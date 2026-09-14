@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ t('reg_for') }} {{ pick(reg, 'couple_names') }}{% endblock %}
-{% block robots %}{% if reg['visibility'] is defined and reg['visibility'] != 'public' %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
 {% block content %}
 
 <section class="reg-hero glass">
@@ -22,7 +21,7 @@
   {% if bought_item and bought_item['url'] %}
   <div class="flash flash-ok buy-next">
     <strong>{{ pick(bought_item, 'name') }}</strong> —
-    <a href="{{ bought_item['url'] }}" target="_blank" rel="noopener">
+    <a href="{{ go_url(bought_item) }}" target="_blank" rel="noopener sponsored">
       {{ tf('buy_at', store=bought_item['store']) if bought_item['store'] else t('buy_link') }} →</a>
   </div>
   {% endif %}
@@ -37,6 +36,7 @@
   </div>
   {% endif %}
 
+  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
   <h2 class="section-title">{{ t('reg_gifts') }}</h2>
 
   {% if not items %}
@@ -70,7 +70,7 @@
         {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
         <h3>{{ pick(item, 'name') }}</h3>
         <p class="gift-meta bdi">
-          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> <span class="usd">({{ t('price_about') }} ${{ usd(item['price_nis']) }})</span>{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
+          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> {% set _e = estimate_label(item['price_nis']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
           {% if item['store'] %} · {{ item['store'] }}{% endif %}
         </p>
         {% if item['price_status'] is defined and item['price_status'] == 'verified' and item['price_checked_at'] %}
@@ -109,11 +109,17 @@
         {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
         <h3>{{ pick(item, 'name') }}</h3>
         {% if item['url'] %}
-        <a class="store-link" href="{{ item['url'] }}" target="_blank" rel="noopener">
+        <a class="store-link" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
           <svg class="ic"><use href="#i-link"/></svg>
           {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }}</a>
         {% endif %}
-        <p class="hint">{{ t('claim_hint') }}</p>
+        <p class="gift-meta modal-price">
+          {% if item['price_nis'] %}<strong class="bdi">₪{{ '{:,}'.format(item['price_nis']) }}</strong>
+          {% set _e = estimate_label(item['price_nis']) %}{% if _e %} <span class="usd bdi">{{ _e }}</span>{% endif %}
+          {% else %}{{ t('price_not_set') }}{% endif %}
+        </p>
+        <p class="hint">{{ t('claim_hint') }}
+          {% if not item['url'] %} {{ t('claim_cash_only_note') }}{% elif not pay_links %} {{ t('claim_store_only_note') }}{% endif %}</p>
         {% if item['url'] and pay_links %}
         <fieldset class="give-choice">
           <legend>{{ t('claim_how') }}</legend>

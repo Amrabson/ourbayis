@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}{{ brand }} — {{ t('brand_tagline') }}{% endblock %}</title>
 <meta name="description" content="{% block meta_desc %}{{ t('hero_sub') }}{% endblock %}">
-{% block robots %}{% endblock %}
-{% set _clean_url = request.base_url %}
-<link rel="canonical" href="{{ _clean_url }}{{ '?lang=he' if rtl else '' }}">
-<link rel="alternate" hreflang="en" href="{{ _clean_url }}?lang=en">
-<link rel="alternate" hreflang="he" href="{{ _clean_url }}?lang=he">
-<link rel="alternate" hreflang="x-default" href="{{ _clean_url }}">
+{% block robots %}{% if noindex %}<meta name="robots" content="noindex, nofollow">{% endif %}{% endblock %}
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% if canonical_url and not noindex %}
+<link rel="canonical" href="{{ canonical_url }}">
+<link rel="alternate" hreflang="en" href="{{ alt_urls['en'] }}">
+<link rel="alternate" hreflang="he" href="{{ alt_urls['he'] }}">
+<link rel="alternate" hreflang="x-default" href="{{ alt_urls['en'] }}">
+{% endif %}
 <meta property="og:title" content="{{ self.title() }}">
 <meta property="og:description" content="{{ self.meta_desc() }}">
 <meta property="og:type" content="website">
@@ -75,6 +77,9 @@
       {% endif %}
     </nav>
     <div class="header-side">
+      {% if currencies | length > 1 %}
+      <a class="lang-toggle cur-toggle" href="{{ url_for('set_currency', code=('ILS' if display_currency != 'ILS' else currencies[1])) }}" title="{{ t('currency_toggle_title') }}"><bdi>{{ display_currency }}</bdi></a>
+      {% endif %}
       <a class="lang-toggle" href="{{ url_for('set_lang', code=('en' if rtl else 'he')) }}">{{ 'English' if rtl else 'עברית' }}</a>
       <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     </div>

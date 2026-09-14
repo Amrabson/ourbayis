@@ -108,6 +108,17 @@
     true
   );
 
+  // share beacon: copy-link / WhatsApp buttons on the dashboard tell the server
+  // the registry was shared (checklist step); CSRF token comes from <meta>.
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest("[data-share-beacon]");
+    if (!el || !window.fetch) return;
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    var fd = new FormData();
+    fd.append("csrf_token", meta ? meta.getAttribute("content") : "");
+    fetch(el.getAttribute("data-share-beacon"), { method: "POST", body: fd, credentials: "same-origin", keepalive: true }).catch(function () {});
+  });
+
   // copy-link buttons, with a select+prompt fallback when the Clipboard API fails
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-copy]");

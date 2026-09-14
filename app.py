@@ -18,6 +18,7 @@ import sqlite3
 import unicodedata
 from datetime import date, datetime, timedelta
 from functools import wraps
+from urllib.parse import urlencode
 from pathlib import Path
 
 from flask import (Flask, abort, flash, g, redirect, render_template,
@@ -333,17 +334,30 @@ def estimate_label(price_nis, lang=None):
     currency, or '' when that currency is ILS (no estimate needed) or isn't
     configured in OB_RATES. Jinja global for public templates."""
     lang = lang or current_lang()
-    cur = session.get("cur") or "ILS"
+    cur = (session.get("cur") or getattr(g, "display_currency", None)
+           or ("USD" if "USD" in ob_money.CURRENCIES else "ILS"))
     if cur == "ILS" or not price_nis:
         return ""
     minor = int(price_nis) * 100
     est_minor = ob_money.estimate(minor, cur)
     if est_minor is None:
         return ""
+    est_minor = int(round(est_minor / 100.0)) * 100  # approximate → whole units
     body = ob_money.fmt_minor(est_minor, cur, lang)
-    if ob_money.RATES_DATE:
-        return _t("estimate_label_dated", lang).format(amount=body, date=ob_money.RATES_DATE)
     return _t("estimate_label", lang).format(amount=body)
+
+
+def estimate_note(lang=None):
+    """One-per-page footnote explaining the ≈ estimates (currency, rate date).
+    Empty when the display currency is ILS, so pages show nothing extra."""
+    lang = lang or current_lang()
+    cur = (session.get("cur") or getattr(g, "display_currency", None)
+           or ("USD" if "USD" in ob_money.CURRENCIES else "ILS"))
+    if cur == "ILS" or cur not in ob_money.CURRENCIES:
+        return ""
+    date = "⁨" + ob_money.RATES_DATE + "⁩" if ob_money.RATES_DATE else ""
+    key = "estimate_note_dated" if ob_money.RATES_DATE else "estimate_note"
+    return _t(key, lang).format(cur=cur, date=date)
 
 
 def _insert_registry_item_from_catalog(db, reg_id, c):
@@ -432,21 +446,14 @@ def _log_claim_event(db, claim_id, event, actor, note=""):
 
 
 def _canonical_and_alts():
-    """canonical_url + alt_urls (en/he) for the current GET request, computed
-    from the path with `lang` stripped/overridden — GET only (SPEC_V3
-    "Privacy / SEO" -> Canonical/hreflang)."""
+    """canonical_url + alt_urls (en/he) for the current GET request. Filter/
+    search params are dropped on purpose (SPEC_V3 "Privacy / SEO": don't index
+    search-result/filter combinations); only the `lang=he` variant survives."""
     if request.method != "GET":
         return None, {}
-    args = request.args.to_dict(flat=True)
-    args.pop("lang", None)
-    base = request.path
-    qs = "&".join(f"{k}={v}" for k, v in args.items())
-    sep = "&" if qs else ""
-    canonical = ext_url_path(base, args, "he" if current_lang() == "he" else None)
-    alts = {
-        "en": ext_url_path(base, args, None),
-        "he": ext_url_path(base, args, "he"),
-    }
+    canonical = ext_url_path(request.path, {}, "he" if current_lang() == "he" else None)
+    alts = {"en": ext_url_path(request.path, {}, None),
+            "he": ext_url_path(request.path, {}, "he")}
     return canonical, alts
 
 
@@ -454,7 +461,7 @@ def ext_url_path(path, args, lang_code):
     q = dict(args)
     if lang_code:
         q["lang"] = lang_code
-    qs = "&".join(f"{k}={v}" for k, v in q.items())
+    qs = urlencode(q)
     full = (BASE_URL or request.host_url.rstrip("/")) + path
     return full + (("?" + qs) if qs else "")
 
@@ -464,7 +471,9 @@ def inject_globals():
     lang = current_lang()
     canonical_url, alt_urls = _canonical_and_alts()
     ep = request.endpoint or ""
-    default_noindex = ep.startswith("admin") or ep in NOINDEX_ENDPOINTS or request.path.startswith("/g/")
+    filtered = any(k != "lang" for k in request.args)  # ?q=/?cat= result pages
+    default_noindex = (ep.startswith("admin") or ep in NOINDEX_ENDPOINTS
+                       or request.path.startswith("/g/") or filtered)
     return dict(
         brand=BRAND,
         lang=lang,
@@ -479,7 +488,8 @@ def inject_globals():
         fmt_money=lambda minor, cur: ob_money.fmt_minor(minor, cur, lang),
         estimate_label=lambda price_nis: estimate_label(price_nis, lang),
         rates_date=ob_money.RATES_DATE,
-        display_currency=session.get("cur") or "ILS",
+        display_currency=(session.get("cur") or getattr(g, "display_currency", None)
+                          or ("USD" if "USD" in ob_money.CURRENCIES else "ILS")),
         currencies=ob_money.CURRENCIES,
         csrf_token=_ensure_csrf(),
         user=current_user(),
@@ -492,6 +502,8 @@ def inject_globals():
         form_key=secrets.token_urlsafe(16),
         gift_routes=lambda item: item_routes(item, reg_pay_links_for_item(item)),
         go_url=go_url,
+        ext_url=ext_url,
+        estimate_note=lambda: estimate_note(lang),
         canonical_url=canonical_url,
         alt_urls=alt_urls,
         noindex=default_noindex,
@@ -646,6 +658,8 @@ def registry(slug):
     if not reg:
         abort(404)
     is_owner = session.get("uid") == reg["user_id"]
+    if reg["display_currency"] in ob_money.CURRENCIES and reg["display_currency"] != "ILS":
+        g.display_currency = reg["display_currency"]  # couple's suggested guest currency
     if reg["visibility"] == "draft" and not is_owner and not session.get("admin"):
         resp = app.make_response(
             render_template("error.html", code=404, draft_not_published=True))
@@ -722,7 +736,13 @@ def claim_item(slug, item_id):
                 qty = 1
             qty = max(1, min(qty, left))
             pay_links = reg_pay_links(reg)
-            give_cash = request.form.get("give") == "cash" and bool(pay_links)
+            routes = item_routes(item, pay_links)
+            if not routes["store"] and not routes["cash"]:
+                # an "idea" with nowhere to buy and no payment link — never reservable
+                flash(_t("claim_no_route", lang), "err")
+                raise _Abort()
+            # server-side card rules: the only valid routes are the ones the item has
+            give_cash = (request.form.get("give") == "cash" and routes["cash"]) or not routes["store"]
             price_minor = int(item["price_nis"]) * 100
             amount_minor = price_minor * qty if give_cash else None
             currency = "ILS" if give_cash else None

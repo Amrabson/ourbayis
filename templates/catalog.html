@@ -26,6 +26,7 @@
     {% endif %}
   </div>
 
+  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
   {% if not items %}
     <p class="empty-note">{{ t('catalog_none') }}</p>
   {% endif %}
@@ -41,11 +42,11 @@
       </div>
       {% endif %}
       <div class="gift-body">
-        {% if item['featured'] %}<span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>{% endif %}
+        {% if item['featured'] %}<span class="badge badge-gold">{{ t('featured_tag') }}</span>{% endif %}
         {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
         <h3>{{ pick(item, 'name') }}</h3>
         <p class="gift-meta bdi">
-          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> <span class="usd">({{ t('price_about') }} ${{ usd(item['price_nis']) }})</span>{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
+          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> {% set _e = estimate_label(item['price_nis']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
           {% if item['store'] %} · {{ item['store'] }}{% endif %}
         </p>
         {% if item['price_status'] is defined and item['price_status'] == 'verified' and item['price_checked_at'] %}

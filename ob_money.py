@@ -37,7 +37,7 @@ def fmt_minor(minor, currency, lang="en"):
     currency = (currency or "ILS").upper()
     sym = CURRENCY_SYMBOLS.get(currency, currency + " ")
     major = Decimal(minor) / 100
-    if currency == "ILS" and major == major.to_integral_value():
+    if major == major.to_integral_value():  # whole amounts read cleaner in every currency
         body = f"{int(major):,}"
     else:
         body = f"{major:,.2f}"

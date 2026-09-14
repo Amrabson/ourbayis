@@ -149,7 +149,7 @@
       <div>
         <strong>{% if c['brand'] %}{{ c['brand'] }} {% endif %}{{ pick(c, 'name') }}</strong>
         <span class="gift-meta bdi">
-          {% if c['price_nis'] %}₪{{ c['price_nis'] }} <span class="usd">({{ t('price_about') }} ${{ usd(c['price_nis']) }})</span>{% else %}{{ t('price_not_set') }}{% endif %}
+          {% if c['price_nis'] %}₪{{ c['price_nis'] }} {% set _e = estimate_label(c['price_nis']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}{% else %}{{ t('price_not_set') }}{% endif %}
           {% if c['store'] %} · {{ c['store'] }}{% endif %}
         </span>
         {% if c['price_status'] is defined and c['price_status'] == 'verified' and c['price_checked_at'] %}
@@ -161,6 +161,7 @@
     </a>
     {% endfor %}
   </div>
+  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 </section>
 {% endif %}
 
@@ -199,7 +200,7 @@
         <div class="gift-ph ph-dining ill-box"><svg class="ic ic-lg"><use href="#ill-dining"/></svg></div>
         <div class="gift-body">
           <h3>{{ t('sample_item1') }}</h3>
-          <p class="gift-meta bdi">₪280</p>
+          <p class="gift-meta bdi">₪180</p>
           <span class="sample-btn-disabled" aria-disabled="true">{{ t('gift_this') }}</span>
         </div>
       </article>

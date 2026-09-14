@@ -24,10 +24,9 @@
   <div class="bundle-grid">
     {% for b in bundles %}
     <article class="bundle-card tier-{{ b['tier'] }}">
-      {% if b['tier'] == 'standard' %}<span class="badge badge-gold bundle-pop"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>{% endif %}
       <h3>{{ pick(b, 'name') }}</h3>
       <p class="bundle-price">{{ t('bundle_from') }} <strong>₪{{ '{:,}'.format(b['price_from']) }}</strong>
-        <span class="usd">({{ t('price_about') }} ${{ '{:,}'.format(usd(b['price_from'])) }})</span></p>
+        {% set _e = estimate_label(b['price_from']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}</p>
       <p class="hint">{{ t('bundle_price_indicative') }}</p>
       <p class="bundle-desc">{{ pick(b, 'description') }}</p>
       <details>

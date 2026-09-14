@@ -467,7 +467,8 @@ textarea { resize: vertical; }
 .starter-panel p { color: var(--ink-soft); font-weight: 400; }
 
 /* honeypot field — visually gone, still in the DOM for bots to fill */
-.hp { position: absolute !important; left: -9999px !important; width: 1px; height: 1px; opacity: 0; }
+.hp { position: absolute !important; inset-inline-start: -9999px !important; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+html, body { overflow-x: clip; }
 
 .gift-img { padding: 0; overflow: hidden; background: var(--paper-deep); }
 .gift-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -557,7 +558,8 @@ textarea { resize: vertical; }
   .section { padding: 32px 16px; }
   .hero h1 { font-size: 1.95rem; }
   .section-title { font-size: 1.65rem; }
-  .gift-grid { grid-template-columns: 1fr 1fr; }
+  .gift-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .sample-panel .gift-grid { grid-template-columns: 1fr; }
   .gift-ph { height: 84px; }
   .pop-grid { grid-template-columns: 1fr; }
   .cash-card, .shana-band-inner { flex-direction: column; align-items: flex-start; }
@@ -749,3 +751,76 @@ dialog:focus-visible { outline: none; }
 @media (max-width: 520px) {
   .hero-card { padding: 26px 18px; }
 }
+
+/* narrow phones: one readable column — overseas guests are often older and on a phone */
+@media (max-width: 430px) {
+  .gift-grid { grid-template-columns: 1fr; }
+  .gift-ph { height: 120px; }
+}
+
+/* guest page payment block */
+.pay-block { margin-block: 18px; }
+.pay-amount { font-size: 1.1rem; margin-bottom: 10px; }
+.pay-btn { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; }
+.pay-btn small { font-weight: 400; opacity: .85; font-size: .78rem; letter-spacing: 0; }
+
+/* ---------------------------------------------------------------- phase 3 pages
+   (onboarding checklist, action queues, starter picker, form step header, admin tables) */
+.checklist-panel {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 24px; margin-bottom: 28px; box-shadow: var(--shadow);
+}
+.checklist-panel h2 { font-size: 1.35rem; margin-bottom: 8px; }
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.checklist li { display: flex; align-items: center; gap: 10px; min-height: 32px; color: var(--ink); }
+.checklist li .ic { color: var(--line); flex: none; width: 18px; height: 18px; border: 1.5px solid var(--line); border-radius: 50%; padding: 2px; }
+.checklist li.is-done { color: var(--ink-soft); }
+.checklist li.is-done span { text-decoration: line-through; text-decoration-color: var(--line); }
+.checklist li.is-done .ic { color: #fff; background: var(--green); border-color: var(--green); }
+.checklist-cta { margin-inline-start: auto; font-weight: 600; white-space: nowrap; }
+
+.action-queues { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin: 18px 0 28px; }
+.queue-card { background: var(--card); border: 1px solid var(--line); border-inline-start: 4px solid var(--gold-bright); border-radius: var(--radius); padding: 14px 18px; }
+.queue-card h3 { font-family: var(--font-body); font-weight: 700; font-size: .95rem; letter-spacing: .3px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.queue-card ul { margin: 0; padding-inline-start: 18px; }
+.queue-card li { margin: 4px 0; }
+
+.step-header { list-style: none; counter-reset: step; display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 0; margin: 0 0 22px; }
+.step-header li { counter-increment: step; display: flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--ink-soft); }
+.step-header li::before {
+  content: counter(step); display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid var(--gold-bright); color: var(--gold); font-family: var(--font-display); font-size: .95rem;
+}
+.visibility-radios { display: grid; gap: 10px; margin-bottom: 14px; }
+.visibility-radios .check-label { align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--card); }
+.visibility-radios .check-label:has(input:checked) { border-color: var(--gold-bright); box-shadow: 0 0 0 3px var(--gold-soft); }
+
+.starter-group { margin-bottom: 28px; }
+.starter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.starter-card { display: block; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.starter-card:hover { border-color: var(--gold-bright); }
+.starter-card:has(input:checked) { border-color: var(--gold-bright); box-shadow: 0 0 0 3px var(--gold-soft); }
+.starter-card.is-added { opacity: .6; cursor: default; }
+.starter-card-top { display: flex; gap: 10px; align-items: flex-start; }
+.starter-card-top input { margin-top: 5px; width: 18px; height: 18px; flex: none; }
+.starter-card .gift-meta { margin: 4px 0 0; }
+.starter-card .mine-qty { margin-top: 8px; }
+
+.items-status-row { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.warn-note { color: var(--danger); font-style: normal; font-weight: 600; }
+.idea-note { margin: 8px 0 0; }
+.archived-panel { margin-top: 28px; border-top: 1px solid var(--line); padding-top: 12px; }
+.archived-panel summary { cursor: pointer; color: var(--ink-soft); font-weight: 600; }
+.is-archived { opacity: .65; }
+.dash-draft-note { background: var(--gold-soft); border: 1px solid var(--gold-bright); border-radius: var(--radius-sm); padding: 10px 14px; color: var(--ink); }
+.dash-account-link { margin-top: 32px; text-align: center; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; margin: 18px 0; }
+.panel-danger { border-color: var(--danger); background: var(--danger-soft); }
+.modal-price { margin: 4px 0 8px; font-size: 1.05rem; }
+
+.admin-table { width: 100%; border-collapse: collapse; font-size: .92rem; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; }
+.admin-table th, .admin-table td { text-align: start; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.admin-table th { background: var(--paper-deep); font-weight: 700; color: var(--navy); }
+.admin-table tr:last-child td { border-bottom: 0; }
+.table-wrap { overflow-x: auto; }
+.rates-note { font-size: .85rem; max-width: 70ch; margin: 6px 0 16px; }
