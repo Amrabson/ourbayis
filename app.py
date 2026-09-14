@@ -4,51 +4,72 @@
 Single-file Flask app (same architecture as BashertBench):
 server-rendered Jinja2, SQLite next to the app, no build step.
 Run:  python app.py   →  http://127.0.0.1:5001
+
+Phase 1 (v3 P0): see SPEC_V3.md. Database, security, mail and money live in
+the small ob_*.py helper modules; this file stays the routes file.
 """
+import csv
+import io
 import json
 import os
 import re
 import secrets
-import smtplib
 import sqlite3
-import threading
-import time
 import unicodedata
-from datetime import date, datetime
-from email.message import EmailMessage
+from datetime import date, datetime, timedelta
 from functools import wraps
 from pathlib import Path
 
 from flask import (Flask, abort, flash, g, redirect, render_template,
                    request, session, url_for)
-from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
+import ob_db
+import ob_mail
+import ob_money
+import ob_security
 from i18n import CATEGORIES, EVENT_TYPES, T_EN, cat_label, t as _t
 
 BASE = Path(__file__).resolve().parent
-DB_PATH = BASE / "ourbayis.db"
+DB_PATH = Path(os.environ.get("OB_DB_PATH") or (BASE / "ourbayis.db"))
 
 BRAND = "OurBayis"
 BRAND_HE = "OurBayis"
 ILS_PER_USD = float(os.environ.get("OB_ILS_PER_USD", "3.7"))
 CONTACT_WHATSAPP = os.environ.get("OB_WHATSAPP", "")  # e.g. 972501234567
+BASE_URL = os.environ.get("OB_BASE_URL", "").rstrip("/")
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("OB_ALLOWED_HOSTS", "").split(",") if h.strip()]
 
-# Optional SMTP — leave unset and the site works fine, just without emails.
+# Optional SMTP — leave unset and the site works fine, mail just stays queued.
 SMTP_HOST = os.environ.get("OB_SMTP_HOST", "")
-SMTP_PORT = int(os.environ.get("OB_SMTP_PORT", "587"))
-SMTP_USER = os.environ.get("OB_SMTP_USER", "")
-SMTP_PASS = os.environ.get("OB_SMTP_PASS", "")
 NOTIFY_EMAIL = os.environ.get("OB_NOTIFY_EMAIL", "")  # owner: shana leads + contact msgs
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+if ob_security.env_bool("OB_TRUST_PROXY"):
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
+
+# ---------------------------------------------------------------- secret key
+_secret = os.environ.get("OB_SECRET_KEY")
+if not _secret:
+    if ob_security.env_bool("OB_SECURE_COOKIES") or os.environ.get("OB_ENV") == "production":
+        raise RuntimeError(
+            "OB_SECRET_KEY is required (OB_SECURE_COOKIES/OB_ENV=production is set). "
+            "Set it in the environment before starting the app.")
+    _instance = BASE / "instance"
+    _instance.mkdir(exist_ok=True)
+    _secret_file = _instance / "dev_secret.txt"
+    if _secret_file.exists():
+        _secret = _secret_file.read_text(encoding="utf-8").strip()
+    if not _secret:
+        _secret = secrets.token_hex(32)
+        _secret_file.write_text(_secret, encoding="utf-8")
+
 app.config.update(
-    SECRET_KEY=os.environ.get("OB_SECRET_KEY", "dev-key-change-in-prod"),
+    SECRET_KEY=_secret,
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
-    SESSION_COOKIE_SECURE=bool(os.environ.get("OB_SECURE_COOKIES")),
+    SESSION_COOKIE_SECURE=ob_security.env_bool("OB_SECURE_COOKIES"),
     MAX_CONTENT_LENGTH=2 * 1024 * 1024,
 )
 
@@ -56,19 +77,32 @@ CONTENT_SECURITY_POLICY = (
     "default-src 'self'; "
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
     "font-src 'self' https://fonts.gstatic.com; "
-    "script-src 'self' 'unsafe-inline'; "
+    "script-src 'self'; "
     "img-src 'self' https: data:; "
     "connect-src 'self'; frame-ancestors 'none'; base-uri 'self'"
 )
 
+NO_STORE_ENDPOINTS = {
+    "dashboard", "registry_new", "registry_edit", "items_manage",
+    "guest_manage", "admin_home", "admin_login", "reset_password", "forgot",
+}
+
 
 # ---------------------------------------------------------------- security
+@app.before_request
+def check_host():
+    if ALLOWED_HOSTS and request.host.split(":")[0] not in ALLOWED_HOSTS:
+        abort(400)
+
+
 @app.after_request
 def set_security_headers(resp):
     resp.headers["Content-Security-Policy"] = CONTENT_SECURITY_POLICY
     resp.headers["X-Content-Type-Options"] = "nosniff"
     resp.headers["X-Frame-Options"] = "DENY"
     resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if request.endpoint in NO_STORE_ENDPOINTS or (request.path.startswith("/g/")):
+        resp.headers["Cache-Control"] = "no-store"
     return resp
 
 
@@ -87,178 +121,18 @@ def csrf_protect():
             abort(400)
 
 
-_RATE: dict = {}
-
-
 def rate_limited(bucket, limit=20, per=600):
-    """True if this IP already made `limit` calls in `per` seconds."""
-    now = time.time()
-    if len(_RATE) > 2000:  # prune stale entries so the dict can't grow forever
-        for k in [k for k, v in _RATE.items() if not v or now - v[-1] > 3600]:
-            _RATE.pop(k, None)
-    key = (bucket, request.headers.get("X-Real-IP", request.remote_addr))
-    hits = [ts for ts in _RATE.get(key, []) if now - ts < per]
-    if len(hits) >= limit:
-        _RATE[key] = hits
-        return True
-    hits.append(now)
-    _RATE[key] = hits
-    return False
+    return ob_security.rate_limited(get_db(), bucket, request.remote_addr, limit, per)
 
 
-def send_email(to, subject, body):
-    """Fire-and-forget email in a background thread; no-op without SMTP config."""
-    if not (SMTP_HOST and SMTP_USER and SMTP_PASS and to):
-        return
-
-    def _send():
-        try:
-            msg = EmailMessage()
-            msg["From"] = SMTP_USER
-            msg["To"] = to
-            msg["Subject"] = subject
-            msg.set_content(body)
-            with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as s:
-                s.starttls()
-                s.login(SMTP_USER, SMTP_PASS)
-                s.send_message(msg)
-        except Exception:
-            app.logger.exception("email send failed (to=%s subject=%s)", to, subject)
-
-    threading.Thread(target=_send, daemon=True).start()
+def send_mail(to, subject, body):
+    return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH)
 
 
 # ---------------------------------------------------------------- database
-SCHEMA = """
-CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT UNIQUE NOT NULL,
-  pw_hash TEXT NOT NULL,
-  name TEXT DEFAULT '',
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS registries (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  slug TEXT UNIQUE NOT NULL,
-  title TEXT NOT NULL,
-  title_he TEXT DEFAULT '',
-  couple_names TEXT NOT NULL,
-  couple_names_he TEXT DEFAULT '',
-  event_type TEXT DEFAULT 'wedding',
-  event_date TEXT DEFAULT '',
-  city TEXT DEFAULT '',
-  message TEXT DEFAULT '',
-  message_he TEXT DEFAULT '',
-  paypal_url TEXT DEFAULT '',
-  stripe_url TEXT DEFAULT '',
-  bit_url TEXT DEFAULT '',
-  is_public INTEGER DEFAULT 1,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS registry_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  registry_id INTEGER NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
-  catalog_id INTEGER,
-  name TEXT NOT NULL,
-  name_he TEXT DEFAULT '',
-  brand TEXT DEFAULT '',
-  category TEXT DEFAULT 'home',
-  price_nis INTEGER DEFAULT 0,
-  store TEXT DEFAULT '',
-  url TEXT DEFAULT '',
-  image TEXT DEFAULT '',
-  qty_wanted INTEGER DEFAULT 1,
-  priority INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS claims (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  registry_id INTEGER NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
-  item_id INTEGER REFERENCES registry_items(id) ON DELETE CASCADE,
-  guest_name TEXT NOT NULL,
-  guest_email TEXT DEFAULT '',
-  message TEXT DEFAULT '',
-  qty INTEGER DEFAULT 1,
-  kind TEXT DEFAULT 'item',
-  amount TEXT DEFAULT '',
-  thanked INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS catalog_items (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  name_he TEXT DEFAULT '',
-  brand TEXT DEFAULT '',
-  category TEXT DEFAULT 'home',
-  price_nis INTEGER DEFAULT 0,
-  store TEXT DEFAULT '',
-  url TEXT DEFAULT '',
-  image TEXT DEFAULT '',
-  active INTEGER DEFAULT 1,
-  featured INTEGER DEFAULT 0,
-  sort INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS bundles (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  slug TEXT UNIQUE NOT NULL,
-  name TEXT NOT NULL,
-  name_he TEXT DEFAULT '',
-  tier TEXT DEFAULT 'basic',
-  price_from INTEGER DEFAULT 0,
-  description TEXT DEFAULT '',
-  description_he TEXT DEFAULT '',
-  items_text TEXT DEFAULT '',
-  items_text_he TEXT DEFAULT '',
-  active INTEGER DEFAULT 1,
-  sort INTEGER DEFAULT 0
-);
-CREATE TABLE IF NOT EXISTS shana_requests (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
-  email TEXT DEFAULT '',
-  whatsapp TEXT DEFAULT '',
-  arrival TEXT DEFAULT '',
-  city TEXT DEFAULT '',
-  address TEXT DEFAULT '',
-  bundle_slug TEXT DEFAULT '',
-  notes TEXT DEFAULT '',
-  status TEXT DEFAULT 'new',
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS messages (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT DEFAULT '',
-  email TEXT DEFAULT '',
-  topic TEXT DEFAULT '',
-  body TEXT NOT NULL,
-  resolved INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS ads (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT NOT NULL,
-  body TEXT DEFAULT '',
-  image TEXT DEFAULT '',
-  link_url TEXT DEFAULT '',
-  active INTEGER DEFAULT 1,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-CREATE TABLE IF NOT EXISTS admins (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE NOT NULL,
-  pw_hash TEXT NOT NULL,
-  created_at TEXT DEFAULT (datetime('now'))
-);
-"""
-
-
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(DB_PATH)
-        g.db.row_factory = sqlite3.Row
-        g.db.execute("PRAGMA foreign_keys = ON")
+        g.db = ob_db.connect(DB_PATH)
     return g.db
 
 
@@ -270,63 +144,34 @@ def close_db(_exc):
 
 
 def init_db():
-    db = sqlite3.connect(DB_PATH)
-    db.executescript(SCHEMA)
-    # lightweight migrations for columns added after v1
-    for col in ("stripe_url TEXT DEFAULT ''", "bit_url TEXT DEFAULT ''",
-                "views INTEGER DEFAULT 0"):
-        try:
-            db.execute(f"ALTER TABLE registries ADD COLUMN {col}")
-        except sqlite3.OperationalError:
-            pass  # column already exists
+    """Run migrations once at import time, then seed-sync the catalog/bundles
+    (catalog seeding stays here — it's not part of the Phase 1 module split)."""
+    db = ob_db.connect(DB_PATH)
     try:
-        db.execute("ALTER TABLE catalog_items ADD COLUMN brand TEXT DEFAULT ''")
-    except sqlite3.OperationalError:
-        pass
-    try:
-        db.execute("ALTER TABLE registry_items ADD COLUMN brand TEXT DEFAULT ''")
-    except sqlite3.OperationalError:
-        pass
-    for it in json.loads((BASE / "seed_catalog.json").read_text(encoding="utf-8"))["items"]:
-        if it.get("brand"):
-            db.execute("UPDATE catalog_items SET brand=? WHERE name=? AND brand=''",
-                       (it["brand"], it["name"]))
-    # items already copied onto a registry before the brand column existed:
-    # backfill from their catalog source so existing registries pick it up too
-    db.execute("""
-        UPDATE registry_items SET brand = (
-            SELECT brand FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id
-        )
-        WHERE (brand IS NULL OR brand = '') AND catalog_id IS NOT NULL
-    """)
-    # default admin (change the password after first login!)
-    cur = db.execute("SELECT COUNT(*) FROM admins")
-    if cur.fetchone()[0] == 0:
-        db.execute("INSERT INTO admins (username, pw_hash) VALUES (?, ?)",
-                   ("admin", generate_password_hash("changeme123")))
-    # sync seed catalog + bundles: insert anything not present yet (matched by
-    # name/slug), so new seed items appear without touching existing rows.
-    # To retire a seed item, mark it inactive in admin rather than deleting it.
-    seed = json.loads((BASE / "seed_catalog.json").read_text(encoding="utf-8"))
-    have = {r[0] for r in db.execute("SELECT name FROM catalog_items")}
-    for i, it in enumerate(seed["items"]):
-        if it["name"] not in have:
-            db.execute(
-                "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store,"
-                " url, sort) VALUES (?,?,?,?,?,?,?,?)",
-                (it["name"], it.get("name_he", ""), it.get("brand", ""),
-                 it.get("category", "home"), it.get("price_nis", 0), it.get("store", ""),
-                 it.get("url", ""), i))
-    for i, b in enumerate(seed.get("bundles", [])):
-        db.execute(
-            "INSERT OR IGNORE INTO bundles (slug, name, name_he, tier, price_from,"
-            " description, description_he, items_text, items_text_he, sort)"
-            " VALUES (?,?,?,?,?,?,?,?,?,?)",
-            (b["slug"], b["name"], b.get("name_he", ""), b.get("tier", "basic"),
-             b.get("price_from", 0), b.get("description", ""), b.get("description_he", ""),
-             b.get("items_text", ""), b.get("items_text_he", ""), i))
-    db.commit()
-    db.close()
+        ob_db.migrate(db)
+        seed_path = BASE / "seed_catalog.json"
+        if seed_path.exists():
+            seed = json.loads(seed_path.read_text(encoding="utf-8"))
+            have = {r[0] for r in db.execute("SELECT name FROM catalog_items")}
+            with ob_db.write_txn(db):
+                for i, it in enumerate(seed.get("items", [])):
+                    if it["name"] not in have:
+                        db.execute(
+                            "INSERT INTO catalog_items (name, name_he, brand, category,"
+                            " price_nis, store, url, sort, seed_key) VALUES (?,?,?,?,?,?,?,?,?)",
+                            (it["name"], it.get("name_he", ""), it.get("brand", ""),
+                             it.get("category", "home"), it.get("price_nis", 0),
+                             it.get("store", ""), it.get("url", ""), i, slugify(it["name"])))
+                for i, b in enumerate(seed.get("bundles", [])):
+                    db.execute(
+                        "INSERT OR IGNORE INTO bundles (slug, name, name_he, tier, price_from,"
+                        " description, description_he, items_text, items_text_he, sort)"
+                        " VALUES (?,?,?,?,?,?,?,?,?,?)",
+                        (b["slug"], b["name"], b.get("name_he", ""), b.get("tier", "basic"),
+                         b.get("price_from", 0), b.get("description", ""), b.get("description_he", ""),
+                         b.get("items_text", ""), b.get("items_text_he", ""), i))
+    finally:
+        db.close()
 
 
 # ---------------------------------------------------------------- helpers
@@ -352,29 +197,51 @@ def usd(nis):
 
 
 def valid_http_url(u):
-    return bool(re.match(r"^https?://[^\s]+$", u or ""))
+    return ob_security.validate_url(u)
+
+
+def ext_url(endpoint, **kw):
+    """External URL for emails/sitemap/robots/share links — uses OB_BASE_URL
+    when set (so it's correct behind a proxy without OB_TRUST_PROXY), else
+    falls back to Flask's own _external=True."""
+    if BASE_URL:
+        return BASE_URL + url_for(endpoint, **kw)
+    return url_for(endpoint, _external=True, **kw)
 
 
 def current_user():
     uid = session.get("uid")
     if not uid:
         return None
-    return get_db().execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+    row = get_db().execute("SELECT * FROM users WHERE id=?", (uid,)).fetchone()
+    if not row or row["session_ver"] != session.get("sv"):
+        return None
+    return row
 
 
 def login_required(f):
     @wraps(f)
     def wrapper(*a, **kw):
-        if not session.get("uid"):
+        if not current_user():
             return redirect(url_for("login", next=request.path))
         return f(*a, **kw)
     return wrapper
 
 
+def current_admin():
+    name = session.get("admin")
+    if not name:
+        return None
+    row = get_db().execute("SELECT * FROM admins WHERE username=?", (name,)).fetchone()
+    if not row or row["session_ver"] != session.get("admin_sv"):
+        return None
+    return row
+
+
 def admin_required(f):
     @wraps(f)
     def wrapper(*a, **kw):
-        if not session.get("admin"):
+        if not current_admin():
             return redirect(url_for("admin_login"))
         return f(*a, **kw)
     return wrapper
@@ -382,7 +249,7 @@ def admin_required(f):
 
 def user_registry():
     uid = session.get("uid")
-    if not uid:
+    if not uid or not current_user():
         return None
     return get_db().execute(
         "SELECT * FROM registries WHERE user_id=? ORDER BY id LIMIT 1", (uid,)).fetchone()
@@ -402,26 +269,63 @@ def is_spam():
     return bool(request.form.get("website"))
 
 
-def _reset_serializer():
-    return URLSafeTimedSerializer(app.config["SECRET_KEY"], salt="pw-reset")
-
-
 def reg_pay_links(reg):
-    """[(t-key, url), ...] for whichever cash-gift links the couple added."""
+    """[(t-key, url), ...] for whichever cash-gift links the couple added and
+    that still classify to a known provider."""
     links = []
     for col, key in (("paypal_url", "pay_paypal"), ("stripe_url", "pay_stripe"),
                      ("bit_url", "pay_bit")):
-        if col in reg.keys() and reg[col]:
-            links.append((key, reg[col]))
+        u = reg[col] if col in reg.keys() else ""
+        if u:
+            try:
+                _provider, canon = ob_security.classify_pay_url(u)
+                links.append((key, canon))
+            except ValueError:
+                continue
     return links
 
 
 def item_claim_counts(registry_id):
+    """Committed quantity per item: reserved/reported/received claims, minus
+    reserved claims that have expired (those free up the quantity again)."""
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     rows = get_db().execute(
-        "SELECT item_id, COALESCE(SUM(qty),1) AS n FROM claims"
-        " WHERE registry_id=? AND item_id IS NOT NULL GROUP BY item_id",
-        (registry_id,)).fetchall()
+        "SELECT item_id, COALESCE(SUM(qty),0) AS n FROM claims"
+        " WHERE registry_id=? AND item_id IS NOT NULL"
+        " AND status IN ('reserved','reported','received')"
+        " AND (expires_at IS NULL OR expires_at > ? OR status != 'reserved')"
+        " GROUP BY item_id", (registry_id, now)).fetchall()
     return {r["item_id"]: r["n"] for r in rows}
+
+
+def csv_safe(cell):
+    """CSV-injection guard: prefix a leading apostrophe if the cell could be
+    interpreted as a formula by Excel/Sheets."""
+    text = "" if cell is None else str(cell)
+    if text[:1] in ("=", "+", "-", "@", "\t", "\r"):
+        return "'" + text
+    return text
+
+
+def track(name, owner_uid=None):
+    """No-PII daily funnel counters. Skipped for admins and for the registry
+    owner viewing their own registry (so self-visits don't inflate funnels)."""
+    if session.get("admin"):
+        return
+    if owner_uid is not None and session.get("uid") == owner_uid:
+        return
+    day = datetime.utcnow().strftime("%Y-%m-%d")
+    db = get_db()
+    with ob_db.write_txn(db):
+        db.execute(
+            "INSERT INTO funnel_events (day, name, n) VALUES (?, ?, 1)"
+            " ON CONFLICT(day, name) DO UPDATE SET n = n + 1", (day, name))
+
+
+def _log_claim_event(db, claim_id, event, actor, note=""):
+    db.execute(
+        "INSERT INTO claim_events (claim_id, event, actor, note) VALUES (?,?,?,?)",
+        (claim_id, event, actor, note))
 
 
 @app.context_processor
@@ -438,6 +342,8 @@ def inject_globals():
         categories=CATEGORIES,
         event_types=EVENT_TYPES,
         usd=usd,
+        fmt_money=lambda minor, cur: ob_money.fmt_minor(minor, cur, lang),
+        currencies=ob_money.CURRENCIES,
         csrf_token=_ensure_csrf(),
         user=current_user(),
         my_registry=user_registry(),
@@ -445,6 +351,8 @@ def inject_globals():
             "SELECT * FROM ads WHERE active=1 ORDER BY RANDOM() LIMIT 1").fetchone(),
         whatsapp_contact=CONTACT_WHATSAPP,
         now_year=datetime.now().year,
+        classify_pay_url=ob_security.classify_pay_url,
+        form_key=secrets.token_urlsafe(16),
     )
 
 
@@ -462,7 +370,14 @@ def index():
 def set_lang(code):
     if code in ("en", "he"):
         session["lang"] = code
-    return redirect(request.referrer or url_for("index"))
+    return redirect(ob_security.same_origin_referrer() or url_for("index"))
+
+
+@app.route("/currency/<code>")
+def set_currency(code):
+    if code in ob_money.CURRENCIES:
+        session["cur"] = code
+    return redirect(ob_security.same_origin_referrer() or url_for("index"))
 
 
 @app.route("/how-it-works")
@@ -512,7 +427,7 @@ def find():
     if q:
         like = f"%{q}%"
         results = get_db().execute(
-            "SELECT * FROM registries WHERE is_public=1 AND"
+            "SELECT * FROM registries WHERE visibility='public' AND"
             " (couple_names LIKE ? OR couple_names_he LIKE ? OR title LIKE ? OR title_he LIKE ?)"
             " ORDER BY created_at DESC LIMIT 40",
             (like, like, like, like)).fetchall()
@@ -533,12 +448,11 @@ def contact():
                 ((request.form.get("name") or "").strip()[:120],
                  (request.form.get("email") or "").strip()[:200],
                  (request.form.get("topic") or "general")[:40], body[:4000]))
-            get_db().commit()
-            send_email(
+            send_mail(
                 NOTIFY_EMAIL,
                 f"OurBayis contact: {(request.form.get('topic') or 'general')}",
                 f"From: {request.form.get('name', '')} <{request.form.get('email', '')}>\n\n"
-                f"{body[:4000]}\n\nAdmin: {url_for('admin_home', _external=True)}")
+                f"{body[:4000]}\n\nAdmin: {ext_url('admin_home')}")
             flash(_t("contact_done", current_lang()), "ok")
             return redirect(url_for("contact"))
     return render_template("contact.html")
@@ -551,9 +465,11 @@ def registry(slug):
     reg = db.execute("SELECT * FROM registries WHERE slug=?", (slug,)).fetchone()
     if not reg:
         abort(404)
-    if session.get("uid") != reg["user_id"]:
+    is_owner = session.get("uid") == reg["user_id"]
+    if reg["visibility"] == "draft" and not is_owner and not session.get("admin"):
+        abort(404)
+    if not is_owner:
         db.execute("UPDATE registries SET views = views + 1 WHERE id=?", (reg["id"],))
-        db.commit()
     days_to_go = None
     try:
         days_to_go = (date.fromisoformat(reg["event_date"]) - date.today()).days
@@ -562,7 +478,7 @@ def registry(slug):
     except (ValueError, TypeError):
         pass
     items = db.execute(
-        "SELECT * FROM registry_items WHERE registry_id=?"
+        "SELECT * FROM registry_items WHERE registry_id=? AND archived=0"
         " ORDER BY priority DESC, category, id", (reg["id"],)).fetchall()
     claimed = item_claim_counts(reg["id"])
     total = sum(i["qty_wanted"] for i in items)
@@ -575,18 +491,9 @@ def registry(slug):
                 (int(request.args["bought"]), reg["id"])).fetchone()
         except ValueError:
             pass
-    pay_claim = None  # guest chose "send the money" — show the pay-now banner
-    if request.args.get("pc"):
-        try:
-            pay_claim = db.execute(
-                "SELECT * FROM claims WHERE id=? AND registry_id=? AND kind='cash'",
-                (int(request.args["pc"]), reg["id"])).fetchone()
-        except ValueError:
-            pass
     return render_template("registry.html", reg=reg, items=items, claimed=claimed,
                            total=total, done=done, bought_item=bought_item,
-                           pay_claim=pay_claim, pay_links=reg_pay_links(reg),
-                           days_to_go=days_to_go)
+                           pay_links=reg_pay_links(reg), days_to_go=days_to_go)
 
 
 @app.route("/r/<slug>/claim/<int:item_id>", methods=["POST"])
@@ -595,51 +502,85 @@ def claim_item(slug, item_id):
         abort(429)
     if is_spam():
         return redirect(url_for("registry", slug=slug))
+    lang = current_lang()
+    form_key = (request.form.get("form_key") or "").strip()[:80]
     db = get_db()
-    reg = db.execute("SELECT * FROM registries WHERE slug=?", (slug,)).fetchone()
-    item = db.execute(
-        "SELECT * FROM registry_items WHERE id=? AND registry_id=?",
-        (item_id, reg["id"] if reg else -1)).fetchone()
-    if not reg or not item:
-        abort(404)
     name = (request.form.get("guest_name") or "").strip()[:120]
     if not name:
-        flash(_t("form_error", current_lang()), "err")
+        flash(_t("form_error", lang), "err")
         return redirect(url_for("registry", slug=slug) + f"#item-{item_id}")
-    already = item_claim_counts(reg["id"]).get(item_id, 0)
-    left = max(item["qty_wanted"] - already, 0)
+
+    result = {}
     try:
-        qty = max(1, min(int(request.form.get("qty", 1)), max(left, 1)))
-    except ValueError:
-        qty = 1
-    if left <= 0:
-        flash(_t("gifted", current_lang()), "err")
+        with ob_db.write_txn(db):
+            reg = db.execute("SELECT * FROM registries WHERE slug=?", (slug,)).fetchone()
+            item = db.execute(
+                "SELECT * FROM registry_items WHERE id=? AND registry_id=? AND archived=0",
+                (item_id, reg["id"] if reg else -1)).fetchone()
+            if not reg or not item:
+                abort(404)
+            committed = item_claim_counts(reg["id"]).get(item_id, 0)
+            left = max(item["qty_wanted"] - committed, 0)
+            if left <= 0:
+                flash(_t("gifted", lang), "err")
+                raise _Abort()
+            try:
+                qty = int(request.form.get("qty", 1))
+            except ValueError:
+                qty = 1
+            qty = max(1, min(qty, left))
+            pay_links = reg_pay_links(reg)
+            give_cash = request.form.get("give") == "cash" and bool(pay_links)
+            price_minor = int(item["price_nis"]) * 100
+            amount_minor = price_minor * qty if give_cash else None
+            currency = "ILS" if give_cash else None
+            expires_at = (datetime.utcnow() + timedelta(days=14)).strftime("%Y-%m-%d %H:%M:%S")
+            token = ob_security.new_token()
+            token_hash = ob_security.hash_token(token)
+            try:
+                cur = db.execute(
+                    "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message,"
+                    " qty, kind, status, amount_minor, currency, price_snapshot_minor,"
+                    " price_snapshot_currency, token_hash, token_created_at, idempotency_key,"
+                    " expires_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    (reg["id"], item_id, name,
+                     (request.form.get("guest_email") or "").strip()[:200],
+                     (request.form.get("message") or "").strip()[:1000], qty,
+                     "cash" if give_cash else "item", "reserved", amount_minor, currency,
+                     price_minor, "ILS", token_hash, datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                     form_key or None, expires_at))
+            except sqlite3.IntegrityError:
+                # duplicate form_key = a repeated POST (double-click / retry). We can't
+                # recover the original guest's raw recovery token from its stored hash,
+                # so send them back to the registry instead of guessing a /g/ URL —
+                # documented deviation, see CHANGELOG_AI.md "Decisions".
+                flash(_t("claim_already", lang), "ok")
+                raise _Abort()
+            _log_claim_event(db, cur.lastrowid, "reserved", "guest")
+            result.update(reg=dict(reg), item=dict(item), token=token, qty=qty,
+                          give_cash=give_cash, name=name)
+    except _Abort:
         return redirect(url_for("registry", slug=slug))
-    give_cash = request.form.get("give") == "cash" and reg_pay_links(reg)
-    amount = f"₪{item['price_nis'] * qty:,}" if (give_cash and item["price_nis"]) else ""
-    cur = db.execute(
-        "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message, qty,"
-        " kind, amount) VALUES (?,?,?,?,?,?,?,?)",
-        (reg["id"], item_id, name,
-         (request.form.get("guest_email") or "").strip()[:200],
-         (request.form.get("message") or "").strip()[:1000], qty,
-         "cash" if give_cash else "item", amount))
-    db.commit()
+
+    reg, item = result["reg"], result["item"]
     owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
-    if owner:
-        kind_txt = f"is sending you the money ({amount})" if give_cash else "reserved"
-        send_email(
-            owner["email"],
-            f"Mazel tov! {name} {'sent a gift' if give_cash else 'reserved a gift'} — {reg['title']}",
-            f"{name} {kind_txt}: {item['name']} x{qty}\n"
-            f"Message: {(request.form.get('message') or '').strip()[:1000] or '—'}\n\n"
-            f"See all your gifts: {url_for('dashboard', _external=True)}")
-    if give_cash:
-        return redirect(url_for("registry", slug=slug, pc=cur.lastrowid))
-    flash(_t("claim_done_t", current_lang()) + " " + _t("claim_done_b", current_lang()), "ok")
-    if item["url"]:
-        return redirect(url_for("registry", slug=slug, bought=item_id))
-    return redirect(url_for("registry", slug=slug))
+    if owner and owner["email"]:
+        kind_txt = "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item"
+        send_mail(owner["email"], _t(kind_txt + "_subj", lang).format(title=reg["title"]),
+                  _t(kind_txt + "_body", lang).format(name=result["name"], item=item["name"],
+                                                       qty=result["qty"]))
+    if request.form.get("guest_email"):
+        send_mail((request.form.get("guest_email") or "").strip(),
+                  _t("mail_guest_manage_subj", lang),
+                  _t("mail_guest_manage_body", lang).format(
+                      link=ext_url("guest_manage", token=result["token"])))
+    track("reservation", owner_uid=reg["user_id"])
+    return redirect(url_for("guest_manage", token=result["token"]))
+
+
+class _Abort(Exception):
+    """Internal control-flow signal to bail out of a write_txn block cleanly
+    (rolls back the transaction) while keeping the flash message set above."""
 
 
 @app.route("/r/<slug>/cash", methods=["POST"])
@@ -648,36 +589,111 @@ def cash_gift(slug):
         abort(429)
     if is_spam():
         return redirect(url_for("registry", slug=slug))
+    lang = current_lang()
     db = get_db()
     reg = db.execute("SELECT * FROM registries WHERE slug=?", (slug,)).fetchone()
     if not reg:
         abort(404)
     name = (request.form.get("guest_name") or "").strip()[:120]
-    if name:
-        db.execute(
-            "INSERT INTO claims (registry_id, item_id, guest_name, message, qty, kind, amount)"
-            " VALUES (?, NULL, ?, ?, 1, 'cash', ?)",
-            (reg["id"], name,
-             (request.form.get("message") or "").strip()[:1000],
-             (request.form.get("amount") or "").strip()[:40]))
-        db.commit()
-        owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
-        if owner:
-            send_email(
-                owner["email"],
-                f"Mazel tov! {name} sent you a cash gift — {reg['title']}",
-                f"{name} sent a cash gift"
-                f"{' (' + request.form.get('amount', '').strip() + ')' if request.form.get('amount') else ''}.\n"
-                f"Message: {(request.form.get('message') or '').strip()[:1000] or '—'}\n\n"
-                f"See all your gifts: {url_for('dashboard', _external=True)}")
-        flash(_t("reg_cash_recorded", current_lang()), "ok")
-    return redirect(url_for("registry", slug=slug))
+    currency = (request.form.get("currency") or "ILS").upper()
+    if currency not in ob_money.CURRENCIES:
+        currency = "ILS"
+    if not name:
+        flash(_t("form_error", lang), "err")
+        return redirect(url_for("registry", slug=slug))
+    try:
+        amount_minor = ob_money.to_minor(request.form.get("amount") or "0", currency)
+    except ValueError:
+        flash(_t("form_error", lang), "err")
+        return redirect(url_for("registry", slug=slug))
+    token = ob_security.new_token()
+    with ob_db.write_txn(db):
+        cur = db.execute(
+            "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message, qty,"
+            " kind, status, amount_minor, currency, token_hash, token_created_at)"
+            " VALUES (?, NULL, ?, ?, ?, 1, 'cash', 'reported', ?, ?, ?, ?)",
+            (reg["id"], name, (request.form.get("guest_email") or "").strip()[:200],
+             (request.form.get("message") or "").strip()[:1000], amount_minor, currency,
+             ob_security.hash_token(token), datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
+        _log_claim_event(db, cur.lastrowid, "reported", "guest")
+    owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
+    if owner and owner["email"]:
+        send_mail(owner["email"], _t("mail_cash_subj", lang).format(title=reg["title"]),
+                  _t("mail_cash_body", lang).format(
+                      name=name, amount=ob_money.fmt_minor(amount_minor, currency, lang)))
+    if request.form.get("guest_email"):
+        send_mail((request.form.get("guest_email") or "").strip(),
+                  _t("mail_guest_manage_subj", lang),
+                  _t("mail_guest_manage_body", lang).format(link=ext_url("guest_manage", token=token)))
+    track("guest_report", owner_uid=reg["user_id"])
+    return redirect(url_for("guest_manage", token=token))
+
+
+# ---------------------------------------------------------------- guest manage
+@app.route("/g/<token>")
+def guest_manage(token):
+    db = get_db()
+    claim = db.execute("SELECT * FROM claims WHERE token_hash=?",
+                       (ob_security.hash_token(token),)).fetchone()
+    if not claim:
+        abort(404)
+    reg = db.execute("SELECT * FROM registries WHERE id=?", (claim["registry_id"],)).fetchone()
+    item = None
+    if claim["item_id"]:
+        item = db.execute("SELECT * FROM registry_items WHERE id=?", (claim["item_id"],)).fetchone()
+    return render_template("guest_manage.html", claim=claim, reg=reg, item=item,
+                           token=token, pay_links=reg_pay_links(reg))
+
+
+@app.route("/g/<token>/report", methods=["POST"])
+def guest_report(token):
+    lang = current_lang()
+    db = get_db()
+    with ob_db.write_txn(db):
+        claim = db.execute("SELECT * FROM claims WHERE token_hash=?",
+                           (ob_security.hash_token(token),)).fetchone()
+        if not claim:
+            abort(404)
+        if claim["status"] not in ("reserved", "expired"):
+            flash(_t("guest_action_invalid", lang), "err")
+            return redirect(url_for("guest_manage", token=token))
+        late = 1 if claim["status"] == "expired" else 0
+        db.execute("UPDATE claims SET status='reported', reported_at=?, late=? WHERE id=?",
+                   (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), late, claim["id"]))
+        _log_claim_event(db, claim["id"], "reported", "guest", "late" if late else "")
+        reg = db.execute("SELECT * FROM registries WHERE id=?", (claim["registry_id"],)).fetchone()
+    owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
+    if owner and owner["email"]:
+        send_mail(owner["email"], _t("mail_reported_subj", lang).format(name=claim["guest_name"]),
+                  _t("mail_reported_body", lang).format(name=claim["guest_name"]))
+    track("guest_report", owner_uid=reg["user_id"])
+    flash(_t("guest_report_done", lang), "ok")
+    return redirect(url_for("guest_manage", token=token))
+
+
+@app.route("/g/<token>/cancel", methods=["POST"])
+def guest_cancel(token):
+    lang = current_lang()
+    db = get_db()
+    with ob_db.write_txn(db):
+        claim = db.execute("SELECT * FROM claims WHERE token_hash=?",
+                           (ob_security.hash_token(token),)).fetchone()
+        if not claim:
+            abort(404)
+        if claim["status"] not in ("reserved", "expired"):
+            flash(_t("guest_action_invalid", lang), "err")
+            return redirect(url_for("guest_manage", token=token))
+        db.execute("UPDATE claims SET status='cancelled', cancelled_by='guest', cancelled_at=? WHERE id=?",
+                   (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim["id"]))
+        _log_claim_event(db, claim["id"], "cancelled", "guest")
+    flash(_t("guest_cancel_done", lang), "ok")
+    return redirect(url_for("guest_manage", token=token))
 
 
 # ---------------------------------------------------------------- auth
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
-    if session.get("uid"):
+    if current_user():
         return redirect(url_for("dashboard"))
     if request.method == "POST":
         if rate_limited("signup", limit=8, per=3600):
@@ -701,8 +717,10 @@ def signup():
                 cur = db.execute(
                     "INSERT INTO users (email, pw_hash, name) VALUES (?,?,?)",
                     (email, generate_password_hash(pw), name))
-                db.commit()
+                session.clear()
                 session["uid"] = cur.lastrowid
+                session["sv"] = 1
+                track("signup")
                 return redirect(url_for("registry_new"))
             except sqlite3.IntegrityError:
                 flash(_t("email_taken", lang), "err")
@@ -711,7 +729,7 @@ def signup():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if session.get("uid"):
+    if current_user():
         return redirect(url_for("dashboard"))
     if request.method == "POST":
         if rate_limited("login", limit=10, per=600):
@@ -720,16 +738,18 @@ def login():
         pw = request.form.get("password") or ""
         row = get_db().execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         if row and check_password_hash(row["pw_hash"], pw):
+            nxt = ob_security.safe_next(request.form.get("next") or request.args.get("next", ""))
+            session.clear()
             session["uid"] = row["id"]
-            nxt = request.args.get("next", "")
-            return redirect(nxt if nxt.startswith("/") else url_for("dashboard"))
+            session["sv"] = row["session_ver"]
+            return redirect(nxt or url_for("dashboard"))
         flash(_t("login_error", current_lang()), "err")
-    return render_template("login.html")
+    return render_template("login.html", next=request.args.get("next", ""))
 
 
-@app.route("/logout")
+@app.route("/logout", methods=["POST"])
 def logout():
-    session.pop("uid", None)
+    session.clear()
     return redirect(url_for("index"))
 
 
@@ -739,19 +759,25 @@ def forgot():
         if rate_limited("forgot", limit=5, per=3600):
             abort(429)
         lang = current_lang()
+        email = (request.form.get("email") or "").strip().lower()
+        if rate_limited(f"forgot_email:{email}", limit=5, per=3600):
+            abort(429)
         if not SMTP_HOST:
             flash(_t("forgot_noemail", lang), "err")
             return redirect(url_for("contact"))
-        email = (request.form.get("email") or "").strip().lower()
-        user = get_db().execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        db = get_db()
+        user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         if user:
-            token = _reset_serializer().dumps(user["id"])
-            send_email(
-                email, f"{BRAND} — reset your password",
-                "Someone (hopefully you) asked to reset your OurBayis password.\n\n"
-                f"Reset it here (link valid for 2 hours):\n"
-                f"{url_for('reset_password', token=token, _external=True)}\n\n"
-                "If this wasn't you, ignore this email — nothing changes.")
+            token = ob_security.new_token()
+            expires_at = (datetime.utcnow() + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+            with ob_db.write_txn(db):
+                db.execute("UPDATE password_resets SET used_at=? WHERE user_id=? AND used_at IS NULL",
+                          (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), user["id"]))
+                db.execute(
+                    "INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?,?,?)",
+                    (user["id"], ob_security.hash_token(token), expires_at))
+            send_mail(email, _t("mail_reset_subj", lang),
+                      _t("mail_reset_body", lang).format(link=ext_url("reset_password", token=token)))
         # same message either way, so the form can't be used to probe for accounts
         flash(_t("forgot_sent", lang), "ok")
         return redirect(url_for("login"))
@@ -761,9 +787,12 @@ def forgot():
 @app.route("/reset/<token>", methods=["GET", "POST"])
 def reset_password(token):
     lang = current_lang()
-    try:
-        uid = _reset_serializer().loads(token, max_age=7200)
-    except (BadSignature, SignatureExpired):
+    db = get_db()
+    row = db.execute(
+        "SELECT * FROM password_resets WHERE token_hash=? AND used_at IS NULL",
+        (ob_security.hash_token(token),)).fetchone()
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    if not row or row["expires_at"] < now:
         flash(_t("reset_invalid", lang), "err")
         return redirect(url_for("forgot"))
     if request.method == "POST":
@@ -774,10 +803,12 @@ def reset_password(token):
         elif pw != pw2:
             flash(_t("pw_mismatch", lang), "err")
         else:
-            db = get_db()
-            db.execute("UPDATE users SET pw_hash=? WHERE id=?",
-                       (generate_password_hash(pw), uid))
-            db.commit()
+            with ob_db.write_txn(db):
+                db.execute(
+                    "UPDATE users SET pw_hash=?, session_ver=session_ver+1 WHERE id=?",
+                    (generate_password_hash(pw), row["user_id"]))
+                db.execute("UPDATE password_resets SET used_at=? WHERE user_id=? AND used_at IS NULL",
+                          (now, row["user_id"]))
             flash(_t("reset_done", lang), "ok")
             return redirect(url_for("login"))
     return render_template("reset.html", token=token)
@@ -788,7 +819,7 @@ def reset_password(token):
 @login_required
 def dashboard():
     reg = user_registry()
-    gifts = stats = None
+    gifts = stats = totals = None
     if reg:
         db = get_db()
         gifts = db.execute(
@@ -796,16 +827,37 @@ def dashboard():
             " ri.url AS item_url, ri.store AS item_store FROM claims c"
             " LEFT JOIN registry_items ri ON ri.id = c.item_id"
             " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)).fetchall()
-        n_items = db.execute("SELECT COUNT(*) FROM registry_items WHERE registry_id=?",
+        n_items = db.execute("SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0",
                              (reg["id"],)).fetchone()[0]
         n_claimed = db.execute(
-            "SELECT COUNT(DISTINCT item_id) FROM claims WHERE registry_id=? AND item_id IS NOT NULL",
-            (reg["id"],)).fetchone()[0]
-        n_cash = db.execute("SELECT COUNT(*) FROM claims WHERE registry_id=? AND kind='cash'",
-                            (reg["id"],)).fetchone()[0]
+            "SELECT COUNT(DISTINCT item_id) FROM claims WHERE registry_id=? AND item_id IS NOT NULL"
+            " AND status IN ('reserved','reported','received')", (reg["id"],)).fetchone()[0]
+        n_cash = db.execute(
+            "SELECT COUNT(*) FROM claims WHERE registry_id=? AND kind='cash'"
+            " AND status IN ('reserved','reported','received')", (reg["id"],)).fetchone()[0]
         stats = dict(items=n_items, claimed=n_claimed, cash=n_cash,
                      views=reg["views"] if "views" in reg.keys() else 0)
-    return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats)
+        totals = {}
+        for gft in gifts:
+            if gft["amount_minor"] is not None and gft["status"] == "received":
+                cur = gft["currency"] or "ILS"
+                totals[cur] = totals.get(cur, 0) + gft["amount_minor"]
+    return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats, totals=totals)
+
+
+@app.route("/dashboard/qr.svg")
+@login_required
+def dashboard_qr():
+    reg = user_registry()
+    if not reg:
+        abort(404)
+    import segno
+    qr = segno.make(ext_url("registry", slug=reg["slug"]), error="m")
+    buf = io.BytesIO()
+    qr.save(buf, kind="svg", scale=6, border=2, dark="#223354")
+    resp = app.response_class(buf.getvalue(), mimetype="image/svg+xml")
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 
 @app.route("/registry/new", methods=["GET", "POST"])
@@ -835,16 +887,39 @@ def _save_registry(reg):
     title = (f.get("title") or "").strip()[:160]
     couple = (f.get("couple_names") or "").strip()[:160]
     pay = {}
+    pay_errors = []
     for col in ("paypal_url", "stripe_url", "bit_url"):
         u = (f.get(col) or "").strip()[:300]
-        if u and not u.startswith("http"):
-            u = "https://" + u
-        pay[col] = u if valid_http_url(u) else ""
+        if not u:
+            pay[col] = ""
+            continue
+        try:
+            _provider, canon = ob_security.classify_pay_url(u)
+            pay[col] = canon
+        except ValueError as e:
+            pay[col] = u  # keep what they typed so they can fix it
+            pay_errors.append(_t(str(e), lang))
     event_type = f.get("event_type") if f.get("event_type") in EVENT_TYPES else "wedding"
     if not title or not couple:
         flash(_t("form_error", lang), "err")
         return render_template("registry_form.html", reg=reg)
+    if pay_errors:
+        for msg in pay_errors:
+            flash(msg, "err")
+        return render_template("registry_form.html", reg=reg)
     db = get_db()
+    # payment-link changes are security-sensitive (they redirect guest money) —
+    # require the couple to re-enter their current password whenever any pay
+    # field actually changes, per SPEC_V3 "Security".
+    if reg:
+        changed_pay = any(pay[c] != (reg[c] if c in reg.keys() else "") for c in
+                          ("paypal_url", "stripe_url", "bit_url"))
+        if changed_pay:
+            cur_pw = f.get("current_password") or ""
+            user = db.execute("SELECT * FROM users WHERE id=?", (session["uid"],)).fetchone()
+            if not cur_pw or not check_password_hash(user["pw_hash"], cur_pw):
+                flash(_t("reauth_required", lang), "err")
+                return render_template("registry_form.html", reg=reg, show_reauth=True)
     fields = (title, (f.get("title_he") or "").strip()[:160],
               couple, (f.get("couple_names_he") or "").strip()[:160],
               event_type, (f.get("event_date") or "").strip()[:40],
@@ -852,23 +927,32 @@ def _save_registry(reg):
               (f.get("message") or "").strip()[:2000],
               (f.get("message_he") or "").strip()[:2000],
               pay["paypal_url"], pay["stripe_url"], pay["bit_url"],
-              1 if f.get("is_public") else 0)
+              1 if f.get("is_public") else 0,
+              "public" if f.get("is_public") else "unlisted")
     if reg:
-        db.execute(
-            "UPDATE registries SET title=?, title_he=?, couple_names=?, couple_names_he=?,"
-            " event_type=?, event_date=?, city=?, message=?, message_he=?, paypal_url=?,"
-            " stripe_url=?, bit_url=?, is_public=? WHERE id=?", fields + (reg["id"],))
-        db.commit()
+        with ob_db.write_txn(db):
+            db.execute(
+                "UPDATE registries SET title=?, title_he=?, couple_names=?, couple_names_he=?,"
+                " event_type=?, event_date=?, city=?, message=?, message_he=?, paypal_url=?,"
+                " stripe_url=?, bit_url=?, is_public=?, visibility=? WHERE id=?",
+                fields + (reg["id"],))
+            if any(pay[c] != (reg[c] if c in reg.keys() else "") for c in
+                  ("paypal_url", "stripe_url", "bit_url")):
+                db.execute("UPDATE users SET session_ver=session_ver+1 WHERE id=?", (session["uid"],))
+                session["sv"] = db.execute("SELECT session_ver FROM users WHERE id=?",
+                                           (session["uid"],)).fetchone()[0]
         return redirect(url_for("dashboard"))
     slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
     while db.execute("SELECT 1 FROM registries WHERE slug=?", (slug,)).fetchone():
         slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
-    db.execute(
-        "INSERT INTO registries (user_id, slug, title, title_he, couple_names,"
-        " couple_names_he, event_type, event_date, city, message, message_he,"
-        " paypal_url, stripe_url, bit_url, is_public) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        (session["uid"], slug) + fields)
-    db.commit()
+    with ob_db.write_txn(db):
+        db.execute(
+            "INSERT INTO registries (user_id, slug, title, title_he, couple_names,"
+            " couple_names_he, event_type, event_date, city, message, message_he,"
+            " paypal_url, stripe_url, bit_url, is_public, visibility)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            (session["uid"], slug) + fields)
+    track("registry_created")
     flash(_t("r_created", lang), "ok")
     return redirect(url_for("items_manage"))
 
@@ -892,8 +976,8 @@ def items_manage():
         params += [f"%{q}%", f"%{q}%"]
     catalog = db.execute(sql + " ORDER BY category, sort", params).fetchall()
     mine = db.execute(
-        "SELECT * FROM registry_items WHERE registry_id=? ORDER BY priority DESC, category, id",
-        (reg["id"],)).fetchall()
+        "SELECT * FROM registry_items WHERE registry_id=? AND archived=0"
+        " ORDER BY priority DESC, category, id", (reg["id"],)).fetchall()
     have_catalog_ids = {m["catalog_id"] for m in mine if m["catalog_id"]}
     claimed = item_claim_counts(reg["id"])
     return render_template("items.html", reg=reg, catalog=catalog, mine=mine,
@@ -922,7 +1006,6 @@ def items_add():
                 " category, price_nis, store, url, image) VALUES (?,?,?,?,?,?,?,?,?,?)",
                 (reg["id"], c["id"], c["name"], c["name_he"], c["brand"], c["category"],
                  c["price_nis"], c["store"], c["url"], c["image"]))
-            db.commit()
     else:
         name = (f.get("name") or "").strip()[:200]
         url = (f.get("url") or "").strip()[:500]
@@ -941,7 +1024,6 @@ def items_add():
                 (reg["id"], name, (f.get("name_he") or "").strip()[:200],
                  f.get("category") if f.get("category") in CATEGORIES else "home",
                  price, (f.get("store") or "").strip()[:120], url))
-            db.commit()
         else:
             flash(_t("form_error", current_lang()), "err")
     if request.args.get("back") == "catalog":
@@ -960,16 +1042,16 @@ def items_starter():
         abort(400)
     db = get_db()
     added = 0
-    for c in db.execute("SELECT * FROM catalog_items WHERE active=1 AND featured=1"):
-        if not db.execute("SELECT 1 FROM registry_items WHERE registry_id=? AND catalog_id=?",
-                          (reg["id"], c["id"])).fetchone():
-            db.execute(
-                "INSERT INTO registry_items (registry_id, catalog_id, name, name_he, brand,"
-                " category, price_nis, store, url, image) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                (reg["id"], c["id"], c["name"], c["name_he"], c["brand"], c["category"],
-                 c["price_nis"], c["store"], c["url"], c["image"]))
-            added += 1
-    db.commit()
+    with ob_db.write_txn(db):
+        for c in db.execute("SELECT * FROM catalog_items WHERE active=1 AND featured=1"):
+            if not db.execute("SELECT 1 FROM registry_items WHERE registry_id=? AND catalog_id=?",
+                              (reg["id"], c["id"])).fetchone():
+                db.execute(
+                    "INSERT INTO registry_items (registry_id, catalog_id, name, name_he, brand,"
+                    " category, price_nis, store, url, image) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    (reg["id"], c["id"], c["name"], c["name_he"], c["brand"], c["category"],
+                     c["price_nis"], c["store"], c["url"], c["image"]))
+                added += 1
     flash(_t("starter_added", current_lang()).format(n=added), "ok")
     return redirect(url_for("items_manage") + "#mine")
 
@@ -983,46 +1065,99 @@ def items_update(item_id):
                       (item_id, reg["id"] if reg else -1)).fetchone()
     if not item:
         abort(404)
+    lang = current_lang()
     if request.form.get("delete"):
-        db.execute("DELETE FROM registry_items WHERE id=?", (item_id,))
+        has_claims = db.execute("SELECT 1 FROM claims WHERE item_id=? LIMIT 1", (item_id,)).fetchone()
+        if has_claims:
+            db.execute("UPDATE registry_items SET archived=1 WHERE id=?", (item_id,))
+        else:
+            db.execute("DELETE FROM registry_items WHERE id=?", (item_id,))
     else:
         try:
             qty = max(1, min(int(request.form.get("qty_wanted", 1)), 99))
         except ValueError:
             qty = 1
+        committed = item_claim_counts(reg["id"]).get(item_id, 0)
+        if qty < committed:
+            flash(_t("qty_below_committed", lang).format(n=committed), "err")
+            return redirect(url_for("items_manage"))
         db.execute("UPDATE registry_items SET qty_wanted=?, priority=? WHERE id=?",
                    (qty, 1 if request.form.get("priority") else 0, item_id))
-    db.commit()
     return redirect(url_for("items_manage"))
 
 
-@app.route("/claim/<int:claim_id>/release", methods=["POST"])
-@login_required
-def claim_release(claim_id):
-    """Owner frees a reserved gift (guest changed their mind / never bought it)."""
+def _owned_claim(claim_id):
     reg = user_registry()
+    return get_db().execute("SELECT * FROM claims WHERE id=? AND registry_id=?",
+                            (claim_id, reg["id"] if reg else -1)).fetchone()
+
+
+@app.route("/claim/<int:claim_id>/confirm", methods=["POST"])
+@login_required
+def claim_confirm(claim_id):
     db = get_db()
-    c = db.execute("SELECT * FROM claims WHERE id=? AND registry_id=?",
-                   (claim_id, reg["id"] if reg else -1)).fetchone()
-    if not c:
-        abort(404)
-    db.execute("DELETE FROM claims WHERE id=?", (claim_id,))
-    db.commit()
+    with ob_db.write_txn(db):
+        c = _owned_claim(claim_id)
+        if not c:
+            abort(404)
+        if c["status"] in ("reported", "reserved"):
+            db.execute("UPDATE claims SET status='received', confirmed_at=? WHERE id=?",
+                      (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim_id))
+            _log_claim_event(db, claim_id, "received", "owner")
+            track("receipt_confirmed")
+    return redirect(url_for("dashboard"))
+
+
+@app.route("/claim/<int:claim_id>/release", methods=["POST"])
+@app.route("/claim/<int:claim_id>/cancel", methods=["POST"])
+@login_required
+def claim_cancel(claim_id):
+    """Owner cancels/frees a claim (guest changed their mind / never bought it).
+    /release is kept as an alias to this same handler."""
+    db = get_db()
+    with ob_db.write_txn(db):
+        c = _owned_claim(claim_id)
+        if not c:
+            abort(404)
+        db.execute("UPDATE claims SET status='cancelled', cancelled_by='owner', cancelled_at=? WHERE id=?",
+                  (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim_id))
+        _log_claim_event(db, claim_id, "cancelled", "owner")
     return redirect(url_for("dashboard"))
 
 
 @app.route("/claim/<int:claim_id>/thanked", methods=["POST"])
 @login_required
 def claim_thanked(claim_id):
-    reg = user_registry()
     db = get_db()
-    c = db.execute("SELECT * FROM claims WHERE id=? AND registry_id=?",
-                   (claim_id, reg["id"] if reg else -1)).fetchone()
+    c = _owned_claim(claim_id)
     if not c:
         abort(404)
     db.execute("UPDATE claims SET thanked=? WHERE id=?", (0 if c["thanked"] else 1, claim_id))
-    db.commit()
     return redirect(url_for("dashboard"))
+
+
+@app.route("/dashboard/claims.csv")
+@login_required
+def dashboard_claims_csv():
+    reg = user_registry()
+    if not reg:
+        abort(404)
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["id", "guest_name", "guest_email", "item", "qty", "kind", "status",
+               "amount", "currency", "created_at"])
+    for r in get_db().execute(
+            "SELECT c.*, ri.name AS item_name FROM claims c"
+            " LEFT JOIN registry_items ri ON ri.id=c.item_id"
+            " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)):
+        w.writerow([csv_safe(r["id"]), csv_safe(r["guest_name"]), csv_safe(r["guest_email"]),
+                   csv_safe(r["item_name"]), csv_safe(r["qty"]), csv_safe(r["kind"]),
+                   csv_safe(r["status"]), csv_safe(r["amount_minor"]), csv_safe(r["currency"]),
+                   csv_safe(r["created_at"])])
+    resp = app.response_class(buf.getvalue(), mimetype="text/csv")
+    resp.headers["Content-Disposition"] = "attachment; filename=gifts.csv"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
 
 
 # ---------------------------------------------------------------- shana rishonah
@@ -1050,14 +1185,13 @@ def shana():
                  (f.get("address") or "").strip()[:300],
                  (f.get("bundle") or "custom")[:60],
                  (f.get("notes") or "").strip()[:2000]))
-            db.commit()
-            send_email(
+            send_mail(
                 NOTIFY_EMAIL,
                 f"New shana rishonah lead: {name} ({f.get('bundle', 'custom')})",
                 f"Name: {name}\nWhatsApp: {f.get('whatsapp', '')}\nEmail: {f.get('email', '')}\n"
                 f"Arrival: {f.get('arrival', '')}\nCity: {f.get('city', '')}\n"
                 f"Address: {f.get('address', '')}\nBundle: {f.get('bundle', '')}\n"
-                f"Notes: {f.get('notes', '')}\n\nAdmin: {url_for('admin_home', _external=True)}")
+                f"Notes: {f.get('notes', '')}\n\nAdmin: {ext_url('admin_home')}")
             flash(_t("sr_done_t", lang) + " " + _t("sr_done_b", lang), "ok")
             return redirect(url_for("shana"))
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
@@ -1067,21 +1201,25 @@ def shana():
 # ---------------------------------------------------------------- admin
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
+    db = get_db()
+    n_admins = db.execute("SELECT COUNT(*) FROM admins").fetchone()[0]
     if request.method == "POST":
         if rate_limited("admin_login", limit=10, per=600):
             abort(429)
-        row = get_db().execute("SELECT * FROM admins WHERE username=?",
-                               ((request.form.get("username") or "").strip(),)).fetchone()
+        row = db.execute("SELECT * FROM admins WHERE username=?",
+                         ((request.form.get("username") or "").strip(),)).fetchone()
         if row and check_password_hash(row["pw_hash"], request.form.get("password") or ""):
+            session.clear()
             session["admin"] = row["username"]
+            session["admin_sv"] = row["session_ver"]
             return redirect(url_for("admin_home"))
         flash("Wrong credentials", "err")
-    return render_template("admin_login.html")
+    return render_template("admin_login.html", no_admins=(n_admins == 0))
 
 
-@app.route("/admin/logout")
+@app.route("/admin/logout", methods=["POST"])
 def admin_logout():
-    session.pop("admin", None)
+    session.clear()
     return redirect(url_for("index"))
 
 
@@ -1102,24 +1240,26 @@ def admin_home():
             "SELECT COUNT(*) FROM catalog_items WHERE active=1 AND url=''").fetchone()[0],
     )
     recent = db.execute("SELECT * FROM registries ORDER BY created_at DESC LIMIT 15").fetchall()
-    return render_template("admin.html", leads=leads, msgs=msgs, stats=stats, recent=recent)
+    mail_stats = ob_mail.outbox_counts(db)
+    return render_template("admin.html", leads=leads, msgs=msgs, stats=stats, recent=recent,
+                           mail_stats=mail_stats)
 
 
 @app.route("/admin/leads.csv")
 @admin_required
 def admin_leads_csv():
-    import csv
-    import io
     buf = io.StringIO()
     w = csv.writer(buf)
     w.writerow(["id", "name", "email", "whatsapp", "arrival", "city", "address",
-                "bundle", "notes", "status", "created_at"])
+               "bundle", "notes", "status", "created_at"])
     for r in get_db().execute("SELECT * FROM shana_requests ORDER BY created_at DESC"):
-        w.writerow([r["id"], r["name"], r["email"], r["whatsapp"], r["arrival"],
-                    r["city"], r["address"], r["bundle_slug"], r["notes"],
-                    r["status"], r["created_at"]])
+        w.writerow([csv_safe(r["id"]), csv_safe(r["name"]), csv_safe(r["email"]),
+                   csv_safe(r["whatsapp"]), csv_safe(r["arrival"]), csv_safe(r["city"]),
+                   csv_safe(r["address"]), csv_safe(r["bundle_slug"]), csv_safe(r["notes"]),
+                   csv_safe(r["status"]), csv_safe(r["created_at"])])
     resp = app.response_class(buf.getvalue(), mimetype="text/csv")
     resp.headers["Content-Disposition"] = "attachment; filename=shana-leads.csv"
+    resp.headers["Cache-Control"] = "no-store"
     return resp
 
 
@@ -1127,9 +1267,8 @@ def admin_leads_csv():
 @admin_required
 def admin_lead_status(lead_id):
     status = request.form.get("status", "new")
-    if status in ("new", "contacted", "done"):
+    if status in ("new", "contacted", "quoted", "accepted", "arranging", "completed", "cancelled"):
         get_db().execute("UPDATE shana_requests SET status=? WHERE id=?", (status, lead_id))
-        get_db().commit()
     return redirect(url_for("admin_home"))
 
 
@@ -1137,7 +1276,6 @@ def admin_lead_status(lead_id):
 @admin_required
 def admin_msg_resolve(msg_id):
     get_db().execute("UPDATE messages SET resolved=1 WHERE id=?", (msg_id,))
-    get_db().commit()
     return redirect(url_for("admin_home"))
 
 
@@ -1175,13 +1313,11 @@ def admin_catalog_edit(item_id=None):
             db.execute("UPDATE catalog_items SET name=?, name_he=?, brand=?, category=?,"
                        " price_nis=?, store=?, url=?, image=?, active=?, featured=?, sort=?"
                        " WHERE id=?", vals + (item_id,))
-            db.commit()
             return redirect(url_for("admin_catalog"))
         else:
             db.execute("INSERT INTO catalog_items (name, name_he, brand, category, price_nis,"
-                       " store, url, image, active, featured, sort)"
-                       " VALUES (?,?,?,?,?,?,?,?,?,?,?)", vals)
-            db.commit()
+                       " store, url, image, active, featured, sort, seed_key)"
+                       " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", vals + (None,))
             return redirect(url_for("admin_catalog"))
     return render_template("admin_catalog_form.html", row=row)
 
@@ -1190,7 +1326,6 @@ def admin_catalog_edit(item_id=None):
 @admin_required
 def admin_catalog_delete(item_id):
     get_db().execute("DELETE FROM catalog_items WHERE id=?", (item_id,))
-    get_db().commit()
     return redirect(url_for("admin_catalog"))
 
 
@@ -1228,14 +1363,12 @@ def admin_bundle_edit(bundle_id=None):
             db.execute("UPDATE bundles SET name=?, name_he=?, tier=?, price_from=?,"
                        " description=?, description_he=?, items_text=?, items_text_he=?,"
                        " active=?, sort=? WHERE id=?", vals + (bundle_id,))
-            db.commit()
             return redirect(url_for("admin_bundles"))
         else:
             slug = slugify(vals[0])
             db.execute("INSERT INTO bundles (slug, name, name_he, tier, price_from, description,"
                        " description_he, items_text, items_text_he, active, sort)"
                        " VALUES (?,?,?,?,?,?,?,?,?,?,?)", (slug,) + vals)
-            db.commit()
             return redirect(url_for("admin_bundles"))
     return render_template("admin_bundle_form.html", row=row)
 
@@ -1251,7 +1384,6 @@ def admin_ads():
                        (title, (request.form.get("body") or "").strip()[:500],
                         (request.form.get("image") or "").strip()[:500],
                         (request.form.get("link_url") or "").strip()[:500]))
-            db.commit()
         return redirect(url_for("admin_ads"))
     rows = db.execute("SELECT * FROM ads ORDER BY created_at DESC").fetchall()
     return render_template("admin_ads.html", rows=rows)
@@ -1261,7 +1393,6 @@ def admin_ads():
 @admin_required
 def admin_ad_toggle(ad_id):
     get_db().execute("UPDATE ads SET active = 1 - active WHERE id=?", (ad_id,))
-    get_db().commit()
     return redirect(url_for("admin_ads"))
 
 
@@ -1269,21 +1400,27 @@ def admin_ad_toggle(ad_id):
 @admin_required
 def admin_ad_delete(ad_id):
     get_db().execute("DELETE FROM ads WHERE id=?", (ad_id,))
-    get_db().commit()
     return redirect(url_for("admin_ads"))
 
 
 @app.route("/admin/password", methods=["POST"])
 @admin_required
 def admin_password():
+    admin_row = current_admin()
+    cur_pw = request.form.get("current_password") or ""
     pw = request.form.get("password") or ""
-    if len(pw) >= 10:
-        get_db().execute("UPDATE admins SET pw_hash=? WHERE username=?",
-                         (generate_password_hash(pw), session["admin"]))
-        get_db().commit()
-        flash("Password updated", "ok")
-    else:
+    if not check_password_hash(admin_row["pw_hash"], cur_pw):
+        flash("Current password is wrong", "err")
+    elif len(pw) < 10:
         flash("Password must be at least 10 characters", "err")
+    else:
+        db = get_db()
+        with ob_db.write_txn(db):
+            db.execute("UPDATE admins SET pw_hash=?, session_ver=session_ver+1 WHERE username=?",
+                      (generate_password_hash(pw), admin_row["username"]))
+            session["admin_sv"] = db.execute("SELECT session_ver FROM admins WHERE username=?",
+                                             (admin_row["username"],)).fetchone()[0]
+        flash("Password updated", "ok")
     return redirect(url_for("admin_home"))
 
 
@@ -1291,13 +1428,13 @@ def admin_password():
 @app.route("/robots.txt")
 def robots():
     return app.response_class(
-        "User-agent: *\nDisallow: /admin\nDisallow: /dashboard\n"
-        f"Sitemap: {url_for('sitemap', _external=True)}\n", mimetype="text/plain")
+        "User-agent: *\nDisallow: /admin\nDisallow: /dashboard\nDisallow: /g/\n"
+        f"Sitemap: {ext_url('sitemap')}\n", mimetype="text/plain")
 
 
 @app.route("/sitemap.xml")
 def sitemap():
-    pages = [url_for(p, _external=True) for p in
+    pages = [ext_url(p) for p in
              ("index", "how", "find", "catalog_page", "shana", "about", "contact",
               "privacy", "signup")]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
@@ -1305,20 +1442,47 @@ def sitemap():
     for u in pages:
         xml.append(f"<url><loc>{u}</loc></url>")
         xml.append(f"<url><loc>{u}{'&' if '?' in u else '?'}lang=he</loc></url>")
-    for r in get_db().execute("SELECT slug FROM registries WHERE is_public=1"):
-        xml.append(f"<url><loc>{url_for('registry', slug=r['slug'], _external=True)}</loc></url>")
+    for r in get_db().execute("SELECT slug FROM registries WHERE visibility='public'"):
+        xml.append(f"<url><loc>{ext_url('registry', slug=r['slug'])}</loc></url>")
     xml.append("</urlset>")
     return app.response_class("\n".join(xml), mimetype="application/xml")
 
 
+# ---------------------------------------------------------------- error handlers
+def _error_page(code):
+    return app.make_response(render_template("error.html", code=code)), code
+
+
+@app.errorhandler(400)
+def bad_request(_e):
+    return _error_page(400)
+
+
+@app.errorhandler(403)
+def forbidden(_e):
+    return _error_page(403)
+
+
 @app.errorhandler(404)
 def not_found(_e):
-    return render_template("404.html"), 404
+    return _error_page(404)
+
+
+@app.errorhandler(413)
+def too_large(_e):
+    return _error_page(413)
 
 
 @app.errorhandler(429)
 def too_many(_e):
-    return "Slow down a little — try again in a few minutes.", 429
+    resp, code = _error_page(429)
+    resp.headers["Retry-After"] = "120"
+    return resp, code
+
+
+@app.errorhandler(500)
+def server_error(_e):
+    return _error_page(500)
 
 
 init_db()
