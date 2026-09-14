@@ -930,9 +930,12 @@ def signup():
                 cur = db.execute(
                     "INSERT INTO users (email, pw_hash, name) VALUES (?,?,?)",
                     (email, generate_password_hash(pw), name))
+                pending_add = session.get("pending_add")  # survives session.clear() below
                 session.clear()
                 session["uid"] = cur.lastrowid
                 session["sv"] = 1
+                if pending_add:
+                    session["pending_add"] = pending_add
                 track("signup")
                 return redirect(url_for("registry_new"))
             except sqlite3.IntegrityError:
