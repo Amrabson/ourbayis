@@ -33,12 +33,39 @@ PythonAnywhere dashboard → **Web** tab → **Add a new web app** → choose **
   - Directory: `/home/YOURUSERNAME/ourbayis/static/`
 
 ## 5. Reload and check
-Click the big green **Reload** button, then open the app's `*.pythonanywhere.com` URL. Check the **Error log** and **Server log** links on the Web tab if anything 500s — importing `app.py` also runs `init_db()`, so the SQLite file and its 117 catalog items get created automatically on first load; no manual DB step needed.
+Click the big green **Reload** button, then open the app's `*.pythonanywhere.com` URL. Check the **Error log** and **Server log** links on the Web tab if anything 500s — importing `app.py` also runs migrations + catalog seed-sync, so the SQLite file, its schema, and its 117 catalog items get created automatically on first load; no manual DB step needed (but you do still need step 5b to create an admin).
+
+## 5b. Create the first admin (v3+, no default admin)
+There's no default `admin/changeme123` anymore. In a Bash console, from the project directory with the venv active:
+```bash
+python manage.py create-admin youradminname
+```
+It prompts for a password (12+ chars), or set `OB_ADMIN_PASSWORD` in the environment first to script it. `/admin/login` shows a reminder of this command when zero admins exist.
 
 ## 6. Before telling anyone the link
-- [ ] Log into `/admin/login` (admin / changeme123) and **change the password** immediately — it's the same default in every fresh install.
+- [ ] Created an admin (see 5b) and logged into `/admin/login`.
 - [ ] Go through `/admin/catalog` and paste in real affiliate URLs (see the earlier conversation on Amazon Associates + Payoneer) — items without one show no "buy" button.
 - [ ] Spot-check a few more catalog prices against real stores (8 big-ticket items are verified as of 2026-07-03; see CHANGELOG_AI.md — the rest are AI estimates).
+- [ ] Set `OB_BASE_URL` in `passenger_wsgi.py` to the real domain (used in every email/sitemap link).
+- [ ] If the domain is fixed, set `OB_ALLOWED_HOSTS` too, so stray Host headers get a 400 instead of serving.
+
+## Scheduled tasks (PythonAnywhere "Tasks" tab)
+v3 phase 1 adds a mail outbox and a claim-expiry sweep — neither runs itself without SMTP configured or a scheduled task:
+```bash
+# once a day (or more often), only useful once OB_SMTP_* is set:
+cd ~/ourbayis && venv/bin/python manage.py send-mail
+
+# once a day: flips reservations past their 14-day hold to 'expired'
+cd ~/ourbayis && venv/bin/python manage.py expire-claims
+
+# weekly, before any deploy that touches the schema, or just as a habit:
+cd ~/ourbayis && venv/bin/python manage.py backup
+```
+`manage.py check` is worth running after any deploy — it checks DB integrity, foreign keys, that at least one admin exists, and secret-key/cookie config sanity; exits 1 if anything's wrong.
+
+## Backup / restore
+- **Backup**: `python manage.py backup` writes a verified online copy (via SQLite's own backup API + `PRAGMA integrity_check`) to `backups/ourbayis-<timestamp>.db`. `backups/` is gitignored — download copies off the server periodically.
+- **Restore**: stop the web app (or at least don't rely on it not writing), copy the backup file over `ourbayis.db` (or point `OB_DB_PATH` at it), then `python manage.py check` before reloading.
 
 ## 7. Custom domain (when ready)
 PythonAnywhere requires a **paid plan** for custom domains (same tier BashertBench is on). Once upgraded: Web tab → add the domain → PythonAnywhere gives you a CNAME/A record to set at your domain registrar → **Force HTTPS** once the cert issues.

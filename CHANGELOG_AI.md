@@ -1,5 +1,53 @@
 # Changelog
 
+## 2026-09-14 — v3 phase 1 (P0 backend)
+Implemented per SPEC_V3.md: new modules `ob_db.py`, `ob_security.py`, `ob_mail.py`,
+`ob_money.py`, `manage.py`; `app.py` rewritten to use them; new `static/app.js` (CSP is now
+`script-src 'self'`, no inline scripts left anywhere); `templates/error.html` +
+`templates/guest_manage.html` added; `tests/` added (pytest, temp DB per test).
+
+**Schema**: versioned migrations (`schema_migrations`, `ob_db.MIGRATIONS`) replace the old
+`try/except OperationalError: pass` pattern. Every column/table/index from SPEC_V3 "Schema v3"
+that's in scope for Phase 1 is migrated, including the one-time legacy-claims migration (old
+`kind='item'` rows → status 'reserved', `legacy=1`; `kind='cash'` rows → status 'reported',
+`legacy=1`, with `amount_minor`/`currency` filled only when `parse_legacy_amount()` is unambiguous).
+Verified against `backups/ourbayis-snapshot-2026-09-14.db` (copied, never modified): "₪180" → 18000
+ILS, "$180" → 18000 USD, zero claims deleted. Catalog/shana columns from later-phase spec sections
+were added now (defaults only) so those phases don't need another schema change.
+
+**Gift lifecycle**: full reserved → reported → received / cancelled / expired flow, atomic
+reservation via `write_txn` + `form_key` idempotency, price snapshot, recovery-token guest manage
+page at `/g/<token>` (replaces the old `?pc=<id>` cash-banner, which leaked a claim's amount to
+anyone with the id). Item delete archives instead of deleting once it has any claims.
+
+**Security**: no default admin (`manage.py create-admin`); session versioning so password
+reset/change and payment-link edits invalidate other sessions; `safe_next`/`same_origin_referrer`
+close the open-redirect holes in `next=` and `/lang`; `classify_pay_url` host-allowlists payment
+links; POST-only logout; DB-backed rate limiting; error pages for 400/403/404/413/429/500.
+
+### Decisions
+- **Duplicate `form_key` on `/claim`**: the spec says to look up the existing claim and redirect
+  to its manage page. Since only the sha256 hash of the recovery token is stored (by design — the
+  raw token must never be recoverable from the DB), a genuine duplicate POST can't be redirected to
+  the *same* `/g/<token>` URL a second time. Implemented instead: flash "already recorded" and
+  redirect to the registry page. The guest's original request (the one that succeeded) already
+  carries the real `/g/<token>` link.
+- **`registry_items.kind` ('product'/'idea'/'cash_need')**: column added per schema, but the
+  "idea" card treatment in `registry.html` is driven directly by presence of `item.url`/pay links
+  (matches the P0/P1 "Card rules" in SPEC_V3 under Catalog, which is out of this phase's scope) —
+  not yet wired to the `kind` column itself. A later catalog-phase pass should decide whether `kind`
+  should override or just describe that same rule.
+- **Dashboard currency totals**: only sums `status='received'` claims per currency (never mixes
+  currencies) — reserved/reported amounts aren't "confirmed" money yet, so they're shown per-row
+  but excluded from the total to avoid implying they're already in hand.
+- **`ext_url()` in emails/sitemap/robots**: uses `OB_BASE_URL` when set, else falls back to
+  Flask's `url_for(..., _external=True)` — this is correct with or without `OB_TRUST_PROXY`.
+
+### Left for later phases (out of scope for P0 per the brief)
+Visual redesign, catalog metadata (price_status/starter_group/etc. logic), onboarding checklist,
+concierge pipeline admin UI, SEO (JSON-LD, canonical/hreflang, og:image), `manage.py seed-sync`
+and `refresh-registry-links` (stubbed, print "not implemented in Phase 1").
+
 ## 2026-07-07 — improvement roadmap specced (no code changes)
 - Full pre/post-launch improvement roadmap added to TODO_AI.md, tagged [SONNET]/[HAIKU] for implementation by cheaper models. Covers: revenue plumbing (click tracking via `/go/`, guest claim-confirmation + reminder emails, /advertise page, viral/cross-sell CTAs, Amazon disclosure near links, v2 group gifting), SEO (canonical/hreflang/og:image, JSON-LD, /guides content section, title/meta pass), UX (onboarding checklist, thank-you CSV, printable invitation insert, registry browsing polish, empty states), ops (server-side analytics, DB backups, 404 upsell).
 
