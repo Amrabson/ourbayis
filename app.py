@@ -265,6 +265,23 @@ def is_spam():
     return bool(request.form.get("website"))
 
 
+def _remember_claim_token(form_key, token):
+    """After a successful reservation/cash-gift, remember form_key -> raw
+    token in the session (capped at 10) so a retried/double-click POST with
+    the same form_key can be sent straight to /g/<token> instead of a dead
+    "already recorded" flash — the raw token only ever lives in the
+    requesting guest's own session, never in the DB (see CHANGELOG_AI.md
+    "Decisions": only the sha256 hash is stored server-side)."""
+    if not form_key:
+        return
+    tokens = session.get("claim_tokens") or {}
+    tokens[form_key] = token
+    if len(tokens) > 10:
+        for k in list(tokens)[:len(tokens) - 10]:
+            del tokens[k]
+    session["claim_tokens"] = tokens
+
+
 def _prefs(reg):
     """Parse registries.preferences_json -> dict, never raising."""
     try:
@@ -683,18 +700,21 @@ def claim_item(slug, item_id):
                      price_minor, "ILS", token_hash, datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
                      form_key or None, expires_at))
             except sqlite3.IntegrityError:
-                # duplicate form_key = a repeated POST (double-click / retry). We can't
-                # recover the original guest's raw recovery token from its stored hash,
-                # so send them back to the registry instead of guessing a /g/ URL —
-                # documented deviation, see CHANGELOG_AI.md "Decisions".
+                # duplicate form_key = a repeated POST (double-click/retry). If
+                # this session made the original request, it remembered the raw
+                # token (see _remember_claim_token) and can go straight there.
+                remembered = (session.get("claim_tokens") or {}).get(form_key) if form_key else None
+                if remembered:
+                    raise _Abort(redirect(url_for("guest_manage", token=remembered)))
                 flash(_t("claim_already", lang), "ok")
                 raise _Abort()
             _log_claim_event(db, cur.lastrowid, "reserved", "guest")
             result.update(reg=dict(reg), item=dict(item), token=token, qty=qty,
                           give_cash=give_cash, name=name)
-    except _Abort:
-        return redirect(url_for("registry", slug=slug))
+    except _Abort as ab:
+        return ab.response or redirect(url_for("registry", slug=slug))
 
+    _remember_claim_token(form_key, result["token"])
     reg, item = result["reg"], result["item"]
     owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
     if owner and owner["email"]:
@@ -713,7 +733,12 @@ def claim_item(slug, item_id):
 
 class _Abort(Exception):
     """Internal control-flow signal to bail out of a write_txn block cleanly
-    (rolls back the transaction) while keeping the flash message set above."""
+    (rolls back the transaction) while keeping the flash message set above.
+    Optionally carries a specific response to return (e.g. straight to the
+    guest's own /g/<token> on a remembered duplicate form_key)."""
+    def __init__(self, response=None):
+        super().__init__()
+        self.response = response
 
 
 @app.route("/r/<slug>/cash", methods=["POST"])
@@ -739,16 +764,29 @@ def cash_gift(slug):
     except ValueError:
         flash(_t("form_error", lang), "err")
         return redirect(url_for("registry", slug=slug))
+    form_key = (request.form.get("form_key") or "").strip()[:80]
     token = ob_security.new_token()
-    with ob_db.write_txn(db):
-        cur = db.execute(
-            "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message, qty,"
-            " kind, status, amount_minor, currency, token_hash, token_created_at)"
-            " VALUES (?, NULL, ?, ?, ?, 1, 'cash', 'reported', ?, ?, ?, ?)",
-            (reg["id"], name, (request.form.get("guest_email") or "").strip()[:200],
-             (request.form.get("message") or "").strip()[:1000], amount_minor, currency,
-             ob_security.hash_token(token), datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
-        _log_claim_event(db, cur.lastrowid, "reported", "guest")
+    try:
+        with ob_db.write_txn(db):
+            try:
+                cur = db.execute(
+                    "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message,"
+                    " qty, kind, status, amount_minor, currency, token_hash, token_created_at,"
+                    " idempotency_key) VALUES (?, NULL, ?, ?, ?, 1, 'cash', 'reported', ?, ?, ?, ?, ?)",
+                    (reg["id"], name, (request.form.get("guest_email") or "").strip()[:200],
+                     (request.form.get("message") or "").strip()[:1000], amount_minor, currency,
+                     ob_security.hash_token(token), datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                     form_key or None))
+            except sqlite3.IntegrityError:
+                remembered = (session.get("claim_tokens") or {}).get(form_key) if form_key else None
+                if remembered:
+                    raise _Abort(redirect(url_for("guest_manage", token=remembered)))
+                flash(_t("claim_already", lang), "ok")
+                raise _Abort()
+            _log_claim_event(db, cur.lastrowid, "reported", "guest")
+    except _Abort as ab:
+        return ab.response or redirect(url_for("registry", slug=slug))
+    _remember_claim_token(form_key, token)
     owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
     if owner and owner["email"]:
         send_mail(owner["email"], _t("mail_cash_subj", lang).format(title=reg["title"]),
