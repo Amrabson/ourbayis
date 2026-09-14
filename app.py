@@ -346,6 +346,37 @@ def estimate_label(price_nis, lang=None):
     return _t("estimate_label", lang).format(amount=body)
 
 
+def _insert_registry_item_from_catalog(db, reg_id, c):
+    """Copy a catalog_items row onto a registry (used by items_add, items_starter,
+    and pending_add-after-signup). Carries kind/price_status/price_checked_at
+    forward per SPEC_V3 "Card rules"."""
+    db.execute(
+        "INSERT INTO registry_items (registry_id, catalog_id, name, name_he, brand,"
+        " category, price_nis, store, url, image, kind, price_status, price_checked_at)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        (reg_id, c["id"], c["name"], c["name_he"], c["brand"], c["category"],
+         c["price_nis"], c["store"], c["url"], c["image"], c["kind"] if "kind" in c.keys() else "product",
+         c["price_status"] if "price_status" in c.keys() else "estimate",
+         c["price_checked_at"] if "price_checked_at" in c.keys() else ""))
+
+
+def _apply_pending_add(db, reg_id, catalog_ids):
+    """Apply session['pending_add'] catalog ids (queued while the guest was
+    logged out) onto a freshly-created registry. Skips inactive/missing ids
+    and ones already on the registry. Returns how many were added."""
+    added = 0
+    for cid in catalog_ids:
+        c = db.execute("SELECT * FROM catalog_items WHERE id=? AND active=1", (cid,)).fetchone()
+        if not c:
+            continue
+        exists = db.execute("SELECT 1 FROM registry_items WHERE registry_id=? AND catalog_id=?",
+                            (reg_id, c["id"])).fetchone()
+        if not exists:
+            _insert_registry_item_from_catalog(db, reg_id, c)
+            added += 1
+    return added
+
+
 def item_claim_counts(registry_id):
     """Committed quantity per item: reserved/reported/received claims, minus
     reserved claims that have expired (those free up the quantity again)."""
@@ -381,6 +412,17 @@ def track(name, owner_uid=None):
         db.execute(
             "INSERT INTO funnel_events (day, name, n) VALUES (?, ?, 1)"
             " ON CONFLICT(day, name) DO UPDATE SET n = n + 1", (day, name))
+
+
+def _maybe_track_first_gifts(db, registry_id):
+    """Fire the `first_gifts` funnel event the moment a registry reaches 5
+    usable items — SPEC_V3 "Privacy / SEO" funnel counters list. Cheap COUNT
+    each call; fine at this scale (idempotent day+name PK on funnel_events,
+    but we still only want to fire once per registry: gate on ==5 exactly)."""
+    n = db.execute("SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0",
+                   (registry_id,)).fetchone()[0]
+    if n == 5:
+        track("first_gifts")
 
 
 def _log_claim_event(db, claim_id, event, actor, note=""):
@@ -986,11 +1028,30 @@ def reset_password(token):
 
 
 # ---------------------------------------------------------------- couple dashboard
+def _dashboard_checklist(db, reg, n_items, n_usable, gifts):
+    """Onboarding checklist items, each (key, done: bool). Disappears from the
+    dashboard once every item is done (SPEC_V3 "Onboarding & dashboard")."""
+    prefs = _prefs(reg)
+    # a cash-only gift = a registry_items row with no store url at all
+    n_cash_only = db.execute(
+        "SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0 AND url=''",
+        (reg["id"],)).fetchone()[0]
+    has_pay_link = bool(reg_pay_links(reg))
+    return [
+        ("details", bool(reg["title"] and reg["couple_names"])),
+        ("gifts", n_usable >= 5),
+        ("payment", has_pay_link or n_cash_only == 0),
+        ("visibility", bool(prefs.get("visibility_reviewed_at"))),
+        ("previewed", bool(prefs.get("previewed_at"))),
+        ("shared", (reg["views"] or 0) > 0 or bool(prefs.get("shared_at"))),
+    ]
+
+
 @app.route("/dashboard")
 @login_required
 def dashboard():
     reg = user_registry()
-    gifts = stats = totals = None
+    gifts = stats = totals = checklist = queues = None
     if reg:
         db = get_db()
         gifts = db.execute(
@@ -1000,6 +1061,9 @@ def dashboard():
             " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)).fetchall()
         n_items = db.execute("SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0",
                              (reg["id"],)).fetchone()[0]
+        n_usable = db.execute(
+            "SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0"
+            " AND (url != '' OR ?)", (reg["id"], 1 if reg_pay_links(reg) else 0)).fetchone()[0]
         n_claimed = db.execute(
             "SELECT COUNT(DISTINCT item_id) FROM claims WHERE registry_id=? AND item_id IS NOT NULL"
             " AND status IN ('reserved','reported','received')", (reg["id"],)).fetchone()[0]
@@ -1013,7 +1077,42 @@ def dashboard():
             if gft["amount_minor"] is not None and gft["status"] == "received":
                 cur = gft["currency"] or "ILS"
                 totals[cur] = totals.get(cur, 0) + gft["amount_minor"]
-    return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats, totals=totals)
+        checklist = _dashboard_checklist(db, reg, n_items, n_usable, gifts)
+        queues = dict(
+            awaiting_confirm=[g for g in gifts if g["status"] == "reported"],
+            waiting=[g for g in gifts if g["status"] == "reserved"],
+            unthanked=[g for g in gifts if g["status"] == "received" and not g["thanked"]],
+        )
+    return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats, totals=totals,
+                           checklist=checklist, queues=queues)
+
+
+@app.route("/dashboard/shared", methods=["POST"])
+@login_required
+def dashboard_shared():
+    """Beacon the design agent's app.js fires on a copy-link/WhatsApp-share
+    click (data-share-beacon). Records the share so the dashboard checklist's
+    "shared" step can complete even before a guest visits. No body needed."""
+    reg = user_registry()
+    if reg:
+        db = get_db()
+        prefs = _prefs(reg)
+        if not prefs.get("shared_at"):
+            prefs["shared_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            with ob_db.write_txn(db):
+                db.execute("UPDATE registries SET preferences_json=? WHERE id=?",
+                          (json.dumps(prefs), reg["id"]))
+        track("share_click")
+    return ("", 204)
+
+
+@app.route("/dashboard/print")
+@login_required
+def dashboard_print():
+    reg = user_registry()
+    if not reg:
+        abort(404)
+    return render_template("dashboard_print.html", reg=reg)
 
 
 @app.route("/dashboard/qr.svg")
@@ -1052,7 +1151,15 @@ def registry_edit():
     return render_template("registry_form.html", reg=reg)
 
 
+PREFERENCE_FIELDS = ("bed_size", "colors", "apartment_size", "furnished",
+                     "arrival_date", "items_needed")
+VISIBILITY_VALUES = ("draft", "unlisted", "public")
+
+
 def _save_registry(reg):
+    """4-section form: Details -> Israel preferences -> Payment (optional) ->
+    Visibility. On any validation error, re-render with `request.form` so the
+    couple never loses what they typed (SPEC_V3 "Onboarding & dashboard")."""
     lang = current_lang()
     f = request.form
     title = (f.get("title") or "").strip()[:160]
@@ -1071,13 +1178,23 @@ def _save_registry(reg):
             pay[col] = u  # keep what they typed so they can fix it
             pay_errors.append(_t(str(e), lang))
     event_type = f.get("event_type") if f.get("event_type") in EVENT_TYPES else "wedding"
+    visibility = f.get("visibility") if f.get("visibility") in VISIBILITY_VALUES else (
+        reg["visibility"] if reg else "unlisted")
+    prefs = _prefs(reg) if reg else {}
+    for pf in PREFERENCE_FIELDS:
+        val = (f.get(pf) or "").strip()[:300]
+        if val:
+            prefs[pf] = val
+        else:
+            prefs.pop(pf, None)
+    prefs["visibility_reviewed_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     if not title or not couple:
         flash(_t("form_error", lang), "err")
-        return render_template("registry_form.html", reg=reg)
+        return render_template("registry_form.html", reg=reg, form=f)
     if pay_errors:
         for msg in pay_errors:
             flash(msg, "err")
-        return render_template("registry_form.html", reg=reg)
+        return render_template("registry_form.html", reg=reg, form=f)
     db = get_db()
     # payment-link changes are security-sensitive (they redirect guest money) —
     # require the couple to re-enter their current password whenever any pay
@@ -1090,7 +1207,7 @@ def _save_registry(reg):
             user = db.execute("SELECT * FROM users WHERE id=?", (session["uid"],)).fetchone()
             if not cur_pw or not check_password_hash(user["pw_hash"], cur_pw):
                 flash(_t("reauth_required", lang), "err")
-                return render_template("registry_form.html", reg=reg, show_reauth=True)
+                return render_template("registry_form.html", reg=reg, form=f, show_reauth=True)
     fields = (title, (f.get("title_he") or "").strip()[:160],
               couple, (f.get("couple_names_he") or "").strip()[:160],
               event_type, (f.get("event_date") or "").strip()[:40],
@@ -1098,31 +1215,40 @@ def _save_registry(reg):
               (f.get("message") or "").strip()[:2000],
               (f.get("message_he") or "").strip()[:2000],
               pay["paypal_url"], pay["stripe_url"], pay["bit_url"],
-              1 if f.get("is_public") else 0,
-              "public" if f.get("is_public") else "unlisted")
+              1 if visibility == "public" else 0, visibility,
+              (f.get("delivery_note") or "").strip()[:1000],
+              (f.get("delivery_note_he") or "").strip()[:1000],
+              json.dumps(prefs))
     if reg:
         with ob_db.write_txn(db):
             db.execute(
                 "UPDATE registries SET title=?, title_he=?, couple_names=?, couple_names_he=?,"
                 " event_type=?, event_date=?, city=?, message=?, message_he=?, paypal_url=?,"
-                " stripe_url=?, bit_url=?, is_public=?, visibility=? WHERE id=?",
+                " stripe_url=?, bit_url=?, is_public=?, visibility=?, delivery_note=?,"
+                " delivery_note_he=?, preferences_json=? WHERE id=?",
                 fields + (reg["id"],))
             if any(pay[c] != (reg[c] if c in reg.keys() else "") for c in
                   ("paypal_url", "stripe_url", "bit_url")):
                 db.execute("UPDATE users SET session_ver=session_ver+1 WHERE id=?", (session["uid"],))
                 session["sv"] = db.execute("SELECT session_ver FROM users WHERE id=?",
                                            (session["uid"],)).fetchone()[0]
+        flash(_t("r_saved", lang), "ok")
         return redirect(url_for("dashboard"))
     slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
     while db.execute("SELECT 1 FROM registries WHERE slug=?", (slug,)).fetchone():
         slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
     with ob_db.write_txn(db):
-        db.execute(
+        cur = db.execute(
             "INSERT INTO registries (user_id, slug, title, title_he, couple_names,"
             " couple_names_he, event_type, event_date, city, message, message_he,"
-            " paypal_url, stripe_url, bit_url, is_public, visibility)"
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            " paypal_url, stripe_url, bit_url, is_public, visibility, delivery_note,"
+            " delivery_note_he, preferences_json)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (session["uid"], slug) + fields)
+        reg_id = cur.lastrowid
+        pending = session.pop("pending_add", None) or []
+        if pending:
+            _apply_pending_add(db, reg_id, pending)
     track("registry_created")
     flash(_t("r_created", lang), "ok")
     return redirect(url_for("items_manage"))
@@ -1156,14 +1282,32 @@ def items_manage():
 
 
 @app.route("/registry/items/add", methods=["POST"])
-@login_required
 def items_add():
+    """Logged in: add straight away. Logged out (catalog "Add" button before
+    signup): queue the catalog_id in session['pending_add'] and send them to
+    signup — applied to the registry once they create one (SPEC_V3
+    "Onboarding" -> pending_add). Not @login_required: it handles the
+    anonymous case itself instead of bouncing through login."""
+    user = current_user()
+    f = request.form
+    cat_id = f.get("catalog_id")
+    if not user:
+        if cat_id:
+            try:
+                cat_id_int = int(cat_id)
+            except ValueError:
+                cat_id_int = None
+            if cat_id_int:
+                pending = session.get("pending_add") or []
+                if cat_id_int not in pending:
+                    pending.append(cat_id_int)
+                session["pending_add"] = pending[-50:]
+        flash(_t("pending_add_signup", current_lang()), "ok")
+        return redirect(url_for("signup"))
     reg = user_registry()
     if not reg:
         abort(400)
     db = get_db()
-    f = request.form
-    cat_id = f.get("catalog_id")
     if cat_id:
         c = db.execute("SELECT * FROM catalog_items WHERE id=? AND active=1", (cat_id,)).fetchone()
         if not c:
@@ -1172,11 +1316,8 @@ def items_add():
             "SELECT 1 FROM registry_items WHERE registry_id=? AND catalog_id=?",
             (reg["id"], c["id"])).fetchone()
         if not exists:
-            db.execute(
-                "INSERT INTO registry_items (registry_id, catalog_id, name, name_he, brand,"
-                " category, price_nis, store, url, image) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                (reg["id"], c["id"], c["name"], c["name_he"], c["brand"], c["category"],
-                 c["price_nis"], c["store"], c["url"], c["image"]))
+            _insert_registry_item_from_catalog(db, reg["id"], c)
+            _maybe_track_first_gifts(db, reg["id"])
     else:
         name = (f.get("name") or "").strip()[:200]
         url = (f.get("url") or "").strip()[:500]
@@ -1191,10 +1332,12 @@ def items_add():
         if name:
             db.execute(
                 "INSERT INTO registry_items (registry_id, name, name_he, category,"
-                " price_nis, store, url) VALUES (?,?,?,?,?,?,?)",
+                " price_nis, store, url, kind) VALUES (?,?,?,?,?,?,?,?)",
                 (reg["id"], name, (f.get("name_he") or "").strip()[:200],
                  f.get("category") if f.get("category") in CATEGORIES else "home",
-                 price, (f.get("store") or "").strip()[:120], url))
+                 price, (f.get("store") or "").strip()[:120], url,
+                 "product" if url else "idea"))
+            _maybe_track_first_gifts(db, reg["id"])
         else:
             flash(_t("form_error", current_lang()), "err")
     if request.args.get("back") == "catalog":
@@ -1204,27 +1347,56 @@ def items_add():
                             q=request.args.get("q", "")))
 
 
-@app.route("/registry/items/starter", methods=["POST"])
+STARTER_GROUPS_ORDER = ["first_week", "kitchen", "shabbos", "bedbath", "appliances"]
+
+
+@app.route("/registry/items/starter", methods=["GET", "POST"])
 @login_required
 def items_starter():
-    """One-click: add all featured catalog items the couple doesn't have yet."""
+    """Grouped starter-pack picker (First Week / Kitchen Basics / Shabbos
+    Hosting / Bedding & Bath / Appliances) — replaces the old one-click
+    "add all featured" (featured is promotional catalog/home-page placement,
+    not a curated starter list; see CHANGELOG_AI.md "Decisions"). GET shows
+    a checkbox preview per group with already-added items pre-unchecked and
+    labelled; POST adds whichever boxes were checked, at the chosen qty."""
     reg = user_registry()
     if not reg:
-        abort(400)
+        return redirect(url_for("registry_new"))
     db = get_db()
-    added = 0
-    with ob_db.write_txn(db):
-        for c in db.execute("SELECT * FROM catalog_items WHERE active=1 AND featured=1"):
-            if not db.execute("SELECT 1 FROM registry_items WHERE registry_id=? AND catalog_id=?",
-                              (reg["id"], c["id"])).fetchone():
-                db.execute(
-                    "INSERT INTO registry_items (registry_id, catalog_id, name, name_he, brand,"
-                    " category, price_nis, store, url, image) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                    (reg["id"], c["id"], c["name"], c["name_he"], c["brand"], c["category"],
-                     c["price_nis"], c["store"], c["url"], c["image"]))
+    have_catalog_ids = {r["catalog_id"] for r in db.execute(
+        "SELECT catalog_id FROM registry_items WHERE registry_id=? AND catalog_id IS NOT NULL",
+        (reg["id"],))}
+    if request.method == "POST":
+        added = 0
+        with ob_db.write_txn(db):
+            for key, val in request.form.items():
+                if not key.startswith("add_"):
+                    continue
+                try:
+                    cid = int(key[len("add_"):])
+                except ValueError:
+                    continue
+                c = db.execute("SELECT * FROM catalog_items WHERE id=? AND active=1", (cid,)).fetchone()
+                if not c or cid in have_catalog_ids:
+                    continue
+                try:
+                    qty = max(1, min(int(request.form.get(f"qty_{cid}", 1)), 99))
+                except ValueError:
+                    qty = 1
+                _insert_registry_item_from_catalog(db, reg["id"], c)
+                if qty > 1:
+                    db.execute("UPDATE registry_items SET qty_wanted=? WHERE registry_id=? AND catalog_id=?",
+                              (qty, reg["id"], cid))
                 added += 1
-    flash(_t("starter_added", current_lang()).format(n=added), "ok")
-    return redirect(url_for("items_manage") + "#mine")
+            if added:
+                _maybe_track_first_gifts(db, reg["id"])
+        flash(_t("starter_added", current_lang()).format(n=added), "ok")
+        return redirect(url_for("items_manage") + "#mine")
+    groups = {g: db.execute(
+        "SELECT * FROM catalog_items WHERE active=1 AND starter_group=? ORDER BY sort", (g,)).fetchall()
+        for g in STARTER_GROUPS_ORDER}
+    return render_template("items_starter.html", reg=reg, groups=groups,
+                           group_order=STARTER_GROUPS_ORDER, have=have_catalog_ids)
 
 
 @app.route("/registry/items/<int:item_id>/update", methods=["POST"])
@@ -1255,6 +1427,71 @@ def items_update(item_id):
         db.execute("UPDATE registry_items SET qty_wanted=?, priority=? WHERE id=?",
                    (qty, 1 if request.form.get("priority") else 0, item_id))
     return redirect(url_for("items_manage"))
+
+
+_OVERRIDABLE_FIELDS = ("url", "image", "store", "brand", "name")
+
+
+@app.route("/registry/items/<int:item_id>/edit", methods=["GET", "POST"])
+@login_required
+def item_edit(item_id):
+    """Full edit of one registry item (SPEC_V3 "Items management"). Editing a
+    field that's normally inherited from the catalog (url/image/store/brand/
+    name) records it in `overrides` so a later `refresh-registry-links` never
+    clobbers the couple's own edit."""
+    reg = user_registry()
+    db = get_db()
+    item = db.execute("SELECT * FROM registry_items WHERE id=? AND registry_id=?",
+                      (item_id, reg["id"] if reg else -1)).fetchone()
+    if not item:
+        abort(404)
+    lang = current_lang()
+    if request.method == "POST":
+        f = request.form
+        name = (f.get("name") or "").strip()[:200]
+        if not name:
+            flash(_t("form_error", lang), "err")
+            return render_template("item_edit.html", reg=reg, item=item)
+        url = (f.get("url") or "").strip()[:500]
+        if url and not url.startswith("http"):
+            url = "https://" + url
+        url_ok = (not url) or valid_http_url(url)
+        if url and not url_ok:
+            flash(_t("bad_url", lang), "err")
+            return render_template("item_edit.html", reg=reg, item=item)
+        try:
+            price = max(0, int(f.get("price_nis") or 0))
+        except ValueError:
+            price = 0
+        try:
+            qty = max(1, min(int(f.get("qty_wanted", 1)), 99))
+        except ValueError:
+            qty = 1
+        committed = item_claim_counts(reg["id"]).get(item_id, 0)
+        if qty < committed:
+            flash(_t("qty_below_committed", lang).format(n=committed), "err")
+            return render_template("item_edit.html", reg=reg, item=item)
+        store = (f.get("store") or "").strip()[:120]
+        brand = (f.get("brand") or "").strip()[:80]
+        new_vals = dict(name=name, url=url, store=store, brand=brand,
+                        image=(f.get("image") or item["image"] or ""))
+        overrides = set(x for x in (item["overrides"] or "").split(",") if x)
+        for field in _OVERRIDABLE_FIELDS:
+            old = item[field] if field in item.keys() else ""
+            if new_vals.get(field, old) != old:
+                overrides.add(field)
+        db.execute(
+            "UPDATE registry_items SET name=?, name_he=?, brand=?, price_nis=?, url=?, store=?,"
+            " qty_wanted=?, priority=?, note=?, note_he=?, variant=?,"
+            " kind=?, overrides=? WHERE id=?",
+            (name, (f.get("name_he") or "").strip()[:200], brand, price, url, store, qty,
+             1 if f.get("priority") else 0, (f.get("note") or "").strip()[:1000],
+             (f.get("note_he") or "").strip()[:1000], (f.get("variant") or "").strip()[:120],
+             f.get("kind") if f.get("kind") in ("product", "idea", "cash_need") else item["kind"],
+             ",".join(sorted(overrides)), item_id))
+        flash(_t("item_updated", lang), "ok")
+        return redirect(url_for("items_manage"))
+    return render_template("item_edit.html", reg=reg, item=item)
 
 
 def _owned_claim(claim_id):
@@ -1331,6 +1568,61 @@ def dashboard_claims_csv():
     return resp
 
 
+# ---------------------------------------------------------------- account (data export/deletion)
+@app.route("/account")
+@login_required
+def account():
+    return render_template("account.html", reg=user_registry())
+
+
+@app.route("/account/export.json")
+@login_required
+def account_export():
+    """Own data only, no password hash / claim tokens — SPEC_V3 "Data export/deletion"."""
+    db = get_db()
+    user = current_user()
+    reg = user_registry()
+    data = dict(
+        user=dict(email=user["email"], name=user["name"], created_at=user["created_at"]),
+        registry=None, items=[], claims=[],
+    )
+    if reg:
+        data["registry"] = {k: reg[k] for k in reg.keys() if k not in ("id", "user_id")}
+        data["items"] = [dict(r) for r in db.execute(
+            "SELECT * FROM registry_items WHERE registry_id=?", (reg["id"],))]
+        data["claims"] = [
+            {k: v for k, v in dict(r).items() if k not in ("token_hash",)}
+            for r in db.execute("SELECT * FROM claims WHERE registry_id=?", (reg["id"],))]
+    resp = app.response_class(json.dumps(data, indent=2, default=str), mimetype="application/json")
+    resp.headers["Content-Disposition"] = "attachment; filename=ourbayis-data.json"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+@app.route("/account/delete", methods=["POST"])
+@login_required
+def account_delete():
+    """Deletes the registry (+ items + claims, via ON DELETE CASCADE) and the
+    user row. Retention decision (documented in PROJECT_KNOWLEDGE.md): mail_outbox
+    rows for this address are purged; funnel_events are aggregate, no PII, kept."""
+    lang = current_lang()
+    user = current_user()
+    pw = request.form.get("current_password") or ""
+    if not check_password_hash(user["pw_hash"], pw):
+        flash(_t("reauth_required", lang), "err")
+        return redirect(url_for("account"))
+    db = get_db()
+    with ob_db.write_txn(db):
+        db.execute("DELETE FROM mail_outbox WHERE to_addr=?", (user["email"],))
+        db.execute("DELETE FROM users WHERE id=?", (user["id"],))
+    session.clear()
+    flash(_t("account_deleted", lang), "ok")
+    return redirect(url_for("index"))
+
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
 # ---------------------------------------------------------------- shana rishonah
 @app.route("/shana-rishonah", methods=["GET", "POST"])
 def shana():
@@ -1343,26 +1635,33 @@ def shana():
         lang = current_lang()
         f = request.form
         name = (f.get("name") or "").strip()[:120]
-        if not name:
-            flash(_t("form_error", lang), "err")
+        email = (f.get("email") or "").strip()[:200]
+        whatsapp_digits = re.sub(r"\D", "", f.get("whatsapp") or "")
+        has_contact = (email and _EMAIL_RE.match(email)) or len(whatsapp_digits) >= 8
+        if not name or not has_contact:
+            flash(_t("shana_contact_required", lang) if name else _t("form_error", lang), "err")
         else:
             db.execute(
-                "INSERT INTO shana_requests (name, email, whatsapp, arrival, city,"
-                " address, bundle_slug, notes) VALUES (?,?,?,?,?,?,?,?)",
-                (name, (f.get("email") or "").strip()[:200],
-                 (f.get("whatsapp") or "").strip()[:40],
+                "INSERT INTO shana_requests (name, email, whatsapp, arrival, city, neighborhood,"
+                " furnishing, budget, bundle_slug, notes) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                (name, email, (f.get("whatsapp") or "").strip()[:40],
                  (f.get("arrival") or "").strip()[:40],
                  (f.get("city") or "").strip()[:120],
-                 (f.get("address") or "").strip()[:300],
+                 (f.get("neighborhood") or "").strip()[:120],
+                 f.get("furnishing") if f.get("furnishing") in
+                     ("unknown", "empty", "partly", "furnished") else "unknown",
+                 (f.get("budget") or "").strip()[:40],
                  (f.get("bundle") or "custom")[:60],
                  (f.get("notes") or "").strip()[:2000]))
             send_mail(
                 NOTIFY_EMAIL,
                 f"New shana rishonah lead: {name} ({f.get('bundle', 'custom')})",
-                f"Name: {name}\nWhatsApp: {f.get('whatsapp', '')}\nEmail: {f.get('email', '')}\n"
+                f"Name: {name}\nWhatsApp: {f.get('whatsapp', '')}\nEmail: {email}\n"
                 f"Arrival: {f.get('arrival', '')}\nCity: {f.get('city', '')}\n"
-                f"Address: {f.get('address', '')}\nBundle: {f.get('bundle', '')}\n"
+                f"Neighborhood: {f.get('neighborhood', '')}\nFurnishing: {f.get('furnishing', '')}\n"
+                f"Budget: {f.get('budget', '')}\nBundle: {f.get('bundle', '')}\n"
                 f"Notes: {f.get('notes', '')}\n\nAdmin: {ext_url('admin_home')}")
+            track("concierge_inquiry")
             flash(_t("sr_done_t", lang) + " " + _t("sr_done_b", lang), "ok")
             return redirect(url_for("shana"))
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
@@ -1407,13 +1706,17 @@ def admin_home():
         claims=db.execute("SELECT COUNT(*) FROM claims").fetchone()[0],
         leads_new=db.execute("SELECT COUNT(*) FROM shana_requests WHERE status='new'").fetchone()[0],
         catalog=db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1").fetchone()[0],
-        no_affiliate=db.execute(
+        missing_store_link=db.execute(
             "SELECT COUNT(*) FROM catalog_items WHERE active=1 AND url=''").fetchone()[0],
     )
     recent = db.execute("SELECT * FROM registries ORDER BY created_at DESC LIMIT 15").fetchall()
     mail_stats = ob_mail.outbox_counts(db)
+    since = (date.today() - timedelta(days=30)).isoformat()
+    funnel = db.execute(
+        "SELECT name, SUM(n) AS n FROM funnel_events WHERE day>=? GROUP BY name ORDER BY n DESC",
+        (since,)).fetchall()
     return render_template("admin.html", leads=leads, msgs=msgs, stats=stats, recent=recent,
-                           mail_stats=mail_stats)
+                           mail_stats=mail_stats, funnel=funnel)
 
 
 @app.route("/admin/leads.csv")
@@ -1434,13 +1737,80 @@ def admin_leads_csv():
     return resp
 
 
+LEAD_STATUSES = ("new", "contacted", "quoted", "accepted", "arranging", "completed", "cancelled")
+
+
 @app.route("/admin/lead/<int:lead_id>/status", methods=["POST"])
 @admin_required
 def admin_lead_status(lead_id):
     status = request.form.get("status", "new")
-    if status in ("new", "contacted", "quoted", "accepted", "arranging", "completed", "cancelled"):
+    if status in LEAD_STATUSES:
         get_db().execute("UPDATE shana_requests SET status=? WHERE id=?", (status, lead_id))
-    return redirect(url_for("admin_home"))
+    return redirect(request.referrer or url_for("admin_home"))
+
+
+@app.route("/admin/lead/<int:lead_id>")
+@admin_required
+def admin_lead(lead_id):
+    db = get_db()
+    lead = db.execute("SELECT * FROM shana_requests WHERE id=?", (lead_id,)).fetchone()
+    if not lead:
+        abort(404)
+    dupes = []
+    if lead["email"] or lead["whatsapp"]:
+        clauses, params = [], []
+        if lead["email"]:
+            clauses.append("email=?")
+            params.append(lead["email"])
+        if lead["whatsapp"]:
+            clauses.append("whatsapp=?")
+            params.append(lead["whatsapp"])
+        dupes = db.execute(
+            f"SELECT * FROM shana_requests WHERE id!=? AND ({' OR '.join(clauses)})"
+            " ORDER BY created_at DESC", [lead_id] + params).fetchall()
+    try:
+        quote = json.loads(lead["quote_json"] or "{}")
+    except (ValueError, TypeError):
+        quote = {}
+    return render_template("admin_lead.html", lead=lead, dupes=dupes, quote=quote,
+                           statuses=LEAD_STATUSES)
+
+
+@app.route("/admin/lead/<int:lead_id>/update", methods=["POST"])
+@admin_required
+def admin_lead_update(lead_id):
+    """Internal notes, next action + date, and the cost-breakdown editor
+    (goods/delivery/assembly/labour/contingency/quoted_price -> total cost,
+    profit, margin % computed server-side and stored in quote_json)."""
+    db = get_db()
+    lead = db.execute("SELECT * FROM shana_requests WHERE id=?", (lead_id,)).fetchone()
+    if not lead:
+        abort(404)
+    f = request.form
+    cost_fields = ("goods", "delivery", "assembly", "labour", "contingency", "quoted_price")
+
+    def _num(key):
+        try:
+            return max(0.0, float(f.get(key) or 0))
+        except ValueError:
+            return 0.0
+    quote = {k: _num(k) for k in cost_fields}
+    total_cost = quote["goods"] + quote["delivery"] + quote["assembly"] + quote["labour"] + quote["contingency"]
+    quote["total_cost"] = round(total_cost, 2)
+    quote["profit"] = round(quote["quoted_price"] - total_cost, 2)
+    quote["margin_pct"] = round((quote["profit"] / quote["quoted_price"]) * 100, 1) if quote["quoted_price"] else 0
+    quote["needs_reconfirmation"] = request.form.getlist("needs_reconfirmation")
+    status = f.get("status", lead["status"])
+    if status not in LEAD_STATUSES:
+        status = lead["status"]
+    db.execute(
+        "UPDATE shana_requests SET status=?, notes_internal=?, next_action=?, next_action_date=?,"
+        " quote_json=? WHERE id=?",
+        (status, (f.get("notes_internal") or "").strip()[:4000],
+         (f.get("next_action") or "").strip()[:200], (f.get("next_action_date") or "").strip()[:20],
+         json.dumps(quote), lead_id))
+    flash("Lead updated", "ok")
+    return redirect(url_for("admin_lead", lead_id=lead_id))
 
 
 @app.route("/admin/message/<int:msg_id>/resolve", methods=["POST"])
@@ -1453,8 +1823,83 @@ def admin_msg_resolve(msg_id):
 @app.route("/admin/catalog")
 @admin_required
 def admin_catalog():
-    rows = get_db().execute("SELECT * FROM catalog_items ORDER BY category, sort").fetchall()
-    return render_template("admin_catalog.html", rows=rows)
+    db = get_db()
+    q = (request.args.get("q") or "").strip()
+    cat = request.args.get("cat", "")
+    missing_url = request.args.get("missing_url")
+    missing_image = request.args.get("missing_image")
+    price_status = request.args.get("price_status", "")
+    show_inactive = request.args.get("inactive")
+    sql = "SELECT * FROM catalog_items WHERE 1=1"
+    params = []
+    if not show_inactive:
+        sql += " AND active=1"
+    if q:
+        sql += " AND (name LIKE ? OR name_he LIKE ? OR seed_key LIKE ?)"
+        params += [f"%{q}%", f"%{q}%", f"%{q}%"]
+    if cat in CATEGORIES:
+        sql += " AND category=?"
+        params.append(cat)
+    if missing_url:
+        sql += " AND url=''"
+    if missing_image:
+        sql += " AND image=''"
+    if price_status in ("verified", "estimate", "unknown"):
+        sql += " AND price_status=?"
+        params.append(price_status)
+    rows = db.execute(sql + " ORDER BY category, sort", params).fetchall()
+    queue_counts = dict(
+        missing_url=db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND url=''").fetchone()[0],
+        missing_image=db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND image=''").fetchone()[0],
+        unverified=db.execute(
+            "SELECT COUNT(*) FROM catalog_items WHERE active=1 AND price_status!='verified'").fetchone()[0],
+    )
+    return render_template("admin_catalog.html", rows=rows, q=q, cat=cat, price_status=price_status,
+                           missing_url=missing_url, missing_image=missing_image,
+                           show_inactive=show_inactive, queue_counts=queue_counts)
+
+
+CATALOG_PRICE_STATUSES = ("verified", "estimate", "unknown")
+CATALOG_KINDS = ("product", "idea")
+CATALOG_AVAILABILITY = ("unknown", "in_stock", "backorder", "discontinued")
+
+
+def _catalog_form_values(f):
+    """Shared parse+validate for the catalog admin add/edit form. Returns
+    (values_tuple, errors_list)."""
+    errors = []
+    try:
+        price = max(0, int(f.get("price_nis") or 0))
+    except ValueError:
+        price = 0
+        errors.append("Price must be a number")
+    url = (f.get("url") or "").strip()[:500]
+    if url and not url.startswith("http"):
+        url = "https://" + url
+    if url and not valid_http_url(url):
+        errors.append("That store link doesn't look like a valid http(s) URL")
+    image = (f.get("image") or "").strip()[:500]
+    if image and not image.startswith("http"):
+        image = "https://" + image
+    if image and not valid_http_url(image):
+        errors.append("That image link doesn't look like a valid http(s) URL")
+    vals = ((f.get("name") or "").strip()[:200], (f.get("name_he") or "").strip()[:200],
+            (f.get("brand") or "").strip()[:80],
+            f.get("category") if f.get("category") in CATEGORIES else "home",
+            price, (f.get("store") or "").strip()[:120], url, image,
+            1 if f.get("active") else 0, 1 if f.get("featured") else 0,
+            int(f.get("sort") or 0),
+            f.get("kind") if f.get("kind") in CATALOG_KINDS else "product",
+            (f.get("model") or "").strip()[:120], (f.get("variant") or "").strip()[:120],
+            (f.get("image_credit") or "").strip()[:200],
+            f.get("price_status") if f.get("price_status") in CATALOG_PRICE_STATUSES else "estimate",
+            (f.get("price_checked_at") or "").strip()[:20], (f.get("price_source") or "").strip()[:200],
+            f.get("availability") if f.get("availability") in CATALOG_AVAILABILITY else "unknown",
+            (f.get("notes") or "").strip()[:1000], (f.get("notes_he") or "").strip()[:1000],
+            f.get("starter_group") or "")
+    if not vals[0]:
+        errors.append("Name is required")
+    return vals, errors
 
 
 @app.route("/admin/catalog/new", methods=["GET", "POST"])
@@ -1465,39 +1910,145 @@ def admin_catalog_edit(item_id=None):
     row = db.execute("SELECT * FROM catalog_items WHERE id=?", (item_id,)).fetchone() if item_id else None
     if item_id and not row:
         abort(404)
+    n_registry_refs = db.execute(
+        "SELECT COUNT(*) FROM registry_items WHERE catalog_id=?", (item_id or -1,)).fetchone()[0]
     if request.method == "POST":
-        f = request.form
-        try:
-            price = max(0, int(f.get("price_nis") or 0))
-        except ValueError:
-            price = 0
-        vals = ((f.get("name") or "").strip()[:200], (f.get("name_he") or "").strip()[:200],
-                (f.get("brand") or "").strip()[:80],
-                f.get("category") if f.get("category") in CATEGORIES else "home",
-                price, (f.get("store") or "").strip()[:120],
-                (f.get("url") or "").strip()[:500], (f.get("image") or "").strip()[:500],
-                1 if f.get("active") else 0, 1 if f.get("featured") else 0,
-                int(f.get("sort") or 0))
-        if not vals[0]:
-            flash("Name is required", "err")
+        vals, errors = _catalog_form_values(request.form)
+        for e in errors:
+            flash(e, "err")
+        if errors:
+            pass
         elif row:
-            db.execute("UPDATE catalog_items SET name=?, name_he=?, brand=?, category=?,"
-                       " price_nis=?, store=?, url=?, image=?, active=?, featured=?, sort=?"
-                       " WHERE id=?", vals + (item_id,))
+            db.execute(
+                "UPDATE catalog_items SET name=?, name_he=?, brand=?, category=?, price_nis=?,"
+                " store=?, url=?, image=?, active=?, featured=?, sort=?, kind=?, model=?, variant=?,"
+                " image_credit=?, price_status=?, price_checked_at=?, price_source=?, availability=?,"
+                " notes=?, notes_he=?, starter_group=?, updated_at=? WHERE id=?",
+                vals + (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), item_id))
+            if n_registry_refs:
+                flash("Changes here don't rewrite gifts already copied to registries — "
+                      "run `manage.py refresh-registry-links` to push url/image/store/brand out.", "ok")
             return redirect(url_for("admin_catalog"))
         else:
-            db.execute("INSERT INTO catalog_items (name, name_he, brand, category, price_nis,"
-                       " store, url, image, active, featured, sort, seed_key)"
-                       " VALUES (?,?,?,?,?,?,?,?,?,?,?,?)", vals + (None,))
+            db.execute(
+                "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store, url,"
+                " image, active, featured, sort, kind, model, variant, image_credit, price_status,"
+                " price_checked_at, price_source, availability, notes, notes_he, starter_group, seed_key)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals + (None,))
             return redirect(url_for("admin_catalog"))
-    return render_template("admin_catalog_form.html", row=row)
+    return render_template("admin_catalog_form.html", row=row, n_registry_refs=n_registry_refs)
 
 
 @app.route("/admin/catalog/<int:item_id>/delete", methods=["POST"])
 @admin_required
 def admin_catalog_delete(item_id):
-    get_db().execute("DELETE FROM catalog_items WHERE id=?", (item_id,))
+    """"Retire" — soft-delete (active=0) unless nothing references it, in
+    which case a hard delete is safe."""
+    db = get_db()
+    n_refs = db.execute("SELECT COUNT(*) FROM registry_items WHERE catalog_id=?", (item_id,)).fetchone()[0]
+    if n_refs:
+        db.execute("UPDATE catalog_items SET active=0 WHERE id=?", (item_id,))
+    else:
+        db.execute("DELETE FROM catalog_items WHERE id=?", (item_id,))
     return redirect(url_for("admin_catalog"))
+
+
+@app.route("/admin/catalog.csv")
+@admin_required
+def admin_catalog_csv():
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    cols = ("seed_key", "id", "name", "name_he", "brand", "category", "price_nis", "store", "url",
+           "image", "kind", "active", "featured", "sort", "price_status", "price_checked_at",
+           "price_source", "starter_group")
+    w.writerow(cols)
+    for r in get_db().execute("SELECT * FROM catalog_items ORDER BY category, sort"):
+        w.writerow([csv_safe(r[c]) for c in cols])
+    resp = app.response_class(buf.getvalue(), mimetype="text/csv")
+    resp.headers["Content-Disposition"] = "attachment; filename=catalog.csv"
+    resp.headers["Cache-Control"] = "no-store"
+    return resp
+
+
+_CSV_IMPORT_FIELDS = ("name", "name_he", "brand", "category", "price_nis", "store", "url", "image",
+                      "kind", "active", "featured", "sort", "price_status", "price_checked_at",
+                      "price_source", "starter_group")
+
+
+@app.route("/admin/catalog/import", methods=["GET", "POST"])
+@admin_required
+def admin_catalog_import():
+    """CSV import matched by seed_key (falls back to id). Always shows a
+    dry-run diff first; only writes on a second POST with mode=apply and the
+    same re-uploaded file (nothing is trusted from a hidden/session payload)."""
+    if request.method != "POST":
+        return render_template("admin_catalog_import.html", diffs=None)
+    db = get_db()
+    file = request.files.get("file")
+    if not file or not file.filename:
+        flash("Choose a CSV file", "err")
+        return render_template("admin_catalog_import.html", diffs=None)
+    mode = request.form.get("mode", "preview")
+    text = file.stream.read().decode("utf-8-sig", errors="replace")
+    reader = csv.DictReader(io.StringIO(text))
+    diffs, errors = _catalog_csv_diff(db, reader, write=(mode == "apply"))
+    if mode == "apply":
+        flash(f"Applied {len(diffs)} field change(s).", "ok")
+        return redirect(url_for("admin_catalog"))
+    return render_template("admin_catalog_import.html", diffs=diffs, errors=errors,
+                           filename=file.filename)
+
+
+def _catalog_csv_diff(db, reader, write):
+    """Parse+validate a catalog CSV against the DB by seed_key (falls back to
+    id). Always computes the full diff; only writes when `write` is True —
+    keeps the dry-run path free of any transaction/rollback trickery."""
+    diffs, errors = [], []
+
+    def _apply(rows):
+        for i, row, existing, sets, params in rows:
+            if sets:
+                db.execute(f"UPDATE catalog_items SET {', '.join(sets)} WHERE id=?",
+                          params + [existing["id"]])
+
+    pending = []
+    for i, row in enumerate(reader, start=2):
+        key = (row.get("seed_key") or "").strip()
+        rid = (row.get("id") or "").strip()
+        existing = None
+        if key:
+            existing = db.execute("SELECT * FROM catalog_items WHERE seed_key=?", (key,)).fetchone()
+        elif rid:
+            existing = db.execute("SELECT * FROM catalog_items WHERE id=?", (rid,)).fetchone()
+        if not existing:
+            errors.append(f"Row {i}: no match for seed_key={key!r} id={rid!r}")
+            continue
+        url = (row.get("url") or "").strip()
+        if url and not valid_http_url(url):
+            errors.append(f"Row {i} ({existing['name']}): invalid url {url!r}")
+            continue
+        sets, params = [], []
+        for field in _CSV_IMPORT_FIELDS:
+            if field not in row:
+                continue
+            new_val = row[field]
+            if field in ("price_nis", "sort"):
+                try:
+                    new_val = int(new_val or 0)
+                except ValueError:
+                    continue
+            elif field in ("active", "featured"):
+                new_val = 1 if str(new_val).strip() in ("1", "true", "True") else 0
+            old_val = existing[field] if field in existing.keys() else None
+            if old_val != new_val:
+                diffs.append((existing["id"], existing["name"], field, old_val, new_val))
+                sets.append(f"{field}=?")
+                params.append(new_val)
+        pending.append((i, row, existing, sets, params))
+    if write:
+        with ob_db.write_txn(db):
+            _apply(pending)
+    return diffs, errors
 
 
 @app.route("/admin/bundles")
@@ -1593,6 +2144,53 @@ def admin_password():
                                              (admin_row["username"],)).fetchone()[0]
         flash("Password updated", "ok")
     return redirect(url_for("admin_home"))
+
+
+@app.route("/admin/outbox")
+@admin_required
+def admin_outbox():
+    db = get_db()
+    rows = db.execute("SELECT * FROM mail_outbox ORDER BY created_at DESC LIMIT 50").fetchall()
+    masked = [dict(r, to_addr=_mask_email(r["to_addr"])) for r in rows]
+    return render_template("admin_outbox.html", rows=masked, mail_stats=ob_mail.outbox_counts(db))
+
+
+def _mask_email(addr):
+    """a***@x.com — admin_outbox never shows a full address (see PROJECT_KNOWLEDGE.md)."""
+    if not addr or "@" not in addr:
+        return "***"
+    local, _, domain = addr.partition("@")
+    return (local[:1] or "*") + "***@" + domain
+
+
+@app.route("/admin/outbox/<int:mail_id>/retry", methods=["POST"])
+@admin_required
+def admin_outbox_retry(mail_id):
+    db = get_db()
+    with ob_db.write_txn(db):
+        db.execute(
+            "UPDATE mail_outbox SET status='queued', next_attempt_at=datetime('now') WHERE id=? AND status='failed'",
+            (mail_id,))
+    return redirect(url_for("admin_outbox"))
+
+
+@app.route("/admin/backup.db")
+@admin_required
+def admin_backup_download():
+    import tempfile
+    fd, tmp_path = tempfile.mkstemp(suffix=".db")
+    os.close(fd)
+    try:
+        ob_db.backup(DB_PATH, tmp_path)
+        return app.response_class(
+            Path(tmp_path).read_bytes(), mimetype="application/octet-stream",
+            headers={"Content-Disposition": "attachment; filename=ourbayis-backup.db",
+                    "Cache-Control": "no-store"})
+    finally:
+        try:
+            os.remove(tmp_path)
+        except OSError:
+            pass
 
 
 # ---------------------------------------------------------------- misc
