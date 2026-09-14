@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OurBayis — רשימות מתנות לבניית בית בישראל</title>
+<meta name="description" content="זוגות בוחרים את מה שבית בישראל באמת צריך. משפחה וחברים בכל מקום בעולם פותחים קישור אחד וקונים מחנות מקושרת או שולחים כסף ישירות לזוג — בעברית או באנגלית.">
+
+<meta name="csrf-token" content="3113838b22978e45634c795425791ae4">
+
+
+<meta property="og:title" content="OurBayis — רשימות מתנות לבניית בית בישראל">
+<meta property="og:description" content="זוגות בוחרים את מה שבית בישראל באמת צריך. משפחה וחברים בכל מקום בעולם פותחים קישור אחד וקונים מחנות מקושרת או שולחים כסף ישירות לזוג — בעברית או באנגלית.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="he_IL">
+<meta property="og:site_name" content="OurBayis">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 3 3 14h3v14h20V14h3L16 3z' fill='%23223354'/%3E%3Cpath d='M16 25c-2.8-2.2-5-4-5-6.2 0-1.6 1.2-2.8 2.7-2.8 1 0 1.8.5 2.3 1.3.5-.8 1.3-1.3 2.3-1.3 1.5 0 2.7 1.2 2.7 2.8 0 2.2-2.2 4-5 6.2z' fill='%23c9a24a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "OurBayis",
+  "url": "/",
+  "logo": "/static/og.png"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "OurBayis",
+  "url": "/"
+}
+</script>
+
+
+</head>
+<body><div class="demo-banner" dir="auto">תצוגה סטטית — הדגמה לקריאה בלבד של OurBayis. טפסים, הרשמה ומתנות אינם פעילים כאן; הרשימה לדוגמה סינתטית.</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-house" viewBox="0 0 24 24"><path d="M3 11 12 3l9 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v10h14V10" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 18.5c-1.9-1.5-3.4-2.7-3.4-4.2 0-1 .8-1.9 1.8-1.9.7 0 1.2.3 1.6.9.4-.6.9-.9 1.6-.9 1 0 1.8.9 1.8 1.9 0 1.5-1.5 2.7-3.4 4.2z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><path d="M4 10h16v10H4zM2 6h20v4H2zM12 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 6C9 6 7 4.9 7 3.5 7 2.4 8 2 9 2c2 0 3 2.5 3 4zm0 0c3 0 5-1.1 5-2.5C17 2.4 16 2 15 2c-2 0-3 2.5-3 4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m16 16 5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20.5C6.5 16.5 3 13.3 3 9.6 3 7 5 5 7.4 5c1.7 0 3.2.9 4.6 2.6C13.4 5.9 14.9 5 16.6 5 19 5 21 7 21 9.6c0 3.7-3.5 6.9-9 10.9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5.5 5.5L20 6.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></symbol>
+  <symbol id="i-wa" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5 13.9c-.2.6-1.2 1.2-1.7 1.2-.4.1-1 .1-1.6-.1-.4-.1-.9-.3-1.5-.5-2.6-1.1-4.3-3.8-4.4-4-.1-.2-1.1-1.4-1.1-2.7s.7-1.9.9-2.2c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.4.2.5.7 1.8.8 1.9.1.1.1.3 0 .5-.3.6-.6.8-.5 1.1.5.9 1.2 1.6 2 2.2.6.4 1 .5 1.3.4.2-.1.5-.6.7-.8.2-.3.4-.2.6-.1l1.7.8c.2.1.4.2.4.3.1.1.1.6-.1 1.2z" fill="currentColor"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-pot" viewBox="0 0 24 24"><path d="M4 10h16v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM2 10h20M8 7c0-2 8-2 8 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3v5m6-5v5M7 8h10v3a5 5 0 0 1-10 0zM12 16v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-plate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-bed" viewBox="0 0 24 24"><path d="M3 18v-8m0 5h18v3m0-3v-2a3 3 0 0 0-3-3h-8v5M6 12a2 2 0 1 0 0-.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-candles" viewBox="0 0 24 24"><path d="M8 10v8m8-8v8M5 21h14M8 7c-.8-1-.8-2 0-3 .8 1 .8 2 0 3zm8 0c-.8-1-.8-2 0-3 .8 1 .8 2 0 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.8 6.3.8-4.6 4.3 1.2 6.2L12 17l-5.6 3.1 1.2-6.2L3 9.6l6.3-.8z" fill="currentColor"/></symbol>
+
+  <!-- category line illustrations, gold on soft tint, ~viewBox 0 0 120 90 -->
+  <symbol id="ill-kitchen" viewBox="0 0 120 90"><g fill="none" stroke="#a5762a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M28 44h50v18a14 14 0 0 1-14 14H42a14 14 0 0 1-14-14z"/><path d="M78 50h8a9 9 0 0 1 0 18h-8"/><path d="M40 44c0-10 6-16 13-16s13 6 13 16"/><path d="M30 30l4 6M40 24l3 7M50 22l2 7"/></g></symbol>
+  <symbol id="ill-appliances" viewBox="0 0 120 90"><g fill="none" stroke="#a5762a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="38" y="14" width="44" height="62" rx="6"/><line x1="38" y1="42" x2="82" y2="42"/><circle cx="60" cy="30" r="4"/><path d="M50 60h20M50 68h20"/><path d="M52 14v-6m16 6v-6" /></g></symbol>
+  <symbol id="ill-dining" viewBox="0 0 120 90"><g fill="none" stroke="#a5762a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="46" cy="48" r="22"/><circle cx="46" cy="48" r="11"/><path d="M84 22v52M84 22c-6 0-9 4-9 10s3 9 9 9M96 22v14a5 5 0 0 1-10 0V22M96 22v52"/></g></symbol>
+  <symbol id="ill-bedding" viewBox="0 0 120 90"><g fill="none" stroke="#a5762a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 70V44a8 8 0 0 1 8-8h76a8 8 0 0 1 8 8v26"/><path d="M14 70h92v8H14z"/><path d="M22 44a10 10 0 0 1 20 0v6H22z"/><path d="M50 44h38"/></g></symbol>
+  <symbol id="ill-judaica" viewBox="0 0 120 90"><g fill="none" stroke="#a5762a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M38 76V44m0-4c-4-4-4-10 0-14 4 4 4 10 0 14zM82 76V44m0-4c-4-4-4-10 0-14 4 4 4 10 0 14z"/><path d="M24 76h20M72 76h20"/></g></symbol>
+  <symbol id="ill-home" viewBox="0 0 120 90"><g fill="none" stroke="#a5762a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 46 60 18l36 28"/><path d="M32 42v34h56V42"/><path d="M52 76V56h16v20"/></g></symbol>
+</svg>
+
+<header class="site-header glass">
+  <div class="wrap header-inner">
+    <a class="brand" href="../he/">
+      <span class="brand-mark"><svg class="ic" aria-hidden="true"><use href="#i-house"/></svg></span>
+      <span class="brand-name">Our<em>Bayis</em></span>
+    </a>
+    <nav class="main-nav" id="main-nav" aria-label="Main">
+      <a href="../he/catalog/">קטלוג המתנות</a>
+      <a href="../he/find/">חיפוש רשימה</a>
+      <a href="../he/shana-rishonah/">שנה ראשונה</a>
+      <a href="../he/how-it-works/">איך זה עובד</a>
+      
+        <a href="../he/demo-only/">התחברות</a>
+        <a href="../he/demo-only/" class="nav-cta">פתיחת רשימה</a>
+      
+    </nav>
+    <div class="header-side">
+      
+      <a class="lang-toggle" href="../he/">English</a>
+      <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+
+  
+
+
+<main id="main">
+
+
+<section class="hero">
+  <div class="light-field" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <div class="wrap hero-inner">
+    <div class="glass hero-card">
+      <p class="eyebrow">רשימות מתנות לבניית בית בישראל</p>
+      <h1>בנו את הבית שלכם בישראל. תנו לאנשים שאוהבים אתכם לעזור להפוך אותו לבית.</h1>
+      <p class="hero-sub">זוגות בוחרים את מה שבית בישראל באמת צריך. משפחה וחברים בכל מקום בעולם פותחים קישור אחד וקונים מחנות מקושרת או שולחים כסף ישירות לזוג — בעברית או באנגלית.</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary btn-lg" href="../he/demo-only/">
+          <svg class="ic"><use href="#i-gift"/></svg> פתחו רשימה</a>
+        <a class="btn btn-ghost btn-lg" href="../he/find/">
+          <svg class="ic"><use href="#i-search"/></svg> חפשו רשימה של זוג</a>
+      </div>
+      <p style="margin-top:10px"><a href="../he/catalog/">לגלות מתנות ←</a></p>
+      <div class="trust-row">
+        <span><svg class="ic ic-sm"><use href="#i-check"/></svg> חינם לזוגות</span>
+        <span><svg class="ic ic-sm"><use href="#i-check"/></svg> הכסף מגיע ישירות לזוג — אף פעם לא דרכנו</span>
+        <span><svg class="ic ic-sm"><use href="#i-check"/></svg> עברית ואנגלית, מחירים בשקלים עם המרה משוערת</span>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <!-- Jerusalem skyline + chuppah, gold line art -->
+      <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <g class="draw" stroke="#b8892f" stroke-width="1.6" opacity=".45" stroke-linejoin="round" stroke-linecap="round">
+          <!-- old-city wall, left -->
+          <path d="M60 210v-48h22v-12h14v12h22v-12h14v12h22v48"/>
+          <path d="M96 210v-24h20v24M136 186h14"/>
+          <!-- tower of david -->
+          <path d="M196 210v-96h40v96M196 114h-6l6-10h40l6 10h-6M208 210v-20h16v20M212 140h8v14h-8z"/>
+          <!-- domed building, left -->
+          <path d="M258 210v-42a34 34 0 0 1 68 0v42"/>
+          <path d="M292 168v-14M286 160h12" opacity=".9"/>
+          <!-- cypress trees -->
+          <path d="M348 210c-8-14-8-38 0-56 8 18 8 42 0 56zM348 210v6"/>
+          <!-- right side: wall + minaret + dome -->
+          <path d="M556 210c-8-14-8-38 0-56 8 18 8 42 0 56zM556 210v6"/>
+          <path d="M596 210v-40a30 30 0 0 1 60 0v40M626 172v-12M620 166h12"/>
+          <path d="M688 210v-88M700 210v-88M688 128h12l-6-16zM682 152h24"/>
+          <path d="M726 210v-44h20v-12h14v12h20v-12h14v12h20v44M756 210v-22h18v22"/>
+        </g>
+        <!-- ground line -->
+        <path class="draw" d="M40 210h820" stroke="#b8892f" stroke-width="1.6" opacity=".55"/>
+        <!-- chuppah -->
+        <g class="draw" stroke="#a5762a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M378 210V96M522 210V96"/>
+          <path d="M362 98q88-30 176 0" fill="#f3e4bd" fill-opacity=".55"/>
+          <path d="M362 98q22 15 44 0q22 15 44 0q22 15 44 0q22 15 44 0"/>
+          <path d="M362 98v14M538 98v14" stroke-width="1.8"/>
+          <!-- string lights -->
+          <path d="M378 122q72 40 144 0" stroke-width="1.4" opacity=".8"/>
+        </g>
+        <g fill="#c9a24a" stroke="none">
+          <circle class="tw tw1" cx="398" cy="131" r="4"/>
+          <circle class="tw tw2" cx="426" cy="139" r="4"/>
+          <circle class="tw tw3" cx="450" cy="142" r="4"/>
+          <circle class="tw tw4" cx="474" cy="139" r="4"/>
+          <circle class="tw tw5" cx="502" cy="131" r="4"/>
+        </g>
+        <!-- candlesticks under the chuppah -->
+        <g stroke="#a5762a" stroke-width="2.2" stroke-linecap="round">
+          <path d="M428 210v-26M472 210v-26M420 210h16M464 210h16M422 184h12M466 184h12"/>
+        </g>
+        <circle class="tw tw2" cx="428" cy="178" r="7" fill="#c9a24a" opacity=".22"/>
+        <circle class="tw tw4" cx="472" cy="178" r="7" fill="#c9a24a" opacity=".22"/>
+        <ellipse class="tw tw2" cx="428" cy="178" rx="3" ry="5.5" fill="#c9a24a"/>
+        <ellipse class="tw tw4" cx="472" cy="178" rx="3" ry="5.5" fill="#c9a24a"/>
+        <!-- sparkle stars -->
+        <g fill="#c9a24a">
+          <path class="tw tw1" d="M150 66l3.5 8 8 3.5-8 3.5-3.5 8-3.5-8-8-3.5 8-3.5z" opacity=".8"/>
+          <path class="tw tw3" d="M244 34l2.8 6.4 6.4 2.8-6.4 2.8-2.8 6.4-2.8-6.4-6.4-2.8 6.4-2.8z" opacity=".7"/>
+          <path class="tw tw4" d="M676 52l3.5 8 8 3.5-8 3.5-3.5 8-3.5-8-8-3.5 8-3.5z" opacity=".8"/>
+          <path class="tw tw2" d="M790 96l2.8 6.4 6.4 2.8-6.4 2.8-2.8 6.4-2.8-6.4-6.4-2.8 6.4-2.8z" opacity=".7"/>
+          <path class="tw tw5" d="M580 26l2.8 6.4 6.4 2.8-6.4 2.8-2.8 6.4-2.8-6.4-6.4-2.8 6.4-2.8z" opacity=".6"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- How it works: couples + guests -->
+<section class="wrap section reveal">
+  <h2 class="section-title">איך זה עובד</h2>
+
+  <h3 class="sub-title" style="margin-top:.6em">לזוגות</h3>
+  <p class="page-sub">בונים רשימה ← משתפים קישור אחד ← המתנות מגיעות, או שהכסף מגיע ישירות אליכם.</p>
+  <div class="grid-3">
+    
+    <div class="card step-card">
+      <div class="step-num">1</div>
+      <svg class="ic ic-lg"><use href="#i-gift"/></svg>
+      <h3>בונים רשימה</h3>
+      <p>בוחרים מהקטלוג שלנו של ציוד חיוני לדירה בישראל — מפלטת שבת ועד סט כלי אוכל — או מוסיפים כל פריט מכל חנות.</p>
+    </div>
+    
+    <div class="card step-card">
+      <div class="step-num">2</div>
+      <svg class="ic ic-lg"><use href="#i-link"/></svg>
+      <h3>משתפים קישור אחד</h3>
+      <p>שולחים את הרשימה בוואטסאפ, במייל או על ההזמנה לחתונה. אורחים מכל העולם פותחים אותה — באנגלית או בעברית.</p>
+    </div>
+    
+    <div class="card step-card">
+      <div class="step-num">3</div>
+      <svg class="ic ic-lg"><use href="#i-house"/></svg>
+      <h3>המתנות מגיעות לישראל</h3>
+      <p>האורחים קונים מחנויות שמשלחות בישראל, או שולחים מתנה כספית ישירות אליכם. בלי מכס, בלי לסחוב כפולים מאמריקה.</p>
+    </div>
+    
+  </div>
+
+  <h3 class="sub-title">לאורחים</h3>
+  <p class="page-sub">פותחים את הקישור ← בוחרים מתנה ← קונים בחנות או שולחים כסף, ואז מודיעים לזוג.</p>
+  <div class="grid-3">
+    
+    <div class="card step-card">
+      <div class="step-num">1</div>
+      <svg class="ic ic-lg"><use href="#i-link"/></svg>
+      <h3>פותחים את הקישור של הזוג</h3>
+      <p>בלי חשבון. אפשר לעבור לאנגלית או לעברית בראש העמוד.</p>
+    </div>
+    
+    <div class="card step-card">
+      <div class="step-num">2</div>
+      <svg class="ic ic-lg"><use href="#i-gift"/></svg>
+      <h3>בוחרים מתנה</h3>
+      <p>רואים מה עוד חסר, בשקלים אמיתיים — עם המרה משוערת אם משלמים מחו״ל.</p>
+    </div>
+    
+    <div class="card step-card">
+      <div class="step-num">3</div>
+      <svg class="ic ic-lg"><use href="#i-check"/></svg>
+      <h3>קונים או שולחים, ומודיעים</h3>
+      <p>קונים בחנות המקושרת, או שולחים כסף ישירות לזוג. בכל מקרה, לחיצה אחת מודיעה להם שזה בדרך.</p>
+    </div>
+    
+  </div>
+</section>
+
+
+<section class="wrap section reveal">
+  <h2 class="section-title">טעימה מהקטלוג</h2>
+  <p class="page-sub">טעימה מהקטלוג — זו לא רשימת המתנות של זוג ספציפי.</p>
+  <div class="pop-grid">
+    
+    <a class="pop-card" href="../he/catalog/appliances/">
+      
+      <div class="gift-ph ph-appliances gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-appliances"/></svg>
+      </div>
+      
+      <div>
+        <strong>Hidurit פלטת שבת</strong>
+        <span class="gift-meta bdi">
+          ₪305 <span class="usd bdi">≈ $82</span>
+           · KSP
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+    <a class="pop-card" href="../he/catalog/appliances/">
+      
+      <div class="gift-ph ph-appliances gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-appliances"/></svg>
+      </div>
+      
+      <div>
+        <strong>Hidurit מיחם מים לשבת</strong>
+        <span class="gift-meta bdi">
+          ₪499 <span class="usd bdi">≈ $135</span>
+           · KSP
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+    <a class="pop-card" href="../he/catalog/appliances/">
+      
+      <div class="gift-ph ph-appliances gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-appliances"/></svg>
+      </div>
+      
+      <div>
+        <strong>KitchenAid מיקסר עומד</strong>
+        <span class="gift-meta bdi">
+          ₪2290 <span class="usd bdi">≈ $619</span>
+           · Machsanei Chashmal
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+    <a class="pop-card" href="../he/catalog/appliances/">
+      
+      <div class="gift-ph ph-appliances gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-appliances"/></svg>
+      </div>
+      
+      <div>
+        <strong>Crock-Pot סיר בישול איטי (לצ׳ולנט!)</strong>
+        <span class="gift-meta bdi">
+          ₪599 <span class="usd bdi">≈ $162</span>
+           · Hakol LaBait
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+    <a class="pop-card" href="../he/catalog/dining/">
+      
+      <div class="gift-ph ph-dining gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-dining"/></svg>
+      </div>
+      
+      <div>
+        <strong>Luminarc סט כלי אוכל — בשרי</strong>
+        <span class="gift-meta bdi">
+          ₪199 <span class="usd bdi">≈ $54</span>
+           · Hakol LaBait
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+    <a class="pop-card" href="../he/catalog/bedding/">
+      
+      <div class="gift-ph ph-bedding gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-bedding"/></svg>
+      </div>
+      
+      <div>
+        <strong>Vardinon סט מגבות</strong>
+        <span class="gift-meta bdi">
+          ₪200 <span class="usd bdi">≈ $54</span>
+           · Vardinon
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+    <a class="pop-card" href="../he/catalog/judaica/">
+      
+      <div class="gift-ph ph-judaica gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-judaica"/></svg>
+      </div>
+      
+      <div>
+        <strong>פמוטי שבת</strong>
+        <span class="gift-meta bdi">
+          ₪300 <span class="usd bdi">≈ $81</span>
+           · Heichal Menachem
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+    <a class="pop-card" href="../he/catalog/home/">
+      
+      <div class="gift-ph ph-home gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-home"/></svg>
+      </div>
+      
+      <div>
+        <strong>שולחן מתקפל לאורחי שבת (180 ס״מ)</strong>
+        <span class="gift-meta bdi">
+          ₪100 <span class="usd bdi">≈ $27</span>
+           · Home Center
+        </span>
+        
+        <span class="badge badge-plain">נבדק ב-2026-09-14</span>
+        
+      </div>
+    </a>
+    
+  </div>
+  <p class="hint rates-note">סכומים עם ≈ ב-USD הם הערכה משוערת בלבד (שער נכון ל-⁨2026-09-01⁩) להתמצאות. המחירים נקבעים בשקלים; מה שתשלמו בפועל תלוי בחנות או בספק התשלום ובשער של הבנק שלכם.</p>
+</section>
+
+
+<section class="wrap section reveal">
+  <h2 class="section-title">כל מה שבית חדש צריך</h2>
+  <div class="cat-grid">
+    
+    <a class="cat-tile" href="../he/catalog/kitchen/">
+      <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-kitchen"/></svg>
+      <span>מטבח</span>
+    </a>
+    
+    <a class="cat-tile" href="../he/catalog/appliances/">
+      <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-appliances"/></svg>
+      <span>מוצרי חשמל</span>
+    </a>
+    
+    <a class="cat-tile" href="../he/catalog/dining/">
+      <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-dining"/></svg>
+      <span>שולחן שבת ואירוח</span>
+    </a>
+    
+    <a class="cat-tile" href="../he/catalog/bedding/">
+      <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-bedding"/></svg>
+      <span>מצעים ואמבטיה</span>
+    </a>
+    
+    <a class="cat-tile" href="../he/catalog/judaica/">
+      <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-judaica"/></svg>
+      <span>יודאיקה ותשמישי קדושה</span>
+    </a>
+    
+    <a class="cat-tile" href="../he/catalog/home/">
+      <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-home"/></svg>
+      <span>ציוד לבית</span>
+    </a>
+    
+  </div>
+</section>
+
+<section class="wrap section reveal">
+  <h2 class="section-title">למה זה מתאים לבית ישראלי</h2>
+  <div class="grid-3">
+    
+    <div class="card why-card">
+      <h3>220V ותקעים ישראליים</h3>
+      <p>כל מכשיר חשמלי ב-OurBayis עובד עם המתח והתקעים בישראל — בלי מתאמים, בלי הפתעות כשהחבילה מגיעה.</p>
+    </div>
+    
+    <div class="card why-card">
+      <h3>מידות מקומיות</h3>
+      <p>מידות מצעים ומיטות ישראליות, ורהיטים בגודל שמתאים לדירה ישראלית קומפקטית — לא לאמריקאית.</p>
+    </div>
+    
+    <div class="card why-card">
+      <h3>שבת וכשרות, מובנים</h3>
+      <p>פלטה, מיחם, וסטים נפרדים לחלבי ולבשרי — הבסיס שעליו רץ בית דתי בישראל.</p>
+    </div>
+    
+  </div>
+</section>
+
+<!-- Sample registry — static illustration, not real data -->
+<section class="wrap section reveal">
+  <h2 class="section-title">ככה זה נראה</h2>
+  <div class="glass glass-panel sample-panel">
+    <span class="sample-flag">רשימת דוגמה בלבד — לא זוג אמיתי.</span>
+    <h3 class="sub-title" style="margin-top:0">חתן וכלה לדוגמה</h3>
+    <div class="gift-grid">
+      <article class="gift-card">
+        <div class="gift-ph ph-dining ill-box"><svg class="ic ic-lg"><use href="#ill-dining"/></svg></div>
+        <div class="gift-body">
+          <h3>פלטת שבת</h3>
+          <p class="gift-meta bdi">₪180</p>
+          <span class="sample-btn-disabled" aria-disabled="true">לתת מתנה</span>
+        </div>
+      </article>
+      <article class="gift-card">
+        <div class="gift-ph ph-bedding ill-box"><svg class="ic ic-lg"><use href="#ill-bedding"/></svg></div>
+        <div class="gift-body">
+          <h3>סט מצעים — זוגי ישראלי, 140×190 (מידה לדוגמה)</h3>
+          <p class="gift-meta bdi">₪420</p>
+          <span class="sample-btn-disabled" aria-disabled="true">לתת מתנה</span>
+        </div>
+      </article>
+      <article class="gift-card">
+        <div class="gift-ph ph-kitchen ill-box"><svg class="ic ic-lg"><use href="#ill-kitchen"/></svg></div>
+        <div class="gift-body">
+          <h3>מיקסר עומד</h3>
+          <p class="gift-meta bdi">₪1,650</p>
+          <span class="sample-btn-disabled" aria-disabled="true">לתת מתנה</span>
+        </div>
+      </article>
+      <article class="gift-card">
+        <div class="gift-ph ph-appliances ill-box"><svg class="ic ic-lg"><use href="#ill-appliances"/></svg></div>
+        <div class="gift-body">
+          <h3>כסף לכיוון מקרר</h3>
+          <span class="sample-btn-disabled" aria-disabled="true">לשלוח כסף עבור המתנה הזו</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="shana-band reveal">
+  <div class="wrap shana-band-inner">
+    <div>
+      <h2>נוחתים בישראל? יש עזרה גם לזה.</h2>
+      <p>שירות נפרד, מתואם אישית, לזוגות שנוחתים בישראל: אנחנו עוזרים לסדר את הבסיס לפני שאתם מגיעים. הצעת מחיר אישית; לא חלק מרשימת המתנות.</p>
+    </div>
+    <a class="btn btn-gold btn-lg" href="../he/shana-rishonah/">לחבילות ההקמה ←</a>
+  </div>
+</section>
+
+<section class="wrap section narrow reveal">
+  <h2 class="section-title" style="text-align:center">שאלות</h2>
+  <div class="faq-list">
+    
+    <details>
+      <summary>אתם מטפלים בכסף?</summary>
+      <p>לא. מתנות מהחנות עוברות דרך הקופה של החנות עצמה; מתנות כספיות עוברות דרך קישור ה-PayPal, Stripe, Bit או PayBox של הזוג. OurBayis אף פעם לא נוגע בכסף של האורחים ולא מחזיק אותו.</p>
+    </details>
+    
+    <details>
+      <summary>אורחים בחו״ל יכולים להשתמש בלי עברית?</summary>
+      <p>כן — כל האתר עובד באנגלית, וכל רשימה אפשר לצפות בה באנגלית או בעברית, לא משנה מי יצר אותה.</p>
+    </details>
+    
+    <details>
+      <summary>אורחים יכולים לשלם בדולרים?</summary>
+      <p>זה תלוי בספק קישור התשלום של הזוג. הסכומים המוצגים באתר הם הערכה לפי שער חליפין מפורסם, לא הצעת מחיר בזמן אמת.</p>
+    </details>
+    
+    <details>
+      <summary>הרשימה שלי ציבורית?</summary>
+      <p>כברירת מחדל היא לא רשומה בחיפוש — כל מי שיש לו את הקישור יכול לפתוח אותה, אבל אי אפשר למצוא אותה בחיפוש. אפשר להפוך אותה לניתנת לגילוי בכל עת בהגדרות הרשימה.</p>
+    </details>
+    
+    <details>
+      <summary>&#34;שוריין&#34; — מה זה אומר?</summary>
+      <p>אורח הודיע שהוא מתכוון לקנות או לשלוח את המתנה הזו. זה לא אישור רכישה — זה מגיע כשהאורח מדווח, והזוג מאשר קבלה.</p>
+    </details>
+    
+    <details>
+      <summary>שנה ראשונה חלק מרשימת המתנות?</summary>
+      <p>לא — זהו שירות ליווי נפרד, עם הצעת מחיר אישית לכל זוג.</p>
+    </details>
+    
+  </div>
+</section>
+
+<section class="wrap section reveal">
+  <div class="cta-panel">
+    <h2>מוכנים לבנות את הרשימה שלכם?</h2>
+    <p>זה לוקח כמה דקות, וזה חינם לזוגות.</p>
+    <a class="btn btn-primary btn-lg" href="../he/demo-only/">פתחו רשימה</a>
+  </div>
+</section>
+
+
+</main>
+
+
+
+
+
+<footer class="site-footer">
+  <div class="wrap footer-inner">
+    <div>
+      <a class="brand brand-footer" href="../he/">
+        <span class="brand-mark"><svg class="ic" aria-hidden="true"><use href="#i-house"/></svg></span>
+        <span class="brand-name">Our<em>Bayis</em></span>
+      </a>
+      <p class="footer-tag">עוזרים לזוגות לבנות בית נאמן בישראל — מתנה אחת בכל פעם.</p>
+    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <strong>קישורים</strong>
+      <a href="../he/demo-only/">פתיחת רשימה</a>
+      <a href="../he/catalog/">קטלוג המתנות</a>
+      <a href="../he/find/">חיפוש רשימה</a>
+      <a href="../he/shana-rishonah/">שנה ראשונה</a>
+      <a href="../he/how-it-works/">איך זה עובד</a>
+    </nav>
+    <nav class="footer-links" aria-label="More">
+      <strong>OurBayis</strong>
+      <a href="../he/about/">אודות</a>
+      <a href="../he/contact/">צור קשר</a>
+      <a href="../he/contact/">פרסמו אצלנו</a>
+      <a href="../he/privacy/">Privacy</a>
+    </nav>
+  </div>
+  <div class="wrap footer-legal">© 2026 OurBayis · כל הזכויות שמורות.</div>
+</footer>
+
+<script src="../static/app.js"></script>
+
+<script src="../demo.js"></script></body>
+</html>

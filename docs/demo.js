@@ -1,0 +1,1 @@
+document.addEventListener('submit',function(e){e.preventDefault();alert(document.documentElement.lang==='he'?'זו תצוגה סטטית — הטופס אינו פעיל.':'This is a static preview — forms are disabled.');},true);
