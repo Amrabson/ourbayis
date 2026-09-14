@@ -28,6 +28,7 @@
       <h3>{{ pick(b, 'name') }}</h3>
       <p class="bundle-price">{{ t('bundle_from') }} <strong>₪{{ '{:,}'.format(b['price_from']) }}</strong>
         <span class="usd">({{ t('price_about') }} ${{ '{:,}'.format(usd(b['price_from'])) }})</span></p>
+      <p class="hint">{{ t('bundle_price_indicative') }}</p>
       <p class="bundle-desc">{{ pick(b, 'description') }}</p>
       <details>
         <summary>{{ t('shana_includes') }}</summary>
@@ -37,6 +38,19 @@
           {% endfor %}
         </ul>
       </details>
+      <details>
+        <summary>{{ t('shana_optional_extras') }}</summary>
+        <p>{{ t('shana_optional_extras_body') }}</p>
+      </details>
+      <details>
+        <summary>{{ t('shana_not_included') }}</summary>
+        <p>{{ t('shana_not_included_body') }}</p>
+      </details>
+      <details>
+        <summary>{{ t('shana_coord_vs_install') }}</summary>
+        <p>{{ t('shana_coord_vs_install_body') }}</p>
+      </details>
+      <p class="hint">{{ t('shana_lead_time') }}</p>
       <a class="btn btn-primary btn-block" href="#request" data-bundle="{{ b['slug'] }}">{{ t('sr_submit') }}</a>
     </article>
     {% endfor %}
@@ -50,15 +64,35 @@
   <div class="form-panel" id="request">
     <h2 class="section-title">{{ t('shana_form_title') }}</h2>
     <p class="page-sub">{{ t('shana_form_sub') }}</p>
+    <p class="hint">{{ t('shana_form_disclaimer') }}</p>
     <form method="post" action="{{ url_for('shana') }}#request" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <div class="form-2col">
         <label>{{ t('sr_name') }} *<input name="name" required maxlength="120"></label>
-        <label>{{ t('sr_whatsapp') }} *<input name="whatsapp" required maxlength="40" placeholder="+1 / +972…"></label>
+        <label>{{ t('sr_whatsapp') }}<input name="whatsapp" maxlength="40" placeholder="+1 / +972…"></label>
         <label>{{ t('sr_email') }}<input name="email" type="email" maxlength="200"></label>
         <label>{{ t('sr_arrival') }}<input name="arrival" type="date"></label>
         <label>{{ t('sr_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim, Ramat Beit Shemesh…"></label>
+        <label>{{ t('sr_neighborhood') }}<input name="neighborhood" maxlength="120"></label>
+        <label>{{ t('sr_furnishing') }}
+          <select name="furnishing">
+            <option value="unknown">{{ t('pref_unknown') }}</option>
+            <option value="empty">{{ t('pref_furn_empty') }}</option>
+            <option value="partly">{{ t('pref_furn_partly') }}</option>
+            <option value="furnished">{{ t('pref_furn_furnished') }}</option>
+          </select>
+        </label>
+        <label>{{ t('sr_budget') }}
+          <select name="budget">
+            <option value="">—</option>
+            <option value="under_3000">{{ t('budget_under_3000') }}</option>
+            <option value="3000_6000">{{ t('budget_3000_6000') }}</option>
+            <option value="6000_10000">{{ t('budget_6000_10000') }}</option>
+            <option value="10000_plus">{{ t('budget_10000_plus') }}</option>
+            <option value="not_sure">{{ t('budget_not_sure') }}</option>
+          </select>
+        </label>
         <label>{{ t('sr_bundle') }}
           <select name="bundle" id="bundle-select">
             {% for b in bundles %}<option value="{{ b['slug'] }}">{{ pick(b, 'name') }} — ₪{{ '{:,}'.format(b['price_from']) }}+</option>{% endfor %}
@@ -66,7 +100,6 @@
           </select>
         </label>
       </div>
-      <label>{{ t('sr_address') }}<input name="address" maxlength="300"></label>
       <label>{{ t('sr_notes') }}<textarea name="notes" rows="3" maxlength="2000"></textarea></label>
       <button class="btn btn-primary btn-lg" type="submit">{{ t('sr_submit') }}</button>
     </form>

@@ -11,13 +11,37 @@
     </div>
   {% else %}
 
-  <div class="share-panel">
+  {% if checklist and checklist | selectattr(1, 'equalto', false) | list %}
+  <div class="checklist-panel">
+    <h2>{{ t('dash_checklist_title') }}</h2>
+    <ul class="checklist">
+      {% for key, done in checklist %}
+      <li class="{{ 'is-done' if done else '' }}">
+        <svg class="ic ic-sm"><use href="#i-check"/></svg>
+        <span>{{ t('dash_checklist_' ~ key) }}</span>
+        {% if not done %}
+          {% if key == 'gifts' %}<a href="{{ url_for('items_manage') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
+          {% elif key == 'payment' %}<a href="{{ url_for('registry_edit') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
+          {% elif key == 'visibility' %}<a href="{{ url_for('registry_edit') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
+          {% elif key == 'previewed' %}<a href="{{ url_for('registry', slug=reg['slug'], preview=1) }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
+          {% elif key == 'shared' %}<a href="#dash-share" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
+          {% elif key == 'details' %}<a href="{{ url_for('registry_edit') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
+          {% endif %}
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  <div class="share-panel" id="dash-share">
     <h2>{{ t('dash_share') }}</h2>
     <p class="hint">{{ t('dash_share_hint') }}</p>
     <div class="share-link-row">
       <code class="share-url">{{ url_for('registry', slug=reg['slug'], _external=True) }}</code>
-      <button class="btn btn-ghost" data-copy="{{ url_for('registry', slug=reg['slug'], _external=True) }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
-      <a class="btn btn-wa" target="_blank" rel="noopener"
+      <button class="btn btn-ghost" data-copy="{{ url_for('registry', slug=reg['slug'], _external=True) }}"
+              data-copied-label="{{ t('copied') }}" data-share-beacon="{{ url_for('dashboard_shared') }}">{{ t('copy_link') }}</button>
+      <a class="btn btn-wa" target="_blank" rel="noopener" data-share-beacon="{{ url_for('dashboard_shared') }}"
          href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ url_for('registry', slug=reg['slug'], _external=True)) | urlencode }}">
         <svg class="ic"><use href="#i-wa"/></svg> {{ t('share_whatsapp') }}</a>
     </div>
@@ -26,15 +50,45 @@
       <div>
         <strong>{{ t('qr_title') }}</strong>
         <p class="hint">{{ t('qr_hint') }}</p>
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('dashboard_print') }}" target="_blank">{{ t('dash_print_insert') }}</a>
       </div>
     </div>
   </div>
+
+  {% if reg['visibility'] == 'draft' %}
+    <p class="hint dash-draft-note">{{ t('visibility_draft_dash_note') }}</p>
+  {% endif %}
 
   <div class="dash-actions">
     <a class="btn btn-primary" href="{{ url_for('items_manage') }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('dash_items') }}</a>
     <a class="btn btn-ghost" href="{{ url_for('registry_edit') }}">{{ t('dash_edit') }}</a>
     <a class="btn btn-ghost" href="{{ url_for('registry', slug=reg['slug']) }}">{{ t('dash_view_public') }}</a>
+    <a class="btn btn-ghost" href="{{ url_for('dashboard_claims_csv') }}">{{ t('dash_export_csv') }}</a>
   </div>
+
+  {% if queues %}
+  <div class="action-queues">
+    {% if queues['awaiting_confirm'] %}
+    <div class="queue-card">
+      <h3>{{ t('dash_queue_awaiting') }}</h3>
+      <ul>{% for g in queues['awaiting_confirm'] %}<li>{{ g['guest_name'] }} — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    {% if queues['waiting'] %}
+    <div class="queue-card">
+      <h3>{{ t('dash_queue_waiting') }}</h3>
+      <ul>{% for g in queues['waiting'] %}<li>{{ g['guest_name'] }} — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or '—' }}
+        {% if g['expires_at'] %}<span class="hint">({{ t('dash_queue_expires') }} {{ g['expires_at'][:10] }})</span>{% endif %}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+    {% if queues['unthanked'] %}
+    <div class="queue-card">
+      <h3>{{ t('dash_queue_unthanked') }}</h3>
+      <ul>{% for g in queues['unthanked'] %}<li>{{ g['guest_name'] }} — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
 
   <div class="stat-row">
     <div class="stat-card"><strong>{{ stats['items'] }}</strong><span>{{ t('dash_stats_items') }}</span></div>
@@ -95,6 +149,7 @@
     {% endfor %}
   </div>
   {% endif %}
+  <p class="hint dash-account-link"><a href="{{ url_for('account') }}">{{ t('dash_account_link') }}</a></p>
   {% endif %}
 </div>
 {% endblock %}

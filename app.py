@@ -1137,7 +1137,7 @@ def registry_new():
         return redirect(url_for("registry_edit"))
     if request.method == "POST":
         return _save_registry(None)
-    return render_template("registry_form.html", reg=None)
+    return render_template("registry_form.html", reg=None, prefs={})
 
 
 @app.route("/registry/edit", methods=["GET", "POST"])
@@ -1148,7 +1148,7 @@ def registry_edit():
         return redirect(url_for("registry_new"))
     if request.method == "POST":
         return _save_registry(reg)
-    return render_template("registry_form.html", reg=reg)
+    return render_template("registry_form.html", reg=reg, prefs=_prefs(reg))
 
 
 PREFERENCE_FIELDS = ("bed_size", "colors", "apartment_size", "furnished",
@@ -1190,11 +1190,11 @@ def _save_registry(reg):
     prefs["visibility_reviewed_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     if not title or not couple:
         flash(_t("form_error", lang), "err")
-        return render_template("registry_form.html", reg=reg, form=f)
+        return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
     if pay_errors:
         for msg in pay_errors:
             flash(msg, "err")
-        return render_template("registry_form.html", reg=reg, form=f)
+        return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
     db = get_db()
     # payment-link changes are security-sensitive (they redirect guest money) —
     # require the couple to re-enter their current password whenever any pay
@@ -1207,7 +1207,7 @@ def _save_registry(reg):
             user = db.execute("SELECT * FROM users WHERE id=?", (session["uid"],)).fetchone()
             if not cur_pw or not check_password_hash(user["pw_hash"], cur_pw):
                 flash(_t("reauth_required", lang), "err")
-                return render_template("registry_form.html", reg=reg, form=f, show_reauth=True)
+                return render_template("registry_form.html", reg=reg, form=f, prefs=prefs, show_reauth=True)
     fields = (title, (f.get("title_he") or "").strip()[:160],
               couple, (f.get("couple_names_he") or "").strip()[:160],
               event_type, (f.get("event_date") or "").strip()[:40],
@@ -1275,10 +1275,19 @@ def items_manage():
     mine = db.execute(
         "SELECT * FROM registry_items WHERE registry_id=? AND archived=0"
         " ORDER BY priority DESC, category, id", (reg["id"],)).fetchall()
+    archived = db.execute(
+        "SELECT * FROM registry_items WHERE registry_id=? AND archived=1"
+        " ORDER BY category, id", (reg["id"],)).fetchall()
+    archived_claim_counts = {a["id"]: db.execute(
+        "SELECT COUNT(*) FROM claims WHERE item_id=?", (a["id"],)).fetchone()[0] for a in archived}
     have_catalog_ids = {m["catalog_id"] for m in mine if m["catalog_id"]}
     claimed = item_claim_counts(reg["id"])
-    return render_template("items.html", reg=reg, catalog=catalog, mine=mine,
-                           have=have_catalog_ids, claimed=claimed, cat=cat, q=q)
+    n_committed = sum(1 for m in mine if claimed.get(m["id"]))
+    n_needs_link = sum(1 for m in mine if not m["url"] and not reg_pay_links(reg))
+    return render_template("items.html", reg=reg, catalog=catalog, mine=mine, archived=archived,
+                           archived_claim_counts=archived_claim_counts,
+                           have=have_catalog_ids, claimed=claimed, cat=cat, q=q,
+                           n_committed=n_committed, n_needs_link=n_needs_link)
 
 
 @app.route("/registry/items/add", methods=["POST"])

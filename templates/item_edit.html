@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ t('item_edit_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="wrap section narrow">
+  <h1 class="section-title">{{ t('item_edit_title') }}</h1>
+  {% if item['catalog_id'] %}
+  <p class="hint">{{ t('item_edit_catalog_note') }}</p>
+  {% endif %}
+  <form method="post" class="stack-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="form-2col">
+      <label>{{ t('custom_name') }} *<input name="name" required maxlength="200" value="{{ item['name'] }}"></label>
+      <label dir="rtl">{{ t('custom_name_he') }}<input name="name_he" maxlength="200" value="{{ item['name_he'] }}"></label>
+      <label>{{ t('item_brand') }}<input name="brand" maxlength="80" value="{{ item['brand'] }}"></label>
+      <label>{{ t('item_variant') }}<input name="variant" maxlength="120" value="{{ item['variant'] }}"></label>
+      <label>{{ t('custom_url') }}<input name="url" maxlength="500" placeholder="https://…" value="{{ item['url'] }}"></label>
+      <label>{{ t('custom_store') }}<input name="store" maxlength="120" value="{{ item['store'] }}"></label>
+      <label>{{ t('custom_price') }}<input name="price_nis" type="number" min="0" max="99999" value="{{ item['price_nis'] }}"></label>
+      <label>{{ t('qty') }}<input name="qty_wanted" type="number" min="1" max="99" value="{{ item['qty_wanted'] }}"></label>
+      <label>{{ t('item_kind') }}
+        <select name="kind">
+          <option value="product" {% if item['kind'] == 'product' %}selected{% endif %}>{{ t('item_kind_product') }}</option>
+          <option value="idea" {% if item['kind'] == 'idea' %}selected{% endif %}>{{ t('item_kind_idea') }}</option>
+          <option value="cash_need" {% if item['kind'] == 'cash_need' %}selected{% endif %}>{{ t('item_kind_cash_need') }}</option>
+        </select>
+      </label>
+      <label class="check-label"><input type="checkbox" name="priority" {% if item['priority'] %}checked{% endif %}>
+        <svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority') }}</label>
+    </div>
+    <label>{{ t('item_note') }}<textarea name="note" maxlength="1000" rows="2">{{ item['note'] }}</textarea></label>
+    <label dir="rtl">{{ t('item_note_he') }}<textarea name="note_he" maxlength="1000" rows="2">{{ item['note_he'] }}</textarea></label>
+    <button class="btn btn-primary" type="submit">{{ t('save') }}</button>
+    <a class="btn btn-ghost" href="{{ url_for('items_manage') }}">{{ t('cancel') }}</a>
+  </form>
+</div>
+{% endblock %}

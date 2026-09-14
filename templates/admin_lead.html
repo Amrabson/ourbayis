@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Lead: {{ lead['name'] }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section narrow admin">
+  <div class="admin-head">
+    <h1 class="section-title">{{ lead['name'] }}</h1>
+    <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+  </div>
+
+  <div class="panel">
+    <p>{% if lead['email'] %}<a href="mailto:{{ lead['email'] }}">{{ lead['email'] }}</a>{% endif %}
+       {% if lead['whatsapp'] %} · <a href="https://wa.me/{{ lead['whatsapp'] | replace('+','') | replace(' ','') }}" target="_blank" rel="noopener">WhatsApp: {{ lead['whatsapp'] }}</a>{% endif %}</p>
+    <p class="gift-meta">Arrival: {{ lead['arrival'] or '—' }} · City: {{ lead['city'] or '—' }} ·
+      Neighborhood: {{ lead['neighborhood'] or '—' }} · Furnishing: {{ lead['furnishing'] }} ·
+      Budget: {{ lead['budget'] or '—' }} · Bundle: {{ lead['bundle_slug'] or 'custom' }}</p>
+    {% if lead['notes'] %}<p class="gift-msg">“{{ lead['notes'] }}”</p>{% endif %}
+    <p class="hint">Created {{ lead['created_at'] }}</p>
+  </div>
+
+  {% if dupes %}
+  <div class="notice-panel">
+    <strong>Possible duplicate contact:</strong>
+    <ul>{% for d in dupes %}<li><a href="{{ url_for('admin_lead', lead_id=d['id']) }}">{{ d['name'] }} — {{ d['status'] }} ({{ d['created_at'] }})</a></li>{% endfor %}</ul>
+  </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('admin_lead_update', lead_id=lead['id']) }}" class="stack-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Status
+      <select name="status">
+        {% for s in statuses %}<option value="{{ s }}" {% if lead['status'] == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+      </select>
+    </label>
+    <div class="form-2col">
+      <label>Next action<input name="next_action" maxlength="200" value="{{ lead['next_action'] }}"></label>
+      <label>Next action date<input name="next_action_date" type="date" value="{{ lead['next_action_date'] }}"></label>
+    </div>
+    <label>Internal notes<textarea name="notes_internal" rows="4" maxlength="4000">{{ lead['notes_internal'] }}</textarea></label>
+
+    <h2 class="sub-title">Cost breakdown</h2>
+    <div class="form-2col">
+      <label>Goods (₪)<input name="goods" type="number" step="0.01" min="0" value="{{ quote.get('goods', 0) }}"></label>
+      <label>Delivery (₪)<input name="delivery" type="number" step="0.01" min="0" value="{{ quote.get('delivery', 0) }}"></label>
+      <label>Assembly (₪)<input name="assembly" type="number" step="0.01" min="0" value="{{ quote.get('assembly', 0) }}"></label>
+      <label>Labour (₪)<input name="labour" type="number" step="0.01" min="0" value="{{ quote.get('labour', 0) }}"></label>
+      <label>Contingency (₪)<input name="contingency" type="number" step="0.01" min="0" value="{{ quote.get('contingency', 0) }}"></label>
+      <label>Quoted price (₪)<input name="quoted_price" type="number" step="0.01" min="0" value="{{ quote.get('quoted_price', 0) }}"></label>
+    </div>
+    {% if quote.get('total_cost') is not none %}
+    <p class="hint">Total cost: ₪{{ quote.get('total_cost', 0) }} · Profit: ₪{{ quote.get('profit', 0) }} · Margin: {{ quote.get('margin_pct', 0) }}%</p>
+    {% endif %}
+    <fieldset>
+      <legend>Needs reconfirmation</legend>
+      {% for opt in ('supplier prices', 'delivery date', 'access') %}
+      <label class="check-label"><input type="checkbox" name="needs_reconfirmation" value="{{ opt }}"
+        {% if opt in quote.get('needs_reconfirmation', []) %}checked{% endif %}> {{ opt }}</label>
+      {% endfor %}
+    </fieldset>
+    <button class="btn btn-primary" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}

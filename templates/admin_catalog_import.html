@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Import catalog CSV — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Import catalog CSV</h1>
+    <a class="btn btn-ghost" href="{{ url_for('admin_catalog') }}">← Catalog</a>
+  </div>
+  <p class="hint">Matched by <code>seed_key</code> (falls back to <code>id</code>). Columns: name, name_he,
+    brand, category, price_nis, store, url, image, kind, active, featured, sort, price_status,
+    price_checked_at, price_source, starter_group. This always shows a diff first — nothing is written
+    until you re-upload the same file with "Apply".</p>
+
+  <form method="post" enctype="multipart/form-data" class="stack-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="mode" value="preview">
+    <label>CSV file<input type="file" name="file" accept=".csv" required></label>
+    <button class="btn btn-primary" type="submit">Preview changes</button>
+  </form>
+
+  {% if diffs is not none %}
+    {% if errors %}
+    <h2 class="sub-title">Errors ({{ errors | length }})</h2>
+    <ul>{% for e in errors %}<li class="claimed-note">{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+    <h2 class="sub-title">Changes ({{ diffs | length }})</h2>
+    {% if not diffs %}
+      <p class="empty-note">No differences.</p>
+    {% else %}
+    <table class="admin-table">
+      <thead><tr><th>id</th><th>name</th><th>field</th><th>old</th><th>new</th></tr></thead>
+      <tbody>
+        {% for item_id, name, field, old, new in diffs %}
+        <tr><td>{{ item_id }}</td><td>{{ name }}</td><td>{{ field }}</td><td>{{ old }}</td><td>{{ new }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <form method="post" enctype="multipart/form-data" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="mode" value="apply">
+      <label>Re-upload the same file to apply<input type="file" name="file" accept=".csv" required></label>
+      <button class="btn btn-danger" type="submit" data-confirm="Apply {{ diffs | length }} change(s)?">Apply changes</button>
+    </form>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

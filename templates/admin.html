@@ -8,6 +8,8 @@
       <a class="btn btn-ghost" href="{{ url_for('admin_catalog') }}">Catalog</a>
       <a class="btn btn-ghost" href="{{ url_for('admin_bundles') }}">Bundles</a>
       <a class="btn btn-ghost" href="{{ url_for('admin_ads') }}">Ads</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_outbox') }}">Outbox</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_backup_download') }}">Backup .db</a>
       <form method="post" action="{{ url_for('admin_logout') }}" class="nav-logout-form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <button type="submit" class="btn btn-ghost">Log out</button>
@@ -20,7 +22,7 @@
     <div class="stat-card"><strong>{{ stats.registries }}</strong><span>registries</span></div>
     <div class="stat-card"><strong>{{ stats.users }}</strong><span>users</span></div>
     <div class="stat-card"><strong>{{ stats.claims }}</strong><span>gifts reserved</span></div>
-    <div class="stat-card {% if stats.no_affiliate %}stat-warn{% endif %}"><strong>{{ stats.no_affiliate }}</strong><span>catalog items missing affiliate link</span></div>
+    <div class="stat-card {% if stats.missing_store_link %}stat-warn{% endif %}"><strong>{{ stats.missing_store_link }}</strong><span>catalog items missing store link</span></div>
   </div>
 
   <h2 class="sub-title">Shana Rishonah leads
@@ -29,10 +31,11 @@
   {% for l in leads %}
   <div class="gift-row {% if l['status'] != 'new' %}is-thanked{% endif %}">
     <div>
-      <strong>{{ l['name'] }}</strong> · {{ l['bundle_slug'] }} · <span class="badge badge-{{ 'gold' if l['status'] == 'new' else 'plain' }}">{{ l['status'] }}</span>
+      <strong><a href="{{ url_for('admin_lead', lead_id=l['id']) }}">{{ l['name'] }}</a></strong> · {{ l['bundle_slug'] }} · <span class="badge badge-{{ 'gold' if l['status'] == 'new' else 'plain' }}">{{ l['status'] }}</span>
       <p class="gift-msg">
         {% if l['whatsapp'] %}<a href="https://wa.me/{{ l['whatsapp'] | replace('+','') | replace(' ','') | replace('-','') }}" target="_blank" rel="noopener">WhatsApp {{ l['whatsapp'] }}</a> · {% endif %}
-        {{ l['email'] }} · arrives {{ l['arrival'] or '?' }} · {{ l['city'] }} {{ l['address'] }}</p>
+        {{ l['email'] }} · arrives {{ l['arrival'] or '?' }} · {{ l['city'] }}
+        {% if l['next_action_date'] %} · next: {{ l['next_action'] }} ({{ l['next_action_date'] }}){% endif %}</p>
       {% if l['notes'] %}<p class="gift-msg">“{{ l['notes'] }}”</p>{% endif %}
       <p class="gift-msg">{{ l['created_at'] }}</p>
     </div>
@@ -74,8 +77,16 @@
   </div>
   {% endfor %}
 
-  <h2 class="sub-title">Mail outbox</h2>
+  <h2 class="sub-title">Mail outbox <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_outbox') }}" style="margin-inline-start:12px">View outbox</a></h2>
   <p class="hint">{% for status, n in mail_stats.items() %}{{ status }}: {{ n }} &nbsp; {% else %}nothing queued yet{% endfor %}</p>
+
+  <h2 class="sub-title">Funnel — last 30 days</h2>
+  {% if not funnel %}<p class="empty-note">No events yet.</p>{% else %}
+  <table class="admin-table">
+    <thead><tr><th>event</th><th>count</th></tr></thead>
+    <tbody>{% for f in funnel %}<tr><td>{{ f['name'] }}</td><td>{{ f['n'] }}</td></tr>{% endfor %}</tbody>
+  </table>
+  {% endif %}
 
   <h2 class="sub-title">Change admin password</h2>
   <form method="post" action="{{ url_for('admin_password') }}" class="filter-row">

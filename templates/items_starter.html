@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ t('starter_page_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1 class="section-title">{{ t('starter_page_title') }}</h1>
+  <p class="page-sub">{{ t('starter_page_sub') }}</p>
+  <p class="hint">{{ t('starter_page_skip_note') }}</p>
+
+  <form method="post" action="{{ url_for('items_starter') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% for grp in group_order %}
+      {% if groups.get(grp) %}
+      <div class="starter-group">
+        <h2 class="sub-title">{{ t('starter_group_' ~ grp) }}</h2>
+        <div class="starter-grid">
+          {% for c in groups[grp] %}
+          <label class="starter-card {% if c['id'] in have %}is-added{% endif %}">
+            <div class="starter-card-top">
+              <input type="checkbox" name="add_{{ c['id'] }}" value="1" {% if c['id'] in have %}disabled{% endif %}>
+              <div>
+                <strong>{% if c['brand'] %}<span class="item-brand">{{ c['brand'] }}</span> {% endif %}{{ pick(c, 'name') }}</strong>
+                <span class="gift-meta">{% if c['price_nis'] %}₪{{ c['price_nis'] }}{% endif %}{% if c['store'] %} · {{ c['store'] }}{% endif %}</span>
+              </div>
+            </div>
+            {% if c['id'] in have %}
+              <span class="hint">{{ t('already_added') }}</span>
+            {% else %}
+              <label class="mine-qty">{{ t('qty') }}
+                <input name="qty_{{ c['id'] }}" type="number" min="1" max="99" value="1"></label>
+            {% endif %}
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+    <button class="btn btn-primary btn-lg" type="submit">{{ t('starter_add_selected') }}</button>
+    <a class="btn btn-ghost btn-lg" href="{{ url_for('items_manage') }}">{{ t('skip_for_now') }}</a>
+  </form>
+</div>
+{% endblock %}

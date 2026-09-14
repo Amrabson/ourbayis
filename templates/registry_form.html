@@ -1,37 +1,100 @@
 {% extends "base.html" %}
 {% block title %}{{ t('redit_title' if reg else 'rnew_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% macro val(field, default='') %}{{ (form.get(field, default) if form else (reg[field] if reg and field in reg.keys() else default)) }}{% endmacro %}
 {% block content %}
 <div class="wrap section narrow">
   <div class="form-panel">
     <h1 class="section-title">{{ t('redit_title' if reg else 'rnew_title') }}</h1>
+    <ol class="step-header">
+      <li>{{ t('rform_step_details') }}</li>
+      <li>{{ t('rform_step_prefs') }}</li>
+      <li>{{ t('rform_step_payment') }}</li>
+      <li>{{ t('rform_step_visibility') }}</li>
+    </ol>
     <form method="post" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <h2 class="sub-title">{{ t('rform_step_details') }}</h2>
       <div class="form-2col">
-        <label>{{ t('r_title_label') }} *<input name="title" required maxlength="160" placeholder="{{ t('r_title_ph') }}" value="{{ reg['title'] if reg else '' }}"></label>
-        <label dir="rtl">{{ t('r_title_he') }}<input name="title_he" maxlength="160" value="{{ reg['title_he'] if reg else '' }}"></label>
-        <label>{{ t('r_couple') }} *<input name="couple_names" required maxlength="160" placeholder="Sarah & Dovid Cohen" value="{{ reg['couple_names'] if reg else '' }}"></label>
-        <label dir="rtl">{{ t('r_couple_he') }}<input name="couple_names_he" maxlength="160" value="{{ reg['couple_names_he'] if reg else '' }}"></label>
+        <label>{{ t('r_title_label') }} *<input name="title" required maxlength="160" placeholder="{{ t('r_title_ph') }}" value="{{ val('title') }}"></label>
+        <label dir="rtl">{{ t('r_title_he') }}<input name="title_he" maxlength="160" value="{{ val('title_he') }}"></label>
+        <label>{{ t('r_couple') }} *<input name="couple_names" required maxlength="160" placeholder="Sarah & Dovid Cohen" value="{{ val('couple_names') }}"></label>
+        <label dir="rtl">{{ t('r_couple_he') }}<input name="couple_names_he" maxlength="160" value="{{ val('couple_names_he') }}"></label>
         <label>{{ t('r_event_type') }}
           <select name="event_type">
             {% for slug, key in event_types.items() %}
-            <option value="{{ slug }}" {% if reg and reg['event_type'] == slug %}selected{% endif %}>{{ t(key) }}</option>
+            <option value="{{ slug }}" {% if (val('event_type') or (reg['event_type'] if reg else 'wedding')) == slug %}selected{% endif %}>{{ t(key) }}</option>
             {% endfor %}
           </select>
         </label>
-        <label>{{ t('r_event_date') }}<input name="event_date" type="date" value="{{ reg['event_date'] if reg else '' }}"></label>
-        <label>{{ t('r_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim…" value="{{ reg['city'] if reg else '' }}"></label>
-        <label>{{ t('r_paypal') }}<input name="paypal_url" maxlength="300" placeholder="paypal.me/yourname" value="{{ reg['paypal_url'] if reg else '' }}"></label>
-        <label>{{ t('r_stripe') }}<input name="stripe_url" maxlength="300" placeholder="buy.stripe.com/…" value="{{ reg['stripe_url'] if reg else '' }}"></label>
-        <label>{{ t('r_bit') }}<input name="bit_url" maxlength="300" placeholder="bitpay.co.il/app/me/… / payboxapp.com/…" value="{{ reg['bit_url'] if reg else '' }}"></label>
+        <label>{{ t('r_event_date') }}<input name="event_date" type="date" value="{{ val('event_date') }}"></label>
+        <label>{{ t('r_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim…" value="{{ val('city') }}"></label>
       </div>
+      <label>{{ t('r_message') }}<textarea name="message" rows="3" maxlength="2000">{{ val('message') }}</textarea></label>
+      <label dir="rtl">{{ t('r_message_he') }}<textarea name="message_he" rows="3" maxlength="2000">{{ val('message_he') }}</textarea></label>
+
+      <h2 class="sub-title">{{ t('rform_step_prefs') }}</h2>
+      <p class="hint">{{ t('rform_prefs_hint') }}</p>
+      <div class="form-2col">
+        <label>{{ t('pref_bed_size') }}
+          <select name="bed_size">
+            <option value="">—</option>
+            <option value="single90" {% if prefs.get('bed_size') == 'single90' %}selected{% endif %}>{{ t('pref_bed_single90') }}</option>
+            <option value="double140" {% if prefs.get('bed_size') == 'double140' %}selected{% endif %}>{{ t('pref_bed_double140') }}</option>
+            <option value="queen160" {% if prefs.get('bed_size') == 'queen160' %}selected{% endif %}>{{ t('pref_bed_queen160') }}</option>
+            <option value="king180" {% if prefs.get('bed_size') == 'king180' %}selected{% endif %}>{{ t('pref_bed_king180') }}</option>
+            <option value="unknown" {% if prefs.get('bed_size') == 'unknown' %}selected{% endif %}>{{ t('pref_unknown') }}</option>
+          </select>
+        </label>
+        <label>{{ t('pref_colors') }}<input name="colors" maxlength="200" value="{{ prefs.get('colors', '') }}" placeholder="{{ t('pref_colors_ph') }}"></label>
+        <label>{{ t('pref_apartment_size') }}
+          <select name="apartment_size">
+            <option value="">—</option>
+            <option value="studio" {% if prefs.get('apartment_size') == 'studio' %}selected{% endif %}>{{ t('pref_apt_studio') }}</option>
+            <option value="2" {% if prefs.get('apartment_size') == '2' %}selected{% endif %}>{{ t('pref_apt_2') }}</option>
+            <option value="3" {% if prefs.get('apartment_size') == '3' %}selected{% endif %}>{{ t('pref_apt_3') }}</option>
+            <option value="4plus" {% if prefs.get('apartment_size') == '4plus' %}selected{% endif %}>{{ t('pref_apt_4plus') }}</option>
+          </select>
+        </label>
+        <label>{{ t('pref_furnished') }}
+          <select name="furnished">
+            <option value="">—</option>
+            <option value="empty" {% if prefs.get('furnished') == 'empty' %}selected{% endif %}>{{ t('pref_furn_empty') }}</option>
+            <option value="partly" {% if prefs.get('furnished') == 'partly' %}selected{% endif %}>{{ t('pref_furn_partly') }}</option>
+            <option value="furnished" {% if prefs.get('furnished') == 'furnished' %}selected{% endif %}>{{ t('pref_furn_furnished') }}</option>
+          </select>
+        </label>
+        <label>{{ t('pref_arrival_date') }}<input name="arrival_date" type="date" value="{{ prefs.get('arrival_date', '') }}"></label>
+      </div>
+      <label>{{ t('pref_items_needed') }}<textarea name="items_needed" rows="2" maxlength="300" placeholder="{{ t('pref_items_needed_ph') }}">{{ prefs.get('items_needed', '') }}</textarea></label>
+      <label>{{ t('r_delivery_note') }}<textarea name="delivery_note" rows="2" maxlength="1000">{{ val('delivery_note') }}</textarea></label>
+      <label dir="rtl">{{ t('r_delivery_note_he') }}<textarea name="delivery_note_he" rows="2" maxlength="1000">{{ val('delivery_note_he') }}</textarea></label>
+      <p class="hint">{{ t('r_delivery_note_hint') }}</p>
+
+      <h2 class="sub-title">{{ t('rform_step_payment') }}</h2>
       <p class="hint">{{ t('r_pay_hint') }}</p>
+      <div class="form-2col">
+        <label>{{ t('r_paypal') }}<input name="paypal_url" maxlength="300" placeholder="paypal.me/yourname" value="{{ val('paypal_url') }}"></label>
+        <label>{{ t('r_stripe') }}<input name="stripe_url" maxlength="300" placeholder="buy.stripe.com/…" value="{{ val('stripe_url') }}"></label>
+        <label>{{ t('r_bit') }}<input name="bit_url" maxlength="300" placeholder="bitpay.co.il/app/me/… / payboxapp.com/…" value="{{ val('bit_url') }}"></label>
+      </div>
       {% if reg %}
       <label>{{ t('r_current_password') }}<input name="current_password" type="password" autocomplete="current-password"></label>
       <p class="hint">{{ t('r_current_password_hint') }}</p>
       {% endif %}
-      <label>{{ t('r_message') }}<textarea name="message" rows="3" maxlength="2000">{{ reg['message'] if reg else '' }}</textarea></label>
-      <label dir="rtl">{{ t('r_message_he') }}<textarea name="message_he" rows="3" maxlength="2000">{{ reg['message_he'] if reg else '' }}</textarea></label>
-      <label class="check-label"><input type="checkbox" name="is_public" {% if not reg or reg['is_public'] %}checked{% endif %}> {{ t('r_public') }}</label>
+
+      <h2 class="sub-title">{{ t('rform_step_visibility') }}</h2>
+      {% set cur_vis = (reg['visibility'] if reg else 'unlisted') %}
+      <div class="visibility-radios">
+        <label class="check-label"><input type="radio" name="visibility" value="draft" {% if cur_vis == 'draft' %}checked{% endif %}>
+          <strong>{{ t('visibility_draft') }}</strong> — {{ t('visibility_draft_hint') }}</label>
+        <label class="check-label"><input type="radio" name="visibility" value="unlisted" {% if cur_vis == 'unlisted' or not reg %}checked{% endif %}>
+          <strong>{{ t('visibility_unlisted') }}</strong> — {{ t('visibility_unlisted_hint') }}</label>
+        <label class="check-label"><input type="radio" name="visibility" value="public" {% if cur_vis == 'public' %}checked{% endif %}>
+          <strong>{{ t('visibility_public') }}</strong> — {{ t('visibility_public_hint') }}</label>
+      </div>
+
       <button class="btn btn-primary btn-lg" type="submit">{{ t('save') }}</button>
     </form>
   </div>

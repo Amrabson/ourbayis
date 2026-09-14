@@ -4,12 +4,18 @@
 <div class="wrap section narrow admin">
   <div class="form-panel">
     <h1 class="section-title">{{ 'Edit' if row else 'New' }} catalog item</h1>
+    {% if n_registry_refs %}
+    <p class="hint">Changes here don't rewrite gifts already copied to registries ({{ n_registry_refs }}
+      registry has this item) — run <code>manage.py refresh-registry-links</code> to push url/image/store/brand out.</p>
+    {% endif %}
     <form method="post" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-2col">
         <label>Name (EN) *<input name="name" required maxlength="200" value="{{ row['name'] if row else '' }}"></label>
         <label dir="rtl">Name (HE)<input name="name_he" maxlength="200" value="{{ row['name_he'] if row else '' }}"></label>
         <label>Brand<input name="brand" maxlength="80" placeholder="e.g. Tefal, Vardinon…" value="{{ row['brand'] if row else '' }}"></label>
+        <label>Model<input name="model" maxlength="120" value="{{ row['model'] if row else '' }}"></label>
+        <label>Variant<input name="variant" maxlength="120" value="{{ row['variant'] if row else '' }}"></label>
         <label>Category
           <select name="category">
             {% for slug, (icon, en, he) in categories.items() %}
@@ -17,12 +23,45 @@
             {% endfor %}
           </select>
         </label>
+        <label>Kind
+          <select name="kind">
+            <option value="product" {% if row and row['kind'] == 'product' %}selected{% endif %}>Product (branded)</option>
+            <option value="idea" {% if not row or row['kind'] == 'idea' %}selected{% endif %}>Idea (generic)</option>
+          </select>
+        </label>
+        <label>Starter group
+          <select name="starter_group">
+            <option value="">—</option>
+            {% for g in ('first_week','kitchen','shabbos','bedbath','appliances') %}
+            <option value="{{ g }}" {% if row and row['starter_group'] == g %}selected{% endif %}>{{ g }}</option>
+            {% endfor %}
+          </select>
+        </label>
         <label>Price (₪)<input name="price_nis" type="number" min="0" value="{{ row['price_nis'] if row else '' }}"></label>
         <label>Store<input name="store" maxlength="120" value="{{ row['store'] if row else '' }}"></label>
         <label>Sort<input name="sort" type="number" value="{{ row['sort'] if row else 0 }}"></label>
+        <label>Price status
+          <select name="price_status">
+            <option value="estimate" {% if not row or row['price_status'] == 'estimate' %}selected{% endif %}>Estimate</option>
+            <option value="verified" {% if row and row['price_status'] == 'verified' %}selected{% endif %}>Verified</option>
+            <option value="unknown" {% if row and row['price_status'] == 'unknown' %}selected{% endif %}>Unknown</option>
+          </select>
+        </label>
+        <label>Price checked (YYYY-MM-DD)<input name="price_checked_at" maxlength="20" value="{{ row['price_checked_at'] if row else '' }}"></label>
+        <label>Price source<input name="price_source" maxlength="200" value="{{ row['price_source'] if row else '' }}"></label>
+        <label>Availability
+          <select name="availability">
+            {% for a in ('unknown','in_stock','backorder','discontinued') %}
+            <option value="{{ a }}" {% if row and row['availability'] == a %}selected{% endif %}>{{ a }}</option>
+            {% endfor %}
+          </select>
+        </label>
       </div>
-      <label>Affiliate / store URL<input name="url" maxlength="500" placeholder="https://…" value="{{ row['url'] if row else '' }}"></label>
+      <label>Store link<input name="url" maxlength="500" placeholder="https://…" value="{{ row['url'] if row else '' }}"></label>
       <label>Image URL (optional)<input name="image" maxlength="500" placeholder="https://…" value="{{ row['image'] if row else '' }}"></label>
+      <label>Image credit<input name="image_credit" maxlength="200" value="{{ row['image_credit'] if row else '' }}"></label>
+      <label>Internal notes<textarea name="notes" rows="2" maxlength="1000">{{ row['notes'] if row else '' }}</textarea></label>
+      <label dir="rtl">Internal notes (HE)<textarea name="notes_he" rows="2" maxlength="1000">{{ row['notes_he'] if row else '' }}</textarea></label>
       <label class="check-label"><input type="checkbox" name="active" {% if not row or row['active'] %}checked{% endif %}> Active</label>
       <label class="check-label"><input type="checkbox" name="featured" {% if row and row['featured'] %}checked{% endif %}> Featured on homepage</label>
       <button class="btn btn-primary btn-lg" type="submit">Save</button>

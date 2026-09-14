@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Mail outbox — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Mail outbox</h1>
+    <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+  </div>
+  <div class="stat-row">
+    {% for status, n in mail_stats.items() %}
+    <div class="stat-card"><strong>{{ n }}</strong><span>{{ status }}</span></div>
+    {% endfor %}
+  </div>
+  <table class="admin-table">
+    <thead><tr><th>to</th><th>subject</th><th>status</th><th>attempts</th><th>last error</th><th></th></tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>{{ r['to_addr'] }}</td>
+        <td>{{ r['subject'] }}</td>
+        <td>{{ r['status'] }}</td>
+        <td>{{ r['attempts'] }}</td>
+        <td class="hint">{{ r['last_error'] }}</td>
+        <td>
+          {% if r['status'] == 'failed' %}
+          <form method="post" action="{{ url_for('admin_outbox_retry', mail_id=r['id']) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="btn btn-ghost btn-sm" type="submit">Retry</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
