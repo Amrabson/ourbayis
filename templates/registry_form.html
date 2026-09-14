@@ -25,6 +25,10 @@
         <label>{{ t('r_bit') }}<input name="bit_url" maxlength="300" placeholder="bitpay.co.il/app/me/… / payboxapp.com/…" value="{{ reg['bit_url'] if reg else '' }}"></label>
       </div>
       <p class="hint">{{ t('r_pay_hint') }}</p>
+      {% if reg %}
+      <label>{{ t('r_current_password') }}<input name="current_password" type="password" autocomplete="current-password"></label>
+      <p class="hint">{{ t('r_current_password_hint') }}</p>
+      {% endif %}
       <label>{{ t('r_message') }}<textarea name="message" rows="3" maxlength="2000">{{ reg['message'] if reg else '' }}</textarea></label>
       <label dir="rtl">{{ t('r_message_he') }}<textarea name="message_he" rows="3" maxlength="2000">{{ reg['message_he'] if reg else '' }}</textarea></label>
       <label class="check-label"><input type="checkbox" name="is_public" {% if not reg or reg['is_public'] %}checked{% endif %}> {{ t('r_public') }}</label>

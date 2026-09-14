@@ -15,7 +15,7 @@
 
   <h2 class="sub-title">{{ t('items_catalog') }}</h2>
   <form class="filter-row" method="get" action="{{ url_for('items_manage') }}">
-    <select name="cat" onchange="this.form.submit()">
+    <select name="cat" data-autosubmit>
       <option value="">{{ t('all_cats') }}</option>
       {% for slug, (icon, en, he) in categories.items() %}
       <option value="{{ slug }}" {% if cat == slug %}selected{% endif %}>{{ cat_label(slug) }}</option>
@@ -93,7 +93,7 @@
       <div class="mine-actions">
         <button class="btn btn-ghost btn-sm" type="submit">{{ t('save') }}</button>
         <button class="btn btn-danger btn-sm" type="submit" name="delete" value="1"
-                onclick="return confirm('{{ t('remove') }}?')">{{ t('remove') }}</button>
+                data-confirm="{{ t('remove') }}?">{{ t('remove') }}</button>
       </div>
     </form>
     {% endfor %}

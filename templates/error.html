@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ t('err_' ~ code ~ '_t') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section narrow" style="text-align:center">
+  <h1 class="section-title">{{ t('err_' ~ code ~ '_t') }}</h1>
+  <p class="page-sub">{{ t('err_' ~ code ~ '_b') }}</p>
+  <a class="btn btn-primary btn-lg" href="{{ url_for('index') }}">{{ t('back_home') }}</a>
+</div>
+{% endblock %}

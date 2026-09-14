@@ -84,6 +84,14 @@ img, svg { vertical-align: middle; }
   padding: 9px 12px; border-bottom: 2px solid transparent; white-space: nowrap;
 }
 .main-nav a:hover { color: var(--gold); border-bottom-color: var(--gold-bright); }
+.nav-logout-form { display: inline-flex; margin: 0; }
+.link-btn {
+  background: none; border: none; cursor: pointer; font: inherit;
+  text-decoration: none; color: var(--ink); font-weight: 600; font-size: .88rem;
+  text-transform: uppercase; letter-spacing: .8px;
+  padding: 9px 12px; border-bottom: 2px solid transparent; white-space: nowrap;
+}
+.link-btn:hover { color: var(--gold); border-bottom-color: var(--gold-bright); }
 .main-nav a.nav-cta {
   background: var(--navy); color: var(--paper); border: 1px solid var(--navy-deep);
   border-radius: var(--radius-sm); padding: 9px 16px; margin-inline-start: 8px;

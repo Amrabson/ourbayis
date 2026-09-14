@@ -73,13 +73,3 @@
   </div>
 </div>
 {% endblock %}
-{% block scripts %}
-<script>
-document.addEventListener('click', function (e) {
-  var a = e.target.closest('[data-bundle]');
-  if (!a) return;
-  var sel = document.getElementById('bundle-select');
-  if (sel) sel.value = a.getAttribute('data-bundle');
-});
-</script>
-{% endblock %}

@@ -31,9 +31,9 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <button class="btn btn-ghost btn-sm" type="submit">{{ 'Turn off' if r['active'] else 'Turn on' }}</button>
       </form>
-      <form method="post" action="{{ url_for('admin_ad_delete', ad_id=r['id']) }}" onsubmit="return confirm('Delete ad?')">
+      <form method="post" action="{{ url_for('admin_ad_delete', ad_id=r['id']) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+        <button class="btn btn-danger btn-sm" type="submit" data-confirm="Delete ad?">Delete</button>
       </form>
     </div>
   </div>

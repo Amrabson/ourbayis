@@ -47,7 +47,10 @@
       <a href="{{ url_for('how') }}">{{ t('nav_how') }}</a>
       {% if user %}
         <a href="{{ url_for('dashboard') }}" class="nav-cta">{{ t('nav_dashboard') }}</a>
-        <a href="{{ url_for('logout') }}">{{ t('nav_logout') }}</a>
+        <form method="post" action="{{ url_for('logout') }}" class="nav-logout-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button type="submit" class="link-btn">{{ t('nav_logout') }}</button>
+        </form>
       {% else %}
         <a href="{{ url_for('login') }}">{{ t('nav_login') }}</a>
         <a href="{{ url_for('signup') }}" class="nav-cta">{{ t('nav_start') }}</a>
@@ -108,42 +111,7 @@
   <div class="wrap footer-legal">© {{ now_year }} {{ brand }} · {{ t('footer_rights') }}</div>
 </footer>
 
-<script>
-(function () {
-  var burger = document.getElementById('hamburger'), nav = document.getElementById('main-nav');
-  if (burger) burger.addEventListener('click', function () {
-    var open = nav.classList.toggle('open');
-    burger.setAttribute('aria-expanded', open);
-  });
-  // one shared modal opener: any [data-modal] button opens the dialog with that id
-  document.addEventListener('click', function (e) {
-    var opener = e.target.closest('[data-modal]');
-    if (opener) {
-      var dlg = document.getElementById(opener.getAttribute('data-modal'));
-      if (dlg && dlg.showModal) { dlg.showModal(); e.preventDefault(); }
-    }
-    var closer = e.target.closest('[data-close]');
-    if (closer) { var d = closer.closest('dialog'); if (d) d.close(); }
-    var dlgBg = e.target;
-    if (dlgBg.tagName === 'DIALOG') dlgBg.close();  // click on backdrop
-  });
-  // copy-link buttons
-  document.addEventListener('click', function (e) {
-    var btn = e.target.closest('[data-copy]');
-    if (!btn) return;
-    navigator.clipboard.writeText(btn.getAttribute('data-copy')).then(function () {
-      var old = btn.textContent;
-      btn.textContent = btn.getAttribute('data-copied-label') || 'Copied!';
-      setTimeout(function () { btn.textContent = old; }, 1600);
-    });
-  });
-  // prevent double submits
-  document.addEventListener('submit', function (e) {
-    var b = e.target.querySelector('button[type=submit]');
-    if (b) setTimeout(function () { b.disabled = true; }, 0);
-  });
-})();
-</script>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

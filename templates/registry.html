@@ -26,18 +26,6 @@
   </div>
   {% endif %}
 
-  {% if pay_claim %}
-  <div class="pay-banner">
-    <h2>{{ tf('pay_banner', amount=pay_claim['amount']) if pay_claim['amount'] else t('pay_banner_noamt') }}</h2>
-    <div class="pay-btn-row">
-      {% for key, url in pay_links %}
-      <a class="btn btn-gold" href="{{ url }}" target="_blank" rel="noopener">{{ t(key) }} →</a>
-      {% endfor %}
-    </div>
-    <p class="hint">{{ t('pay_done_hint') }}</p>
-  </div>
-  {% endif %}
-
   {% if pay_links %}
   <div class="cash-card">
     <div>
@@ -86,18 +74,23 @@
         </p>
         {% if item['qty_wanted'] > 1 %}<p class="gift-qty">{{ tf('left_of', left=left if left > 0 else 0, qty=item['qty_wanted']) }}</p>{% endif %}
         {% if left > 0 %}
-        <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}">
-          <svg class="ic"><use href="#i-gift"/></svg> {{ t('gift_this') }}</button>
+          {% if item['url'] or pay_links %}
+          <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}">
+            <svg class="ic"><use href="#i-gift"/></svg> {{ t('gift_this') }}</button>
+          {% else %}
+          <p class="hint idea-note">{{ t('item_idea_note') }}</p>
+          {% endif %}
         {% else %}
         <span class="gifted-tag"><svg class="ic"><use href="#i-check"/></svg> {{ t('gifted') }}</span>
         {% endif %}
       </div>
     </article>
 
-    {% if left > 0 %}
+    {% if left > 0 and (item['url'] or pay_links) %}
     <dialog class="modal" id="claim-{{ item['id'] }}">
       <form method="post" action="{{ url_for('claim_item', slug=reg['slug'], item_id=item['id']) }}" class="modal-body">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="form_key" value="{{ form_key }}">
         <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <button type="button" class="modal-x" data-close aria-label="Close">✕</button>
         <p class="modal-eyebrow">{{ t('claim_title') }}</p>
@@ -109,12 +102,14 @@
           {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }}</a>
         {% endif %}
         <p class="hint">{{ t('claim_hint') }}</p>
-        {% if pay_links %}
+        {% if item['url'] and pay_links %}
         <fieldset class="give-choice">
           <legend>{{ t('claim_how') }}</legend>
           <label class="radio"><input type="radio" name="give" value="buy" checked> {{ t('claim_buy_opt') }}</label>
           <label class="radio"><input type="radio" name="give" value="cash"> {{ t('claim_cash_opt') }}</label>
         </fieldset>
+        {% elif pay_links %}
+        <input type="hidden" name="give" value="cash">
         {% endif %}
         <label>{{ t('claim_name') }} *<input name="guest_name" required maxlength="120"></label>
         <label>{{ t('claim_email') }}<input name="guest_email" type="email" maxlength="200"></label>
@@ -124,6 +119,7 @@
         </label>
         {% endif %}
         <label>{{ t('claim_msg') }}<textarea name="message" rows="2" maxlength="1000"></textarea></label>
+        <p class="hint">{{ t('claim_expiry_hint') }}</p>
         <button class="btn btn-primary btn-block" type="submit">{{ t('claim_submit') }}</button>
       </form>
     </dialog>
@@ -153,7 +149,15 @@
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label>{{ t('cash_name') }} *<input name="guest_name" required maxlength="120"></label>
-      <label>{{ t('cash_amount') }}<input name="amount" maxlength="40" placeholder="₪ / $"></label>
+      <label>{{ t('cash_email') }}<input name="guest_email" type="email" maxlength="200"></label>
+      <div class="form-2col">
+        <label>{{ t('cash_amount') }} *<input name="amount" type="number" min="0" step="0.01" required></label>
+        <label>{{ t('cash_currency') }}
+          <select name="currency">
+            {% for c in currencies %}<option value="{{ c }}" {% if c == reg['display_currency'] %}selected{% endif %}>{{ c }}</option>{% endfor %}
+          </select>
+        </label>
+      </div>
       <label>{{ t('cash_msg') }}<textarea name="message" rows="2" maxlength="1000"></textarea></label>
       <button class="btn btn-gold btn-block" type="submit">{{ t('cash_record') }}</button>
     </form>
@@ -161,22 +165,4 @@
 </dialog>
 {% endif %}
 
-{% endblock %}
-{% block scripts %}
-<script>
-(function () {
-  var chips = document.getElementById('cat-chips');
-  if (!chips) return;
-  chips.addEventListener('click', function (e) {
-    var chip = e.target.closest('.chip');
-    if (!chip) return;
-    chips.querySelectorAll('.chip').forEach(function (c) { c.classList.remove('active'); });
-    chip.classList.add('active');
-    var f = chip.getAttribute('data-filter');
-    document.querySelectorAll('.gift-card').forEach(function (card) {
-      card.style.display = (f === 'all' || card.getAttribute('data-cat') === f) ? '' : 'none';
-    });
-  });
-})();
-</script>
 {% endblock %}

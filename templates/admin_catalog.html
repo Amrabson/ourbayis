@@ -21,9 +21,9 @@
     </div>
     <div class="mine-actions">
       <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_catalog_edit', item_id=r['id']) }}">Edit</a>
-      <form method="post" action="{{ url_for('admin_catalog_delete', item_id=r['id']) }}" onsubmit="return confirm('Delete {{ r['name'] }}?')">
+      <form method="post" action="{{ url_for('admin_catalog_delete', item_id=r['id']) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+        <button class="btn btn-danger btn-sm" type="submit" data-confirm="Delete {{ r['name'] }}?">Delete</button>
       </form>
     </div>
   </div>

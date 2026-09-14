@@ -4,6 +4,10 @@
 <div class="wrap section auth-wrap">
   <div class="form-panel">
     <h1 class="section-title">Admin login</h1>
+    {% if no_admins %}
+    <p class="hint">No admin accounts exist yet. On the server, run:<br>
+      <code>python manage.py create-admin &lt;username&gt;</code></p>
+    {% endif %}
     <form method="post" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <label>Username<input name="username" required maxlength="60"></label>
