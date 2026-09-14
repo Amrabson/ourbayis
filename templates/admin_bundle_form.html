@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Bundle — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section narrow admin">
+  <div class="form-panel">
+    <h1 class="section-title">{{ 'Edit' if row else 'New' }} bundle</h1>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-2col">
+        <label>Name (EN) *<input name="name" required maxlength="160" value="{{ row['name'] if row else '' }}"></label>
+        <label dir="rtl">Name (HE)<input name="name_he" maxlength="160" value="{{ row['name_he'] if row else '' }}"></label>
+        <label>Tier
+          <select name="tier">
+            {% for tr in ['basic', 'standard', 'premium'] %}
+            <option value="{{ tr }}" {% if row and row['tier'] == tr %}selected{% endif %}>{{ tr }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Price from (₪)<input name="price_from" type="number" min="0" value="{{ row['price_from'] if row else '' }}"></label>
+        <label>Sort<input name="sort" type="number" value="{{ row['sort'] if row else 0 }}"></label>
+      </div>
+      <label>Description (EN)<textarea name="description" rows="3" maxlength="2000">{{ row['description'] if row else '' }}</textarea></label>
+      <label dir="rtl">Description (HE)<textarea name="description_he" rows="3" maxlength="2000">{{ row['description_he'] if row else '' }}</textarea></label>
+      <label>Included items — one per line (EN)<textarea name="items_text" rows="8" maxlength="4000">{{ row['items_text'] if row else '' }}</textarea></label>
+      <label dir="rtl">Included items — one per line (HE)<textarea name="items_text_he" rows="8" maxlength="4000">{{ row['items_text_he'] if row else '' }}</textarea></label>
+      <label class="check-label"><input type="checkbox" name="active" {% if not row or row['active'] %}checked{% endif %}> Active</label>
+      <button class="btn btn-primary btn-lg" type="submit">Save</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

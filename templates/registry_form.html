@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ t('redit_title' if reg else 'rnew_title') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section narrow">
+  <div class="form-panel">
+    <h1 class="section-title">{{ t('redit_title' if reg else 'rnew_title') }}</h1>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-2col">
+        <label>{{ t('r_title_label') }} *<input name="title" required maxlength="160" placeholder="{{ t('r_title_ph') }}" value="{{ reg['title'] if reg else '' }}"></label>
+        <label dir="rtl">{{ t('r_title_he') }}<input name="title_he" maxlength="160" value="{{ reg['title_he'] if reg else '' }}"></label>
+        <label>{{ t('r_couple') }} *<input name="couple_names" required maxlength="160" placeholder="Sarah & Dovid Cohen" value="{{ reg['couple_names'] if reg else '' }}"></label>
+        <label dir="rtl">{{ t('r_couple_he') }}<input name="couple_names_he" maxlength="160" value="{{ reg['couple_names_he'] if reg else '' }}"></label>
+        <label>{{ t('r_event_type') }}
+          <select name="event_type">
+            {% for slug, key in event_types.items() %}
+            <option value="{{ slug }}" {% if reg and reg['event_type'] == slug %}selected{% endif %}>{{ t(key) }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>{{ t('r_event_date') }}<input name="event_date" type="date" value="{{ reg['event_date'] if reg else '' }}"></label>
+        <label>{{ t('r_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim…" value="{{ reg['city'] if reg else '' }}"></label>
+        <label>{{ t('r_paypal') }}<input name="paypal_url" maxlength="300" placeholder="paypal.me/yourname" value="{{ reg['paypal_url'] if reg else '' }}"></label>
+        <label>{{ t('r_stripe') }}<input name="stripe_url" maxlength="300" placeholder="buy.stripe.com/…" value="{{ reg['stripe_url'] if reg else '' }}"></label>
+        <label>{{ t('r_bit') }}<input name="bit_url" maxlength="300" placeholder="bitpay.co.il/app/me/… / payboxapp.com/…" value="{{ reg['bit_url'] if reg else '' }}"></label>
+      </div>
+      <p class="hint">{{ t('r_pay_hint') }}</p>
+      <label>{{ t('r_message') }}<textarea name="message" rows="3" maxlength="2000">{{ reg['message'] if reg else '' }}</textarea></label>
+      <label dir="rtl">{{ t('r_message_he') }}<textarea name="message_he" rows="3" maxlength="2000">{{ reg['message_he'] if reg else '' }}</textarea></label>
+      <label class="check-label"><input type="checkbox" name="is_public" {% if not reg or reg['is_public'] %}checked{% endif %}> {{ t('r_public') }}</label>
+      <button class="btn btn-primary btn-lg" type="submit">{{ t('save') }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

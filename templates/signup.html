@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ t('signup_title') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section auth-wrap">
+  <div class="form-panel">
+    <h1 class="section-title">{{ t('signup_title') }}</h1>
+    <p class="page-sub">{{ t('signup_sub') }}</p>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label>{{ t('your_name') }} *<input name="name" required maxlength="120" value="{{ request.form.get('name', '') }}"></label>
+      <label>{{ t('email') }} *<input name="email" type="email" required maxlength="200" value="{{ request.form.get('email', '') }}"></label>
+      <label>{{ t('password') }} *<input name="password" type="password" required minlength="8"></label>
+      <label>{{ t('password2') }} *<input name="password2" type="password" required minlength="8"></label>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('signup_btn') }}</button>
+    </form>
+    <p class="auth-alt">{{ t('have_account') }} <a href="{{ url_for('login') }}">{{ t('login_btn') }}</a></p>
+  </div>
+</div>
+{% endblock %}

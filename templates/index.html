@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">{{ t('brand_tagline') }}</p>
+    <h1>{{ t('hero_title') }}</h1>
+    <p class="hero-sub">{{ t('hero_sub') }}</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">
+        <svg class="ic"><use href="#i-gift"/></svg> {{ t('cta_start') }}</a>
+      <a class="btn btn-ghost btn-lg" href="{{ url_for('find') }}">
+        <svg class="ic"><use href="#i-search"/></svg> {{ t('cta_find') }}</a>
+    </div>
+    <div class="trust-row">
+      <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust1') }}</span>
+      <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust2') }}</span>
+      <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust3') }}</span>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <!-- Jerusalem skyline + chuppah, gold line art -->
+      <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" fill="none">
+        <g stroke="#b8892f" stroke-width="1.6" opacity=".45" stroke-linejoin="round" stroke-linecap="round">
+          <!-- old-city wall, left -->
+          <path d="M60 210v-48h22v-12h14v12h22v-12h14v12h22v48"/>
+          <path d="M96 210v-24h20v24M136 186h14"/>
+          <!-- tower of david -->
+          <path d="M196 210v-96h40v96M196 114h-6l6-10h40l6 10h-6M208 210v-20h16v20M212 140h8v14h-8z"/>
+          <!-- domed building, left -->
+          <path d="M258 210v-42a34 34 0 0 1 68 0v42"/>
+          <path d="M292 168v-14M286 160h12" opacity=".9"/>
+          <!-- cypress trees -->
+          <path d="M348 210c-8-14-8-38 0-56 8 18 8 42 0 56zM348 210v6"/>
+          <!-- right side: wall + minaret + dome -->
+          <path d="M556 210c-8-14-8-38 0-56 8 18 8 42 0 56zM556 210v6"/>
+          <path d="M596 210v-40a30 30 0 0 1 60 0v40M626 172v-12M620 166h12"/>
+          <path d="M688 210v-88M700 210v-88M688 128h12l-6-16zM682 152h24"/>
+          <path d="M726 210v-44h20v-12h14v12h20v-12h14v12h20v44M756 210v-22h18v22"/>
+        </g>
+        <!-- ground line -->
+        <path d="M40 210h820" stroke="#b8892f" stroke-width="1.6" opacity=".55"/>
+        <!-- chuppah -->
+        <g stroke="#a5762a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M378 210V96M522 210V96"/>
+          <path d="M362 98q88-30 176 0" fill="#f3e4bd" fill-opacity=".55"/>
+          <path d="M362 98q22 15 44 0q22 15 44 0q22 15 44 0q22 15 44 0"/>
+          <path d="M362 98v14M538 98v14" stroke-width="1.8"/>
+          <!-- string lights -->
+          <path d="M378 122q72 40 144 0" stroke-width="1.4" opacity=".8"/>
+        </g>
+        <g fill="#c9a24a" stroke="none">
+          <circle class="tw tw1" cx="398" cy="131" r="4"/>
+          <circle class="tw tw2" cx="426" cy="139" r="4"/>
+          <circle class="tw tw3" cx="450" cy="142" r="4"/>
+          <circle class="tw tw4" cx="474" cy="139" r="4"/>
+          <circle class="tw tw5" cx="502" cy="131" r="4"/>
+        </g>
+        <!-- candlesticks under the chuppah -->
+        <g stroke="#a5762a" stroke-width="2.2" stroke-linecap="round">
+          <path d="M428 210v-26M472 210v-26M420 210h16M464 210h16M422 184h12M466 184h12"/>
+        </g>
+        <circle class="tw tw2" cx="428" cy="178" r="7" fill="#c9a24a" opacity=".22"/>
+        <circle class="tw tw4" cx="472" cy="178" r="7" fill="#c9a24a" opacity=".22"/>
+        <ellipse class="tw tw2" cx="428" cy="178" rx="3" ry="5.5" fill="#c9a24a"/>
+        <ellipse class="tw tw4" cx="472" cy="178" rx="3" ry="5.5" fill="#c9a24a"/>
+        <!-- sparkle stars -->
+        <g fill="#c9a24a">
+          <path class="tw tw1" d="M150 66l3.5 8 8 3.5-8 3.5-3.5 8-3.5-8-8-3.5 8-3.5z" opacity=".8"/>
+          <path class="tw tw3" d="M244 34l2.8 6.4 6.4 2.8-6.4 2.8-2.8 6.4-2.8-6.4-6.4-2.8 6.4-2.8z" opacity=".7"/>
+          <path class="tw tw4" d="M676 52l3.5 8 8 3.5-8 3.5-3.5 8-3.5-8-8-3.5 8-3.5z" opacity=".8"/>
+          <path class="tw tw2" d="M790 96l2.8 6.4 6.4 2.8-6.4 2.8-2.8 6.4-2.8-6.4-6.4-2.8 6.4-2.8z" opacity=".7"/>
+          <path class="tw tw5" d="M580 26l2.8 6.4 6.4 2.8-6.4 2.8-2.8 6.4-2.8-6.4-6.4-2.8 6.4-2.8z" opacity=".6"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section class="wrap section">
+  <h2 class="section-title">{{ t('steps_title') }}</h2>
+  <div class="grid-3">
+    {% for n, icon in [(1, 'i-gift'), (2, 'i-link'), (3, 'i-house')] %}
+    <div class="card step-card">
+      <div class="step-num">{{ n }}</div>
+      <svg class="ic ic-lg"><use href="#{{ icon }}"/></svg>
+      <h3>{{ t('step' ~ n ~ '_t') }}</h3>
+      <p>{{ t('step' ~ n ~ '_b') }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="shana-band">
+  <div class="wrap shana-band-inner">
+    <div>
+      <h2>{{ t('home_shana_title') }}</h2>
+      <p>{{ t('home_shana_body') }}</p>
+    </div>
+    <a class="btn btn-gold btn-lg" href="{{ url_for('shana') }}">{{ t('home_shana_cta') }} {{ '←' if rtl else '→' }}</a>
+  </div>
+</section>
+
+{% if featured %}
+<section class="wrap section">
+  <h2 class="section-title">{{ t('popular_title') }}</h2>
+  <p class="page-sub">{{ t('popular_sub') }}</p>
+  <div class="pop-grid">
+    {% for c in featured %}
+    <a class="pop-card" href="{{ url_for('catalog_page', cat=c['category']) }}">
+      {% if c['image'] %}
+      <div class="gift-ph gift-ph-sm gift-img"><img src="{{ c['image'] }}" alt="" loading="lazy"></div>
+      {% else %}
+      <div class="gift-ph ph-{{ c['category'] }} gift-ph-sm">
+        <svg class="ic"><use href="#i-{{ categories[c['category']][0] if c['category'] in categories else 'house' }}"/></svg>
+      </div>
+      {% endif %}
+      <div>
+        <strong>{% if c['brand'] %}{{ c['brand'] }} {% endif %}{{ pick(c, 'name') }}</strong>
+        <span class="gift-meta">₪{{ c['price_nis'] }} <span class="usd">({{ t('price_about') }} ${{ usd(c['price_nis']) }})</span>{% if c['store'] %} · {{ c['store'] }}{% endif %}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="wrap section">
+  <h2 class="section-title">{{ t('cats_title') }}</h2>
+  <div class="cat-grid">
+    {% for slug, (icon, en, he) in categories.items() %}
+    <a class="cat-tile" href="{{ url_for('catalog_page', cat=slug) }}">
+      <svg class="ic ic-lg"><use href="#i-{{ icon }}"/></svg>
+      <span>{{ cat_label(slug) }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="wrap section">
+  <h2 class="section-title">{{ t('why_title') }}</h2>
+  <div class="grid-3">
+    {% for n in [1, 2, 3] %}
+    <div class="card why-card">
+      <h3>{{ t('why' ~ n ~ '_t') }}</h3>
+      <p>{{ t('why' ~ n ~ '_b') }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="wrap section">
+  <div class="cta-panel">
+    <h2>{{ t('home_cta_title') }}</h2>
+    <p>{{ t('home_cta_body') }}</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>
+  </div>
+</section>
+
+{% endblock %}

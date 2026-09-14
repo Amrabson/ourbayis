@@ -1,0 +1,1040 @@
+{
+  "items": [
+    {
+      "name": "Pots & pans starter set",
+      "name_he": "סט סירים ומחבתות",
+      "category": "kitchen",
+      "price_nis": 450,
+      "store": "Arcosteel",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Knife set with block",
+      "name_he": "סט סכינים עם מעמד",
+      "category": "kitchen",
+      "price_nis": 180,
+      "store": "Max Home",
+      "url": "",
+      "brand": "Zwilling"
+    },
+    {
+      "name": "Cutting boards — milchig & fleishig set",
+      "name_he": "קרשי חיתוך — חלבי ובשרי",
+      "category": "kitchen",
+      "price_nis": 90,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Mixing bowls set",
+      "name_he": "סט קערות ערבוב",
+      "category": "kitchen",
+      "price_nis": 80,
+      "store": "Max Home",
+      "url": "",
+      "brand": "Pyrex"
+    },
+    {
+      "name": "Baking pans & cookie sheets",
+      "name_he": "תבניות אפייה",
+      "category": "kitchen",
+      "price_nis": 120,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Colander & strainers",
+      "name_he": "מסננות",
+      "category": "kitchen",
+      "price_nis": 60,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Measuring cups & spoons",
+      "name_he": "כוסות וכפות מדידה",
+      "category": "kitchen",
+      "price_nis": 45,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Food storage container set",
+      "name_he": "סט קופסאות אחסון",
+      "category": "kitchen",
+      "price_nis": 110,
+      "store": "Home Center",
+      "url": "",
+      "brand": "Lock&Lock"
+    },
+    {
+      "name": "Kitchen towels & oven mitts",
+      "name_he": "מגבות מטבח וכפפות תנור",
+      "category": "kitchen",
+      "price_nis": 70,
+      "store": "Fox Home",
+      "url": ""
+    },
+    {
+      "name": "Spice rack with spices",
+      "name_he": "מעמד תבלינים עם תבלינים",
+      "category": "kitchen",
+      "price_nis": 130,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Electric kettle",
+      "name_he": "קומקום חשמלי",
+      "category": "appliances",
+      "price_nis": 220,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Shabbos hot plate (platta)",
+      "name_he": "פלטת שבת",
+      "category": "appliances",
+      "price_nis": 180,
+      "store": "KSP",
+      "url": "",
+      "brand": "Hidorit"
+    },
+    {
+      "name": "Shabbos urn (meicham)",
+      "name_he": "מיחם מים לשבת",
+      "category": "appliances",
+      "price_nis": 330,
+      "store": "KSP",
+      "url": "",
+      "brand": "Hidorit"
+    },
+    {
+      "name": "Toaster oven",
+      "name_he": "טוסטר אובן",
+      "category": "appliances",
+      "price_nis": 350,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Hand mixer",
+      "name_he": "מיקסר ידני",
+      "category": "appliances",
+      "price_nis": 180,
+      "store": "KSP",
+      "url": "",
+      "brand": "Braun"
+    },
+    {
+      "name": "Stand mixer",
+      "name_he": "מיקסר עומד",
+      "category": "appliances",
+      "price_nis": 2290,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "KitchenAid"
+    },
+    {
+      "name": "Immersion blender",
+      "name_he": "בלנדר מוט",
+      "category": "appliances",
+      "price_nis": 200,
+      "store": "KSP",
+      "url": "",
+      "brand": "Braun"
+    },
+    {
+      "name": "Slow cooker (for cholent!)",
+      "name_he": "סיר בישול איטי (לצ׳ולנט!)",
+      "category": "appliances",
+      "price_nis": 350,
+      "store": "KSP",
+      "url": "",
+      "brand": "Crock-Pot"
+    },
+    {
+      "name": "Sandwich maker",
+      "name_he": "טוסטר לחיצה",
+      "category": "appliances",
+      "price_nis": 130,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Vacuum cleaner",
+      "name_he": "שואב אבק",
+      "category": "appliances",
+      "price_nis": 500,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Electrolux"
+    },
+    {
+      "name": "Microwave",
+      "name_he": "מיקרוגל",
+      "category": "appliances",
+      "price_nis": 400,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Samsung"
+    },
+    {
+      "name": "Washing machine",
+      "name_he": "מכונת כביסה",
+      "category": "appliances",
+      "price_nis": 1950,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Bosch"
+    },
+    {
+      "name": "Dinnerware set — fleishig",
+      "name_he": "סט כלי אוכל — בשרי",
+      "category": "dining",
+      "price_nis": 320,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Luminarc"
+    },
+    {
+      "name": "Dinnerware set — milchig",
+      "name_he": "סט כלי אוכל — חלבי",
+      "category": "dining",
+      "price_nis": 320,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Luminarc"
+    },
+    {
+      "name": "Cutlery sets — milchig & fleishig",
+      "name_he": "סטי סכו״ם — חלבי ובשרי",
+      "category": "dining",
+      "price_nis": 750,
+      "store": "Naaman",
+      "url": "",
+      "brand": "WMF"
+    },
+    {
+      "name": "Glassware set",
+      "name_he": "סט כוסות זכוכית",
+      "category": "dining",
+      "price_nis": 70,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Luminarc"
+    },
+    {
+      "name": "Serving platters & bowls",
+      "name_he": "מגשי וקערות הגשה",
+      "category": "dining",
+      "price_nis": 180,
+      "store": "Naaman",
+      "url": ""
+    },
+    {
+      "name": "Shabbos tablecloths (2)",
+      "name_he": "מפות שולחן לשבת",
+      "category": "dining",
+      "price_nis": 200,
+      "store": "Fox Home",
+      "url": ""
+    },
+    {
+      "name": "Hot water pump pot (for Shabbos)",
+      "name_he": "תרמוס משאבה לשבת",
+      "category": "dining",
+      "price_nis": 150,
+      "store": "KSP",
+      "url": ""
+    },
+    {
+      "name": "Water carbonator (Soda machine)",
+      "name_he": "מכשיר סודה",
+      "category": "dining",
+      "price_nis": 320,
+      "store": "KSP",
+      "url": "",
+      "brand": "SodaStream"
+    },
+    {
+      "name": "Duvet & pillows set",
+      "name_he": "שמיכת פוך וכריות",
+      "category": "bedding",
+      "price_nis": 350,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Sheet sets (x2)",
+      "name_he": "סטי מצעים (2)",
+      "category": "bedding",
+      "price_nis": 500,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Towel set",
+      "name_he": "סט מגבות",
+      "category": "bedding",
+      "price_nis": 200,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Mattress protectors",
+      "name_he": "מגני מזרן",
+      "category": "bedding",
+      "price_nis": 120,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Winter blankets",
+      "name_he": "שמיכות חורף",
+      "category": "bedding",
+      "price_nis": 180,
+      "store": "Fox Home",
+      "url": ""
+    },
+    {
+      "name": "Laundry hamper & drying rack",
+      "name_he": "סל כביסה ומתקן ייבוש",
+      "category": "bedding",
+      "price_nis": 150,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Bath mats & shower caddy",
+      "name_he": "שטיחוני אמבטיה ומדף מקלחת",
+      "category": "bedding",
+      "price_nis": 100,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Shabbos candlesticks",
+      "name_he": "פמוטי שבת",
+      "category": "judaica",
+      "price_nis": 350,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Kiddush cup (silver plated)",
+      "name_he": "גביע קידוש מוכסף",
+      "category": "judaica",
+      "price_nis": 250,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Havdalah set",
+      "name_he": "סט הבדלה",
+      "category": "judaica",
+      "price_nis": 200,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Challah board & knife",
+      "name_he": "מגש וסכין לחלה",
+      "category": "judaica",
+      "price_nis": 250,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Challah cover",
+      "name_he": "כיסוי חלה",
+      "category": "judaica",
+      "price_nis": 120,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Menorah (Chanukah)",
+      "name_he": "חנוכייה",
+      "category": "judaica",
+      "price_nis": 300,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Mezuzah cases (set of 5)",
+      "name_he": "בתי מזוזה (5)",
+      "category": "judaica",
+      "price_nis": 150,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Netilas yadayim cup & basin",
+      "name_he": "נטלה וקערה",
+      "category": "judaica",
+      "price_nis": 90,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Bentchers — set of 20",
+      "name_he": "ברכונים (20)",
+      "category": "judaica",
+      "price_nis": 150,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Seder plate",
+      "name_he": "קערת ליל הסדר",
+      "category": "judaica",
+      "price_nis": 200,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Kiddush cups for guests (6)",
+      "name_he": "כוסיות קידוש לאורחים",
+      "category": "judaica",
+      "price_nis": 90,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Folding table + 6 chairs (Shabbos guests)",
+      "name_he": "שולחן מתקפל ו־6 כיסאות",
+      "category": "home",
+      "price_nis": 700,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Bookcase for sefarim",
+      "name_he": "ספרייה לספרי קודש",
+      "category": "home",
+      "price_nis": 900,
+      "store": "IKEA",
+      "url": ""
+    },
+    {
+      "name": "Iron & ironing board",
+      "name_he": "מגהץ וקרש גיהוץ",
+      "category": "home",
+      "price_nis": 180,
+      "store": "KSP",
+      "url": ""
+    },
+    {
+      "name": "Fans (x2)",
+      "name_he": "מאווררים (2)",
+      "category": "home",
+      "price_nis": 150,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tadiran"
+    },
+    {
+      "name": "Space heater (Israeli winter is real)",
+      "name_he": "תנור חימום (החורף הישראלי אמיתי)",
+      "category": "home",
+      "price_nis": 200,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tadiran"
+    },
+    {
+      "name": "Sponja set — squeegee, bucket & broom",
+      "name_he": "סט ספונג׳ה — מגב, דלי ומטאטא",
+      "category": "home",
+      "price_nis": 100,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Shabbos lamp",
+      "name_he": "מנורת שבת",
+      "category": "home",
+      "price_nis": 180,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Step stool",
+      "name_he": "שרפרף מדרגה",
+      "category": "home",
+      "price_nis": 80,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Hangers & closet organizers",
+      "name_he": "קולבים ומארגני ארון",
+      "category": "home",
+      "price_nis": 90,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Tool kit & first aid kit",
+      "name_he": "ערכת כלי עבודה ועזרה ראשונה",
+      "category": "home",
+      "price_nis": 150,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Pots & pans — premium 10-piece set",
+      "name_he": "סט סירים ומחבתות פרימיום (10 חלקים)",
+      "category": "kitchen",
+      "price_nis": 900,
+      "store": "Arcosteel",
+      "url": "",
+      "brand": "Zwilling"
+    },
+    {
+      "name": "Ceramic frying pan set",
+      "name_he": "סט מחבתות קרמיות",
+      "category": "kitchen",
+      "price_nis": 220,
+      "store": "Arcosteel",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Chef's knife — professional",
+      "name_he": "סכין שף מקצועית",
+      "category": "kitchen",
+      "price_nis": 250,
+      "store": "Max Home",
+      "url": "",
+      "brand": "Zwilling"
+    },
+    {
+      "name": "Glass baking dishes (Pyrex set)",
+      "name_he": "כלי אפייה מזכוכית (פיירקס)",
+      "category": "kitchen",
+      "price_nis": 160,
+      "store": "Max Home",
+      "url": "",
+      "brand": "Pyrex"
+    },
+    {
+      "name": "Loaf & kugel pans",
+      "name_he": "תבניות אינגליש קייק וקוגל",
+      "category": "kitchen",
+      "price_nis": 70,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Salad bowl set",
+      "name_he": "סט קערות סלט",
+      "category": "kitchen",
+      "price_nis": 90,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Luminarc"
+    },
+    {
+      "name": "Knife sharpener",
+      "name_he": "משחיז סכינים",
+      "category": "kitchen",
+      "price_nis": 60,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Garlic press & peelers set",
+      "name_he": "מכבש שום וקולפנים",
+      "category": "kitchen",
+      "price_nis": 45,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Rolling pin & pastry tools",
+      "name_he": "מערוך וכלי בצק",
+      "category": "kitchen",
+      "price_nis": 70,
+      "store": "Max Home",
+      "url": ""
+    },
+    {
+      "name": "Water filter pitcher",
+      "name_he": "קנקן עם מסנן מים",
+      "category": "kitchen",
+      "price_nis": 150,
+      "store": "Home Center",
+      "url": "",
+      "brand": "Brita"
+    },
+    {
+      "name": "Stainless dish drying rack",
+      "name_he": "מתקן ייבוש כלים מנירוסטה",
+      "category": "kitchen",
+      "price_nis": 90,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Electric kettle — premium stainless",
+      "name_he": "קומקום חשמלי — נירוסטה פרימיום",
+      "category": "appliances",
+      "price_nis": 279,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Shabbos hot plate — large family size",
+      "name_he": "פלטת שבת גדולה",
+      "category": "appliances",
+      "price_nis": 280,
+      "store": "KSP",
+      "url": "",
+      "brand": "Hidorit"
+    },
+    {
+      "name": "Shabbos urn — 40 cup",
+      "name_he": "מיחם 40 כוסות",
+      "category": "appliances",
+      "price_nis": 400,
+      "store": "KSP",
+      "url": "",
+      "brand": "Hidorit"
+    },
+    {
+      "name": "Coffee machine",
+      "name_he": "מכונת קפה",
+      "category": "appliances",
+      "price_nis": 750,
+      "store": "KSP",
+      "url": "",
+      "brand": "Nespresso"
+    },
+    {
+      "name": "Milk frother",
+      "name_he": "מקציף חלב",
+      "category": "appliances",
+      "price_nis": 300,
+      "store": "KSP",
+      "url": "",
+      "brand": "Nespresso"
+    },
+    {
+      "name": "Food processor",
+      "name_he": "מעבד מזון",
+      "category": "appliances",
+      "price_nis": 450,
+      "store": "KSP",
+      "url": "",
+      "brand": "Braun"
+    },
+    {
+      "name": "Air fryer",
+      "name_he": "מטגן אוויר (אייר פרייר)",
+      "category": "appliances",
+      "price_nis": 550,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Blender — full size",
+      "name_he": "בלנדר",
+      "category": "appliances",
+      "price_nis": 250,
+      "store": "KSP",
+      "url": "",
+      "brand": "Braun"
+    },
+    {
+      "name": "Waffle maker",
+      "name_he": "מכשיר וופלים",
+      "category": "appliances",
+      "price_nis": 180,
+      "store": "KSP",
+      "url": "",
+      "brand": "Tefal"
+    },
+    {
+      "name": "Robot vacuum",
+      "name_he": "שואב אבק רובוטי",
+      "category": "appliances",
+      "price_nis": 1200,
+      "store": "KSP",
+      "url": "",
+      "brand": "Xiaomi"
+    },
+    {
+      "name": "Clothes dryer",
+      "name_he": "מייבש כביסה",
+      "category": "appliances",
+      "price_nis": 2200,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Electrolux"
+    },
+    {
+      "name": "Dishwasher",
+      "name_he": "מדיח כלים",
+      "category": "appliances",
+      "price_nis": 2300,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Bosch"
+    },
+    {
+      "name": "Fridge — large family size",
+      "name_he": "מקרר גדול למשפחה",
+      "category": "appliances",
+      "price_nis": 5200,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Samsung"
+    },
+    {
+      "name": "Small freezer",
+      "name_he": "מקפיא קטן",
+      "category": "appliances",
+      "price_nis": 2000,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Electrolux"
+    },
+    {
+      "name": "Oven",
+      "name_he": "תנור אפייה",
+      "category": "appliances",
+      "price_nis": 2200,
+      "store": "Machsanei Chashmal",
+      "url": "",
+      "brand": "Bosch"
+    },
+    {
+      "name": "Porcelain dinnerware — premium fleishig",
+      "name_he": "סט פורצלן פרימיום — בשרי",
+      "category": "dining",
+      "price_nis": 2900,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Villeroy & Boch"
+    },
+    {
+      "name": "Porcelain dinnerware — premium milchig",
+      "name_he": "סט פורצלן פרימיום — חלבי",
+      "category": "dining",
+      "price_nis": 2900,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Villeroy & Boch"
+    },
+    {
+      "name": "Wine glasses (12)",
+      "name_he": "כוסות יין (12)",
+      "category": "dining",
+      "price_nis": 200,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Spiegelau"
+    },
+    {
+      "name": "Glass serving bowls",
+      "name_he": "קערות הגשה מזכוכית",
+      "category": "dining",
+      "price_nis": 120,
+      "store": "Naaman",
+      "url": "",
+      "brand": "Pyrex"
+    },
+    {
+      "name": "Cake stand & dessert set",
+      "name_he": "מעמד עוגה וסט קינוחים",
+      "category": "dining",
+      "price_nis": 150,
+      "store": "Naaman",
+      "url": ""
+    },
+    {
+      "name": "Pitchers & carafes",
+      "name_he": "קנקנים לשולחן",
+      "category": "dining",
+      "price_nis": 80,
+      "store": "Naaman",
+      "url": ""
+    },
+    {
+      "name": "Placemats & napkins set",
+      "name_he": "פלייסמטים ומפיות בד",
+      "category": "dining",
+      "price_nis": 90,
+      "store": "Fox Home",
+      "url": ""
+    },
+    {
+      "name": "Shabbos tablecloth — embroidered premium",
+      "name_he": "מפת שבת רקומה — פרימיום",
+      "category": "dining",
+      "price_nis": 450,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Sheet set — premium sateen",
+      "name_he": "סט מצעים סאטן — פרימיום",
+      "category": "bedding",
+      "price_nis": 450,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Towel set — luxury 8-piece",
+      "name_he": "סט מגבות יוקרתי (8 חלקים)",
+      "category": "bedding",
+      "price_nis": 400,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Winter-weight duvet",
+      "name_he": "שמיכת פוך חורפית",
+      "category": "bedding",
+      "price_nis": 450,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Memory foam pillows (2)",
+      "name_he": "כריות ויסקו (2)",
+      "category": "bedding",
+      "price_nis": 1500,
+      "store": "Hollandia",
+      "url": "",
+      "brand": "Tempur"
+    },
+    {
+      "name": "Bathrobe set — his & hers",
+      "name_he": "סט חלוקי רחצה",
+      "category": "bedding",
+      "price_nis": 450,
+      "store": "Fox Home",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Guest linen set",
+      "name_he": "סט מצעים לאורחים",
+      "category": "bedding",
+      "price_nis": 200,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Quilted bedspread",
+      "name_he": "כיסוי מיטה",
+      "category": "bedding",
+      "price_nis": 300,
+      "store": "Vardinon",
+      "url": "",
+      "brand": "Vardinon"
+    },
+    {
+      "name": "Candlesticks — sterling silver",
+      "name_he": "פמוטי כסף טהור",
+      "category": "judaica",
+      "price_nis": 2500,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Kiddush cup — sterling silver",
+      "name_he": "גביע קידוש כסף טהור",
+      "category": "judaica",
+      "price_nis": 900,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Challah knife — engraved",
+      "name_he": "סכין חלה עם חריטה",
+      "category": "judaica",
+      "price_nis": 180,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Esrog box",
+      "name_he": "קופסת אתרוג",
+      "category": "judaica",
+      "price_nis": 150,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Pop-up sukkah",
+      "name_he": "סוכה מתקפלת",
+      "category": "judaica",
+      "price_nis": 1500,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Shas — full set",
+      "name_he": "סט ש״ס",
+      "category": "judaica",
+      "price_nis": 2500,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Chumashim & siddurim set",
+      "name_he": "חומשים וסידורים",
+      "category": "judaica",
+      "price_nis": 300,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Machzorim set",
+      "name_he": "סט מחזורים",
+      "category": "judaica",
+      "price_nis": 400,
+      "store": "",
+      "url": ""
+    },
+    {
+      "name": "Dining table & chairs",
+      "name_he": "פינת אוכל — שולחן וכיסאות",
+      "category": "home",
+      "price_nis": 2500,
+      "store": "IKEA",
+      "url": "",
+      "brand": "IKEA"
+    },
+    {
+      "name": "Couch",
+      "name_he": "ספה לסלון",
+      "category": "home",
+      "price_nis": 2800,
+      "store": "IKEA",
+      "url": "",
+      "brand": "IKEA"
+    },
+    {
+      "name": "Coffee table",
+      "name_he": "שולחן סלון",
+      "category": "home",
+      "price_nis": 400,
+      "store": "IKEA",
+      "url": "",
+      "brand": "IKEA"
+    },
+    {
+      "name": "Area rug",
+      "name_he": "שטיח לסלון",
+      "category": "home",
+      "price_nis": 350,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Floor lamp",
+      "name_he": "מנורת עמידה",
+      "category": "home",
+      "price_nis": 200,
+      "store": "IKEA",
+      "url": "",
+      "brand": "IKEA"
+    },
+    {
+      "name": "Curtains (2 rooms)",
+      "name_he": "וילונות (2 חדרים)",
+      "category": "home",
+      "price_nis": 300,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Storage boxes & organizers",
+      "name_he": "קופסאות אחסון לבית",
+      "category": "home",
+      "price_nis": 120,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Folding guest beds (2)",
+      "name_he": "מיטות מתקפלות לאורחים (2)",
+      "category": "home",
+      "price_nis": 500,
+      "store": "Home Center",
+      "url": ""
+    },
+    {
+      "name": "Dehumidifier",
+      "name_he": "סופג לחות חשמלי",
+      "category": "home",
+      "price_nis": 400,
+      "store": "KSP",
+      "url": "",
+      "brand": "Electrolux"
+    },
+    {
+      "name": "Entryway mirror & shelf",
+      "name_he": "מראה ומדף לכניסה",
+      "category": "home",
+      "price_nis": 250,
+      "store": "IKEA",
+      "url": "",
+      "brand": "IKEA"
+    }
+  ],
+  "bundles": [
+    {
+      "slug": "landing-basics",
+      "name": "Landing Basics",
+      "name_he": "בסיס לנחיתה",
+      "tier": "basic",
+      "price_from": 2450,
+      "description": "Land on Thursday, make Shabbos in your own apartment. The absolute essentials for your first week, delivered before you arrive.",
+      "description_he": "נוחתים בחמישי, עושים שבת בדירה שלכם. הציוד החיוני לשבוע הראשון — מגיע לפניכם.",
+      "items_text": "Electric kettle\nShabbos hot plate (platta)\nShabbos urn (meicham)\nBasic milchig & fleishig dinnerware and cutlery\nSheet set, duvet & pillows\nTowel set\nSponja & cleaning set\nNetilas yadayim cup\nKitchen starter box (cutting board, knife, pot & pan)",
+      "items_text_he": "קומקום חשמלי\nפלטת שבת\nמיחם לשבת\nכלי אוכל וסכו״ם בסיסיים — חלבי ובשרי\nסט מצעים, שמיכה וכריות\nסט מגבות\nסט ספונג׳ה וניקיון\nנטלה\nערכת מטבח בסיסית (קרש חיתוך, סכין, סיר ומחבת)"
+    },
+    {
+      "slug": "home-sweet-home",
+      "name": "Home Sweet Home",
+      "name_he": "בית מתוק",
+      "tier": "standard",
+      "price_from": 6900,
+      "description": "Everything in Landing Basics, plus a real working kitchen and a home you can host in. Our most popular package for shana rishonah couples.",
+      "description_he": "כל מה שבחבילת הבסיס, ועוד מטבח אמיתי ובית שאפשר לארח בו. החבילה הפופולרית ביותר לזוגות בשנה ראשונה.",
+      "items_text": "Everything in Landing Basics\nFull pots & pans set\nToaster oven, hand mixer & immersion blender\nFull dinnerware sets — milchig & fleishig\nGlassware & serving pieces\nShabbos tablecloths & hot water pump\nSecond sheet set + winter blankets\nIron & ironing board, drying rack\nFans or space heater (seasonal)",
+      "items_text_he": "כל מה שבחבילת הבסיס\nסט סירים ומחבתות מלא\nטוסטר אובן, מיקסר ידני ובלנדר מוט\nסטים מלאים של כלי אוכל — חלבי ובשרי\nכוסות וכלי הגשה\nמפות שבת ותרמוס משאבה\nסט מצעים נוסף ושמיכות חורף\nמגהץ, קרש גיהוץ ומתקן ייבוש\nמאווררים או תנור חימום (לפי עונה)"
+    },
+    {
+      "slug": "full-nest",
+      "name": "The Full Nest",
+      "name_he": "הקן המלא",
+      "tier": "premium",
+      "price_from": 17900,
+      "description": "White glove: we order everything, receive the deliveries, unpack, and set up the apartment before you land — including coordinating big appliances. Walk into a ready home.",
+      "description_he": "שירות מלא: אנחנו מזמינים הכול, מקבלים את המשלוחים, מפרקים ומסדרים את הדירה לפני שאתם נוחתים — כולל תיאום מוצרי חשמל גדולים. נכנסים לבית מוכן.",
+      "items_text": "Everything in Home Sweet Home\nWasher, fridge & microwave — coordinated and installed\nFolding table & chairs for Shabbos guests\nBookcase for sefarim\nFull linen closet setup\nJudaica starter set (candlesticks, kiddush cup, havdalah, challah board)\nWe receive all deliveries & set everything up\nWelcome grocery box for your first Shabbos",
+      "items_text_he": "כל מה שבחבילת בית מתוק\nמכונת כביסה, מקרר ומיקרוגל — בתיאום והתקנה\nשולחן מתקפל וכיסאות לאורחי שבת\nספרייה לספרי קודש\nסידור מלא של ארון המצעים\nסט יודאיקה (פמוטים, גביע קידוש, הבדלה, מגש חלה)\nאנחנו מקבלים את כל המשלוחים ומסדרים הכול\nסל קניות לשבת הראשונה"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Admin — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section auth-wrap">
+  <div class="form-panel">
+    <h1 class="section-title">Admin login</h1>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Username<input name="username" required maxlength="60"></label>
+      <label>Password<input name="password" type="password" required></label>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">Log in</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

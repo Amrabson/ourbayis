@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ t('reset_title') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section auth-wrap">
+  <div class="form-panel">
+    <h1 class="section-title">{{ t('reset_title') }}</h1>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>{{ t('password') }}<input name="password" type="password" required minlength="8"></label>
+      <label>{{ t('password2') }}<input name="password2" type="password" required minlength="8"></label>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('reset_btn') }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

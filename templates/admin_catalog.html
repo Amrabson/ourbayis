@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Catalog admin — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Catalog ({{ rows | length }})</h1>
+    <nav class="dash-actions">
+      <a class="btn btn-primary" href="{{ url_for('admin_catalog_edit') }}"><svg class="ic"><use href="#i-plus"/></svg> New item</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+    </nav>
+  </div>
+  <p class="hint">Items without a URL show no store link on registries — paste your affiliate links (Amazon Associates, KSP, etc.) into each item.</p>
+  {% for r in rows %}
+  <div class="gift-row {% if not r['active'] %}is-thanked{% endif %}">
+    <div>
+      <strong>{% if r['brand'] %}{{ r['brand'] }} — {% endif %}{{ r['name'] }}</strong> <span dir="rtl">{{ r['name_he'] }}</span>
+      <p class="gift-msg">{{ r['category'] }} · ₪{{ r['price_nis'] }} · {{ r['store'] or 'no store' }} ·
+        {% if r['url'] %}<a href="{{ r['url'] }}" target="_blank" rel="noopener">link</a>{% else %}<em class="claimed-note">no affiliate link!</em>{% endif %}
+        {% if r['featured'] %} · ★ featured{% endif %}
+        {% if not r['active'] %} · hidden{% endif %}</p>
+    </div>
+    <div class="mine-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_catalog_edit', item_id=r['id']) }}">Edit</a>
+      <form method="post" action="{{ url_for('admin_catalog_delete', item_id=r['id']) }}" onsubmit="return confirm('Delete {{ r['name'] }}?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Bundles admin — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Shana Rishonah bundles</h1>
+    <nav class="dash-actions">
+      <a class="btn btn-primary" href="{{ url_for('admin_bundle_edit') }}"><svg class="ic"><use href="#i-plus"/></svg> New bundle</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+    </nav>
+  </div>
+  {% for r in rows %}
+  <div class="gift-row {% if not r['active'] %}is-thanked{% endif %}">
+    <div>
+      <strong>{{ r['name'] }}</strong> <span dir="rtl">{{ r['name_he'] }}</span>
+      <p class="gift-msg">{{ r['tier'] }} · from ₪{{ r['price_from'] }} · /{{ r['slug'] }}{% if not r['active'] %} · hidden{% endif %}</p>
+    </div>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_bundle_edit', bundle_id=r['id']) }}">Edit</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

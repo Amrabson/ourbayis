@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}{{ t('items_title') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1 class="section-title">{{ t('items_title') }}</h1>
+  <p class="page-sub">{{ t('items_sub') }}</p>
+
+  <div class="notice-panel starter-panel">
+    <form method="post" action="{{ url_for('items_starter') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn btn-gold" type="submit"><svg class="ic"><use href="#i-star"/></svg> {{ t('starter_btn') }}</button>
+    </form>
+    <p>{{ t('starter_hint') }}</p>
+  </div>
+
+  <h2 class="sub-title">{{ t('items_catalog') }}</h2>
+  <form class="filter-row" method="get" action="{{ url_for('items_manage') }}">
+    <select name="cat" onchange="this.form.submit()">
+      <option value="">{{ t('all_cats') }}</option>
+      {% for slug, (icon, en, he) in categories.items() %}
+      <option value="{{ slug }}" {% if cat == slug %}selected{% endif %}>{{ cat_label(slug) }}</option>
+      {% endfor %}
+    </select>
+    <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_catalog') }}">
+    <button class="btn btn-ghost" type="submit"><svg class="ic"><use href="#i-search"/></svg></button>
+  </form>
+
+  <div class="catalog-grid">
+    {% for c in catalog %}
+    <div class="catalog-card">
+      {% if c['image'] %}
+      <div class="gift-ph gift-ph-sm gift-img"><img src="{{ c['image'] }}" alt="" loading="lazy"></div>
+      {% else %}
+      <div class="gift-ph ph-{{ c['category'] }} gift-ph-sm">
+        <svg class="ic"><use href="#i-{{ categories[c['category']][0] if c['category'] in categories else 'house' }}"/></svg>
+      </div>
+      {% endif %}
+      <div class="catalog-body">
+        <h3>{% if c['brand'] %}<span class="item-brand">{{ c['brand'] }}</span> {% endif %}{{ pick(c, 'name') }}</h3>
+        <p class="gift-meta">{% if c['price_nis'] %}₪{{ c['price_nis'] }}{% endif %}{% if c['store'] %} · {{ c['store'] }}{% endif %}</p>
+      </div>
+      {% if c['id'] in have %}
+      <span class="btn btn-ghost btn-sm" aria-disabled="true">{{ t('added_btn') }}</span>
+      {% else %}
+      <form method="post" action="{{ url_for('items_add', cat=cat, q=q) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="catalog_id" value="{{ c['id'] }}">
+        <button class="btn btn-primary btn-sm" type="submit"><svg class="ic ic-sm"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <h2 class="sub-title">{{ t('items_custom') }}</h2>
+  <div class="form-panel">
+    <form method="post" action="{{ url_for('items_add') }}" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-2col">
+        <label>{{ t('custom_name') }} *<input name="name" required maxlength="200"></label>
+        <label dir="rtl">{{ t('custom_name_he') }}<input name="name_he" maxlength="200"></label>
+        <label>{{ t('custom_url') }}<input name="url" maxlength="500" placeholder="https://…"></label>
+        <label>{{ t('custom_store') }}<input name="store" maxlength="120"></label>
+        <label>{{ t('custom_price') }}<input name="price_nis" type="number" min="0" max="99999"></label>
+        <label>{{ t('custom_cat') }}
+          <select name="category">
+            {% for slug, (icon, en, he) in categories.items() %}
+            <option value="{{ slug }}">{{ cat_label(slug) }}</option>
+            {% endfor %}
+          </select>
+        </label>
+      </div>
+      <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
+    </form>
+  </div>
+
+  <h2 class="sub-title" id="mine">{{ t('your_items') }} ({{ mine | length }})</h2>
+  {% if not mine %}
+    <p class="empty-note">{{ t('no_items') }}</p>
+  {% else %}
+  <div class="mine-list">
+    {% for m in mine %}
+    <form class="mine-row" method="post" action="{{ url_for('items_update', item_id=m['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="mine-info">
+        <strong>{{ pick(m, 'name') }}</strong>
+        <span class="gift-meta">{% if m['price_nis'] %}₪{{ m['price_nis'] }}{% endif %}{% if m['store'] %} · {{ m['store'] }}{% endif %}
+        {% if claimed.get(m['id']) %} · <em class="claimed-note">{{ tf('claimed_n', n=claimed.get(m['id'])) }}</em>{% endif %}</span>
+      </div>
+      <label class="mine-qty">{{ t('qty') }}
+        <input name="qty_wanted" type="number" min="1" max="99" value="{{ m['qty_wanted'] }}"></label>
+      <label class="check-label"><input type="checkbox" name="priority" {% if m['priority'] %}checked{% endif %}> <svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority') }}</label>
+      <div class="mine-actions">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ t('save') }}</button>
+        <button class="btn btn-danger btn-sm" type="submit" name="delete" value="1"
+                onclick="return confirm('{{ t('remove') }}?')">{{ t('remove') }}</button>
+      </div>
+    </form>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

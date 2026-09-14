@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ t('dash_title') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section">
+  <h1 class="section-title">{{ t('dash_title') }}</h1>
+
+  {% if not reg %}
+    <div class="cta-panel">
+      <p>{{ t('dash_no_reg') }}</p>
+      <a class="btn btn-primary btn-lg" href="{{ url_for('registry_new') }}">{{ t('dash_create') }}</a>
+    </div>
+  {% else %}
+
+  <div class="share-panel">
+    <h2>{{ t('dash_share') }}</h2>
+    <p class="hint">{{ t('dash_share_hint') }}</p>
+    <div class="share-link-row">
+      <code class="share-url">{{ url_for('registry', slug=reg['slug'], _external=True) }}</code>
+      <button class="btn btn-ghost" data-copy="{{ url_for('registry', slug=reg['slug'], _external=True) }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
+      <a class="btn btn-wa" target="_blank" rel="noopener"
+         href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ url_for('registry', slug=reg['slug'], _external=True)) | urlencode }}">
+        <svg class="ic"><use href="#i-wa"/></svg> {{ t('share_whatsapp') }}</a>
+    </div>
+    <div class="qr-box">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&color=16223c&data={{ url_for('registry', slug=reg['slug'], _external=True) | urlencode }}"
+           width="120" height="120" alt="QR — {{ pick(reg, 'title') }}">
+      <div>
+        <strong>{{ t('qr_title') }}</strong>
+        <p class="hint">{{ t('qr_hint') }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-actions">
+    <a class="btn btn-primary" href="{{ url_for('items_manage') }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('dash_items') }}</a>
+    <a class="btn btn-ghost" href="{{ url_for('registry_edit') }}">{{ t('dash_edit') }}</a>
+    <a class="btn btn-ghost" href="{{ url_for('registry', slug=reg['slug']) }}">{{ t('dash_view_public') }}</a>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ stats['items'] }}</strong><span>{{ t('dash_stats_items') }}</span></div>
+    <div class="stat-card"><strong>{{ stats['claimed'] }}</strong><span>{{ t('dash_stats_claimed') }}</span></div>
+    <div class="stat-card"><strong>{{ stats['cash'] }}</strong><span>{{ t('dash_stats_cash') }}</span></div>
+    <div class="stat-card"><strong>{{ stats['views'] }}</strong><span>{{ t('dash_stats_views') }}</span></div>
+  </div>
+
+  <h2 class="sub-title">{{ t('dash_gifts') }}</h2>
+  {% if not gifts %}
+    <p class="empty-note">{{ t('dash_no_gifts') }}</p>
+  {% else %}
+  <button class="btn btn-ghost btn-sm no-print" onclick="window.print()">{{ t('print_list') }}</button>
+  <div class="gift-list">
+    {% for gft in gifts %}
+    <div class="gift-row {% if gft['thanked'] %}is-thanked{% endif %}">
+      <div>
+        <strong>{{ gft['guest_name'] }}</strong>
+        — {% if gft['kind'] == 'cash' %}{{ t('gift_cash') }}{% if gft['item_name'] %}: {{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) }}{% endif %}{% if gft['amount'] %} ({{ gft['amount'] }}){% endif %}{% else %}{{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) or '—' }}{% if gft['qty'] > 1 %} ×{{ gft['qty'] }}{% endif %}{% endif %}
+        {% if gft['message'] %}<p class="gift-msg">“{{ gft['message'] }}”</p>{% endif %}
+        {% if gft['guest_email'] %}<p class="gift-msg">{{ gft['guest_email'] }}</p>{% endif %}
+        {% if gft['kind'] == 'cash' and gft['item_url'] %}
+        <a class="btn btn-gold btn-sm order-link" href="{{ gft['item_url'] }}" target="_blank" rel="noopener">
+          <svg class="ic ic-sm"><use href="#i-link"/></svg>
+          {{ tf('buy_at', store=gft['item_store']) if gft['item_store'] else t('buy_link') }} →</a>
+        {% endif %}
+      </div>
+      <div class="mine-actions">
+        <form method="post" action="{{ url_for('claim_thanked', claim_id=gft['id']) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn {% if gft['thanked'] %}btn-ghost{% else %}btn-gold{% endif %} btn-sm" type="submit">
+            {% if gft['thanked'] %}<svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('dash_thanked') }}{% else %}{{ t('dash_mark_thanked') }}{% endif %}
+          </button>
+        </form>
+        <form method="post" action="{{ url_for('claim_release', claim_id=gft['id']) }}"
+              onsubmit="return confirm('{{ t('dash_release_confirm') }}')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn btn-danger btn-sm" type="submit">{{ t('dash_release') }}</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

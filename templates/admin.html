@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Admin — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Admin</h1>
+    <nav class="dash-actions">
+      <a class="btn btn-ghost" href="{{ url_for('admin_catalog') }}">Catalog</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_bundles') }}">Bundles</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_ads') }}">Ads</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_logout') }}">Log out</a>
+    </nav>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ stats.leads_new }}</strong><span>new shana leads</span></div>
+    <div class="stat-card"><strong>{{ stats.registries }}</strong><span>registries</span></div>
+    <div class="stat-card"><strong>{{ stats.users }}</strong><span>users</span></div>
+    <div class="stat-card"><strong>{{ stats.claims }}</strong><span>gifts reserved</span></div>
+    <div class="stat-card {% if stats.no_affiliate %}stat-warn{% endif %}"><strong>{{ stats.no_affiliate }}</strong><span>catalog items missing affiliate link</span></div>
+  </div>
+
+  <h2 class="sub-title">Shana Rishonah leads
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_leads_csv') }}" style="margin-inline-start:12px">Export CSV</a></h2>
+  {% if not leads %}<p class="empty-note">No leads yet.</p>{% endif %}
+  {% for l in leads %}
+  <div class="gift-row {% if l['status'] != 'new' %}is-thanked{% endif %}">
+    <div>
+      <strong>{{ l['name'] }}</strong> · {{ l['bundle_slug'] }} · <span class="badge badge-{{ 'gold' if l['status'] == 'new' else 'plain' }}">{{ l['status'] }}</span>
+      <p class="gift-msg">
+        {% if l['whatsapp'] %}<a href="https://wa.me/{{ l['whatsapp'] | replace('+','') | replace(' ','') | replace('-','') }}" target="_blank" rel="noopener">WhatsApp {{ l['whatsapp'] }}</a> · {% endif %}
+        {{ l['email'] }} · arrives {{ l['arrival'] or '?' }} · {{ l['city'] }} {{ l['address'] }}</p>
+      {% if l['notes'] %}<p class="gift-msg">“{{ l['notes'] }}”</p>{% endif %}
+      <p class="gift-msg">{{ l['created_at'] }}</p>
+    </div>
+    <form method="post" action="{{ url_for('admin_lead_status', lead_id=l['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <select name="status" onchange="this.form.submit()">
+        {% for s in ['new', 'contacted', 'done'] %}
+        <option value="{{ s }}" {% if l['status'] == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </div>
+  {% endfor %}
+
+  <h2 class="sub-title">Messages</h2>
+  {% if not msgs %}<p class="empty-note">No messages.</p>{% endif %}
+  {% for m in msgs %}
+  <div class="gift-row {% if m['resolved'] %}is-thanked{% endif %}">
+    <div>
+      <strong>{{ m['name'] or 'Anonymous' }}</strong> · {{ m['topic'] }} · {{ m['email'] }}
+      <p class="gift-msg">{{ m['body'] }}</p>
+      <p class="gift-msg">{{ m['created_at'] }}</p>
+    </div>
+    {% if not m['resolved'] %}
+    <form method="post" action="{{ url_for('admin_msg_resolve', msg_id=m['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button class="btn btn-ghost btn-sm" type="submit">Resolve</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <h2 class="sub-title">Recent registries</h2>
+  {% for r in recent %}
+  <div class="gift-row">
+    <div><strong>{{ r['couple_names'] }}</strong> · {{ r['event_type'] }} · {{ r['city'] }} · {{ r['created_at'] }}
+      <p class="gift-msg"><a href="{{ url_for('registry', slug=r['slug']) }}">/r/{{ r['slug'] }}</a>{% if not r['is_public'] %} · (unlisted){% endif %}</p>
+    </div>
+  </div>
+  {% endfor %}
+
+  <h2 class="sub-title">Change admin password</h2>
+  <form method="post" action="{{ url_for('admin_password') }}" class="filter-row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input name="password" type="password" placeholder="New password (10+ chars)" minlength="10" required>
+    <button class="btn btn-ghost" type="submit">Update</button>
+  </form>
+</div>
+{% endblock %}

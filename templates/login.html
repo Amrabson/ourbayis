@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ t('login_title') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section auth-wrap">
+  <div class="form-panel">
+    <h1 class="section-title">{{ t('login_title') }}</h1>
+    <p class="page-sub">{{ t('login_sub') }}</p>
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>{{ t('email') }}<input name="email" type="email" required maxlength="200"></label>
+      <label>{{ t('password') }}<input name="password" type="password" required></label>
+      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('login_btn') }}</button>
+    </form>
+    <p class="auth-alt">{{ t('no_account') }} <a href="{{ url_for('signup') }}">{{ t('nav_start') }}</a> · <a href="{{ url_for('forgot') }}">{{ t('forgot_link') }}</a></p>
+  </div>
+</div>
+{% endblock %}

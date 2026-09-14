@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}{{ t('shana_title') }} — {{ brand }}{% endblock %}
+{% block meta_desc %}{{ t('shana_sub') }}{% endblock %}
+{% block content %}
+<section class="reg-hero shana-hero">
+  <div class="wrap">
+    <h1>{{ t('shana_title') }}</h1>
+    <p class="reg-message">{{ t('shana_sub') }}</p>
+  </div>
+</section>
+
+<div class="wrap section">
+  <h2 class="section-title">{{ t('shana_how_t') }}</h2>
+  <div class="grid-3">
+    {% for n, icon in [(1, 'i-wa'), (2, 'i-check'), (3, 'i-house')] %}
+    <div class="card step-card">
+      <div class="step-num">{{ n }}</div>
+      <svg class="ic ic-lg"><use href="#{{ icon }}"/></svg>
+      <p>{{ t('shana_how' ~ n) }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="bundle-grid">
+    {% for b in bundles %}
+    <article class="bundle-card tier-{{ b['tier'] }}">
+      {% if b['tier'] == 'standard' %}<span class="badge badge-gold bundle-pop"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>{% endif %}
+      <h3>{{ pick(b, 'name') }}</h3>
+      <p class="bundle-price">{{ t('bundle_from') }} <strong>₪{{ '{:,}'.format(b['price_from']) }}</strong>
+        <span class="usd">({{ t('price_about') }} ${{ '{:,}'.format(usd(b['price_from'])) }})</span></p>
+      <p class="bundle-desc">{{ pick(b, 'description') }}</p>
+      <details>
+        <summary>{{ t('shana_includes') }}</summary>
+        <ul>
+          {% for line in pick(b, 'items_text').splitlines() if line.strip() %}
+          <li>{{ line }}</li>
+          {% endfor %}
+        </ul>
+      </details>
+      <a class="btn btn-primary btn-block" href="#request" data-bundle="{{ b['slug'] }}">{{ t('sr_submit') }}</a>
+    </article>
+    {% endfor %}
+  </div>
+
+  <div class="notice-panel">
+    <svg class="ic"><use href="#i-star"/></svg>
+    <p>{{ t('shana_notice') }}</p>
+  </div>
+
+  <div class="form-panel" id="request">
+    <h2 class="section-title">{{ t('shana_form_title') }}</h2>
+    <p class="page-sub">{{ t('shana_form_sub') }}</p>
+    <form method="post" action="{{ url_for('shana') }}#request" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="form-2col">
+        <label>{{ t('sr_name') }} *<input name="name" required maxlength="120"></label>
+        <label>{{ t('sr_whatsapp') }} *<input name="whatsapp" required maxlength="40" placeholder="+1 / +972…"></label>
+        <label>{{ t('sr_email') }}<input name="email" type="email" maxlength="200"></label>
+        <label>{{ t('sr_arrival') }}<input name="arrival" type="date"></label>
+        <label>{{ t('sr_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim, Ramat Beit Shemesh…"></label>
+        <label>{{ t('sr_bundle') }}
+          <select name="bundle" id="bundle-select">
+            {% for b in bundles %}<option value="{{ b['slug'] }}">{{ pick(b, 'name') }} — ₪{{ '{:,}'.format(b['price_from']) }}+</option>{% endfor %}
+            <option value="custom">{{ t('sr_custom') }}</option>
+          </select>
+        </label>
+      </div>
+      <label>{{ t('sr_address') }}<input name="address" maxlength="300"></label>
+      <label>{{ t('sr_notes') }}<textarea name="notes" rows="3" maxlength="2000"></textarea></label>
+      <button class="btn btn-primary btn-lg" type="submit">{{ t('sr_submit') }}</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('click', function (e) {
+  var a = e.target.closest('[data-bundle]');
+  if (!a) return;
+  var sel = document.getElementById('bundle-select');
+  if (sel) sel.value = a.getAttribute('data-bundle');
+});
+</script>
+{% endblock %}

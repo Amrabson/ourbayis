@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Ads admin — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Ads</h1>
+    <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+  </div>
+  <p class="hint">One random active ad shows in the band above the footer on every page. Sell these slots to stores, wedding vendors, seminaries…</p>
+
+  <div class="form-panel">
+    <form method="post" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-2col">
+        <label>Title *<input name="title" required maxlength="200"></label>
+        <label>Link URL<input name="link_url" maxlength="500" placeholder="https://…"></label>
+      </div>
+      <label>Body<input name="body" maxlength="500"></label>
+      <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-plus"/></svg> Add ad</button>
+    </form>
+  </div>
+
+  {% for r in rows %}
+  <div class="gift-row {% if not r['active'] %}is-thanked{% endif %}">
+    <div>
+      <strong>{{ r['title'] }}</strong>{% if not r['active'] %} · (off){% endif %}
+      <p class="gift-msg">{{ r['body'] }} {% if r['link_url'] %}· <a href="{{ r['link_url'] }}" target="_blank" rel="noopener">{{ r['link_url'] }}</a>{% endif %}</p>
+    </div>
+    <div class="mine-actions">
+      <form method="post" action="{{ url_for('admin_ad_toggle', ad_id=r['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ 'Turn off' if r['active'] else 'Turn on' }}</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_ad_delete', ad_id=r['id']) }}" onsubmit="return confirm('Delete ad?')">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

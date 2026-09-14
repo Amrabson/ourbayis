@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_about') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section narrow prose">
+  <h1 class="section-title">{{ t('nav_about') }}</h1>
+  {% if rtl %}
+  <p><strong>OurBayis</strong> נולד מבעיה פשוטה: זוגות שמקימים בית בישראל — במיוחד זוגות אמריקאים וישראלים־אמריקאים — לא מצאו רשימת מתנות שבאמת עובדת כאן. הרשימות האמריקאיות שולחות לארה״ב; החנויות הישראליות לא נוחות לאורחים מחו״ל.</p>
+  <p>אז בנינו רשימה שמדברת שתי שפות: הזוג בוחר ציוד שדירה ישראלית באמת צריכה, והדודה מניו ג׳רזי פותחת קישור אחד, לוחצת על מתנה, וסיימה — הכול באנגלית, עם מחירים משוערים בדולרים.</p>
+  <p>המתנות נקנות ישירות מהחנויות, ומתנות כספיות עוברות ישירות ל־PayPal של הזוג. אנחנו לא נוגעים בכסף שלכם. האתר מתפרנס מקישורי שותפים, מפרסום וממשירות ההקמה לשנה ראשונה.</p>
+  <p>בהצלחה בבניית הבית — מזל טוב! 🏠</p>
+  {% else %}
+  <p><strong>OurBayis</strong> was born from a simple problem: couples building a home in Israel — especially Americans and American-Israelis — had no gift registry that actually works here. The American registries ship to America; the Israeli stores are a headache for guests abroad.</p>
+  <p>So we built a registry that speaks both languages: the couple picks the things an Israeli apartment really needs, and the aunt in New Jersey opens one link, clicks a gift, and she's done — all in English, with dollar estimates.</p>
+  <p>Gifts are bought directly from the stores, and cash gifts go directly to the couple's own PayPal. We never touch your money. The site is supported by affiliate links, advertising, and our Shana Rishonah setup service.</p>
+  <p>Hatzlacha building your bayis — mazel tov! 🏠</p>
+  {% endif %}
+</div>
+{% endblock %}
