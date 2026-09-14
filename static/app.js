@@ -32,12 +32,53 @@
     });
   });
 
+  // v3 phase 2: reveal-on-scroll for elements marked .reveal
+  document.addEventListener("DOMContentLoaded", function () {
+    var reveals = document.querySelectorAll(".reveal");
+    if (!reveals.length) return;
+    if (!("IntersectionObserver" in window) ||
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      reveals.forEach(function (el) { el.classList.add("in"); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    reveals.forEach(function (el) { io.observe(el); });
+  });
+
+  // v3 phase 2: swap a broken/missing product photo for its category illustration
+  document.addEventListener(
+    "error",
+    function (e) {
+      var img = e.target;
+      if (img.tagName === "IMG" && img.classList.contains("gift-img-img")) {
+        var box = img.closest(".gift-img");
+        if (box) { box.classList.add("ill-box"); }
+        img.style.display = "none";
+      }
+    },
+    true
+  );
+
   // one shared modal opener/closer: any [data-modal] button opens the dialog with that id
+  var lastOpener = null;
   document.addEventListener("click", function (e) {
     var opener = e.target.closest("[data-modal]");
     if (opener) {
       var dlg = document.getElementById(opener.getAttribute("data-modal"));
-      if (dlg && dlg.showModal) { dlg.showModal(); e.preventDefault(); }
+      if (dlg && dlg.showModal) {
+        lastOpener = opener;
+        dlg.showModal();
+        e.preventDefault();
+        var first = dlg.querySelector("input:not([type=hidden]):not(.hp), select, textarea");
+        if (first) first.focus();
+      }
     }
     var closer = e.target.closest("[data-close]");
     if (closer) { var d = closer.closest("dialog"); if (d) d.close(); }
@@ -55,15 +96,33 @@
     }
   });
 
-  // copy-link buttons
+  // focus return to the element that opened a dialog, once it closes
+  document.addEventListener(
+    "close",
+    function (e) {
+      if (e.target.tagName === "DIALOG" && lastOpener && document.contains(lastOpener)) {
+        lastOpener.focus();
+        lastOpener = null;
+      }
+    },
+    true
+  );
+
+  // copy-link buttons, with a select+prompt fallback when the Clipboard API fails
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-copy]");
     if (!btn) return;
-    navigator.clipboard.writeText(btn.getAttribute("data-copy")).then(function () {
+    var text = btn.getAttribute("data-copy");
+    var flash = function () {
       var old = btn.textContent;
       btn.textContent = btn.getAttribute("data-copied-label") || "Copied!";
       setTimeout(function () { btn.textContent = old; }, 1600);
-    });
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(flash, function () { window.prompt("Copy:", text); });
+    } else {
+      window.prompt("Copy:", text);
+    }
   });
 
   // data-autosubmit: change on a select/input submits its form

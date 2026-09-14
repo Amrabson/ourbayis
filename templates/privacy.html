@@ -3,11 +3,22 @@
 {% block content %}
 <div class="wrap section narrow prose">
   <h1 class="section-title">Privacy</h1>
+  <p class="page-sub">{{ t('privacy_intro') }}</p>
   <p><strong>What we store:</strong> your account email and name, your registry details, and the names/messages guests leave when reserving a gift. That's it — we keep only what the site needs to work.</p>
-  <p><strong>What we never see:</strong> your money and your card details. Store purchases happen on the store's own site; cash gifts go through the couple's own PayPal. OurBayis never processes payments.</p>
-  <p><strong>Registry visibility:</strong> anyone with your registry link can view it. If "show in search results" is enabled, guests can also find it by searching your names. You can turn that off any time in your registry settings.</p>
-  <p><strong>Affiliate links:</strong> some store links earn OurBayis a small commission, at no cost to you or your guests.</p>
-  <p><strong>Cookies:</strong> one session cookie for login and language preference. No tracking pixels, no analytics profiling, nothing sold to anyone.</p>
-  <p><strong>Deleting your data:</strong> write to us via the <a href="{{ url_for('contact') }}">contact page</a> and we'll delete your account and registry.</p>
+  <p><strong>What we never see:</strong> your money and your card details. Store purchases happen on the store's own site; cash gifts go through the couple's own PayPal, Stripe, Bit or PayBox link. OurBayis never processes payments.</p>
+  <p><strong>Registry visibility:</strong> registries are unlisted by default — anyone with the link can view it, but it isn't searchable. If "show in search results" is enabled, guests can also find it by searching your names. You can change that any time in your registry settings.</p>
+  <h2 class="sub-title">{{ t('privacy_cookies_t') }}</h2>
+  <p>{{ t('privacy_cookies_b') }}</p>
+  <h2 class="sub-title">{{ t('privacy_counters_t') }}</h2>
+  <p>{{ t('privacy_counters_b') }}</p>
+  <h2 class="sub-title">{{ t('privacy_mail_t') }}</h2>
+  <p>{{ t('privacy_mail_b') }}</p>
+  <h2 class="sub-title">{{ t('privacy_guest_t') }}</h2>
+  <p>{{ t('privacy_guest_b') }}</p>
+  <h2 class="sub-title">{{ t('privacy_affiliate_t') }}</h2>
+  <p>{{ t('privacy_affiliate_b') }}</p>
+  <h2 class="sub-title">{{ t('privacy_delete_t') }}</h2>
+  <p>{{ t('privacy_delete_b') }} <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>.</p>
+  <p class="hint">{{ t('privacy_legal_note') }} This page describes the system's current behavior; it is not legal advice and should be reviewed before relying on it for GDPR/Israeli Privacy Protection Law compliance.</p>
 </div>
 {% endblock %}

@@ -1,26 +1,51 @@
 {% extends "base.html" %}
+
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "{{ brand }}",
+  "url": "{{ url_for('index', _external=True) }}",
+  "logo": "{{ url_for('static', filename='og.png', _external=True) }}"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "{{ brand }}",
+  "url": "{{ url_for('index', _external=True) }}"
+}
+</script>
+{% endblock %}
+
 {% block content %}
 
 <section class="hero">
+  <div class="light-field" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
   <div class="wrap hero-inner">
-    <p class="eyebrow">{{ t('brand_tagline') }}</p>
-    <h1>{{ t('hero_title') }}</h1>
-    <p class="hero-sub">{{ t('hero_sub') }}</p>
-    <div class="hero-ctas">
-      <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">
-        <svg class="ic"><use href="#i-gift"/></svg> {{ t('cta_start') }}</a>
-      <a class="btn btn-ghost btn-lg" href="{{ url_for('find') }}">
-        <svg class="ic"><use href="#i-search"/></svg> {{ t('cta_find') }}</a>
-    </div>
-    <div class="trust-row">
-      <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust1') }}</span>
-      <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust2') }}</span>
-      <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust3') }}</span>
+    <div class="glass hero-card">
+      <p class="eyebrow">{{ t('brand_tagline') }}</p>
+      <h1>{{ t('hero_title') }}</h1>
+      <p class="hero-sub">{{ t('hero_sub') }}</p>
+      <div class="hero-ctas">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">
+          <svg class="ic"><use href="#i-gift"/></svg> {{ t('cta_start') }}</a>
+        <a class="btn btn-ghost btn-lg" href="{{ url_for('find') }}">
+          <svg class="ic"><use href="#i-search"/></svg> {{ t('cta_find') }}</a>
+      </div>
+      <p style="margin-top:10px"><a href="{{ url_for('catalog_page') }}">{{ t('cta_explore') }} {{ '←' if rtl else '→' }}</a></p>
+      <div class="trust-row">
+        <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust1') }}</span>
+        <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust2') }}</span>
+        <span><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust3') }}</span>
+      </div>
     </div>
     <div class="hero-art" aria-hidden="true">
       <!-- Jerusalem skyline + chuppah, gold line art -->
       <svg viewBox="0 0 900 250" xmlns="http://www.w3.org/2000/svg" fill="none">
-        <g stroke="#b8892f" stroke-width="1.6" opacity=".45" stroke-linejoin="round" stroke-linecap="round">
+        <g class="draw" stroke="#b8892f" stroke-width="1.6" opacity=".45" stroke-linejoin="round" stroke-linecap="round">
           <!-- old-city wall, left -->
           <path d="M60 210v-48h22v-12h14v12h22v-12h14v12h22v48"/>
           <path d="M96 210v-24h20v24M136 186h14"/>
@@ -38,9 +63,9 @@
           <path d="M726 210v-44h20v-12h14v12h20v-12h14v12h20v44M756 210v-22h18v22"/>
         </g>
         <!-- ground line -->
-        <path d="M40 210h820" stroke="#b8892f" stroke-width="1.6" opacity=".55"/>
+        <path class="draw" d="M40 210h820" stroke="#b8892f" stroke-width="1.6" opacity=".55"/>
         <!-- chuppah -->
-        <g stroke="#a5762a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <g class="draw" stroke="#a5762a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M378 210V96M522 210V96"/>
           <path d="M362 98q88-30 176 0" fill="#f3e4bd" fill-opacity=".55"/>
           <path d="M362 98q22 15 44 0q22 15 44 0q22 15 44 0q22 15 44 0"/>
@@ -76,8 +101,12 @@
   </div>
 </section>
 
-<section class="wrap section">
+<!-- How it works: couples + guests -->
+<section class="wrap section reveal">
   <h2 class="section-title">{{ t('steps_title') }}</h2>
+
+  <h3 class="sub-title" style="margin-top:.6em">{{ t('how_couples') }}</h3>
+  <p class="page-sub">{{ t('how_couples_intro') }}</p>
   <div class="grid-3">
     {% for n, icon in [(1, 'i-gift'), (2, 'i-link'), (3, 'i-house')] %}
     <div class="card step-card">
@@ -88,35 +117,46 @@
     </div>
     {% endfor %}
   </div>
-</section>
 
-<section class="shana-band">
-  <div class="wrap shana-band-inner">
-    <div>
-      <h2>{{ t('home_shana_title') }}</h2>
-      <p>{{ t('home_shana_body') }}</p>
+  <h3 class="sub-title">{{ t('how_guests') }}</h3>
+  <p class="page-sub">{{ t('how_guests_intro') }}</p>
+  <div class="grid-3">
+    {% for n, icon in [(1, 'i-link'), (2, 'i-gift'), (3, 'i-check')] %}
+    <div class="card step-card">
+      <div class="step-num">{{ n }}</div>
+      <svg class="ic ic-lg"><use href="#{{ icon }}"/></svg>
+      <h3>{{ t('how_g' ~ n ~ '_t') }}</h3>
+      <p>{{ t('how_g' ~ n ~ '_b') }}</p>
     </div>
-    <a class="btn btn-gold btn-lg" href="{{ url_for('shana') }}">{{ t('home_shana_cta') }} {{ '←' if rtl else '→' }}</a>
+    {% endfor %}
   </div>
 </section>
 
 {% if featured %}
-<section class="wrap section">
+<section class="wrap section reveal">
   <h2 class="section-title">{{ t('popular_title') }}</h2>
-  <p class="page-sub">{{ t('popular_sub') }}</p>
+  <p class="page-sub">{{ t('catalog_intro_label') }}</p>
   <div class="pop-grid">
     {% for c in featured %}
     <a class="pop-card" href="{{ url_for('catalog_page', cat=c['category']) }}">
       {% if c['image'] %}
-      <div class="gift-ph gift-ph-sm gift-img"><img src="{{ c['image'] }}" alt="" loading="lazy"></div>
+      <div class="gift-ph gift-ph-sm gift-img"><img class="gift-img-img" src="{{ c['image'] }}" alt="{{ pick(c, 'name') }}" loading="lazy" width="54" height="54"></div>
       {% else %}
-      <div class="gift-ph ph-{{ c['category'] }} gift-ph-sm">
-        <svg class="ic"><use href="#i-{{ categories[c['category']][0] if c['category'] in categories else 'house' }}"/></svg>
+      <div class="gift-ph ph-{{ c['category'] }} gift-ph-sm ill-box">
+        <svg class="ic"><use href="#ill-{{ c['category'] if c['category'] in categories else 'home' }}"/></svg>
       </div>
       {% endif %}
       <div>
         <strong>{% if c['brand'] %}{{ c['brand'] }} {% endif %}{{ pick(c, 'name') }}</strong>
-        <span class="gift-meta">₪{{ c['price_nis'] }} <span class="usd">({{ t('price_about') }} ${{ usd(c['price_nis']) }})</span>{% if c['store'] %} · {{ c['store'] }}{% endif %}</span>
+        <span class="gift-meta bdi">
+          {% if c['price_nis'] %}₪{{ c['price_nis'] }} <span class="usd">({{ t('price_about') }} ${{ usd(c['price_nis']) }})</span>{% else %}{{ t('price_not_set') }}{% endif %}
+          {% if c['store'] %} · {{ c['store'] }}{% endif %}
+        </span>
+        {% if c['price_status'] is defined and c['price_status'] == 'verified' and c['price_checked_at'] %}
+        <span class="badge badge-plain">{{ tf('price_checked_tag', date=c['price_checked_at'][:10]) }}</span>
+        {% elif c['price_status'] is defined %}
+        <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
+        {% endif %}
       </div>
     </a>
     {% endfor %}
@@ -124,34 +164,98 @@
 </section>
 {% endif %}
 
-<section class="wrap section">
+<section class="wrap section reveal">
   <h2 class="section-title">{{ t('cats_title') }}</h2>
   <div class="cat-grid">
     {% for slug, (icon, en, he) in categories.items() %}
     <a class="cat-tile" href="{{ url_for('catalog_page', cat=slug) }}">
-      <svg class="ic ic-lg"><use href="#i-{{ icon }}"/></svg>
+      <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-{{ slug }}"/></svg>
       <span>{{ cat_label(slug) }}</span>
     </a>
     {% endfor %}
   </div>
 </section>
 
-<section class="wrap section">
-  <h2 class="section-title">{{ t('why_title') }}</h2>
+<section class="wrap section reveal">
+  <h2 class="section-title">{{ t('why_fit_title') }}</h2>
   <div class="grid-3">
     {% for n in [1, 2, 3] %}
     <div class="card why-card">
-      <h3>{{ t('why' ~ n ~ '_t') }}</h3>
-      <p>{{ t('why' ~ n ~ '_b') }}</p>
+      <h3>{{ t('why_fit' ~ n ~ '_t') }}</h3>
+      <p>{{ t('why_fit' ~ n ~ '_b') }}</p>
     </div>
     {% endfor %}
   </div>
 </section>
 
-<section class="wrap section">
+<!-- Sample registry — static illustration, not real data -->
+<section class="wrap section reveal">
+  <h2 class="section-title">{{ t('sample_title') }}</h2>
+  <div class="glass glass-panel sample-panel">
+    <span class="sample-flag">{{ t('sample_sub') }}</span>
+    <h3 class="sub-title" style="margin-top:0">{{ t('sample_couple') }}</h3>
+    <div class="gift-grid">
+      <article class="gift-card">
+        <div class="gift-ph ph-dining ill-box"><svg class="ic ic-lg"><use href="#ill-dining"/></svg></div>
+        <div class="gift-body">
+          <h3>{{ t('sample_item1') }}</h3>
+          <p class="gift-meta bdi">₪280</p>
+          <span class="sample-btn-disabled" aria-disabled="true">{{ t('gift_this') }}</span>
+        </div>
+      </article>
+      <article class="gift-card">
+        <div class="gift-ph ph-bedding ill-box"><svg class="ic ic-lg"><use href="#ill-bedding"/></svg></div>
+        <div class="gift-body">
+          <h3>{{ t('sample_item2') }}</h3>
+          <p class="gift-meta bdi">₪420</p>
+          <span class="sample-btn-disabled" aria-disabled="true">{{ t('gift_this') }}</span>
+        </div>
+      </article>
+      <article class="gift-card">
+        <div class="gift-ph ph-kitchen ill-box"><svg class="ic ic-lg"><use href="#ill-kitchen"/></svg></div>
+        <div class="gift-body">
+          <h3>{{ t('sample_item3') }}</h3>
+          <p class="gift-meta bdi">₪1,650</p>
+          <span class="sample-btn-disabled" aria-disabled="true">{{ t('gift_this') }}</span>
+        </div>
+      </article>
+      <article class="gift-card">
+        <div class="gift-ph ph-appliances ill-box"><svg class="ic ic-lg"><use href="#ill-appliances"/></svg></div>
+        <div class="gift-body">
+          <h3>{{ t('sample_item4') }}</h3>
+          <span class="sample-btn-disabled" aria-disabled="true">{{ t('sample_cash_btn') }}</span>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="shana-band reveal">
+  <div class="wrap shana-band-inner">
+    <div>
+      <h2>{{ t('shana_intro_title') }}</h2>
+      <p>{{ t('shana_intro_body') }}</p>
+    </div>
+    <a class="btn btn-gold btn-lg" href="{{ url_for('shana') }}">{{ t('shana_intro_cta') }} {{ '←' if rtl else '→' }}</a>
+  </div>
+</section>
+
+<section class="wrap section narrow reveal">
+  <h2 class="section-title" style="text-align:center">{{ t('faq_title') }}</h2>
+  <div class="faq-list">
+    {% for n in [1, 2, 3, 4, 5, 6] %}
+    <details>
+      <summary>{{ t('faq_q' ~ n) }}</summary>
+      <p>{{ t('faq_a' ~ n) }}</p>
+    </details>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="wrap section reveal">
   <div class="cta-panel">
-    <h2>{{ t('home_cta_title') }}</h2>
-    <p>{{ t('home_cta_body') }}</p>
+    <h2>{{ t('final_cta_title') }}</h2>
+    <p>{{ t('final_cta_body') }}</p>
     <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>
   </div>
 </section>

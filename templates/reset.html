@@ -2,7 +2,7 @@
 {% block title %}{{ t('reset_title') }} — {{ brand }}{% endblock %}
 {% block content %}
 <div class="wrap section auth-wrap">
-  <div class="form-panel">
+  <div class="glass glass-panel">
     <h1 class="section-title">{{ t('reset_title') }}</h1>
     <form method="post" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -13,3 +13,4 @@
   </div>
 </div>
 {% endblock %}
+{% block ad %}{% endblock %}

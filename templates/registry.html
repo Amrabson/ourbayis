@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ t('reg_for') }} {{ pick(reg, 'couple_names') }}{% endblock %}
+{% block robots %}{% if reg['visibility'] is defined and reg['visibility'] != 'public' %}<meta name="robots" content="noindex">{% endif %}{% endblock %}
 {% block content %}
 
-<section class="reg-hero">
+<section class="reg-hero glass">
   <div class="wrap">
     <p class="reg-eyebrow">{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · {{ reg['event_date'] }}{% endif %}{% if reg['city'] %} · {{ reg['city'] }}{% endif %}</p>
     <h1>{{ pick(reg, 'title') }}</h1>
@@ -29,7 +30,7 @@
   {% if pay_links %}
   <div class="cash-card">
     <div>
-      <h2><svg class="ic"><use href="#i-heart"/></svg> {{ t('reg_cash_title') }}</h2>
+      <h2><svg class="ic"><use href="#i-gift"/></svg> {{ t('reg_cash_title') }}</h2>
       <p>{{ t('reg_cash_body') }}</p>
     </div>
     <button class="btn btn-gold" data-modal="cash-modal">{{ t('reg_cash_btn') }}</button>
@@ -58,25 +59,36 @@
     {% set left = item['qty_wanted'] - got %}
     <article class="gift-card {% if left <= 0 %}is-gifted{% endif %}" id="item-{{ item['id'] }}" data-cat="{{ item['category'] }}">
       {% if item['image'] %}
-      <div class="gift-ph gift-img"><img src="{{ item['image'] }}" alt="" loading="lazy"></div>
+      <div class="gift-ph gift-img"><img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" width="240" height="180"></div>
       {% else %}
-      <div class="gift-ph ph-{{ item['category'] }}">
-        <svg class="ic ic-lg"><use href="#i-{{ categories[item['category']][0] if item['category'] in categories else 'house' }}"/></svg>
+      <div class="gift-ph ph-{{ item['category'] }} ill-box">
+        <svg class="ic ic-lg"><use href="#ill-{{ item['category'] if item['category'] in categories else 'home' }}"/></svg>
       </div>
       {% endif %}
       <div class="gift-body">
         {% if item['priority'] %}<span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>{% endif %}
         {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
         <h3>{{ pick(item, 'name') }}</h3>
-        <p class="gift-meta">
-          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> <span class="usd">({{ t('price_about') }} ${{ usd(item['price_nis']) }})</span>{% endif %}
+        <p class="gift-meta bdi">
+          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> <span class="usd">({{ t('price_about') }} ${{ usd(item['price_nis']) }})</span>{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
           {% if item['store'] %} · {{ item['store'] }}{% endif %}
         </p>
+        {% if item['price_status'] is defined and item['price_status'] == 'verified' and item['price_checked_at'] %}
+        <span class="badge badge-plain">{{ tf('price_checked_tag', date=item['price_checked_at'][:10]) }}</span>
+        {% elif item['price_status'] is defined %}
+        <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
+        {% endif %}
         {% if item['qty_wanted'] > 1 %}<p class="gift-qty">{{ tf('left_of', left=left if left > 0 else 0, qty=item['qty_wanted']) }}</p>{% endif %}
         {% if left > 0 %}
-          {% if item['url'] or pay_links %}
+          {% if item['url'] and pay_links %}
           <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}">
             <svg class="ic"><use href="#i-gift"/></svg> {{ t('gift_this') }}</button>
+          {% elif item['url'] %}
+          <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}">
+            <svg class="ic"><use href="#i-link"/></svg> {{ t('reserve_buy_btn') }}</button>
+          {% elif pay_links %}
+          <button class="btn btn-gold btn-block" data-modal="claim-{{ item['id'] }}">
+            <svg class="ic"><use href="#i-gift"/></svg> {{ t('send_money_btn') }}</button>
           {% else %}
           <p class="hint idea-note">{{ t('item_idea_note') }}</p>
           {% endif %}

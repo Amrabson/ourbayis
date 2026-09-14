@@ -4,6 +4,13 @@
 <div class="wrap section narrow" style="text-align:center">
   <h1 class="section-title">{{ t('err_' ~ code ~ '_t') }}</h1>
   <p class="page-sub">{{ t('err_' ~ code ~ '_b') }}</p>
-  <a class="btn btn-primary btn-lg" href="{{ url_for('index') }}">{{ t('back_home') }}</a>
+  <div class="hero-ctas" style="justify-content:center">
+    <a class="btn btn-primary btn-lg" href="{{ url_for('index') }}">{{ t('back_home') }}</a>
+    <a class="btn btn-ghost btn-lg" href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }}</a>
+  </div>
+  <form class="find-form err-find" method="get" action="{{ url_for('find') }}">
+    <input type="search" name="q" placeholder="{{ t('find_placeholder') }}" aria-label="{{ t('notfound_search_label') }}">
+    <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
+  </form>
 </div>
 {% endblock %}

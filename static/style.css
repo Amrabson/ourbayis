@@ -562,3 +562,190 @@ textarea { resize: vertical; }
   .pop-grid { grid-template-columns: 1fr; }
   .cash-card, .shana-band-inner { flex-direction: column; align-items: flex-start; }
 }
+
+/* =====================================================================
+   v3 phase 2 — glass system, light field, illustrations, reveal motion
+   ===================================================================== */
+:root {
+  --glass-bg: rgba(250, 246, 236, .62);
+  --glass-border: rgba(255, 255, 255, .55);
+  --glass-shadow: 0 12px 40px rgba(22, 34, 60, .16);
+  --max-w: 1120px;
+  --sp-1: 8px; --sp-2: 16px; --sp-3: 24px; --sp-4: 32px; --sp-5: 48px; --sp-6: 64px;
+}
+
+/* generous but consistent content width for phase-2 sections */
+.wrap { max-width: var(--max-w); }
+
+/* -------- glass surfaces -------- */
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--glass-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6), var(--glass-shadow);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .glass { background: var(--card); }
+}
+.site-header.glass {
+  background: var(--glass-bg);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: none;
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .site-header.glass { background: var(--paper); }
+}
+.glass-panel {
+  border-radius: var(--radius); padding: 32px;
+}
+.glass-card { border-radius: var(--radius); }
+
+/* -------- hero light field (CSS only, no libraries) -------- */
+.hero { position: relative; overflow: hidden; }
+.light-field {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+}
+.light-field span {
+  position: absolute; border-radius: 50%; filter: blur(46px); opacity: .55;
+  animation: drift 34s ease-in-out infinite alternate;
+}
+.light-field span:nth-child(1) { width: 380px; height: 380px; background: radial-gradient(circle, var(--gold-soft), transparent 70%); top: -140px; inset-inline-start: -80px; animation-duration: 36s; }
+.light-field span:nth-child(2) { width: 320px; height: 320px; background: radial-gradient(circle, var(--gold-bright), transparent 70%); opacity: .28; top: 20px; inset-inline-end: -60px; animation-duration: 29s; animation-delay: -6s; }
+.light-field span:nth-child(3) { width: 260px; height: 260px; background: radial-gradient(circle, var(--navy-soft), transparent 70%); bottom: -100px; inset-inline-start: 30%; animation-duration: 40s; animation-delay: -14s; }
+.light-field span:nth-child(4) { width: 300px; height: 300px; background: radial-gradient(circle, #fff, transparent 70%); opacity: .4; bottom: -60px; inset-inline-end: 10%; animation-duration: 33s; animation-delay: -20s; }
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, -30px) scale(1.12); }
+}
+.hero-inner, .hero > .wrap { position: relative; z-index: 1; }
+.hero-card {
+  border-radius: var(--radius); padding: 40px 32px; margin-inline: auto;
+  max-width: 900px;
+}
+
+/* line-art draw-in */
+.hero-art svg .draw {
+  stroke-dasharray: 1400; stroke-dashoffset: 1400;
+  animation: draw-in 2.6s ease-out forwards;
+}
+@keyframes draw-in { to { stroke-dashoffset: 0; } }
+
+/* foil shimmer on primary gold button */
+.btn-gold { position: relative; overflow: hidden; }
+.btn-gold::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, .55) 48%, transparent 66%);
+  transform: translateX(-120%);
+}
+.btn-gold:hover::after { transform: translateX(120%); transition: transform .7s ease; }
+.btn-primary, .btn-ghost { transition: transform .15s, box-shadow .15s, background .15s, color .15s; }
+
+.gift-card, .cat-tile, .pop-card, .bundle-card { transition: transform .18s, box-shadow .18s, border-color .18s; }
+
+/* -------- reveal-on-scroll -------- */
+.reveal { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: no-preference) {
+  .reveal { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .light-field span, .btn-gold::after, .hero-art svg .draw, .tw { animation: none !important; }
+  .hero-art svg .draw { stroke-dashoffset: 0; }
+}
+
+/* -------- category illustrations -------- */
+.gift-ph.ill-box { display: grid; place-items: center; }
+.gift-ph.ill-box svg { width: 42%; height: 42%; }
+.ph-kitchen.ill-box { background: #f3e6d8; }
+.ph-appliances.ill-box { background: #e2e9f2; }
+.ph-dining.ill-box { background: #f4ecd4; }
+.ph-bedding.ill-box { background: #ece6f2; }
+.ph-judaica.ill-box { background: #e2ece6; }
+.ph-home.ill-box { background: #ece5db; }
+
+/* reserved 4:3 image box */
+.gift-ph, .gift-img { aspect-ratio: 4 / 3; height: auto; }
+.gift-img img.gift-img-img { width: 100%; height: 100%; object-fit: contain; }
+
+/* -------- focus rings -------- */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, .chip:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--gold-soft);
+  border-radius: 4px;
+}
+dialog:focus-visible { outline: none; }
+
+/* -------- RTL-safe bidi isolation -------- */
+.bdi, bdi { unicode-bidi: isolate; }
+
+/* -------- min touch targets -------- */
+.btn, input, select, textarea, .chip { min-height: 44px; }
+.btn-sm { min-height: 38px; }
+.chip { display: inline-flex; align-items: center; }
+
+/* -------- sticky glass filter bar (catalog) -------- */
+.filter-bar {
+  position: sticky; top: 64px; z-index: 20;
+  border-radius: var(--radius); padding: 16px 18px; margin-bottom: 24px;
+}
+.filter-bar .chip-row { margin-bottom: 10px; }
+.filter-summary { color: var(--ink-soft); font-size: .9rem; margin: 6px 0 0; }
+.filter-reset { font-weight: 700; color: var(--gold); text-decoration: underline; }
+
+/* -------- registry hero glass -------- */
+.reg-hero.glass, .shana-hero.glass {
+  background: linear-gradient(135deg, rgba(34, 51, 84, .78), rgba(22, 34, 60, .82));
+  color: #dfe4ee; border: 1px solid rgba(255, 255, 255, .18);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .reg-hero.glass, .shana-hero.glass { background: linear-gradient(135deg, var(--navy), var(--navy-deep)); }
+}
+
+/* -------- guest status stepper -------- */
+.stepper { display: flex; gap: 6px; list-style: none; margin: 14px 0 4px; padding: 0; flex-wrap: wrap; }
+.stepper li {
+  flex: 1; min-width: 90px; text-align: center; font-size: .82rem; font-weight: 700;
+  color: var(--ink-soft); padding: 8px 6px 10px; border-bottom: 3px solid var(--line); position: relative;
+}
+.stepper li.done { color: var(--green); border-bottom-color: var(--green); }
+.stepper li.current { color: var(--navy); border-bottom-color: var(--gold); }
+.stepper li.cancelled-step { color: var(--danger); border-bottom-color: var(--danger); }
+
+/* -------- sample registry (illustration only) -------- */
+.sample-panel { position: relative; }
+.sample-flag {
+  display: inline-flex; align-items: center; gap: 6px; margin-bottom: 14px;
+  background: var(--gold-soft); color: var(--gold); border: 1px solid var(--gold-bright);
+  border-radius: 999px; padding: 4px 12px; font-size: .78rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.sample-btn-disabled {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; border-radius: var(--radius-sm); padding: 10px 22px;
+  font: 600 1rem var(--font-body); background: var(--paper-deep); color: var(--ink-soft);
+  border: 1px dashed var(--line); cursor: not-allowed;
+}
+
+/* -------- FAQ details -------- */
+.faq-list { display: flex; flex-direction: column; gap: 10px; max-width: 780px; margin-inline: auto; }
+.faq-list details {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 4px 18px;
+}
+.faq-list summary { cursor: pointer; font-weight: 700; color: var(--navy); padding: 14px 0; }
+.faq-list summary::marker { color: var(--gold); }
+.faq-list p { color: var(--ink-soft); margin: 0 0 14px; }
+
+/* -------- find box on error/404 -------- */
+.err-find { max-width: 420px; margin: 26px auto 0; }
+
+@media (max-width: 900px) {
+  .filter-bar { position: static; }
+  .stepper li { min-width: 70px; font-size: .75rem; }
+}
+@media (max-width: 520px) {
+  .hero-card { padding: 26px 18px; }
+}

@@ -2,9 +2,24 @@
 {% block title %}{{ t('guest_manage_title') }} — {{ brand }}{% endblock %}
 {% block content %}
 <div class="wrap section narrow">
-  <div class="form-panel">
+  <div class="glass glass-panel">
     <h1 class="section-title">{{ t('guest_manage_title') }}</h1>
     <p class="page-sub">{{ pick(reg, 'title') }} — {{ pick(reg, 'couple_names') }}</p>
+
+    {% set _steps = ['reserved', 'reported', 'received'] %}
+    {% set _status_for_stepper = 'reserved' if claim['status'] == 'expired' else claim['status'] %}
+    {% if _status_for_stepper in _steps %}
+    {% set _current_idx = _steps.index(_status_for_stepper) %}
+    <ul class="stepper" aria-label="{{ t('guest_manage_title') }}">
+      {% for s in _steps %}
+      <li class="{% if loop.index0 < _current_idx %}done{% elif loop.index0 == _current_idx %}current{% endif %}">
+        {{ t('claim_status_' ~ s) }}
+      </li>
+      {% endfor %}
+    </ul>
+    {% elif claim['status'] == 'cancelled' %}
+    <ul class="stepper"><li class="cancelled-step">{{ t('claim_status_cancelled') }}</li></ul>
+    {% endif %}
 
     <div class="notice-panel">
       <strong>{{ t('claim_status_' ~ claim['status']) }}</strong>
@@ -23,14 +38,14 @@
 
     {% if item %}
     <h2 class="sub-title">{{ pick(item, 'name') }}{% if claim['qty'] > 1 %} ×{{ claim['qty'] }}{% endif %}</h2>
-    {% if item['store'] and item['url'] %}
-    <a class="store-link" href="{{ item['url'] }}" target="_blank" rel="noopener">
-      <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) }}</a>
+    {% if item['url'] %}
+    <a class="store-link bdi" href="{{ item['url'] }}" target="_blank" rel="noopener">
+      <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }}</a>
     {% endif %}
     {% endif %}
 
     {% if claim['amount_minor'] is not none %}
-    <p class="gift-meta"><strong>{{ fmt_money(claim['amount_minor'], claim['currency']) }}</strong></p>
+    <p class="gift-meta bdi"><strong>{{ fmt_money(claim['amount_minor'], claim['currency']) }}</strong></p>
     {% endif %}
 
     {% if claim['kind'] == 'cash' and pay_links %}
@@ -63,11 +78,14 @@
     </div>
     {% endif %}
 
-    <div class="share-link-row">
-      <code class="share-url">{{ request.url }}</code>
-      <button class="btn btn-ghost" data-copy="{{ request.url }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
+    <div class="notice-panel" style="flex-direction:column;align-items:stretch;gap:8px">
+      <p style="margin:0"><strong>{{ t('guest_save_link_hint') }}</strong></p>
+      <div class="share-link-row">
+        <code class="share-url bdi">{{ request.url }}</code>
+        <button class="btn btn-ghost" data-copy="{{ request.url }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
+      </div>
     </div>
-    <p class="hint">{{ t('guest_save_link_hint') }}</p>
   </div>
 </div>
 {% endblock %}
+{% block ad %}{% endblock %}

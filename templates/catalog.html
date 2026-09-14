@@ -6,18 +6,25 @@
   <h1 class="section-title">{{ t('catalog_title') }}</h1>
   <p class="page-sub">{{ t('catalog_sub') }}</p>
 
-  <div class="chip-row">
-    <a class="chip {% if not cat %}active{% endif %}" href="{{ url_for('catalog_page', q=q or None) }}">{{ t('all_cats') }}</a>
-    {% for slug, (icon, en, he) in categories.items() %}
-    <a class="chip {% if cat == slug %}active{% endif %}" href="{{ url_for('catalog_page', cat=slug, q=q or None) }}">{{ cat_label(slug) }}</a>
-    {% endfor %}
+  <div class="glass filter-bar">
+    <div class="chip-row" id="cat-chips-static">
+      <a class="chip {% if not cat %}active{% endif %}" href="{{ url_for('catalog_page', q=q or None) }}">{{ t('all_cats') }}</a>
+      {% for slug, (icon, en, he) in categories.items() %}
+      <a class="chip {% if cat == slug %}active{% endif %}" href="{{ url_for('catalog_page', cat=slug, q=q or None) }}">{{ cat_label(slug) }}</a>
+      {% endfor %}
+    </div>
+    <form class="find-form catalog-search" method="get" action="{{ url_for('catalog_page') }}" style="margin-bottom:0">
+      {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
+      <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_catalog') }}">
+      <button class="btn btn-ghost" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
+    </form>
+    {% if cat or q %}
+    <p class="filter-summary">
+      {% if cat %}{{ cat_label(cat) }}{% endif %}{% if cat and q %} · {% endif %}{% if q %}“{{ q }}”{% endif %}
+      — <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a>
+    </p>
+    {% endif %}
   </div>
-
-  <form class="find-form catalog-search" method="get" action="{{ url_for('catalog_page') }}">
-    {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
-    <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_catalog') }}">
-    <button class="btn btn-ghost" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
-  </form>
 
   {% if not items %}
     <p class="empty-note">{{ t('catalog_none') }}</p>
@@ -27,20 +34,25 @@
     {% for item in items %}
     <article class="gift-card">
       {% if item['image'] %}
-      <div class="gift-ph gift-img"><img src="{{ item['image'] }}" alt="" loading="lazy"></div>
+      <div class="gift-ph gift-img"><img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" width="240" height="180"></div>
       {% else %}
-      <div class="gift-ph ph-{{ item['category'] }}">
-        <svg class="ic ic-lg"><use href="#i-{{ categories[item['category']][0] if item['category'] in categories else 'house' }}"/></svg>
+      <div class="gift-ph ph-{{ item['category'] }} ill-box">
+        <svg class="ic ic-lg"><use href="#ill-{{ item['category'] if item['category'] in categories else 'home' }}"/></svg>
       </div>
       {% endif %}
       <div class="gift-body">
         {% if item['featured'] %}<span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>{% endif %}
         {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
         <h3>{{ pick(item, 'name') }}</h3>
-        <p class="gift-meta">
-          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> <span class="usd">({{ t('price_about') }} ${{ usd(item['price_nis']) }})</span>{% endif %}
+        <p class="gift-meta bdi">
+          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> <span class="usd">({{ t('price_about') }} ${{ usd(item['price_nis']) }})</span>{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
           {% if item['store'] %} · {{ item['store'] }}{% endif %}
         </p>
+        {% if item['price_status'] is defined and item['price_status'] == 'verified' and item['price_checked_at'] %}
+        <span class="badge badge-plain">{{ tf('price_checked_tag', date=item['price_checked_at'][:10]) }}</span>
+        {% elif item['price_status'] is defined %}
+        <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
+        {% endif %}
         {% if has_reg %}
           {% if item['id'] in have %}
           <span class="gifted-tag"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>

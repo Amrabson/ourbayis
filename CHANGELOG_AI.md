@@ -1,5 +1,57 @@
 # Changelog
 
+## 2026-09-14 — v3 phase 2 (design system + homepage)
+Visual system: glassmorphic sticky header + hero/registry-hero/guest-status/modal panels
+(`.glass`/`.glass-panel`, `backdrop-filter: blur(14px) saturate(1.2)` with a solid
+`@supports not` fallback); CSS-only hero light field (4 drifting blurred bokeh blobs),
+skyline/chuppah line-art draw-in animation, gold foil shimmer on `.btn-gold`, card
+lift-on-hover, `IntersectionObserver` `.reveal`/`.in` section fade-ins — all disabled under
+`prefers-reduced-motion: reduce`. New per-category SVG line illustrations (`ill-kitchen`,
+`ill-appliances`, `ill-dining`, `ill-bedding`, `ill-judaica`, `ill-home`) replace the flat
+icon-on-colour placeholders, shown in a reserved 4:3 `.gift-ph.ill-box`; a broken/missing
+`<img class="gift-img-img">` falls back to the illustration via an `app.js` `error` listener.
+44px controls, visible `:focus-visible` rings, `.bdi`/`<bdi>` isolation around prices/URLs,
+sticky glass filter bar with active-filter summary + reset on `/catalog`.
+
+Homepage rewritten end-to-end per SPEC_V3 "Rebuild the homepage": hero (glass card + light
+field), couples/guests how-it-works, catalog teaser labelled as illustrative, "why it fits an
+Israeli home" (220V/plugs, local sizes, Shabbos+kashrus), a static **sample registry**
+(illustration only — synthetic couple, `aria-disabled` buttons, no real links/POSTs), a Shana
+Rishonah intro band, a 6-item FAQ (`<details>`, also emitted as FAQPage JSON-LD on
+`how-it-works`), final CTA. `how.html`, `about.html` (no longer US-only — UK/SA/AU/CA/olim
+generally), `catalog.html`, `registry.html`, `guest_manage.html` (status stepper, store link
+shown whenever `item['url']` exists regardless of store name, "save this link" box),
+`privacy.html` (rewritten to match actual behavior: session cookie only, no analytics,
+no-PII daily counters, mail outbox, guest recovery token hashing, affiliate links, deletion —
+marked `[owner/legal review]` where a legal call is needed), `error.html`/`404.html` (find-a-registry
+search box) all updated. `base.html` gained `{% block robots %}`/`{% block jsonld %}`/
+`{% block ad %}` (empty-overridden on login/signup/forgot/reset/guest_manage), canonical +
+hreflang (en/he/x-default) links, `og:image`/`og:site_name`/`twitter:card`, and the six
+illustration `<symbol>`s in the sprite. `tools/make_og.py` (new, Pillow-only) generates
+`static/og.png` (1200×630).
+
+Registry gift-card button label now varies by what the item actually offers (SPEC_V3 "Card
+rules"): url-only → "Reserve and buy from the store", pay-links-only → "Send money for this
+gift", both → "Gift this" (opens the modal with the buy/cash radio choice), neither → muted
+"the couple will share where to buy" with no button. Price 0 shows "Price not set" instead of
+being blank. `catalog_items.price_status`/`price_checked_at` (added by the parallel backend
+agent this phase) are read defensively via `is defined` since `registry_items` doesn't carry
+them — a "Checked <date>" vs "estimate" badge shows wherever they're present.
+
+`app.js`: reveal-on-scroll observer, modal opener tracked and refocused on close, clipboard
+copy falls back to `window.prompt` when the Clipboard API is unavailable/denied.
+
+Verification: `python -m pytest -q` stays green (27 passed, untouched by this phase); every
+public route smoke-rendered EN+HE via Flask's test client (home, how, about, find, catalog,
+login, signup, forgot, contact, privacy, 404, registry with items + a claim end-to-end, guest
+manage). Browser-tool visual pass at 375/1280 width, EN+HE, incl. keyboard focus ring and FAQ
+`<details>` toggle — no console errors, no horizontal overflow. One `/r/<slug>` 404 was seen in
+the live dev-server browser session on a registry whose `visibility` the concurrently-running
+backend agent's `app.py` didn't yet resolve consistently with the DB row (`app.py` is out of
+scope for this phase) — templates themselves were already verified end-to-end via the test
+client, which did hit registry.html/guest_manage.html successfully (stepper, claim modal, card
+button rules all rendered).
+
 ## 2026-09-14 — v3 phase 1 (P0 backend)
 Implemented per SPEC_V3.md: new modules `ob_db.py`, `ob_security.py`, `ob_mail.py`,
 `ob_money.py`, `manage.py`; `app.py` rewritten to use them; new `static/app.js` (CSP is now
