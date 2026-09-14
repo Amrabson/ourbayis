@@ -1,5 +1,72 @@
 # Changelog
 
+## 2026-09-14 — v3 phase 3 (catalog, onboarding, dashboard, concierge, admin) + integration pass
+**Phase 3 (Sonnet agent; the run was cut off mid-docs, code was fully committed):**
+- Catalog data model: `seed_catalog.json` items carry `seed_key`, `kind` (product/idea), `featured`
+  (the 8 from the snapshot), `starter_group` (first_week/kitchen/shabbos/bedbath/appliances) and
+  `price_status`/`price_checked_at`/`price_source` mapped from the July price-audit entries below
+  (55 rows marked verified — **owner: spot-check that mapping**, the July notes say 31 of ~48 branded
+  items + the 8 big-ticket ones). Seed sync now matches by `seed_key` (one-time adoption of legacy
+  rows by exact name), never re-inserts retired rows, never overwrites admin edits. Explicit
+  `manage.py seed-sync --fields … [--apply]` and `manage.py refresh-registry-links` (respects the
+  couple's `overrides`, never touches claims/price/qty/priority/note).
+- Card rules helper `gift_routes(item)` + `/go/c/<id>` / `/go/i/<id>` click tracking (DB-stored URL
+  only, `validate_url` re-checked, no query-string redirects).
+- Admin catalog: search, filters (category / missing link / missing image / price status / inactive),
+  queue counts, full metadata form with server-side URL validation, soft "Retire", CSV export
+  (formula-safe) and CSV import with dry-run diff. "Missing affiliate link" → "missing store link".
+- Registry form: 4 sections with step header (details → Israel preferences → payment → visibility);
+  `preferences_json` (bed size, apartment size, furnishing, needed-by, before-arrival list);
+  provider-validated pay links with per-provider errors; draft/unlisted/public with honest hints;
+  values preserved on validation errors; `pending_add` keeps catalog picks across signup.
+- Items: starter-pack picker grouped by starter_group with qty + "already added"; per-item edit page
+  (name/brand/price/url/store/qty/priority/note/variant/kind; qty below committed rejected; edited
+  inherited fields recorded in `overrides`); archived section; "needs a link or payment method" flag.
+- Dashboard: state-driven checklist (details / ≥5 usable gifts / payment method / visibility reviewed /
+  previewed / shared), action queues (awaiting confirmation, reserved & waiting with expiry, thank-yous
+  outstanding), per-currency totals, `/dashboard/print` insert with local QR, `/dashboard/claims.csv`,
+  `/dashboard/shared` beacon. Account page: JSON export + password-confirmed deletion.
+- Concierge: email-or-WhatsApp requirement, neighborhood/furnishing/budget, address no longer collected
+  publicly; bundle cards split Included / optional extras / not included / coordination vs installation /
+  lead time "confirmed per quote". Admin `/admin/lead/<id>`: 7-stage pipeline (legacy `done` → `completed`),
+  internal notes, next action + date, duplicate hint, cost breakdown → total/profit/margin server-side.
+- Admin: `/admin/outbox` (masked recipients, retry), `/admin/backup.db`, funnel table.
+- Privacy/SEO plumbing: draft registries hidden from non-owners, `?preview=1`, `canonical_url`/
+  `alt_urls`/`noindex` globals, `find`/sitemap only for `visibility='public'`, robots disallows `/g/`.
+- Duplicate `form_key` POSTs now redirect to the same `/g/<token>` (token kept in session, capped at 10).
+- Tests: `tests/test_p1.py` (20 tests) → 47 total.
+
+**Integration pass (review model), after both parallel agents finished:**
+- `base.html` now renders the server-computed `canonical_url`/`alt_urls` and a `noindex` meta for every
+  private/filtered page (filter/search result pages are noindexed; canonical never carries filter params).
+  Added `<meta name="csrf-token">` and a display-currency toggle in the header (only when `OB_RATES`
+  configures more than ILS).
+- Store links on registry/guest pages go through `/go/` (`rel="noopener sponsored"`); `app.js` fires the
+  dashboard share beacon (copy/WhatsApp) with the CSRF token.
+- Currency: `usd()` no longer used in templates. `estimate_label()` gives a short "≈ $59" (whole units,
+  guest default = registry's display currency, else USD when configured); `estimate_note()` prints one
+  per-page footnote with the rate date. Bidi-isolated for Hebrew.
+- **Server-side gift routes**: `claim_item` now refuses items with neither a store URL nor a payment link
+  and forces the cash route when there is no store URL (previously template-only).
+- Claim modal shows price + a route explanation; guest page shows "Amount to send", provider-labelled
+  button with the destination host, and a clean save-link URL.
+- Copy: "Popular gifts right now" → "A taste of the catalog" (no popularity claim); removed the
+  "Most wanted" badge from concierge bundles; progress bar says "reserved or received";
+  dashboard "Release" → "Cancel reservation" (explicitly no refund); privacy deletion paragraph now
+  describes the self-service Account page.
+- CSS for all phase-3 components (checklist, queues, starter picker, step header, visibility radios,
+  admin tables) in the same parchment/gold system; 1-column gift grid under 430px; fixed an RTL
+  horizontal-overflow bug caused by the honeypot input's `left:-9999px` (now `inset-inline-start`).
+- Dev tooling: `run_dev.py` forces a %TEMP% database (the user-level launch.json's old `ourbayis` entry
+  ran the real DB — a new `ourbayis-v3` entry points at the wrapper). The repo `ourbayis.db` was restored
+  from `backups/ourbayis-snapshot-2026-09-14.db` after that slip; the snapshot itself was never touched.
+
+**Verified this pass:** `python -m pytest -q` → 47 passed. Browser checks (in-app Chromium) at ~700px and
+375px, EN + HE: home, catalog (filtered), registry, claim modal, guest manage page, dashboard, starter
+picker, registry form, concierge; no console errors; no horizontal overflow after the honeypot fix. Admin
+routes smoke-tested with the Flask test client (all 200), lead quote math checked (₪6,900 quote on ₪5,200
+cost → 24.6 % margin).
+
 ## 2026-09-14 — v3 phase 2 (design system + homepage)
 Visual system: glassmorphic sticky header + hero/registry-hero/guest-status/modal panels
 (`.glass`/`.glass-panel`, `backdrop-filter: blur(14px) saturate(1.2)` with a solid

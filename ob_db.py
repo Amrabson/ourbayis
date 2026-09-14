@@ -596,6 +596,13 @@ MIGRATIONS = [
 ]
 
 
+def pending_migrations(db):
+    """Versions not yet applied — read-only (no table creation), for `manage.py check`."""
+    have = db.execute("SELECT 1 FROM sqlite_master WHERE name='schema_migrations'").fetchone()
+    applied = {r[0] for r in db.execute("SELECT version FROM schema_migrations")} if have else set()
+    return [i for i in range(1, len(MIGRATIONS) + 1) if i not in applied]
+
+
 def migrate(db):
     """Apply every migration not yet recorded in schema_migrations, in order,
     each in its own transaction so a failure part-way doesn't mark it applied."""

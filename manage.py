@@ -32,9 +32,10 @@ def _db_path():
     return Path(os.environ.get("OB_DB_PATH") or (BASE / "ourbayis.db"))
 
 
-def _open():
+def _open(migrate=True):
     db = ob_db.connect(_db_path())
-    ob_db.migrate(db)
+    if migrate:
+        ob_db.migrate(db)
     return db
 
 
@@ -88,8 +89,13 @@ def cmd_expire_claims(args):
 
 
 def cmd_check(args):
+    """Read-only: never migrates, so it's safe to run against any copy of the DB."""
     problems = []
-    db = _open()
+    db = _open(migrate=False)
+    pending = ob_db.pending_migrations(db)
+    if pending:
+        problems.append(f"{len(pending)} pending migration(s) — they run automatically when the"
+                        " app starts (or via any other manage.py command); back up first")
     integrity = db.execute("PRAGMA integrity_check").fetchone()[0]
     if integrity != "ok":
         problems.append(f"integrity_check: {integrity}")
