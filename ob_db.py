@@ -398,6 +398,35 @@ def _m013_shana_extra(db):
     db.execute("UPDATE shana_requests SET status='completed' WHERE status='done'")
 
 
+def _m015_registry_items_price_status(db):
+    """Registry items copied from the catalog carry the catalog's price
+    confidence forward (SPEC_V3 "Card rules": "checked 2026-07-05" vs
+    "estimate"), and clicks for the /go/ handoff-click funnel."""
+    for coldef in ("price_status TEXT DEFAULT 'estimate'", "price_checked_at TEXT DEFAULT ''",
+                   "clicks INTEGER DEFAULT 0"):
+        _add_column(db, "registry_items", coldef)
+    db.execute("""
+        UPDATE registry_items SET price_status = (
+            SELECT price_status FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id
+        ), price_checked_at = (
+            SELECT price_checked_at FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id
+        )
+        WHERE catalog_id IS NOT NULL AND (price_status IS NULL OR price_status = 'estimate')
+    """)
+
+
+def _m016_registry_preview_flag(db):
+    """`preferences_json` already exists on registries (m004) — used to store
+    the dashboard checklist's visibility_reviewed_at / previewed flags. No
+    schema change needed; this migration is a documented no-op placeholder so
+    future readers of MIGRATIONS see the decision recorded (see PROJECT_KNOWLEDGE.md)."""
+    pass
+
+
+def _m017_account_deletion_index(db):
+    db.execute("CREATE INDEX IF NOT EXISTS ix_users_deleted_at ON users(deleted_at)")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -561,6 +590,9 @@ MIGRATIONS = [
     _m012_catalog_extra,
     _m013_shana_extra,
     _m014_indexes,
+    _m015_registry_items_price_status,
+    _m016_registry_preview_flag,
+    _m017_account_deletion_index,
 ]
 
 

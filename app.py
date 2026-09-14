@@ -87,6 +87,16 @@ NO_STORE_ENDPOINTS = {
     "guest_manage", "admin_home", "admin_login", "reset_password", "forgot",
 }
 
+# SPEC_V3 "Privacy / SEO": private/account/admin pages are never indexed.
+# `registry` overrides this per-request based on `visibility` (see the route).
+NOINDEX_ENDPOINTS = {
+    "dashboard", "dashboard_qr", "dashboard_print", "dashboard_shared",
+    "dashboard_claims_csv", "registry_new", "registry_edit", "items_manage",
+    "items_add", "items_starter", "item_edit", "guest_manage", "account",
+    "account_export", "account_delete", "admin_home", "admin_login",
+    "reset_password", "forgot", "signup", "login",
+}
+
 
 # ---------------------------------------------------------------- security
 @app.before_request
@@ -255,6 +265,14 @@ def is_spam():
     return bool(request.form.get("website"))
 
 
+def _prefs(reg):
+    """Parse registries.preferences_json -> dict, never raising."""
+    try:
+        return json.loads(reg["preferences_json"] or "{}")
+    except (ValueError, TypeError):
+        return {}
+
+
 def reg_pay_links(reg):
     """[(t-key, url), ...] for whichever cash-gift links the couple added and
     that still classify to a known provider."""
@@ -269,6 +287,46 @@ def reg_pay_links(reg):
             except ValueError:
                 continue
     return links
+
+
+def item_routes(item, pay_links):
+    """Card-rule plumbing (SPEC_V3 "Catalog" -> "Card rules"): what can a
+    guest actually do with this gift?
+      store — a valid store link exists -> "Reserve and buy from the store"
+      cash  — the couple has at least one working pay link -> "Send money
+              for this gift" (allowed even for a kind='idea' row: an idea
+              still needs money, it just has no store link to click through)
+    Neither -> shown as an idea with no button; the dashboard flags it."""
+    has_url = bool(item["url"]) if "url" in item.keys() else False
+    return dict(store=has_url, cash=bool(pay_links))
+
+
+def go_url(item):
+    """/go/ handoff-click URL for a catalog or registry item. Jinja global —
+    see PROJECT_KNOWLEDGE.md "Click tracking" for the return-key contract."""
+    if "clicks" not in item.keys():
+        return item["url"] if "url" in item.keys() else ""
+    if "category" in item.keys() and "registry_id" not in item.keys() and "sort" in item.keys():
+        return url_for("go_catalog", catalog_id=item["id"])
+    return url_for("go_item", item_id=item["id"])
+
+
+def estimate_label(price_nis, lang=None):
+    """"≈ $49 (approx., rate as of 2026-09-01)" in the session/registry display
+    currency, or '' when that currency is ILS (no estimate needed) or isn't
+    configured in OB_RATES. Jinja global for public templates."""
+    lang = lang or current_lang()
+    cur = session.get("cur") or "ILS"
+    if cur == "ILS" or not price_nis:
+        return ""
+    minor = int(price_nis) * 100
+    est_minor = ob_money.estimate(minor, cur)
+    if est_minor is None:
+        return ""
+    body = ob_money.fmt_minor(est_minor, cur, lang)
+    if ob_money.RATES_DATE:
+        return _t("estimate_label_dated", lang).format(amount=body, date=ob_money.RATES_DATE)
+    return _t("estimate_label", lang).format(amount=body)
 
 
 def item_claim_counts(registry_id):
@@ -314,9 +372,40 @@ def _log_claim_event(db, claim_id, event, actor, note=""):
         (claim_id, event, actor, note))
 
 
+def _canonical_and_alts():
+    """canonical_url + alt_urls (en/he) for the current GET request, computed
+    from the path with `lang` stripped/overridden — GET only (SPEC_V3
+    "Privacy / SEO" -> Canonical/hreflang)."""
+    if request.method != "GET":
+        return None, {}
+    args = request.args.to_dict(flat=True)
+    args.pop("lang", None)
+    base = request.path
+    qs = "&".join(f"{k}={v}" for k, v in args.items())
+    sep = "&" if qs else ""
+    canonical = ext_url_path(base, args, "he" if current_lang() == "he" else None)
+    alts = {
+        "en": ext_url_path(base, args, None),
+        "he": ext_url_path(base, args, "he"),
+    }
+    return canonical, alts
+
+
+def ext_url_path(path, args, lang_code):
+    q = dict(args)
+    if lang_code:
+        q["lang"] = lang_code
+    qs = "&".join(f"{k}={v}" for k, v in q.items())
+    full = (BASE_URL or request.host_url.rstrip("/")) + path
+    return full + (("?" + qs) if qs else "")
+
+
 @app.context_processor
 def inject_globals():
     lang = current_lang()
+    canonical_url, alt_urls = _canonical_and_alts()
+    ep = request.endpoint or ""
+    default_noindex = ep.startswith("admin") or ep in NOINDEX_ENDPOINTS or request.path.startswith("/g/")
     return dict(
         brand=BRAND,
         lang=lang,
@@ -329,6 +418,9 @@ def inject_globals():
         event_types=EVENT_TYPES,
         usd=usd,
         fmt_money=lambda minor, cur: ob_money.fmt_minor(minor, cur, lang),
+        estimate_label=lambda price_nis: estimate_label(price_nis, lang),
+        rates_date=ob_money.RATES_DATE,
+        display_currency=session.get("cur") or "ILS",
         currencies=ob_money.CURRENCIES,
         csrf_token=_ensure_csrf(),
         user=current_user(),
@@ -339,7 +431,24 @@ def inject_globals():
         now_year=datetime.now().year,
         classify_pay_url=ob_security.classify_pay_url,
         form_key=secrets.token_urlsafe(16),
+        gift_routes=lambda item: item_routes(item, reg_pay_links_for_item(item)),
+        go_url=go_url,
+        canonical_url=canonical_url,
+        alt_urls=alt_urls,
+        noindex=default_noindex,
     )
+
+
+def reg_pay_links_for_item(item):
+    """gift_routes(item) needs the owning registry's pay links; item rows
+    (registry_items / claims joins) don't carry them, so look the registry
+    up. Cheap: one indexed lookup, only called from templates that already
+    have `pay_links` in scope most of the time — kept for the documented
+    Jinja `gift_routes()` contract in PROJECT_KNOWLEDGE.md."""
+    if "registry_id" not in item.keys():
+        return []
+    reg = get_db().execute("SELECT * FROM registries WHERE id=?", (item["registry_id"],)).fetchone()
+    return reg_pay_links(reg) if reg else []
 
 
 # ---------------------------------------------------------------- public pages
@@ -347,7 +456,7 @@ def inject_globals():
 def index():
     db = get_db()
     featured = db.execute(
-        "SELECT * FROM catalog_items WHERE active=1 ORDER BY featured DESC, sort LIMIT 8").fetchall()
+        "SELECT * FROM catalog_items WHERE active=1 AND featured=1 ORDER BY sort LIMIT 8").fetchall()
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
     return render_template("index.html", featured=featured, bundles=bundles)
 
@@ -406,6 +515,32 @@ def catalog_page():
                            have=have, has_reg=bool(reg))
 
 
+@app.route("/go/c/<int:catalog_id>")
+def go_catalog(catalog_id):
+    """Click-through to a catalog item's store link. The destination is
+    always read from the DB, never from the query string (no open redirect),
+    and is re-validated even though it was validated on save."""
+    db = get_db()
+    row = db.execute("SELECT * FROM catalog_items WHERE id=?", (catalog_id,)).fetchone()
+    if not row or not valid_http_url(row["url"]):
+        abort(404)
+    db.execute("UPDATE catalog_items SET clicks = clicks + 1 WHERE id=?", (catalog_id,))
+    track("handoff_click")
+    return redirect(row["url"], code=302)
+
+
+@app.route("/go/i/<int:item_id>")
+def go_item(item_id):
+    db = get_db()
+    row = db.execute("SELECT * FROM registry_items WHERE id=?", (item_id,)).fetchone()
+    if not row or not valid_http_url(row["url"]):
+        abort(404)
+    db.execute("UPDATE registry_items SET clicks = clicks + 1 WHERE id=?", (item_id,))
+    reg = db.execute("SELECT user_id FROM registries WHERE id=?", (row["registry_id"],)).fetchone()
+    track("handoff_click", owner_uid=reg["user_id"] if reg else None)
+    return redirect(row["url"], code=302)
+
+
 @app.route("/find")
 def find():
     q = (request.args.get("q") or "").strip()
@@ -453,9 +588,19 @@ def registry(slug):
         abort(404)
     is_owner = session.get("uid") == reg["user_id"]
     if reg["visibility"] == "draft" and not is_owner and not session.get("admin"):
-        abort(404)
+        resp = app.make_response(
+            render_template("error.html", code=404, draft_not_published=True))
+        resp.status_code = 404
+        return resp
     if not is_owner:
         db.execute("UPDATE registries SET views = views + 1 WHERE id=?", (reg["id"],))
+    is_preview = is_owner and request.args.get("preview") == "1"
+    if is_preview:
+        prefs = _prefs(reg)
+        if not prefs.get("previewed_at"):
+            prefs["previewed_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            db.execute("UPDATE registries SET preferences_json=? WHERE id=?",
+                      (json.dumps(prefs), reg["id"]))
     days_to_go = None
     try:
         days_to_go = (date.fromisoformat(reg["event_date"]) - date.today()).days
@@ -479,7 +624,9 @@ def registry(slug):
             pass
     return render_template("registry.html", reg=reg, items=items, claimed=claimed,
                            total=total, done=done, bought_item=bought_item,
-                           pay_links=reg_pay_links(reg), days_to_go=days_to_go)
+                           pay_links=reg_pay_links(reg), days_to_go=days_to_go,
+                           is_owner=is_owner, is_preview=is_preview,
+                           noindex=(reg["visibility"] != "public"))
 
 
 @app.route("/r/<slug>/claim/<int:item_id>", methods=["POST"])
@@ -1421,8 +1568,7 @@ def robots():
 @app.route("/sitemap.xml")
 def sitemap():
     pages = [ext_url(p) for p in
-             ("index", "how", "find", "catalog_page", "shana", "about", "contact",
-              "privacy", "signup")]
+             ("index", "how", "find", "catalog_page", "shana", "about", "contact", "privacy")]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in pages:
