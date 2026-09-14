@@ -350,3 +350,31 @@ def test_bilingual_render_of_new_pages(client, app_module, lang):
                 "/shana-rishonah", "/registry/edit"):
         r = client.get(f"{path}?lang={lang}")
         assert r.status_code == 200, (path, lang)
+
+
+def test_migrated_legacy_db_gets_starter_groups_and_verified_links_stay_opt_in(tmp_path, monkeypatch):
+    """Regression: migration 12 assigns seed_keys to legacy rows itself, so the
+    seed-sync 'adopt' path never ran on real installs and starter groups stayed
+    empty. Metadata still at its default must be filled; url/price never."""
+    import shutil
+    import sys
+    from pathlib import Path
+    snap = Path(BASE) / "backups" / "ourbayis-snapshot-2026-09-14.db"
+    if not snap.exists():
+        pytest.skip("snapshot DB not available")
+    db_path = tmp_path / "legacy.db"
+    shutil.copy(snap, db_path)
+    monkeypatch.setenv("OB_DB_PATH", str(db_path))
+    monkeypatch.setenv("OB_SECRET_KEY", "test-secret-key")
+    for mod in list(sys.modules):
+        if mod == "app" or mod.startswith("ob_"):
+            del sys.modules[mod]
+    import app  # noqa: F401  (runs migrate + seed_sync)
+    import sqlite3
+    db = sqlite3.connect(db_path)
+    groups = {r[0] for r in db.execute("SELECT DISTINCT starter_group FROM catalog_items")}
+    assert {"first_week", "kitchen", "shabbos", "bedbath", "appliances"} <= groups
+    assert db.execute("SELECT COUNT(*) FROM catalog_items").fetchone()[0] == 117  # no duplicates
+    assert db.execute("SELECT COUNT(*) FROM catalog_items WHERE url != ''").fetchone()[0] == 0
+    # the renamed seed item adopted the old row rather than inserting a second one
+    assert db.execute("SELECT COUNT(*) FROM catalog_items WHERE name LIKE 'Folding table%'").fetchone()[0] == 1

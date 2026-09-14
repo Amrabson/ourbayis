@@ -448,6 +448,10 @@ _ADOPT_FIELDS = {
     "price_status": "estimate",
     "price_checked_at": "",
     "price_source": "",
+    "model": "",
+    "availability": "unknown",
+    "notes": "",
+    "notes_he": "",
 }
 
 
@@ -472,9 +476,25 @@ def seed_sync(db, seed_items, dry_run=False):
     for i, it in enumerate(seed_items):
         key = it["seed_key"]
         if key in have_keys:
+            # Already keyed (migration 12 assigns seed_keys to legacy rows by
+            # slugified name, so real installs land here, not in "adopt").
+            # Fill ONLY metadata still at its default — never price/url/name/
+            # store/brand/active/featured, which the admin owns.
+            row = db.execute("SELECT * FROM catalog_items WHERE seed_key=?", (key,)).fetchone()
+            sets, params = [], []
+            for field, default in _ADOPT_FIELDS.items():
+                if field in row.keys() and row[field] == default and it.get(field, default) != default:
+                    sets.append(f"{field}=?")
+                    params.append(it[field])
+            if sets and not dry_run:
+                params.append(row["id"])
+                db.execute(f"UPDATE catalog_items SET {', '.join(sets)} WHERE id=?", params)
             counters["unchanged"] += 1
             continue
         legacy_id = legacy_by_name.get(it["name"])
+        for old_name in it.get("legacy_names", []):  # renamed seed items still adopt their old row
+            if legacy_id is None:
+                legacy_id = legacy_by_name.get(old_name)
         if legacy_id is not None:
             counters["adopted"] += 1
             if dry_run:
@@ -494,13 +514,15 @@ def seed_sync(db, seed_items, dry_run=False):
             db.execute(
                 "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store,"
                 " url, sort, seed_key, kind, featured, starter_group, price_status,"
-                " price_checked_at, price_source) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " price_checked_at, price_source, model, variant, availability, notes, notes_he)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (it["name"], it.get("name_he", ""), it.get("brand", ""),
                  it.get("category", "home"), it.get("price_nis", 0), it.get("store", ""),
                  it.get("url", ""), i, key, it.get("kind", "product"),
                  1 if it.get("featured") else 0, it.get("starter_group", ""),
                  it.get("price_status", "estimate"), it.get("price_checked_at", ""),
-                 it.get("price_source", "")))
+                 it.get("price_source", ""), it.get("model", ""), it.get("variant", ""),
+                 it.get("availability", "unknown"), it.get("notes", ""), it.get("notes_he", "")))
     return counters
 
 

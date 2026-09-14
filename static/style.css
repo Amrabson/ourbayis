@@ -824,3 +824,5 @@ dialog:focus-visible { outline: none; }
 .admin-table tr:last-child td { border-bottom: 0; }
 .table-wrap { overflow-x: auto; }
 .rates-note { font-size: .85rem; max-width: 70ch; margin: 6px 0 16px; }
+.badge-warn { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
+.item-model { font-size: .82rem; color: var(--ink-soft); margin: 4px 0 6px; }

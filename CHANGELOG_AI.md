@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-09-14 — featured items: real store links verified (8/8), seed-sync metadata fix
+Each of the 8 featured catalog items now has a real Israeli product page in `seed_catalog.json`,
+checked by opening the page on 2026-09-14 (KSP / Machsanei Chashmal block scripted fetches, so those
+were read in a real browser session):
+
+| Item | Store / page | Price seen | Stock at check | Note |
+|---|---|---|---|---|
+| Shabbos hot plate (platta) | KSP item 117570 (SKU 109554), Hidurit PS4 ceramic 4-pot | ₪305 (was ₪180 in seed) | last unit | 6-pot ₪371 same page |
+| Shabbos urn (meicham) | KSP item 117602 (SKU 109550), Hidurit 60-cup | ₪499 (was ₪330) | in stock | 40-cup (M-LC8) ~₪395 out of stock |
+| Stand mixer | payngo.co.il 237042, KitchenAid Artisan 5KSM125 | ₪2,290 (unchanged) | in stock | official importer warranty |
+| Slow cooker (for cholent!) | hakolabait.co.il, Crock-Pot TimeSelect 5.6 L | ₪599 (was ₪350) | **out of stock** | Express ₪850 also out; Multi-Express ₪949 in stock at cookstore.co.il; card shows "Out of stock at last check" |
+| Dinnerware set — fleishig | hakolabait.co.il, Luminarc 18-piece turquoise | ₪199 (was ₪320) | in stock | store changed from "Naaman" |
+| Towel set | vardinon.co.il 3191595, ESTER 4-towel set | ₪199.90 sale (reg ₪599.90) | in stock | promo rotates |
+| Shabbos candlesticks | heichal.co.il product 4268, 36 cm plated pair | ₪300 (was ₪350 idea) | in stock | now kind=product; plated, not sterling |
+| Folding table (renamed from "+ 6 chairs") | homecenter.co.il 1747685036002, 180×70 cm | ₪99.90 sale (was ₪700 bundle idea) | in stock | chairs sold separately; no in-stock table+chairs bundle existed |
+
+Every row records `model`, `price_source`, `price_checked_at=2026-09-14`, `availability`, and bilingual
+`notes`/`notes_he`. Prices/links are a point-in-time check, not live inventory.
+
+**Seed-sync fix (real bug):** migration 12 assigns `seed_key`s to legacy rows by slugified name, so on
+an existing database `seed_sync()` never hit its "adopt" branch and `starter_group`/`kind`/price
+metadata stayed at defaults — the starter picker would have been empty on the live install. Keyed rows
+now get still-default metadata filled (never price/url/name/store/brand/active/featured). New
+`legacy_names` seed field lets a renamed seed item adopt its old row (used for the folding table).
+Inserts now carry model/variant/availability/notes. Regression test added (49th test uses the snapshot DB).
+
+**Applying to an existing DB is opt-in:** the links/prices above do NOT auto-apply to a live database.
+Review with `python manage.py seed-sync --fields url,price_nis,name,name_he,model,store,brand,availability,notes,notes_he,price_status,price_checked_at,price_source,kind`
+(dry run, 21 field changes on the snapshot) and add `--apply` to write, then
+`python manage.py refresh-registry-links --apply` so registries that already copied these items pick up the URLs.
+
+Catalog cards now show the model line and an "Out of stock at last check" badge when `availability='unavailable'`.
+
 ## 2026-09-14 — v3 phase 3 (catalog, onboarding, dashboard, concierge, admin) + integration pass
 **Phase 3 (Sonnet agent; the run was cut off mid-docs, code was fully committed):**
 - Catalog data model: `seed_catalog.json` items carry `seed_key`, `kind` (product/idea), `featured`

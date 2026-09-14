@@ -54,6 +54,10 @@
         {% elif item['price_status'] is defined %}
         <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
         {% endif %}
+        {% if item['availability'] is defined and item['availability'] == 'unavailable' %}
+        <span class="badge badge-plain badge-warn">{{ t('availability_unavailable_tag') }}</span>
+        {% endif %}
+        {% if item['model'] is defined and item['model'] %}<p class="gift-meta item-model bdi">{{ item['model'] }}</p>{% endif %}
         {% if has_reg %}
           {% if item['id'] in have %}
           <span class="gifted-tag"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>

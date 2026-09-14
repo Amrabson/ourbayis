@@ -29,9 +29,10 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [ ] Multiple registries per account, co-owners, live inventory — deferred.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Real store links.** Catalog has 0 real URLs by design (seed never invents links). Use
-  `/admin/catalog` (filter "missing store link") or `manage.py seed-sync --fields url --apply`
-  after editing `seed_catalog.json`. Sign up for Amazon Associates (works from Israel/SA) and any
+- [ ] **Real store links.** The 8 featured items have verified links in `seed_catalog.json`
+  (2026-09-14, see CHANGELOG) — on the live DB run the `seed-sync --fields … --apply` command from
+  the changelog, then `refresh-registry-links --apply`. The other ~109 items still have no URL: use
+  `/admin/catalog` (filter "missing store link") or extend `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.
 - [ ] **Images** — only add a product photo URL you have the right to use (the store's own listing
   image, or one you purchased/shot). `image_credit` field exists in the catalog admin form for
