@@ -1,54 +1,98 @@
 # TODO
 
-## Improvement roadmap — specced 2026-07-07 (Fable), implement with cheaper models
-Tags: **[SONNET]** = logic/schema/routes; **[HAIKU]** = templates/CSS/content-plumbing; **[OWNER]** = human action, no code.
-Rules for every task (from CLAUDE.md): all public text in BOTH `T_EN`/`T_HE`; "Shabbos" never "Shabbat"; no new pip deps; site never touches money; update PROJECT_KNOWLEDGE/CHANGELOG when done. Verify a feature doesn't already exist before building — this app is more complete than it looks.
+Rules (from CLAUDE.md): all public text in BOTH `T_EN`/`T_HE`; "Shabbos" never "Shabbat"; no new
+pip deps beyond `segno`; site never touches money; keep PROJECT_KNOWLEDGE/CHANGELOG/TODO updated.
 
-### P1 — Revenue plumbing (do before/at launch)
-- [ ] **[SONNET] Outbound click tracking `/go/<int:item_id>`** — new route: look up catalog/registry item URL, `UPDATE ... SET clicks=clicks+1` (add `clicks INTEGER DEFAULT 0` to `catalog_items` via the existing schema-migration pattern), 302 to the store URL with `rel` handled at the link. Replace all direct store-link hrefs in registry.html/catalog.html/items.html with `/go/...` (keep `target=_blank rel="noopener sponsored"`). Admin: show clicks column in /admin/catalog + total clicks stat-card in /admin. Why: proves traffic value to advertisers/stores, central place to swap affiliate URLs, measures which items earn.
-- [ ] **[SONNET] Guest claim-confirmation email (purchase recovery)** — in the claim route (~app.py:625), when `guest_email` present and claim is kind='item' with a store URL, `send_email()` the guest: gift name, **store link** (via `/go/`), registry link, reminder that the claim is a reservation and the purchase happens at the store. Bilingual body by current session lang. Why: claim happens on-site but purchase happens at the store — a closed tab is a lost affiliate sale; this email recovers it.
-- [ ] **[SONNET] Unfinished-claim reminder script** — standalone `remind_claims.py` (run as PythonAnywhere daily scheduled task, like a cron): find item-claims 5–7 days old with `guest_email`, no reminder sent yet (add `reminded INTEGER DEFAULT 0`), item has store URL → send one polite "did you get a chance to order X for <couple>?" email with the `/go/` link, set reminded=1. Never send twice.
-- [ ] **[SONNET] `/advertise` page (inbound ad sales)** — bilingual page pitching ad slots + catalog placement to Israeli stores/services (audience: chassanim/kallahs & olim setting up homes, i.e. buyers of appliances/furniture/linens). Pull live-ish numbers server-side: total registries, total claims, sum of registry `views`, catalog clicks (after click-tracking lands). Contact form posts to existing `messages` with `topic=advertise`. Link it from footer + a small line in the ad band ("Your ad here — advertise on OurBayis"). Why: turns ad sales from outbound-manual to inbound.
-- [ ] **[HAIKU] Viral + cross-sell CTAs** — (1) guest-facing registry.html footer: small tasteful "Mazel tov on the simcha! Create your own OurBayis registry — free" CTA linking /signup (guests are the next couples). (2) Dashboard + how-it-works: one banner cross-selling Shana Rishonah ("Landing in Israel soon? We'll have the basics waiting"→ /shana-rishonah). (3) Catalog page for visitors already has signup CTA — verify, don't duplicate. All bilingual.
-- [ ] **[HAIKU] Amazon Associates disclosure near links** — Amazon ToS requires disclosure visible near affiliate links, not only in /privacy. Add one short muted line above/below the item grid on catalog.html and registry.html (reuse/extend existing `how_money_b` phrasing; new i18n keys, EN+HE).
-- [ ] **[SONNET] v2 — Group gifting for big-ticket items** — cash claims already carry `amount`; extend the gift modal for expensive items (say price ≥ ₪1,000): "chip in toward this" with custom amount → claim kind='cash' with item_id + partial amount; registry shows funded-so-far bar (sum of cash claims for that item vs price); item counts claimed when fully funded. Money still flows only via couple's own pay links (existing `?pc=` banner). Why: Israeli appliances are the pricey items nobody claims alone; this is the differentiator vs a static list.
+## v3 phase 3 — done 2026-09-14
+Catalog data model (seed_key/kind/featured/starter_group/price_status, seed-sync/refresh-
+registry-links, admin CSV import/export, /go/ click tracking), onboarding (4-section registry
+form, pending_add for logged-out catalog adds, starter-pack picker), items management (edit page,
+archived section, needs-link flag), dashboard (checklist, action queues, print insert, account
+export/delete), concierge (email-or-whatsapp requirement, neighborhood/furnishing/budget, admin
+lead detail + cost-breakdown/margin editor), admin (outbox, backup download, funnel table),
+privacy/SEO (draft/unlisted/public visibility, canonical/hreflang globals, noindex). See
+CHANGELOG_AI.md "2026-09-14 — v3 phase 3" for the full breakdown and decisions.
+
+Everything below the roadmap items marked `[x]` was superseded or built by phase 3; items still
+`[ ]` are genuinely open.
+
+### P1 — Revenue plumbing
+- [x] Outbound click tracking `/go/` — built as `/go/c/<catalog_id>` and `/go/i/<item_id>`,
+  `clicks` column, `handoff_click` funnel event. Registry/catalog/items templates should route
+  their store links through `go_url(item)` (Jinja global) rather than the raw `item['url']` —
+  **verify the design agent's templates actually call it** (registry.html/catalog.html are theirs).
+- [ ] Guest claim-confirmation email (purchase recovery) — not built this phase. Add to the claim
+  route: when `guest_email` present and the item has a store URL, send a reminder with the `/go/`
+  link a few days after reservation if not yet reported.
+- [ ] Unfinished-claim reminder scheduled task (`manage.py` subcommand or standalone script) —
+  not built. Needs a `reminded` column on `claims` and a daily PythonAnywhere task.
+- [ ] `/advertise` page (inbound ad sales) — not built.
+- [ ] Viral + cross-sell CTAs on registry.html/dashboard — design-agent territory (their template
+  ownership); flag to them if not already covered by the redesign.
+- [x] Amazon Associates disclosure — admin catalog UI now correctly calls a missing link "missing
+  store link" (not "missing affiliate") since not every store link is an affiliate link; the
+  guest-facing disclosure line is still the design agent's to add near link buttons.
+- [ ] v2 — Group gifting for big-ticket items (chip-in cash claims) — not built.
 
 ### P1 — SEO
-- [ ] **[SONNET] Head tags: canonical + hreflang + og:image** — in base.html: `<link rel=canonical>` (self URL, strip `lang` param except keep `?lang=he` canonical for the HE variant to match sitemap), `hreflang` alternates en/he/x-default using the existing `?lang=` support, `og:image` pointing to a new `static/og.png` (1200×630 — generate once with a throwaway Pillow script or hand-built export: parchment bg, navy "OurBayis" in Bellefair, gold skyline motif from the hero SVG, EN+HE tagline). Add `og:site_name`, `twitter:card=summary_large_image`.
-- [ ] **[SONNET] JSON-LD structured data** — blocks per page: Organization+WebSite (home), FAQPage (how-it-works — mark up the existing Q/A content), Service (shana-rishonah), BreadcrumbList (guides, below). Keep it template-level, values from `t()` so both languages work.
-- [ ] **[SONNET] Guides section (content SEO + affiliate surface)** — `/guides` index + `/guides/<slug>` bilingual articles, stored as simple dicts/templates (no DB, no build step), added to sitemap. Launch set of 4, each ending with catalog/registry CTA and item mentions via `/go/` links: (1) "Setting up an apartment in Israel: the complete checklist", (2) "The Shabbos kitchen: platta, meicham, and what American couples don't know they need", (3) "Wedding registry for couples making aliyah — how it works", (4) "Your first shana rishonah in Israel: what to arrange before you land" (cross-sells the concierge). Target long-tail EN keywords (aliyah registry, wedding registry Israel, apartment setup Israel); HE versions can be shorter adaptations. Write in the site's existing warm/frum voice; "Shabbos" spelling.
-- [ ] **[HAIKU] Title/meta pass** — each public template's `{% block title %}`/`meta_desc` gets a keyword-bearing unique value (e.g. home: "OurBayis — Wedding Gift Registry for Couples Building a Home in Israel"). Add guides + /advertise to sitemap route list.
+- [x] Canonical + hreflang + noindex context — `canonical_url`, `alt_urls`, `noindex` Jinja
+  globals now computed server-side in app.py (GET-only, lang stripped/overridden). **base.html
+  still needs to actually render them** (`<link rel="canonical">`, hreflang alternates gated on
+  these vars, `<meta name="robots" content="noindex">` when `noindex` is true) — base.html is
+  DO NOT TOUCH for this agent; hand off to the design agent.
+- [ ] JSON-LD structured data (Organization/WebSite/FAQPage/Service) — not built, design-agent
+  territory (base.html/index.html/how.html/shana.html markup).
+- [ ] `/guides` content section — not built.
+- [ ] Title/meta pass — mostly the design agent's territory; my new pages (`item_edit`,
+  `items_starter`, `account`, `dashboard_print`) have basic `{% block title %}`s only.
+- [ ] `og:image`/`static/og.png` — not built this phase (no Pillow script run); base.html already
+  references `static/og.png` — confirm the file actually exists before launch.
 
 ### P2 — UX/UI
-- [ ] **[SONNET] Dashboard onboarding checklist** — top-of-dashboard card, four steps auto-checked from data: registry created → ≥5 gifts added → payment link added (any of paypal/stripe/bit) → shared (views > 0 or dismissed). Each step links to the fix. Disappears when complete. Bilingual.
-- [ ] **[HAIKU] Thank-you export CSV** — dashboard button `/dashboard/claims.csv` (login-required, own registry only): guest name, email, gift, qty/amount, kind, message, date, thanked yes/no. Mirrors the existing `/admin/leads.csv` pattern. Kallahs write thank-you cards from this.
-- [ ] **[HAIKU] Printable invitation insert** — "Print insert" button on dashboard → minimal print-styled page (or `@media print` on a dedicated route): couple's names/title, short "we're building our bayis in Eretz Yisroel" line, registry URL large, QR (existing qrserver img at higher res), sized to fit 2–4 per A4/letter page. Bilingual per current lang.
-- [ ] **[SONNET] Registry page browsing polish** — verify first, then add what's missing: group items by category with anchor pills when a registry has >12 items across ≥3 categories; "most wanted" badge for priority items sorted first; a claimed/available filter toggle. Keep the wedding-invitation aesthetic (hairlines, gold accents, no hearts-adjacent kitsch).
-- [ ] **[HAIKU] Empty/edge states pass** — friendly bilingual empty states: registry with 0 items (guest view), dashboard with 0 claims, catalog search with 0 results, find page no-match. Each with one next-step CTA.
+- [x] Dashboard onboarding checklist — built (details/≥5 gifts/payment/visibility reviewed/
+  previewed/shared), disappears once every step is done.
+- [x] Thank-you export CSV — already existed from phase 1 (`/dashboard/claims.csv`).
+- [x] Printable invitation insert — built (`/dashboard/print`, 2-per-A4 `@media print`).
+- [ ] Registry page browsing polish (category anchor pills, claimed/available filter) —
+  design-agent territory (registry.html).
+- [ ] Empty/edge states pass — partially covered; not audited this phase.
 
 ### P2 — Function/ops
-- [ ] **[SONNET] Privacy-friendly server-side analytics** — `page_views(day TEXT, path TEXT, count INTEGER)` upsert per request (public GET routes only, bucket registry pages as `/r/*`, skip admins/owners where cheap). Admin dashboard: last-30-days total + top pages table. No cookies/JS — keeps the privacy page's "no tracking" promise true, and feeds /advertise numbers.
-- [ ] **[HAIKU] SQLite backup** — `backup_db.py` for a PythonAnywhere daily scheduled task: `sqlite3` `.backup` (or file copy while using WAL-safe method) to `backups/ourbayis-YYYY-MM-DD.db`, keep last 14. Plus an admin-only "Download DB backup" button on /admin. Document in DEPLOY_AI.md.
-- [ ] **[HAIKU] 404 upsell** — 404.html: add find-a-registry search box + links to catalog/home (bilingual). Cheap, catches mistyped registry slugs from invitations.
+- [ ] Privacy-friendly server-side page-view analytics — not built (funnel_events covers
+  named events but not a per-path view log).
+- [x] SQLite backup — `manage.py backup` already existed (phase 1); this phase added an
+  admin-UI download button (`/admin/backup.db`).
+- [ ] 404 upsell (find-a-registry box on 404.html) — design-agent territory.
 
-
-- [x] **Full catalog price/brand audit — 31 of ~48 branded items verified against real Zap.co.il/brand-site prices** across six research passes (2026-07-03 + 2026-07-05). Every big-ticket item checked (fridge, washer, dishwasher, both dinnerware tiers, mixer, pillows, freezer) plus all Vardinon lines, Judaica silver items, IKEA furniture, and most small appliances. Full list of corrections is in CHANGELOG_AI.md — standout errors: Villeroy & Boch dinnerware (was ~1/3 of real cost), Tempur pillows (was ~1/6 of real cost, wrong store too), one fully invented brand (Kayor → real Hidorit), small freezer (was well below real minimum), Luminarc glassware (was overpriced for the brand).
-- [ ] **Genuinely inconclusive — couldn't find usable data despite 2–3 attempts each**: Electrolux dehumidifier, Tadiran fans + space heater, Tefal sandwich maker + waffle maker, Braun full-size (jug) blender. Hebrew search terms kept surfacing unrelated products. Worth 5–10 minutes browsing an actual Israeli appliance store site (KSP, Machsanei Chashmal) rather than more AI search attempts.
-- [ ] **Remaining never-searched items (low risk, modest prices)**: Pots & pans starter set/Tefal, Ceramic frying pan set/Tefal, Salad bowl set/Luminarc, Toaster oven/Tefal. If you want 100% coverage, spot-check these manually in /admin/catalog; otherwise the catalog is solid for launch — every item a guest is likely to recognize and price-check has been verified.
-- [ ] **Villeroy & Boch price jump note**: the premium porcelain dinnerware went from ₪900 to ₪2,900 (real V&B is genuinely a luxury brand — full sets run ₪3,983–4,978). This changes the "premium" tier's positioning — worth deciding if that's the item you actually want there, or whether a nicer-but-not-ultra-luxury brand fits the target price point better.
-- [ ] **Important: re-seeding does NOT fix already-running installs.** The seed-sync only inserts brand-new catalog items by name; it never overwrites an existing row's price/brand (so it can't silently clobber your manual corrections in /admin/catalog on every restart). If you update seed_catalog.json prices later, apply the same change in /admin/catalog too — don't expect a restart to pick it up.
-- [ ] **Verify shana bundle economics** — price_from values assume ~25% margin over estimated retail component cost; re-cost each bundle against real prices (and your delivery/time) before taking the first booking
-- [ ] Change admin password (form at bottom of /admin) and set `OB_SECRET_KEY` + `OB_SECURE_COOKIES=1` in prod
-- [ ] Sign up for Amazon Associates (works fine from Israel/SA) and paste affiliate URLs into catalog items (/admin/catalog flags items missing links)
-- [ ] Set `OB_WHATSAPP` so leads can be contacted; decide pricing/margin per shana bundle
-- [x] Deployment prep — BUILT: `passenger_wsgi.py` + full walkthrough in [DEPLOY_AI.md](DEPLOY_AI.md), smoke-tested end to end
-- [ ] Pick + buy a domain (ourbayis.com or similar), follow DEPLOY_AI.md to actually deploy, then add the custom domain (needs a paid PythonAnywhere plan, same as BashertBench)
-
-## Nice to have (v2)
-- [x] Email notifications — BUILT; just set OB_SMTP_HOST/PORT/USER/PASS + OB_NOTIFY_EMAIL in prod (e.g. Gmail app password or Zoho)
-- [x] Password reset flow — BUILT (works once SMTP env vars are set; falls back to contact form until then)
-- [ ] Product images: rendering is BUILT — just paste image URLs into catalog items in /admin/catalog (great pairing with affiliate links: use the store's product photo URL)
-- [ ] Multiple registries per account (currently 1)
-- [ ] Israeli store affiliate programs beyond Amazon (KSP etc. mostly don't have public ones — approach stores directly for flat referral/ad deals instead)
-- [ ] On-site card checkout (guests pay OurBayis directly): needs a merchant of record — options: PayPal Business checkout buttons (owner has PayPal; guests can pay by card without an account), or an Israeli processor (Grow/Meshulam/Cardcom — needs osek murshe + Israeli bank), or Paddle/Lemon Squeezy as MoR. Deliberately deferred: becoming the merchant means handling refunds/tax/fulfillment
-- [ ] Hebrew URL slugs / fully-Hebrew couple names in slugs (currently transliterated-or-generic slug + random suffix)
+## Owner launch checklist (do these before going live)
+- [ ] **Real store links.** Catalog has 0 real URLs by design (seed never invents links). Use
+  `/admin/catalog` (filter "missing store link") or `manage.py seed-sync --fields url --apply`
+  after editing `seed_catalog.json`. Sign up for Amazon Associates (works from Israel/SA) and any
+  other affiliate programs; paste links per item.
+- [ ] **Images** — only add a product photo URL you have the right to use (the store's own listing
+  image, or one you purchased/shot). `image_credit` field exists in the catalog admin form for
+  attribution if needed. Until then the category SVG placeholder is used.
+- [ ] **Payment provider setup** — couples paste their own PayPal.me/Stripe Payment Link/Bit/
+  PayBox URLs; nothing to configure server-side. **Verify Bit and PayBox link formats** —
+  `ob_security._PAY_HOSTS` allowlists `bitpay.co.il`/`payboxapp.com` by host only (their exact
+  link *paths* aren't publicly documented); test with a real Bit/PayBox account before launch and
+  tighten the allowlist if you learn the real path pattern.
+- [ ] **SMTP sender** — set `OB_SMTP_HOST/PORT/USER/PASS` + `OB_NOTIFY_EMAIL` (Gmail app password
+  or Zoho work fine). Without it, mail queues in `mail_outbox` but never sends — `/forgot` and
+  guest confirmation emails silently no-op.
+- [ ] **Rates config** — set `OB_RATES` (e.g. `{"USD":3.7,"GBP":4.75}`) and `OB_RATES_DATE` so
+  `estimate_label()` shows "≈ $49 (approx., rate as of ...)" instead of nothing. Update
+  periodically — nothing auto-refreshes exchange rates.
+- [ ] **Pricing verification** — 55 of 117 catalog items are `price_status='verified'` (dated
+  2026-07-03/05, see CHANGELOG_AI.md). The remaining ~62 are estimates; spot-check the highest-
+  value ones (fridge, mixer, appliances) before launch. Filter `/admin/catalog?price_status=estimate`.
+- [ ] **Legal review of privacy/terms** — `privacy.html` still has `[owner/legal review]` markers
+  (e.g. `privacy_delete_b` describes manual deletion by request — now partially superseded by the
+  self-service `/account/delete`; reconcile that copy). Not touched this phase (privacy.html is
+  the design agent's file).
+- [ ] **PythonAnywhere scheduled tasks** — see DEPLOY_AI.md "Scheduled tasks" for the exact
+  commands (`send-mail`, `expire-claims`, `backup`, `seed-sync --apply` after a `seed_catalog.json`
+  edit).
+- [ ] Change the admin password from whatever `manage.py create-admin` was seeded with (via
+  the form at the bottom of `/admin`), and set `OB_SECRET_KEY` + `OB_SECURE_COOKIES=1` in prod.
+- [ ] Pick + buy a domain, follow DEPLOY_AI.md to deploy, add the custom domain.

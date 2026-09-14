@@ -104,3 +104,80 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
 - `manage.py`: `create-admin`, `backup`, `send-mail` (flush the outbox — run on a schedule),
   `expire-claims` (run daily), `check` (integrity + config sanity, exit 1 on problems), `stats`.
 - Deploy target: PythonAnywhere like BashertBench. See [DEPLOY_AI.md](DEPLOY_AI.md) for the full walkthrough — `passenger_wsgi.py` is the ready-to-paste WSGI file (fix `project_home`, real `OB_SECRET_KEY`, `OB_BASE_URL` before using). Static mapping `/static/` → project static dir. Importing `app.py` runs migrations + catalog seed-sync automatically on first load; you still need `manage.py create-admin` once.
+
+## Catalog rules (v3 phase 3)
+- `seed_catalog.json` items carry a stable `seed_key` (slugified name), `kind` ('product' when a
+  real brand is known, 'idea' for generic items), `featured` (promotional placement — homepage +
+  `/registry/items/starter`'s old one-click no longer uses this), `starter_group`
+  ('first_week'|'kitchen'|'shabbos'|'bedbath'|'appliances', used by the grouped starter-pack
+  picker), and `price_status`/`price_checked_at`/`price_source` ('verified' for the 55 items
+  CHANGELOG_AI.md's v1.7–v2.3 entries confirmed against real Israeli listings; 'estimate' otherwise).
+- **Seed sync** (`ob_db.seed_sync()`, called automatically on every app import, and via
+  `manage.py seed-sync`): matches by `seed_key`. A DB row with that `seed_key` is left untouched.
+  A legacy row (no `seed_key`, `NULL`) matched by exact `name` gets its `seed_key` set and ONLY
+  its still-default metadata fields (`kind`/`starter_group`/`price_status`/`price_checked_at`/
+  `price_source`) filled — never name/price/url/store/brand/active/featured. A `seed_key` with no
+  DB match at all is inserted fresh (including `featured`/`starter_group`, so a brand-new install
+  gets a working starter pack and homepage strip immediately). Inactive (retired) rows are matched
+  by `seed_key` like any other row, so they're never re-inserted after being retired in
+  `/admin/catalog`.
+- **Explicit overwrite** (`manage.py seed-sync --fields price_nis,url,... --apply`) is the *only*
+  way a seed value overwrites an existing DB value — always a dry run (prints a diff table) unless
+  `--apply` is passed.
+- **Card rules** (`item_routes(item, pay_links)` in app.py, exposed as the Jinja global
+  `gift_routes(item)`): `store` is true iff the item has a `url`; `cash` is true iff the couple has
+  at least one working pay link — this is true even for `kind='idea'` rows (an idea still needs
+  money, it just has no store link to click through). Neither → the design agent's templates show
+  it as an idea with no button.
+- **`/go/c/<catalog_id>`** and **`/go/i/<item_id>`**: the only sanctioned click-through routes.
+  Redirect to the DB-stored `url` (re-validated with `validate_url`, never trusts a query string —
+  no open redirect), increments `clicks`, logs the `handoff_click` funnel event. `go_url(item)` is
+  the Jinja global that builds these URLs — templates should never link `item['url']` directly.
+- **`manage.py refresh-registry-links`**: for `registry_items` with a `catalog_id`, copies
+  url/image/store/brand from the current catalog row onto the registry item, for whichever of
+  those fields is NOT in the item's `overrides` (comma list, set by `/registry/items/<id>/edit`
+  whenever the couple manually changes a normally-inherited field). Never touches name/price/qty/
+  priority/note or any claim. Dry run by default.
+
+## Key flows added in v3 phase 3
+- **Pending add while logged out**: `/registry/items/add` is no longer `@login_required` — if
+  there's no `uid`, it stashes `catalog_id` in `session['pending_add']` (capped at 50) and sends
+  the visitor to `/signup` with a flash. `signup()` must carry `pending_add` across its
+  `session.clear()` (it rotates the session on account creation) — this was a real bug fixed
+  during phase 3 testing (see CHANGELOG_AI.md). `_save_registry()`'s insert branch applies the
+  queued ids via `_apply_pending_add()` once the new registry exists, then clears the session key.
+- **Starter pack picker** (`/registry/items/starter`, GET shows groups + checkboxes, POST adds only
+  what was checked, at the chosen qty): replaces the old "add all 8 featured items" one-click —
+  `featured` is promotional homepage placement, not a curated starter list. Groups come straight
+  from `catalog_items.starter_group`.
+- **Item edit** (`/registry/items/<id>/edit`): full field edit; changing a normally-inherited field
+  (url/image/store/brand/name) records it in `registry_items.overrides` so `refresh-registry-links`
+  never clobbers it later.
+- **Dashboard checklist**: computed live from registry state each request (details filled / ≥5
+  usable gifts / a payment link if any gift has no store url / visibility reviewed [stamped in
+  `preferences_json.visibility_reviewed_at` whenever the registry form is saved] / previewed
+  [`?preview=1` by the owner stamps `previewed_at`] / shared [`views>0` or a
+  `POST /dashboard/shared` beacon the share buttons fire, stamping `shared_at`]). Disappears once
+  every step is done.
+- **Visibility** (`registries.visibility`: draft|unlisted|public): draft renders `error.html` (404)
+  with `draft_not_published=True` for non-owners; owner still sees it with `is_owner`/`is_preview`
+  context. `find`/`sitemap.xml` only ever include `visibility='public'` rows. `noindex` is computed
+  server-side per request (admin/dashboard/account/auth endpoints always; registries by
+  `visibility != 'public'`) and passed as a context var — **base.html itself doesn't render a
+  `<meta name="robots">` tag yet**, that's the design agent's to add (base.html is out of this
+  agent's file ownership).
+- **Account** (`/account`, `/account/export.json`, `/account/delete`): self-service data export
+  (own data only, no `pw_hash`/`token_hash`) and account deletion (current-password confirm,
+  cascades registry→items→claims via `ON DELETE CASCADE`, purges the user's `mail_outbox` rows,
+  leaves `funnel_events` alone since those carry no PII).
+- **Concierge admin** (`/admin/lead/<id>`): internal notes, next action + date, a dedup hint (other
+  leads sharing the same email/whatsapp), and a cost-breakdown editor
+  (goods/delivery/assembly/labour/contingency/quoted_price) stored in `shana_requests.quote_json`
+  with `total_cost`/`profit`/`margin_pct` computed server-side on every save.
+- **Admin catalog**: search/category/price-status/missing-url/missing-image filters, queue counts,
+  CSV export (`/admin/catalog.csv`) and import (`/admin/catalog/import` — always shows a dry-run
+  diff first; a second POST with the *same re-uploaded file* and `mode=apply` writes; nothing is
+  ever trusted from a session-stored payload). "Delete" is really "Retire" (`active=0`) whenever
+  any `registry_items` row still references the catalog item; otherwise a real `DELETE`.
+- **Admin outbox** (`/admin/outbox`): masked addresses (`a***@x.com`) — the body is never shown.
+  Failed rows get a one-click "Retry" that resets them to `status='queued'`.

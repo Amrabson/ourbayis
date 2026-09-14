@@ -50,7 +50,9 @@ It prompts for a password (12+ chars), or set `OB_ADMIN_PASSWORD` in the environ
 - [ ] If the domain is fixed, set `OB_ALLOWED_HOSTS` too, so stray Host headers get a 400 instead of serving.
 
 ## Scheduled tasks (PythonAnywhere "Tasks" tab)
-v3 phase 1 adds a mail outbox and a claim-expiry sweep — neither runs itself without SMTP configured or a scheduled task:
+v3 phase 1 adds a mail outbox and a claim-expiry sweep; neither runs itself without SMTP configured
+or a scheduled task. All commands assume the venv is active (`source venv/bin/activate`) or you
+call `venv/bin/python` directly, from `~/ourbayis`:
 ```bash
 # once a day (or more often), only useful once OB_SMTP_* is set:
 cd ~/ourbayis && venv/bin/python manage.py send-mail
@@ -63,9 +65,30 @@ cd ~/ourbayis && venv/bin/python manage.py backup
 ```
 `manage.py check` is worth running after any deploy — it checks DB integrity, foreign keys, that at least one admin exists, and secret-key/cookie config sanity; exits 1 if anything's wrong.
 
+### Catalog maintenance commands (v3 phase 3, run manually — not scheduled)
+```bash
+# after editing seed_catalog.json: adopt/insert new items, never overwrites existing DB rows
+cd ~/ourbayis && venv/bin/python manage.py seed-sync            # dry run, prints a diff table
+cd ~/ourbayis && venv/bin/python manage.py seed-sync --apply    # actually writes
+
+# explicit overwrite of specific fields from the seed by seed_key (dry run by default)
+cd ~/ourbayis && venv/bin/python manage.py seed-sync --fields price_nis,url --apply
+
+# after editing catalog items in /admin/catalog: push url/image/store/brand out to
+# registry_items that came from the catalog and haven't been individually edited
+cd ~/ourbayis && venv/bin/python manage.py refresh-registry-links           # dry run
+cd ~/ourbayis && venv/bin/python manage.py refresh-registry-links --apply
+```
+The web app also runs `seed_sync()`/`bundle_sync()` automatically on every import (i.e. every
+`Reload`), so a `seed_catalog.json` edit that only *adds new items* (new `seed_key`s) needs no
+manual command at all — reload the web app and it's picked up. The `--fields`/`--apply` commands
+above are only for the two cases the app never does on its own: overwriting an existing row's
+value from the seed, and pushing catalog edits out to registries.
+
 ## Backup / restore
-- **Backup**: `python manage.py backup` writes a verified online copy (via SQLite's own backup API + `PRAGMA integrity_check`) to `backups/ourbayis-<timestamp>.db`. `backups/` is gitignored — download copies off the server periodically.
+- **Backup**: `python manage.py backup` writes a verified online copy (via SQLite's own backup API + `PRAGMA integrity_check`) to `backups/ourbayis-<timestamp>.db`. `backups/` is gitignored — download copies off the server periodically. An admin can also download one on demand from `/admin/backup.db` (streamed, deleted from the server immediately after).
 - **Restore**: stop the web app (or at least don't rely on it not writing), copy the backup file over `ourbayis.db` (or point `OB_DB_PATH` at it), then `python manage.py check` before reloading.
+- **Rollback after a bad migration/deploy**: restore the most recent `backups/ourbayis-*.db` copy from *before* the deploy (see above), `git checkout` (or re-upload) the previous commit's code, `python manage.py check`, then Reload. Migrations in `ob_db.py` are additive and idempotent (`ALTER TABLE ... ADD COLUMN`, `CREATE TABLE IF NOT EXISTS`) — there is no automatic down-migration, so a schema rollback always means restoring a pre-deploy DB backup, never rolling the schema back in place.
 
 ## 7. Custom domain (when ready)
 PythonAnywhere requires a **paid plan** for custom domains (same tier BashertBench is on). Once upgraded: Web tab → add the domain → PythonAnywhere gives you a CNAME/A record to set at your domain registrar → **Force HTTPS** once the cert issues.
