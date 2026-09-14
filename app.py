@@ -145,31 +145,17 @@ def close_db(_exc):
 
 def init_db():
     """Run migrations once at import time, then seed-sync the catalog/bundles
-    (catalog seeding stays here — it's not part of the Phase 1 module split)."""
+    (catalog seeding stays here — it's not part of the Phase 1 module split).
+    See ob_db.seed_sync() for the adoption/insert rules (SPEC_V3 "Catalog")."""
     db = ob_db.connect(DB_PATH)
     try:
         ob_db.migrate(db)
         seed_path = BASE / "seed_catalog.json"
         if seed_path.exists():
             seed = json.loads(seed_path.read_text(encoding="utf-8"))
-            have = {r[0] for r in db.execute("SELECT name FROM catalog_items")}
             with ob_db.write_txn(db):
-                for i, it in enumerate(seed.get("items", [])):
-                    if it["name"] not in have:
-                        db.execute(
-                            "INSERT INTO catalog_items (name, name_he, brand, category,"
-                            " price_nis, store, url, sort, seed_key) VALUES (?,?,?,?,?,?,?,?,?)",
-                            (it["name"], it.get("name_he", ""), it.get("brand", ""),
-                             it.get("category", "home"), it.get("price_nis", 0),
-                             it.get("store", ""), it.get("url", ""), i, slugify(it["name"])))
-                for i, b in enumerate(seed.get("bundles", [])):
-                    db.execute(
-                        "INSERT OR IGNORE INTO bundles (slug, name, name_he, tier, price_from,"
-                        " description, description_he, items_text, items_text_he, sort)"
-                        " VALUES (?,?,?,?,?,?,?,?,?,?)",
-                        (b["slug"], b["name"], b.get("name_he", ""), b.get("tier", "basic"),
-                         b.get("price_from", 0), b.get("description", ""), b.get("description_he", ""),
-                         b.get("items_text", ""), b.get("items_text_he", ""), i))
+                ob_db.seed_sync(db, seed.get("items", []))
+                ob_db.bundle_sync(db, seed.get("bundles", []))
     finally:
         db.close()
 

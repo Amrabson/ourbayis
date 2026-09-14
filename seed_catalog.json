@@ -7,7 +7,14 @@
       "price_nis": 450,
       "store": "Arcosteel",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "pots-pans-starter-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "first_week",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Knife set with block",
@@ -16,7 +23,14 @@
       "price_nis": 180,
       "store": "Max Home",
       "url": "",
-      "brand": "Zwilling"
+      "brand": "Zwilling",
+      "seed_key": "knife-set-with-block",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Cutting boards — milchig & fleishig set",
@@ -24,7 +38,14 @@
       "category": "kitchen",
       "price_nis": 90,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "cutting-boards-milchig-fleishig-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Mixing bowls set",
@@ -33,7 +54,14 @@
       "price_nis": 80,
       "store": "Max Home",
       "url": "",
-      "brand": "Pyrex"
+      "brand": "Pyrex",
+      "seed_key": "mixing-bowls-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Baking pans & cookie sheets",
@@ -41,7 +69,14 @@
       "category": "kitchen",
       "price_nis": 120,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "baking-pans-cookie-sheets",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Colander & strainers",
@@ -49,7 +84,14 @@
       "category": "kitchen",
       "price_nis": 60,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "colander-strainers",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Measuring cups & spoons",
@@ -57,7 +99,14 @@
       "category": "kitchen",
       "price_nis": 45,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "measuring-cups-spoons",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Food storage container set",
@@ -66,7 +115,14 @@
       "price_nis": 110,
       "store": "Home Center",
       "url": "",
-      "brand": "Lock&Lock"
+      "brand": "Lock&Lock",
+      "seed_key": "food-storage-container-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Kitchen towels & oven mitts",
@@ -74,7 +130,14 @@
       "category": "kitchen",
       "price_nis": 70,
       "store": "Fox Home",
-      "url": ""
+      "url": "",
+      "seed_key": "kitchen-towels-oven-mitts",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Spice rack with spices",
@@ -82,7 +145,14 @@
       "category": "kitchen",
       "price_nis": 130,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "spice-rack-with-spices",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Electric kettle",
@@ -91,7 +161,14 @@
       "price_nis": 220,
       "store": "KSP",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "electric-kettle",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Shabbos hot plate (platta)",
@@ -100,7 +177,14 @@
       "price_nis": 180,
       "store": "KSP",
       "url": "",
-      "brand": "Hidorit"
+      "brand": "Hidorit",
+      "seed_key": "shabbos-hot-plate-platta",
+      "kind": "product",
+      "featured": true,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Shabbos urn (meicham)",
@@ -109,7 +193,14 @@
       "price_nis": 330,
       "store": "KSP",
       "url": "",
-      "brand": "Hidorit"
+      "brand": "Hidorit",
+      "seed_key": "shabbos-urn-meicham",
+      "kind": "product",
+      "featured": true,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Toaster oven",
@@ -118,7 +209,14 @@
       "price_nis": 350,
       "store": "KSP",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "toaster-oven",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Hand mixer",
@@ -127,7 +225,14 @@
       "price_nis": 180,
       "store": "KSP",
       "url": "",
-      "brand": "Braun"
+      "brand": "Braun",
+      "seed_key": "hand-mixer",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Stand mixer",
@@ -136,7 +241,14 @@
       "price_nis": 2290,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "KitchenAid"
+      "brand": "KitchenAid",
+      "seed_key": "stand-mixer",
+      "kind": "product",
+      "featured": true,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Immersion blender",
@@ -145,7 +257,14 @@
       "price_nis": 200,
       "store": "KSP",
       "url": "",
-      "brand": "Braun"
+      "brand": "Braun",
+      "seed_key": "immersion-blender",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Slow cooker (for cholent!)",
@@ -154,7 +273,14 @@
       "price_nis": 350,
       "store": "KSP",
       "url": "",
-      "brand": "Crock-Pot"
+      "brand": "Crock-Pot",
+      "seed_key": "slow-cooker-for-cholent",
+      "kind": "product",
+      "featured": true,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Sandwich maker",
@@ -163,7 +289,14 @@
       "price_nis": 130,
       "store": "KSP",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "sandwich-maker",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Vacuum cleaner",
@@ -172,7 +305,14 @@
       "price_nis": 500,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Electrolux"
+      "brand": "Electrolux",
+      "seed_key": "vacuum-cleaner",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Microwave",
@@ -181,7 +321,14 @@
       "price_nis": 400,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Samsung"
+      "brand": "Samsung",
+      "seed_key": "microwave",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Washing machine",
@@ -190,7 +337,14 @@
       "price_nis": 1950,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Bosch"
+      "brand": "Bosch",
+      "seed_key": "washing-machine",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Dinnerware set — fleishig",
@@ -199,7 +353,14 @@
       "price_nis": 320,
       "store": "Naaman",
       "url": "",
-      "brand": "Luminarc"
+      "brand": "Luminarc",
+      "seed_key": "dinnerware-set-fleishig",
+      "kind": "product",
+      "featured": true,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Dinnerware set — milchig",
@@ -208,7 +369,14 @@
       "price_nis": 320,
       "store": "Naaman",
       "url": "",
-      "brand": "Luminarc"
+      "brand": "Luminarc",
+      "seed_key": "dinnerware-set-milchig",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Cutlery sets — milchig & fleishig",
@@ -217,7 +385,14 @@
       "price_nis": 750,
       "store": "Naaman",
       "url": "",
-      "brand": "WMF"
+      "brand": "WMF",
+      "seed_key": "cutlery-sets-milchig-fleishig",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Glassware set",
@@ -226,7 +401,14 @@
       "price_nis": 70,
       "store": "Naaman",
       "url": "",
-      "brand": "Luminarc"
+      "brand": "Luminarc",
+      "seed_key": "glassware-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Serving platters & bowls",
@@ -234,7 +416,14 @@
       "category": "dining",
       "price_nis": 180,
       "store": "Naaman",
-      "url": ""
+      "url": "",
+      "seed_key": "serving-platters-bowls",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Shabbos tablecloths (2)",
@@ -242,7 +431,14 @@
       "category": "dining",
       "price_nis": 200,
       "store": "Fox Home",
-      "url": ""
+      "url": "",
+      "seed_key": "shabbos-tablecloths-2",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Hot water pump pot (for Shabbos)",
@@ -250,7 +446,14 @@
       "category": "dining",
       "price_nis": 150,
       "store": "KSP",
-      "url": ""
+      "url": "",
+      "seed_key": "hot-water-pump-pot-for-shabbos",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "shabbos",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Water carbonator (Soda machine)",
@@ -259,7 +462,14 @@
       "price_nis": 320,
       "store": "KSP",
       "url": "",
-      "brand": "SodaStream"
+      "brand": "SodaStream",
+      "seed_key": "water-carbonator-soda-machine",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Duvet & pillows set",
@@ -268,7 +478,14 @@
       "price_nis": 350,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "duvet-pillows-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Sheet sets (x2)",
@@ -277,7 +494,14 @@
       "price_nis": 500,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "sheet-sets-x2",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Towel set",
@@ -286,7 +510,14 @@
       "price_nis": 200,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "towel-set",
+      "kind": "product",
+      "featured": true,
+      "starter_group": "first_week",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Mattress protectors",
@@ -295,7 +526,14 @@
       "price_nis": 120,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "mattress-protectors",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Winter blankets",
@@ -303,7 +541,14 @@
       "category": "bedding",
       "price_nis": 180,
       "store": "Fox Home",
-      "url": ""
+      "url": "",
+      "seed_key": "winter-blankets",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Laundry hamper & drying rack",
@@ -311,7 +556,14 @@
       "category": "bedding",
       "price_nis": 150,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "laundry-hamper-drying-rack",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Bath mats & shower caddy",
@@ -319,7 +571,14 @@
       "category": "bedding",
       "price_nis": 100,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "bath-mats-shower-caddy",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Shabbos candlesticks",
@@ -327,7 +586,14 @@
       "category": "judaica",
       "price_nis": 350,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "shabbos-candlesticks",
+      "kind": "idea",
+      "featured": true,
+      "starter_group": "shabbos",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Kiddush cup (silver plated)",
@@ -335,7 +601,14 @@
       "category": "judaica",
       "price_nis": 250,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "kiddush-cup-silver-plated",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "shabbos",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Havdalah set",
@@ -343,7 +616,14 @@
       "category": "judaica",
       "price_nis": 200,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "havdalah-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "shabbos",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Challah board & knife",
@@ -351,7 +631,14 @@
       "category": "judaica",
       "price_nis": 250,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "challah-board-knife",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "shabbos",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Challah cover",
@@ -359,7 +646,14 @@
       "category": "judaica",
       "price_nis": 120,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "challah-cover",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "shabbos",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Menorah (Chanukah)",
@@ -367,7 +661,14 @@
       "category": "judaica",
       "price_nis": 300,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "menorah-chanukah",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Mezuzah cases (set of 5)",
@@ -375,7 +676,14 @@
       "category": "judaica",
       "price_nis": 150,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "mezuzah-cases-set-of-5",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Netilas yadayim cup & basin",
@@ -383,7 +691,14 @@
       "category": "judaica",
       "price_nis": 90,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "netilas-yadayim-cup-basin",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "first_week",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Bentchers — set of 20",
@@ -391,7 +706,14 @@
       "category": "judaica",
       "price_nis": 150,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "bentchers-set-of-20",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Seder plate",
@@ -399,7 +721,14 @@
       "category": "judaica",
       "price_nis": 200,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "seder-plate",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Kiddush cups for guests (6)",
@@ -407,7 +736,14 @@
       "category": "judaica",
       "price_nis": 90,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "kiddush-cups-for-guests-6",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Folding table + 6 chairs (Shabbos guests)",
@@ -415,7 +751,14 @@
       "category": "home",
       "price_nis": 700,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "folding-table-6-chairs-shabbos-guests",
+      "kind": "idea",
+      "featured": true,
+      "starter_group": "shabbos",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Bookcase for sefarim",
@@ -423,7 +766,14 @@
       "category": "home",
       "price_nis": 900,
       "store": "IKEA",
-      "url": ""
+      "url": "",
+      "seed_key": "bookcase-for-sefarim",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Iron & ironing board",
@@ -431,7 +781,14 @@
       "category": "home",
       "price_nis": 180,
       "store": "KSP",
-      "url": ""
+      "url": "",
+      "seed_key": "iron-ironing-board",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Fans (x2)",
@@ -440,7 +797,14 @@
       "price_nis": 150,
       "store": "KSP",
       "url": "",
-      "brand": "Tadiran"
+      "brand": "Tadiran",
+      "seed_key": "fans-x2",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Space heater (Israeli winter is real)",
@@ -449,7 +813,14 @@
       "price_nis": 200,
       "store": "KSP",
       "url": "",
-      "brand": "Tadiran"
+      "brand": "Tadiran",
+      "seed_key": "space-heater-israeli-winter-is-real",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Sponja set — squeegee, bucket & broom",
@@ -457,7 +828,14 @@
       "category": "home",
       "price_nis": 100,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "sponja-set-squeegee-bucket-broom",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "first_week",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Shabbos lamp",
@@ -465,7 +843,14 @@
       "category": "home",
       "price_nis": 180,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "shabbos-lamp",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Step stool",
@@ -473,7 +858,14 @@
       "category": "home",
       "price_nis": 80,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "step-stool",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Hangers & closet organizers",
@@ -481,7 +873,14 @@
       "category": "home",
       "price_nis": 90,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "hangers-closet-organizers",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Tool kit & first aid kit",
@@ -489,7 +888,14 @@
       "category": "home",
       "price_nis": 150,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "tool-kit-first-aid-kit",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Pots & pans — premium 10-piece set",
@@ -498,7 +904,14 @@
       "price_nis": 900,
       "store": "Arcosteel",
       "url": "",
-      "brand": "Zwilling"
+      "brand": "Zwilling",
+      "seed_key": "pots-pans-premium-10-piece-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Ceramic frying pan set",
@@ -507,7 +920,14 @@
       "price_nis": 220,
       "store": "Arcosteel",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "ceramic-frying-pan-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Chef's knife — professional",
@@ -516,7 +936,14 @@
       "price_nis": 250,
       "store": "Max Home",
       "url": "",
-      "brand": "Zwilling"
+      "brand": "Zwilling",
+      "seed_key": "chef-s-knife-professional",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Glass baking dishes (Pyrex set)",
@@ -525,7 +952,14 @@
       "price_nis": 160,
       "store": "Max Home",
       "url": "",
-      "brand": "Pyrex"
+      "brand": "Pyrex",
+      "seed_key": "glass-baking-dishes-pyrex-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "kitchen",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Loaf & kugel pans",
@@ -533,7 +967,14 @@
       "category": "kitchen",
       "price_nis": 70,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "loaf-kugel-pans",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Salad bowl set",
@@ -542,7 +983,14 @@
       "price_nis": 90,
       "store": "Naaman",
       "url": "",
-      "brand": "Luminarc"
+      "brand": "Luminarc",
+      "seed_key": "salad-bowl-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Knife sharpener",
@@ -550,7 +998,14 @@
       "category": "kitchen",
       "price_nis": 60,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "knife-sharpener",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Garlic press & peelers set",
@@ -558,7 +1013,14 @@
       "category": "kitchen",
       "price_nis": 45,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "garlic-press-peelers-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Rolling pin & pastry tools",
@@ -566,7 +1028,14 @@
       "category": "kitchen",
       "price_nis": 70,
       "store": "Max Home",
-      "url": ""
+      "url": "",
+      "seed_key": "rolling-pin-pastry-tools",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Water filter pitcher",
@@ -575,7 +1044,14 @@
       "price_nis": 150,
       "store": "Home Center",
       "url": "",
-      "brand": "Brita"
+      "brand": "Brita",
+      "seed_key": "water-filter-pitcher",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Stainless dish drying rack",
@@ -583,7 +1059,14 @@
       "category": "kitchen",
       "price_nis": 90,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "stainless-dish-drying-rack",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Electric kettle — premium stainless",
@@ -592,7 +1075,14 @@
       "price_nis": 279,
       "store": "KSP",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "electric-kettle-premium-stainless",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Shabbos hot plate — large family size",
@@ -601,7 +1091,14 @@
       "price_nis": 280,
       "store": "KSP",
       "url": "",
-      "brand": "Hidorit"
+      "brand": "Hidorit",
+      "seed_key": "shabbos-hot-plate-large-family-size",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "shabbos",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Shabbos urn — 40 cup",
@@ -610,7 +1107,14 @@
       "price_nis": 400,
       "store": "KSP",
       "url": "",
-      "brand": "Hidorit"
+      "brand": "Hidorit",
+      "seed_key": "shabbos-urn-40-cup",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "shabbos",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Coffee machine",
@@ -619,7 +1123,14 @@
       "price_nis": 750,
       "store": "KSP",
       "url": "",
-      "brand": "Nespresso"
+      "brand": "Nespresso",
+      "seed_key": "coffee-machine",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Milk frother",
@@ -628,7 +1139,14 @@
       "price_nis": 300,
       "store": "KSP",
       "url": "",
-      "brand": "Nespresso"
+      "brand": "Nespresso",
+      "seed_key": "milk-frother",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Food processor",
@@ -637,7 +1155,14 @@
       "price_nis": 450,
       "store": "KSP",
       "url": "",
-      "brand": "Braun"
+      "brand": "Braun",
+      "seed_key": "food-processor",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Air fryer",
@@ -646,7 +1171,14 @@
       "price_nis": 550,
       "store": "KSP",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "air-fryer",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Blender — full size",
@@ -655,7 +1187,14 @@
       "price_nis": 250,
       "store": "KSP",
       "url": "",
-      "brand": "Braun"
+      "brand": "Braun",
+      "seed_key": "blender-full-size",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Waffle maker",
@@ -664,7 +1203,14 @@
       "price_nis": 180,
       "store": "KSP",
       "url": "",
-      "brand": "Tefal"
+      "brand": "Tefal",
+      "seed_key": "waffle-maker",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Robot vacuum",
@@ -673,7 +1219,14 @@
       "price_nis": 1200,
       "store": "KSP",
       "url": "",
-      "brand": "Xiaomi"
+      "brand": "Xiaomi",
+      "seed_key": "robot-vacuum",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Clothes dryer",
@@ -682,7 +1235,14 @@
       "price_nis": 2200,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Electrolux"
+      "brand": "Electrolux",
+      "seed_key": "clothes-dryer",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Dishwasher",
@@ -691,7 +1251,14 @@
       "price_nis": 2300,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Bosch"
+      "brand": "Bosch",
+      "seed_key": "dishwasher",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Fridge — large family size",
@@ -700,7 +1267,14 @@
       "price_nis": 5200,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Samsung"
+      "brand": "Samsung",
+      "seed_key": "fridge-large-family-size",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Small freezer",
@@ -709,7 +1283,14 @@
       "price_nis": 2000,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Electrolux"
+      "brand": "Electrolux",
+      "seed_key": "small-freezer",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Oven",
@@ -718,7 +1299,14 @@
       "price_nis": 2200,
       "store": "Machsanei Chashmal",
       "url": "",
-      "brand": "Bosch"
+      "brand": "Bosch",
+      "seed_key": "oven",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "appliances",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-03",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Porcelain dinnerware — premium fleishig",
@@ -727,7 +1315,14 @@
       "price_nis": 2900,
       "store": "Naaman",
       "url": "",
-      "brand": "Villeroy & Boch"
+      "brand": "Villeroy & Boch",
+      "seed_key": "porcelain-dinnerware-premium-fleishig",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Porcelain dinnerware — premium milchig",
@@ -736,7 +1331,14 @@
       "price_nis": 2900,
       "store": "Naaman",
       "url": "",
-      "brand": "Villeroy & Boch"
+      "brand": "Villeroy & Boch",
+      "seed_key": "porcelain-dinnerware-premium-milchig",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Wine glasses (12)",
@@ -745,7 +1347,14 @@
       "price_nis": 200,
       "store": "Naaman",
       "url": "",
-      "brand": "Spiegelau"
+      "brand": "Spiegelau",
+      "seed_key": "wine-glasses-12",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Glass serving bowls",
@@ -754,7 +1363,14 @@
       "price_nis": 120,
       "store": "Naaman",
       "url": "",
-      "brand": "Pyrex"
+      "brand": "Pyrex",
+      "seed_key": "glass-serving-bowls",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Cake stand & dessert set",
@@ -762,7 +1378,14 @@
       "category": "dining",
       "price_nis": 150,
       "store": "Naaman",
-      "url": ""
+      "url": "",
+      "seed_key": "cake-stand-dessert-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Pitchers & carafes",
@@ -770,7 +1393,14 @@
       "category": "dining",
       "price_nis": 80,
       "store": "Naaman",
-      "url": ""
+      "url": "",
+      "seed_key": "pitchers-carafes",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Placemats & napkins set",
@@ -778,7 +1408,14 @@
       "category": "dining",
       "price_nis": 90,
       "store": "Fox Home",
-      "url": ""
+      "url": "",
+      "seed_key": "placemats-napkins-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Shabbos tablecloth — embroidered premium",
@@ -786,7 +1423,14 @@
       "category": "dining",
       "price_nis": 450,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "shabbos-tablecloth-embroidered-premium",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Sheet set — premium sateen",
@@ -795,7 +1439,14 @@
       "price_nis": 450,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "sheet-set-premium-sateen",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Towel set — luxury 8-piece",
@@ -804,7 +1455,14 @@
       "price_nis": 400,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "towel-set-luxury-8-piece",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Winter-weight duvet",
@@ -813,7 +1471,14 @@
       "price_nis": 450,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "winter-weight-duvet",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Memory foam pillows (2)",
@@ -822,7 +1487,14 @@
       "price_nis": 1500,
       "store": "Hollandia",
       "url": "",
-      "brand": "Tempur"
+      "brand": "Tempur",
+      "seed_key": "memory-foam-pillows-2",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Bathrobe set — his & hers",
@@ -831,7 +1503,14 @@
       "price_nis": 450,
       "store": "Fox Home",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "bathrobe-set-his-hers",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Guest linen set",
@@ -840,7 +1519,14 @@
       "price_nis": 200,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "guest-linen-set",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "bedbath",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Quilted bedspread",
@@ -849,7 +1535,14 @@
       "price_nis": 300,
       "store": "Vardinon",
       "url": "",
-      "brand": "Vardinon"
+      "brand": "Vardinon",
+      "seed_key": "quilted-bedspread",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Candlesticks — sterling silver",
@@ -857,7 +1550,14 @@
       "category": "judaica",
       "price_nis": 2500,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "candlesticks-sterling-silver",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Kiddush cup — sterling silver",
@@ -865,7 +1565,14 @@
       "category": "judaica",
       "price_nis": 900,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "kiddush-cup-sterling-silver",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Challah knife — engraved",
@@ -873,7 +1580,14 @@
       "category": "judaica",
       "price_nis": 180,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "challah-knife-engraved",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Esrog box",
@@ -881,7 +1595,14 @@
       "category": "judaica",
       "price_nis": 150,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "esrog-box",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Pop-up sukkah",
@@ -889,7 +1610,14 @@
       "category": "judaica",
       "price_nis": 1500,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "pop-up-sukkah",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Shas — full set",
@@ -897,7 +1625,14 @@
       "category": "judaica",
       "price_nis": 2500,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "shas-full-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Chumashim & siddurim set",
@@ -905,7 +1640,14 @@
       "category": "judaica",
       "price_nis": 300,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "chumashim-siddurim-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Machzorim set",
@@ -913,7 +1655,14 @@
       "category": "judaica",
       "price_nis": 400,
       "store": "",
-      "url": ""
+      "url": "",
+      "seed_key": "machzorim-set",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Dining table & chairs",
@@ -922,7 +1671,14 @@
       "price_nis": 2500,
       "store": "IKEA",
       "url": "",
-      "brand": "IKEA"
+      "brand": "IKEA",
+      "seed_key": "dining-table-chairs",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Couch",
@@ -931,7 +1687,14 @@
       "price_nis": 2800,
       "store": "IKEA",
       "url": "",
-      "brand": "IKEA"
+      "brand": "IKEA",
+      "seed_key": "couch",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Coffee table",
@@ -940,7 +1703,14 @@
       "price_nis": 400,
       "store": "IKEA",
       "url": "",
-      "brand": "IKEA"
+      "brand": "IKEA",
+      "seed_key": "coffee-table",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Area rug",
@@ -948,7 +1718,14 @@
       "category": "home",
       "price_nis": 350,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "area-rug",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Floor lamp",
@@ -957,7 +1734,14 @@
       "price_nis": 200,
       "store": "IKEA",
       "url": "",
-      "brand": "IKEA"
+      "brand": "IKEA",
+      "seed_key": "floor-lamp",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     },
     {
       "name": "Curtains (2 rooms)",
@@ -965,7 +1749,14 @@
       "category": "home",
       "price_nis": 300,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "curtains-2-rooms",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Storage boxes & organizers",
@@ -973,7 +1764,14 @@
       "category": "home",
       "price_nis": 120,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "storage-boxes-organizers",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Folding guest beds (2)",
@@ -981,7 +1779,14 @@
       "category": "home",
       "price_nis": 500,
       "store": "Home Center",
-      "url": ""
+      "url": "",
+      "seed_key": "folding-guest-beds-2",
+      "kind": "idea",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Dehumidifier",
@@ -990,7 +1795,14 @@
       "price_nis": 400,
       "store": "KSP",
       "url": "",
-      "brand": "Electrolux"
+      "brand": "Electrolux",
+      "seed_key": "dehumidifier",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": ""
     },
     {
       "name": "Entryway mirror & shelf",
@@ -999,7 +1811,14 @@
       "price_nis": 250,
       "store": "IKEA",
       "url": "",
-      "brand": "IKEA"
+      "brand": "IKEA",
+      "seed_key": "entryway-mirror-shelf",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-07-05",
+      "price_source": "Zap.co.il + brand/retailer sites"
     }
   ],
   "bundles": [

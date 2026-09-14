@@ -408,6 +408,144 @@ def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_catalog_active_cat_sort ON catalog_items(active, category, sort)")
 
 
+# ------------------------------------------------------------------ catalog seed sync
+# Metadata columns that "adoption" (matching a legacy no-seed_key row by exact
+# name) is allowed to fill in — ONLY when the DB row still holds the column's
+# schema default, so a manual admin edit is never clobbered. Never includes
+# name/price/url/store/brand/active/featured — those are the couple/admin's.
+_ADOPT_FIELDS = {
+    "kind": "product",
+    "starter_group": "",
+    "price_status": "estimate",
+    "price_checked_at": "",
+    "price_source": "",
+}
+
+
+def seed_sync(db, seed_items, dry_run=False):
+    """Sync `catalog_items` from the seed file's items (each with a stable
+    `seed_key`). Three cases per seed row:
+      1. seed_key already present in DB -> untouched (admin owns it now).
+      2. No row has this seed_key, but a legacy row (seed_key IS NULL) has an
+         exact name match -> "adopt": set its seed_key, and fill ONLY the
+         metadata fields in _ADOPT_FIELDS that are still at their default.
+         Never touches name/price/url/store/brand/active/featured.
+      3. No row has this seed_key and no legacy name match -> INSERT a new
+         row (including featured/starter_group, so a fresh install gets a
+         working starter pack).
+    Retired items (active=0) are matched by seed_key like any other row, so
+    they are never re-inserted. Returns a dict of counters."""
+    counters = dict(adopted=0, inserted=0, unchanged=0)
+    have_keys = {r["seed_key"] for r in
+                 db.execute("SELECT seed_key FROM catalog_items WHERE seed_key IS NOT NULL")}
+    legacy_by_name = {r["name"]: r["id"] for r in
+                      db.execute("SELECT id, name FROM catalog_items WHERE seed_key IS NULL")}
+    for i, it in enumerate(seed_items):
+        key = it["seed_key"]
+        if key in have_keys:
+            counters["unchanged"] += 1
+            continue
+        legacy_id = legacy_by_name.get(it["name"])
+        if legacy_id is not None:
+            counters["adopted"] += 1
+            if dry_run:
+                continue
+            row = db.execute("SELECT * FROM catalog_items WHERE id=?", (legacy_id,)).fetchone()
+            sets, params = ["seed_key=?"], [key]
+            for field, default in _ADOPT_FIELDS.items():
+                if field in row.keys() and row[field] == default and field in it:
+                    sets.append(f"{field}=?")
+                    params.append(it[field])
+            params.append(legacy_id)
+            db.execute(f"UPDATE catalog_items SET {', '.join(sets)} WHERE id=?", params)
+        else:
+            counters["inserted"] += 1
+            if dry_run:
+                continue
+            db.execute(
+                "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store,"
+                " url, sort, seed_key, kind, featured, starter_group, price_status,"
+                " price_checked_at, price_source) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (it["name"], it.get("name_he", ""), it.get("brand", ""),
+                 it.get("category", "home"), it.get("price_nis", 0), it.get("store", ""),
+                 it.get("url", ""), i, key, it.get("kind", "product"),
+                 1 if it.get("featured") else 0, it.get("starter_group", ""),
+                 it.get("price_status", "estimate"), it.get("price_checked_at", ""),
+                 it.get("price_source", "")))
+    return counters
+
+
+def seed_overwrite(db, seed_items, fields, dry_run=False):
+    """Explicit admin-requested overwrite: for each seed item with a matching
+    seed_key in the DB, set `fields` (a list like ['price_nis','url']) from
+    the seed value if different. Returns a list of (seed_key, name, field,
+    old, new) diff rows (always computed, even in dry-run)."""
+    diffs = []
+    by_key = {it["seed_key"]: it for it in seed_items if it.get("seed_key")}
+    for row in db.execute("SELECT * FROM catalog_items WHERE seed_key IS NOT NULL"):
+        it = by_key.get(row["seed_key"])
+        if not it:
+            continue
+        sets, params = [], []
+        for field in fields:
+            if field not in it:
+                continue
+            new_val = it[field]
+            old_val = row[field] if field in row.keys() else None
+            if old_val != new_val:
+                diffs.append((row["seed_key"], row["name"], field, old_val, new_val))
+                sets.append(f"{field}=?")
+                params.append(new_val)
+        if sets and not dry_run:
+            params.append(row["id"])
+            db.execute(f"UPDATE catalog_items SET {', '.join(sets)} WHERE id=?", params)
+    return diffs
+
+
+def refresh_registry_links(db, dry_run=False):
+    """Copy url/image/store/brand from catalog_items onto registry_items that
+    came from the catalog (catalog_id set), for any of those fields the
+    couple has NOT overridden (registry_items.overrides is a comma list).
+    Never touches name/price/qty/priority/note or any claim. Returns a list
+    of (registry_item_id, field, old, new) diff rows."""
+    diffs = []
+    fields = ("url", "image", "store", "brand")
+    rows = db.execute(
+        "SELECT ri.*, c.url AS c_url, c.image AS c_image, c.store AS c_store,"
+        " c.brand AS c_brand FROM registry_items ri"
+        " JOIN catalog_items c ON c.id = ri.catalog_id"
+        " WHERE ri.archived=0").fetchall()
+    for row in rows:
+        overrides = set(f for f in (row["overrides"] or "").split(",") if f)
+        sets, params = [], []
+        for field in fields:
+            if field in overrides:
+                continue
+            old_val = row[field]
+            new_val = row["c_" + field]
+            if old_val != new_val:
+                diffs.append((row["id"], field, old_val, new_val))
+                sets.append(f"{field}=?")
+                params.append(new_val)
+        if sets and not dry_run:
+            params.append(row["id"])
+            db.execute(f"UPDATE registry_items SET {', '.join(sets)} WHERE id=?", params)
+    return diffs
+
+
+def bundle_sync(db, bundles):
+    """Unchanged behaviour from Phase 1: insert bundles that aren't there yet
+    (matched by slug), never overwrite an existing one."""
+    for i, b in enumerate(bundles):
+        db.execute(
+            "INSERT OR IGNORE INTO bundles (slug, name, name_he, tier, price_from,"
+            " description, description_he, items_text, items_text_he, sort)"
+            " VALUES (?,?,?,?,?,?,?,?,?,?)",
+            (b["slug"], b["name"], b.get("name_he", ""), b.get("tier", "basic"),
+             b.get("price_from", 0), b.get("description", ""), b.get("description_he", ""),
+             b.get("items_text", ""), b.get("items_text_he", ""), i))
+
+
 MIGRATIONS = [
     _m001_initial_schema,
     _m002_brand_backfill,

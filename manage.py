@@ -7,8 +7,12 @@ send-mail      -- flush the mail outbox (run this on a schedule if SMTP is set)
 expire-claims  -- flip reserved claims past expires_at to 'expired'
 check          -- integrity check + basic config sanity, exit 1 on problems
 stats          -- print basic counts (no PII)
-
-seed-sync / refresh-registry-links are Phase 3 (catalog work) — stubs only here.
+seed-sync      -- adopt/insert catalog rows from seed_catalog.json by seed_key;
+                  with --fields, explicitly overwrite those fields from the seed
+                  (both default to a dry run printing a diff table; pass --apply to write)
+refresh-registry-links -- copy url/image/store/brand from catalog to registry_items
+                  that came from the catalog, skipping any field the couple overrode
+                  (dry run by default; pass --apply to write)
 """
 import argparse
 import getpass
@@ -121,8 +125,45 @@ def cmd_stats(args):
     return 0
 
 
-def cmd_not_implemented(args):
-    print("not implemented in Phase 1")
+def cmd_seed_sync(args):
+    import json
+    seed_path = BASE / "seed_catalog.json"
+    seed = json.loads(seed_path.read_text(encoding="utf-8"))
+    db = _open()
+    if args.fields:
+        fields = [f.strip() for f in args.fields.split(",") if f.strip()]
+        with ob_db.write_txn(db):
+            diffs = ob_db.seed_overwrite(db, seed.get("items", []), fields, dry_run=(not args.apply))
+        if not diffs:
+            print("No differences.")
+        else:
+            print(f"{'seed_key':<30} {'name':<40} {'field':<14} {'old':<20} {'new':<20}")
+            for key, name, field, old, new in diffs:
+                print(f"{key:<30} {name[:38]:<40} {field:<14} {str(old)[:18]:<20} {str(new)[:18]:<20}")
+        print(f"\n{len(diffs)} field(s) would change." if (not args.apply)
+              else f"\n{len(diffs)} field(s) changed.")
+    else:
+        with ob_db.write_txn(db):
+            counters = ob_db.seed_sync(db, seed.get("items", []), dry_run=(not args.apply))
+            ob_db.bundle_sync(db, seed.get("bundles", []))
+        verb = "would be" if (not args.apply) else ""
+        print(f"Adopted {counters['adopted']} legacy row(s), inserted {counters['inserted']}"
+              f" new row(s) {verb}, {counters['unchanged']} already in sync.")
+    return 0
+
+
+def cmd_refresh_registry_links(args):
+    db = _open()
+    with ob_db.write_txn(db):
+        diffs = ob_db.refresh_registry_links(db, dry_run=(not args.apply))
+    if not diffs:
+        print("No differences.")
+    else:
+        print(f"{'item_id':<10} {'field':<10} {'old':<40} {'new':<40}")
+        for item_id, field, old, new in diffs:
+            print(f"{item_id:<10} {field:<10} {str(old)[:38]:<40} {str(new)[:38]:<40}")
+    print(f"\n{len(diffs)} field(s) would change." if (not args.apply)
+          else f"\n{len(diffs)} field(s) changed.")
     return 0
 
 
@@ -151,11 +192,19 @@ def main():
     sp = sub.add_parser("stats")
     sp.set_defaults(fn=cmd_stats)
 
-    for name in ("seed-sync", "refresh-registry-links"):
-        sp = sub.add_parser(name)
-        sp.add_argument("--dry-run", action="store_true")
-        sp.add_argument("--fields", default="")
-        sp.set_defaults(fn=cmd_not_implemented)
+    sp = sub.add_parser("seed-sync")
+    sp.add_argument("--apply", action="store_true",
+                     help="write changes (default is a dry run)")
+    sp.add_argument("--fields", default="",
+                     help="comma list (e.g. price_nis,url,image,store,brand,featured):"
+                          " explicitly overwrite these fields from the seed by seed_key."
+                          " Without --fields, only adopts/inserts (never overwrites).")
+    sp.set_defaults(fn=cmd_seed_sync)
+
+    sp = sub.add_parser("refresh-registry-links")
+    sp.add_argument("--apply", action="store_true",
+                     help="write changes (default is a dry run)")
+    sp.set_defaults(fn=cmd_refresh_registry_links)
 
     args = p.parse_args()
     sys.exit(args.fn(args) or 0)
