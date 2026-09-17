@@ -983,3 +983,5 @@ dialog:focus-visible { outline: none; }
 .queue-card a { color: var(--ink); text-decoration: none; border-bottom: 1px dotted var(--gold-bright); }
 .queue-card a:hover { color: var(--gold); }
 .jump-link { font: 600 .9rem var(--font-body); margin-inline-start: 12px; color: var(--gold); }
+.cur-form { display: inline-flex; margin: 0; }
+select.cur-toggle { width: auto; min-height: 0; margin: 0; padding: 5px 28px 5px 12px; background: transparent; font-weight: 700; cursor: pointer; font-size: .9rem; direction: ltr; }

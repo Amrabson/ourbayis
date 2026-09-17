@@ -35,9 +35,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   coordinated (installation confirmed in your quote)" and the terms panel says installation is priced
   per item. Decide: is appliance installation included in the ₪17,900 starting price or always extra?
   Then edit `PACKAGE_TIERS` / `pkg_appliances_included` and the bundle line accordingly.
-- [ ] **Who receives deliveries on Landing Basics / Home Sweet Home.** Copy currently says it "depends
-  on the package and is set out in your quote". Decide (couple / landlord / OurBayis for a fee) and
-  make `shana_term_delivery_b` specific.
+- [x] **Who receives deliveries** — decided 2026-09-17: everything is delivered to the couple's
+  apartment; with access (key/code/someone to open) deliveries are placed inside. Copy updated.
 - [ ] **Bundle text on an existing database.** `bundle_sync` is insert-only, so a live DB keeps the old
   "most popular" / "coordinated and installed" wording. Edit the three bundles in `/admin/bundles`
   (or on a fresh install the seed is used). The static preview already shows the new text.
@@ -47,8 +46,10 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   labelled as illustrations. If you want photos for the 8 featured items, add only images you have the
   right to use via `/admin/catalog` (`image` + `image_credit`); the card, homepage strip, registry and
   dialog all pick them up automatically and fall back to the drawing on error.
-- [ ] **Exchange rate.** `ob_money` defaults to USD 3.7 when `OB_RATES` is unset (the static preview
-  shows that figure with the 2026-09-01 date from the exporter). Set a real `OB_RATES`/`OB_RATES_DATE`.
+- [ ] **Exchange rate.** Run `python manage.py fetch-rates` once and schedule it daily (DEPLOY_AI.md);
+  it writes `instance/rates.json` (ECB reference rates via frankfurter.app, USD/GBP/EUR/CAD/AUD/ZAR)
+  and the running app picks it up without a reload. Until that runs, the built-in USD 3.7 fallback
+  shows with no date. `OB_RATES` env still overrides everything if you prefer a fixed rate.
 - [ ] **Backup retention.** Privacy copy no longer promises a period; state one once you decide how long
   `manage.py backup` files are kept, then update `privacy_delete_b` (EN+HE).
 - [ ] **Sample registry title/names** ("Our new bayis in Yerushalayim" / "A sample couple") — change
@@ -71,9 +72,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [ ] **SMTP sender** — set `OB_SMTP_HOST/PORT/USER/PASS` + `OB_NOTIFY_EMAIL` (Gmail app password
   or Zoho work fine). Without it, mail queues in `mail_outbox` but never sends — `/forgot` and
   guest confirmation emails silently no-op.
-- [ ] **Rates config** — set `OB_RATES` (e.g. `{"USD":3.7,"GBP":4.75}`) and `OB_RATES_DATE` so
-  `estimate_label()` shows "≈ $49 (approx., rate as of ...)" instead of nothing. Update
-  periodically — nothing auto-refreshes exchange rates.
+- [ ] **Rates** — schedule `manage.py fetch-rates` daily (see the decisions list above); `OB_RATES`
+  env is only needed if you want to pin a fixed rate.
 - [ ] **Pricing verification** — 55 of 117 catalog items are marked `price_status='verified'` (dated
   2026-07-03/05, see CHANGELOG_AI.md) — the July notes only claim 31 branded + 8 big-ticket items, so
   spot-check the mapping in `/admin/catalog?price_status=verified` and downgrade anything doubtful.

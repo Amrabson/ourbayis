@@ -22,6 +22,8 @@ def app_module(tmp_path, monkeypatch):
     monkeypatch.setenv("OB_DB_PATH", str(db_path))
     monkeypatch.setenv("OB_SECRET_KEY", "test-secret-key")
     monkeypatch.delenv("OB_SMTP_HOST", raising=False)
+    monkeypatch.setenv("OB_RATES", '{"USD": 3.7}')  # pin: never read instance/rates.json in tests
+    monkeypatch.delenv("OB_RATES_DATE", raising=False)
     monkeypatch.delenv("OB_SECURE_COOKIES", raising=False)
     monkeypatch.delenv("OB_TRUST_PROXY", raising=False)
     for mod in list(sys.modules):

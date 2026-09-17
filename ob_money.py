@@ -6,8 +6,8 @@ import os
 import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 
-CURRENCY_SYMBOLS = {"ILS": "₪", "USD": "$", "EUR": "€", "GBP": "£"}
-CURRENCY_CODES = {"ILS", "NIS", "USD", "EUR", "GBP"}
+CURRENCY_SYMBOLS = {"ILS": "₪", "USD": "$", "EUR": "€", "GBP": "£", "CAD": "CA$", "AUD": "A$", "ZAR": "R"}
+CURRENCY_CODES = {"ILS", "NIS", "USD", "EUR", "GBP", "CAD", "AUD", "ZAR"}
 _SYMBOL_TO_CODE = {"₪": "ILS", "$": "USD", "€": "EUR", "£": "GBP", "NIS": "ILS"}
 
 MAX_MINOR = 10 ** 9 * 100  # reject absurd/garbage amounts (spec: reject > 10^9)
@@ -77,17 +77,107 @@ def parse_legacy_amount(text):
     return minor, code
 
 
-def _rates():
+# Exchange rates: ILS per one unit of each currency. Resolution order:
+#   1. OB_RATES / OB_RATES_DATE env (explicit, wins)
+#   2. instance/rates.json written by `manage.py fetch-rates` (daily scheduled task)
+#   3. built-in fallback {"USD": 3.7} with no date (the rate note then says "approx." only)
+# The file is re-read whenever its mtime changes (see ensure_fresh), so a running
+# web app picks up a fresh fetch without a reload. Estimates stay labelled as
+# approximate — what a guest pays is always the store's / provider's own rate.
+RATES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "instance", "rates.json")
+RATES_SOURCE = ""
+_DEFAULT_RATES = {"USD": 3.7}
+_rates_mtime = None
+
+
+def _read_rates_file():
     try:
-        raw = json.loads(os.environ.get("OB_RATES", "") or '{"USD": 3.7}')
-    except (ValueError, TypeError):
-        raw = {"USD": 3.7}
-    return {str(k).upper(): float(v) for k, v in raw.items()}
+        with open(RATES_FILE, encoding="utf-8") as fh:
+            data = json.load(fh)
+        rates = {str(k).upper(): float(v) for k, v in (data.get("rates") or {}).items()}
+        return rates, str(data.get("date") or ""), str(data.get("source") or "")
+    except (OSError, ValueError, TypeError, AttributeError):
+        return None, "", ""
 
 
-RATES = _rates()
-RATES_DATE = os.environ.get("OB_RATES_DATE", "")
-CURRENCIES = ["ILS"] + [c for c in RATES if c != "ILS"]
+def _rates():
+    """(rates, date, source) — see the resolution order above."""
+    env = os.environ.get("OB_RATES", "")
+    if env:
+        try:
+            raw = json.loads(env)
+            return ({str(k).upper(): float(v) for k, v in raw.items()},
+                    os.environ.get("OB_RATES_DATE", ""), "env")
+        except (ValueError, TypeError, AttributeError):
+            pass
+    rates, date, source = _read_rates_file()
+    if rates:
+        return rates, date, source
+    return dict(_DEFAULT_RATES), os.environ.get("OB_RATES_DATE", ""), ""
+
+
+def _apply(rates, date, source):
+    global RATES_DATE, RATES_SOURCE
+    RATES.clear()
+    RATES.update(rates)
+    RATES_DATE = date
+    RATES_SOURCE = source
+    CURRENCIES[:] = ["ILS"] + [c for c in RATES if c != "ILS"]
+
+
+RATES = {}
+CURRENCIES = []
+RATES_DATE = ""
+_apply(*_rates())
+
+
+def ensure_fresh():
+    """Cheap per-request check: re-read instance/rates.json if it changed on
+    disk (a scheduled `manage.py fetch-rates` ran). No-op when OB_RATES is set."""
+    global _rates_mtime
+    if os.environ.get("OB_RATES"):
+        return
+    try:
+        mtime = os.stat(RATES_FILE).st_mtime
+    except OSError:
+        mtime = None
+    if mtime != _rates_mtime:
+        _rates_mtime = mtime
+        _apply(*_rates())
+
+
+FETCH_CURRENCIES = ("USD", "GBP", "EUR", "CAD", "AUD", "ZAR")
+FETCH_URL = "https://api.frankfurter.app/latest?from=ILS&to={to}"
+
+
+def fetch_rates(codes=FETCH_CURRENCIES, timeout=15):
+    """Fetch reference rates (frankfurter.app — European Central Bank data, free,
+    no key, updated on ECB business days) and write instance/rates.json.
+    Returns (rates, date). Raises on network/parse errors so the scheduled task
+    exits non-zero and the previous file stays in place (never writes garbage)."""
+    import datetime
+    import urllib.request
+    url = FETCH_URL.format(to=",".join(codes))
+    req = urllib.request.Request(url, headers={"User-Agent": "OurBayis rates fetch"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    per_ils = data.get("rates") or {}
+    rates = {}
+    for code in codes:
+        v = per_ils.get(code)
+        if v and float(v) > 0:
+            rates[code] = round(1.0 / float(v), 4)  # ILS per one unit of `code`
+    if not rates:
+        raise ValueError("no usable rates in response")
+    date = str(data.get("date") or datetime.date.today().isoformat())
+    os.makedirs(os.path.dirname(RATES_FILE), exist_ok=True)
+    tmp = RATES_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as fh:
+        json.dump({"rates": rates, "date": date, "source": "frankfurter.app (ECB)",
+                   "fetched_at": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}, fh, indent=1)
+    os.replace(tmp, RATES_FILE)
+    ensure_fresh()
+    return rates, date
 
 
 def estimate(minor_ils, code):

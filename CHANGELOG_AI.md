@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-17 — live-ish exchange rates + delivery decision
+- `manage.py fetch-rates` pulls ECB reference rates (frankfurter.app, free, no key) for
+  USD/GBP/EUR/CAD/AUD/ZAR, inverts them to ILS-per-unit and writes `instance/rates.json` atomically
+  (a failed fetch leaves the previous file untouched and exits 1). `ob_money` resolves rates as
+  env `OB_RATES` → rates file → `{"USD": 3.7}` fallback, and `ensure_fresh()` (called from a
+  `before_request` hook) re-reads the file when its mtime changes, so a daily scheduled task updates
+  the running site with no reload. Estimates remain labelled approximate with the rate date; the site
+  still never converts money itself.
+- Shana Rishonah delivery term (owner decision): everything is delivered to the couple's apartment;
+  with access (key/code/someone to open) deliveries are placed inside; Full Nest receives and unpacks.
+
 ## 2026-09-17 — review pass 2: homepage journey, shared gift cards, status labels, sample, packages, copy
 **Status / availability consistency (the one demonstrated defect, fixed first).** Registry items now
 carry `model`, `availability`, `notes`/`notes_he` (migration 18, backfilled from the catalog;

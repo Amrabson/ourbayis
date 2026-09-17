@@ -100,9 +100,12 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   `OB_TRUST_PROXY=1` (enables ProxyFix — only set this behind a real proxy), `OB_BASE_URL` (used
   for every external link — emails, sitemap, robots, share links — via `ext_url()`),
   `OB_ALLOWED_HOSTS` (comma list; other Host headers get 400), `OB_DB_PATH` (mainly for tests),
-  `OB_RATES`/`OB_RATES_DATE` (JSON rates, e.g. `{"USD":3.7,"GBP":4.75}`; drives the header currency
-  toggle, the short `estimate_label()` "≈ $59" on cards and the one-per-page `estimate_note()` footnote —
-  ILS is always the reference; `OB_ILS_PER_USD`/`usd()` are legacy and no longer used by templates), `OB_WHATSAPP`; email (optional): `OB_SMTP_HOST/PORT/USER/PASS`
+  `OB_RATES`/`OB_RATES_DATE` (optional JSON override, e.g. `{"USD":3.7,"GBP":4.75}`). Normal source is
+  `instance/rates.json`, written by `manage.py fetch-rates` (ECB reference rates via frankfurter.app,
+  ILS per unit, USD/GBP/EUR/CAD/AUD/ZAR) and hot-reloaded by `ob_money.ensure_fresh()` in a
+  `before_request` hook when the file's mtime changes; fallback is `{"USD": 3.7}` with no date. Rates
+  drive the header currency toggle, the short `estimate_label()` "≈ $59" on cards and the one-per-page
+  `estimate_note()` footnote — ILS is always the reference; `OB_ILS_PER_USD`/`usd()` are legacy), `OB_WHATSAPP`; email (optional): `OB_SMTP_HOST/PORT/USER/PASS`
   + `OB_NOTIFY_EMAIL` — without SMTP, mail still queues in `mail_outbox` (visible via
   `manage.py stats`) but nothing sends.
 - `manage.py`: `create-admin`, `backup`, `send-mail` (flush the outbox — run on a schedule),

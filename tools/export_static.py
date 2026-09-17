@@ -108,6 +108,7 @@ def rewrite(html, out_dir, lang, go_map):
     html = html.replace("http://localhost", "")
     # currency toggle is meaningless without a server
     html = re.sub(r'<a class="lang-toggle cur-toggle"[^>]*>.*?</a>\s*', "", html, flags=re.S)
+    html = re.sub(r'<form class="cur-form".*?</form>\s*', "", html, flags=re.S)
     banner = ('<div class="demo-banner" dir="auto">Static preview — read-only demo of OurBayis. '
               'Forms, sign-up and gifting are disabled here; the sample registry is synthetic.</div>'
               if lang == "en" else

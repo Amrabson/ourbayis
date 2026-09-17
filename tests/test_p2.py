@@ -334,3 +334,42 @@ def test_dates_are_localised_but_stored_unchanged(client, app_module):
     he = client.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
     assert '<time datetime="2026-12-15">15 December 2026</time>' in en
     assert "15 בדצמבר 2026" in he
+
+
+# ------------------------------------------------------------------ exchange rates
+def test_rates_file_is_hot_reloaded_and_env_wins(tmp_path, monkeypatch):
+    import importlib
+    import json as _json
+    import sys
+    monkeypatch.delenv("OB_RATES", raising=False)
+    for mod in list(sys.modules):
+        if mod == "ob_money":
+            del sys.modules[mod]
+    import ob_money
+    monkeypatch.setattr(ob_money, "RATES_FILE", str(tmp_path / "rates.json"))
+    monkeypatch.setattr(ob_money, "_rates_mtime", object())  # force a re-read from the new path
+    ob_money.ensure_fresh()
+    assert ob_money.RATES == {"USD": 3.7} and ob_money.RATES_DATE == ""
+    (tmp_path / "rates.json").write_text(_json.dumps(
+        {"rates": {"USD": 3.1, "GBP": 4.1}, "date": "2026-09-17", "source": "test"}), encoding="utf-8")
+    ob_money.ensure_fresh()
+    assert ob_money.RATES["GBP"] == 4.1 and ob_money.RATES_DATE == "2026-09-17"
+    assert ob_money.CURRENCIES == ["ILS", "USD", "GBP"]
+    assert ob_money.estimate(31000, "USD") == 10000
+    # a corrupt file never wipes the previous good rates
+    (tmp_path / "rates.json").write_text("{not json", encoding="utf-8")
+    ob_money.ensure_fresh()
+    assert ob_money.RATES == {"USD": 3.7}  # falls back to the default, never crashes
+    monkeypatch.setenv("OB_RATES", '{"USD": 9.9}')
+    importlib.reload(ob_money)
+    assert ob_money.RATES == {"USD": 9.9}
+
+
+def test_currency_select_and_query_route(client, app_module):
+    app_module.ob_money._apply({"USD": 3.7, "GBP": 4.7, "EUR": 4.0}, "2026-09-17", "test")
+    html = client.get("/").get_data(as_text=True)
+    assert '<form class="cur-form"' in html and '<option value="GBP"' in html
+    r = client.get("/currency?code=gbp", headers={"Referer": "http://localhost/catalog"})
+    assert r.status_code == 302 and r.headers["Location"].endswith("/catalog")
+    assert "≈ £" in client.get("/catalog").get_data(as_text=True)
+    assert client.get("/currency?code=XXX").status_code == 302  # ignored, no 500

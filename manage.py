@@ -173,6 +173,18 @@ def cmd_refresh_registry_links(args):
     return 0
 
 
+def cmd_fetch_rates(args):
+    import ob_money
+    try:
+        rates, date = ob_money.fetch_rates()
+    except Exception as exc:  # noqa: BLE001 — a failed fetch must leave the old file alone
+        print(f"fetch-rates failed: {exc}")
+        return 1
+    print(f"rates as of {date} (ILS per unit): " + ", ".join(f"{k} {v}" for k, v in rates.items()))
+    print(f"written to {ob_money.RATES_FILE}")
+    return 0
+
+
 def main():
     p = argparse.ArgumentParser(prog="manage.py")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -206,6 +218,10 @@ def main():
                           " explicitly overwrite these fields from the seed by seed_key."
                           " Without --fields, only adopts/inserts (never overwrites).")
     sp.set_defaults(fn=cmd_seed_sync)
+
+    sp = sub.add_parser("fetch-rates",
+                        help="pull ECB reference rates (frankfurter.app) into instance/rates.json")
+    sp.set_defaults(fn=cmd_fetch_rates)
 
     sp = sub.add_parser("refresh-registry-links")
     sp.add_argument("--apply", action="store_true",

@@ -101,6 +101,11 @@ NOINDEX_ENDPOINTS = {
 
 # ---------------------------------------------------------------- security
 @app.before_request
+def refresh_rates():
+    ob_money.ensure_fresh()  # picks up instance/rates.json written by `manage.py fetch-rates`
+
+
+@app.before_request
 def check_host():
     if ALLOWED_HOSTS and request.host.split(":")[0] not in ALLOWED_HOSTS:
         abort(400)
@@ -710,8 +715,10 @@ def set_lang(code):
     return redirect(ob_security.same_origin_referrer() or url_for("index"))
 
 
+@app.route("/currency", defaults={"code": None})
 @app.route("/currency/<code>")
 def set_currency(code):
+    code = (code or request.args.get("code") or "").upper()
     if code in ob_money.CURRENCIES:
         session["cur"] = code
     return redirect(ob_security.same_origin_referrer() or url_for("index"))

@@ -105,7 +105,14 @@
       {% endif %}
     </nav>
     <div class="header-side">
-      {% if currencies | length > 1 %}
+      {% if currencies | length > 2 %}
+      <form class="cur-form" method="get" action="{{ url_for('set_currency') }}">
+        <select class="lang-toggle cur-toggle" name="code" data-autosubmit aria-label="{{ t('currency_toggle_title') }}" title="{{ t('currency_toggle_title') }}">
+          {% for c in currencies %}<option value="{{ c }}" {% if c == display_currency %}selected{% endif %}>{{ c }}</option>{% endfor %}
+        </select>
+        <noscript><button type="submit" class="lang-toggle">OK</button></noscript>
+      </form>
+      {% elif currencies | length > 1 %}
       <a class="lang-toggle cur-toggle" href="{{ url_for('set_currency', code=('ILS' if display_currency != 'ILS' else currencies[1])) }}" title="{{ t('currency_toggle_title') }}"><bdi>{{ display_currency }}</bdi></a>
       {% endif %}
       <a class="lang-toggle" href="{{ url_for('set_lang', code=('en' if rtl else 'he')) }}">{{ 'English' if rtl else 'עברית' }}</a>
