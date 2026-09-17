@@ -6,6 +6,7 @@ import os
 
 os.environ["OB_DB_PATH"] = r"C:\Users\aharo\AppData\Local\Temp\ourbayis-dev.db"
 os.environ.setdefault("OB_SECRET_KEY", "dev-only-key")
+os.environ.setdefault("OB_RATES", '{"USD":3.7}')
 os.environ.setdefault("OB_RATES_DATE", "2026-09-01")
 
 import app  # noqa: E402

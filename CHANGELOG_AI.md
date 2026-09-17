@@ -1,5 +1,88 @@
 # Changelog
 
+## 2026-09-17 — review pass 2: homepage journey, shared gift cards, status labels, sample, packages, copy
+**Status / availability consistency (the one demonstrated defect, fixed first).** Registry items now
+carry `model`, `availability`, `notes`/`notes_he` (migration 18, backfilled from the catalog;
+`_insert_registry_item_from_catalog` copies them; `refresh-registry-links` refreshes them — `availability`
+always, the rest unless the couple overrode the field). The Crock-Pot's "Out of stock at last check"
+badge therefore shows on the homepage strip, `/catalog`, the registry card, the claim dialog, the items
+page and the dashboard row, not only on `/catalog`. `featured_items()` sorts unavailable items last, so
+the default homepage/sample selection prefers orderable gifts (the badge still shows when one is included).
+Claim `amount_minor`/`price_snapshot_minor` and the registry item's `price_nis` are never touched by the
+refresh (test: `test_refresh_links_updates_availability_but_never_claim_amounts`).
+
+**Gift lifecycle shown honestly.** `item_claim_breakdown()` (reserved/reported/received per item) and
+`gift_status(item, breakdown)` are the single presentation rule. The public registry no longer prints
+"Gifted" whenever quantity is exhausted: cards say *Reserved by a guest* / *On its way — reported by a
+guest* / *Received — confirmed by the couple*; multi-quantity cards say "1 of 3 still available · 1
+reserved · 1 received"; the progress line reads "reserved, on the way or received"; How It Works has a
+status legend. No donor names or messages are exposed.
+
+**Shared card component.** `templates/_cards.html` (`gift_card`, `gift_media`, `price_line`,
+`gift_facts`, `status_label`, `qty_line`) is now used by the homepage strip, `/catalog`, `/r/<slug>`,
+`/sample`, the claim dialog, the guest page and the items page. Name + shekel price first; brand · store,
+model, "Price checked <date>" / "Estimated price" and the stock flag subordinate. 27 item-specific line
+illustrations (`ill-platta`, `ill-urn`, `ill-kettle`, `ill-mixer`, `ill-slowcooker`, `ill-towel`, …) picked
+by `illustration_for(item)` (keyword rules on name/seed_key, category drawing as fallback) so a kettle no
+longer looks like a mixer; the box is `role="img"` with an "illustration, not a product photo" label. No
+catalog row has a photo (checked: 0/117 in the seed and the snapshot DB) — see TODO for the image workflow.
+
+**Homepage.** New sequence: split hero (eyebrow / H1 "Build your bayis in Israel." / display-serif lead
+/ body / one-line payment explanation / Create your registry + Find a couple / "See a sample registry" /
+three short trust points) beside a live preview of the sample registry; one shared three-step story with
+"For guests" notes; 8 featured gift cards; a category chip strip; three factual benefit cards; the
+Shana Rishonah band (labelled "separate service"); FAQ; final CTA. The old duplicate couples/guests
+sections, the six category tiles, the hardcoded ₪180/₪1,650 sample and the full-width skyline art are
+gone (the chuppah motif survives above the preview). Hero light-field animation now only runs ≥900px and
+under `prefers-reduced-motion: no-preference`; `.reveal` is faster and triggers earlier.
+
+**One canonical sample.** `sample_registry(db)` builds the sample from the live featured catalog rows
+with synthetic states (open, 1-of-2, received, reported, reserved). `/sample` renders `registry.html`
+with `is_sample=True` (no dialogs, no forms, no pay links, inert buttons, "Sample registry" flag,
+"Yours will look like this" CTA). The homepage preview uses the same fixture. `tools/export_static.py`
+publishes `/sample` (old `docs/registry/` redirects to it) and no longer seeds a "Demo Couple".
+
+**Catalog browsing.** Result count, price bands (`CATALOG_PRICE_BANDS`), exact-products/ideas filter,
+sort (`CATALOG_SORTS`), 24-per-page pagination (`CATALOG_PAGE_SIZE`), search also matches brand, reset
+link; everything is in the URL so back/forward and the pending-add-through-signup flow keep state.
+`items_add?back=catalog` now carries `price/kind/sort/page` back and anchors to the added card. The
+logged-out "Sign up to add" is a real pending-add POST, not a bare link to /signup.
+
+**Gift dialog.** "View product details at {store} ↗" before reserving; two clearly separated routes with
+one-line notes on who completes the order (guest + store) vs. who orders after a cash gift (the couple);
+"Next you'll get a private link…" hint; translated `Close` label; `aria-labelledby`; dialogs scroll
+inside `max-height: calc(100dvh - 24px)`. Guest page: price + facts, "Next step: buy it…" CTA for store
+claims, localized held-until date; the rates footnote moved out of the save-link panel.
+
+**Shana Rishonah.** `PACKAGE_TIERS` (per tier: delivery, setup, appliances, lead weeks) drives four
+visible facts per card + a 4-line "What's included" summary + `<details>` full list; the common terms
+(delivery/receiving, installation, extras, exclusions, timing, quotes & payment) appear once in a terms
+panel. Seed copy: "most popular" removed, Full Nest's washer/fridge/microwave line now says "ordered and
+delivery coordinated (installation confirmed in your quote)". Removed "No response-time guarantee, no
+automatic ordering" and "within one business day"; the form is described as an inquiry, "Not sure yet —
+help me choose" kept, contact requirement stated up front, `shana_how1` no longer asks for the address.
+**Existing databases keep their old bundle text** (bundle_sync is insert-only) — see TODO.
+
+**Copy.** Trust strip → Free for couples / English and Hebrew / Direct-to-couple cash gifts. Removed
+"Every appliance … works with Israeli current", "Local sizes … not an American one", "No customs",
+About's "click a gift, and they're done" (now reserve → buy/send → tell them; includes shana-rishonah
+arrivals, not only olim). Privacy page fully bilingual, no bracketed owner notes, no invented retention
+period ("deleted data drops out of dated backups as those backups are rotated"), contact pointer.
+"Checked {date}" → "Price checked {date}"; "estimate" → "Estimated price"; catalog legend explains both.
+Localized dates (`fmt_date`) on registry hero, guest page, dashboard queues; stored ISO values unchanged.
+
+**Dashboard / items.** Checklist shows only remaining steps with a "5 of 6 done" count and a one-line
+"Done:" summary; queue entries link to the row; rows flag an unavailable item with a hint; items page
+puts the couple's own list above the catalog with a status breakdown and stock flag per row.
+
+**Tooling.** `tools/screenshots.py` (headless Chrome, desktop/tablet/narrow, EN+HE), `tools/render_private.py`
+(logged-in/guest pages on a temp DB for screenshots). `run_dev.py` sets `OB_RATES` so the preview shows ≈ estimates.
+
+**Tests:** `tests/test_p2.py` (21 tests) → **69 passed**. Browser checks: home, sample, catalog (filters,
+pages), registry with every claim state, claim dialog, guest page, dashboard, items, starter picker,
+shana — desktop 1280 / tablet 768 / narrow 520 headless with Bellefair + Assistant loaded, and 375px in the
+in-app Chromium (EN + HE; `scrollWidth == viewport`, no overflow; primary CTA inside the first screen).
+
 ## 2026-09-14 — featured items: real store links verified (8/8), seed-sync metadata fix
 Each of the 8 featured catalog items now has a real Israeli product page in `seed_catalog.json`,
 checked by opening the page on 2026-09-14 (KSP / Machsanei Chashmal block scripted fetches, so those

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_cards.html" import price_line, gift_facts with context %}
 {% block title %}{{ t('guest_manage_title') }} — {{ brand }}{% endblock %}
 {% block content %}
 <div class="wrap section narrow">
@@ -38,9 +39,15 @@
 
     {% if item %}
     <h2 class="sub-title">{{ pick(item, 'name') }}{% if claim['qty'] > 1 %} ×{{ claim['qty'] }}{% endif %}</h2>
-    {% if item['url'] %}
+    {% if claim['kind'] != 'cash' %}{{ price_line(item) }}{% endif %}
+    {{ gift_facts(item) }}
+    {% if item['url'] and claim['kind'] != 'cash' %}
+    <p class="next-step"><strong>{{ t('guest_next_buy') }}</strong></p>
+    <a class="btn btn-primary store-cta bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
+      <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }} ↗</a>
+    {% elif item['url'] %}
     <a class="store-link bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
-      <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }}</a>
+      <svg class="ic"><use href="#i-link"/></svg> {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
     {% endif %}
     {% endif %}
 
@@ -66,12 +73,13 @@
     <p class="gift-meta bdi"><strong>{{ fmt_money(claim['amount_minor'], claim['currency']) }}</strong></p>
     {% endif %}
 
+    {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
     {% if reg['delivery_note'] or reg['delivery_note_he'] %}
     <p class="hint">{{ pick(reg, 'delivery_note') }}</p>
     {% endif %}
 
     {% if claim['expires_at'] and claim['status'] == 'reserved' %}
-    <p class="hint">{{ tf('guest_expires_on', date=claim['expires_at'][:10]) }}</p>
+    <p class="hint">{{ tf('guest_expires_on', date=fmt_date(claim['expires_at'])) }}</p>
     {% endif %}
 
     {% if claim['status'] in ('reserved', 'expired') %}
@@ -89,7 +97,6 @@
 
     <div class="notice-panel" style="flex-direction:column;align-items:stretch;gap:8px">
       <p style="margin:0"><strong>{{ t('guest_save_link_hint') }}</strong></p>
-    {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
     <div class="share-link-row">
         <code class="share-url bdi">{{ ext_url('guest_manage', token=token) }}</code>
         <button class="btn btn-ghost" data-copy="{{ ext_url('guest_manage', token=token) }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>

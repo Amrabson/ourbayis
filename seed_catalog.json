@@ -1874,8 +1874,8 @@
       "name_he": "בית מתוק",
       "tier": "standard",
       "price_from": 6900,
-      "description": "Everything in Landing Basics, plus a real working kitchen and a home you can host in. Our most popular package for shana rishonah couples.",
-      "description_he": "כל מה שבחבילת הבסיס, ועוד מטבח אמיתי ובית שאפשר לארח בו. החבילה הפופולרית ביותר לזוגות בשנה ראשונה.",
+      "description": "Everything in Landing Basics, plus a real working kitchen and a home you can host in — the middle package for couples who plan to cook and have guests.",
+      "description_he": "כל מה שבחבילת הבסיס, ועוד מטבח אמיתי ובית שאפשר לארח בו — חבילת הביניים לזוגות שמתכננים לבשל ולארח.",
       "items_text": "Everything in Landing Basics\nFull pots & pans set\nToaster oven, hand mixer & immersion blender\nFull dinnerware sets — milchig & fleishig\nGlassware & serving pieces\nShabbos tablecloths & hot water pump\nSecond sheet set + winter blankets\nIron & ironing board, drying rack\nFans or space heater (seasonal)",
       "items_text_he": "כל מה שבחבילת הבסיס\nסט סירים ומחבתות מלא\nטוסטר אובן, מיקסר ידני ובלנדר מוט\nסטים מלאים של כלי אוכל — חלבי ובשרי\nכוסות וכלי הגשה\nמפות שבת ותרמוס משאבה\nסט מצעים נוסף ושמיכות חורף\nמגהץ, קרש גיהוץ ומתקן ייבוש\nמאווררים או תנור חימום (לפי עונה)"
     },
@@ -1885,10 +1885,10 @@
       "name_he": "הקן המלא",
       "tier": "premium",
       "price_from": 17900,
-      "description": "White glove: we order everything, receive the deliveries, unpack, and set up the apartment before you land — including coordinating big appliances. Walk into a ready home.",
-      "description_he": "שירות מלא: אנחנו מזמינים הכול, מקבלים את המשלוחים, מפרקים ומסדרים את הדירה לפני שאתם נוחתים — כולל תיאום מוצרי חשמל גדולים. נכנסים לבית מוכן.",
-      "items_text": "Everything in Home Sweet Home\nWasher, fridge & microwave — coordinated and installed\nFolding table & chairs for Shabbos guests\nBookcase for sefarim\nFull linen closet setup\nJudaica starter set (candlesticks, kiddush cup, havdalah, challah board)\nWe receive all deliveries & set everything up\nWelcome grocery box for your first Shabbos",
-      "items_text_he": "כל מה שבחבילת בית מתוק\nמכונת כביסה, מקרר ומיקרוגל — בתיאום והתקנה\nשולחן מתקפל וכיסאות לאורחי שבת\nספרייה לספרי קודש\nסידור מלא של ארון המצעים\nסט יודאיקה (פמוטים, גביע קידוש, הבדלה, מגש חלה)\nאנחנו מקבלים את כל המשלוחים ומסדרים הכול\nסל קניות לשבת הראשונה"
+      "description": "White glove: we order everything, receive the deliveries, unpack, and set up the apartment before you land — including ordering and coordinating delivery of the big appliances. Walk into a ready home.",
+      "description_he": "שירות מלא: אנחנו מזמינים הכול, מקבלים את המשלוחים, מפרקים ומסדרים את הדירה לפני שאתם נוחתים — כולל הזמנה ותיאום משלוח של מוצרי החשמל הגדולים. נכנסים לבית מוכן.",
+      "items_text": "Everything in Home Sweet Home\nWasher, fridge & microwave — ordered and delivery coordinated (installation confirmed in your quote)\nFolding table & chairs for Shabbos guests\nBookcase for sefarim\nFull linen closet setup\nJudaica starter set (candlesticks, kiddush cup, havdalah, challah board)\nWe receive all deliveries & set everything up\nWelcome grocery box for your first Shabbos",
+      "items_text_he": "כל מה שבחבילת בית מתוק\nמכונת כביסה, מקרר ומיקרוגל — הזמנה ותיאום משלוח (התקנה מאושרת בהצעת המחיר)\nשולחן מתקפל וכיסאות לאורחי שבת\nספרייה לספרי קודש\nסידור מלא של ארון המצעים\nסט יודאיקה (פמוטים, גביע קידוש, הבדלה, מגש חלה)\nאנחנו מקבלים את כל המשלוחים ומסדרים הכול\nסל קניות לשבת הראשונה"
     }
   ]
 }

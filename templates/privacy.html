@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% block title %}Privacy — {{ brand }}{% endblock %}
+{% block title %}{{ t('nav_privacy') }} — {{ brand }}{% endblock %}
 {% block content %}
 <div class="wrap section narrow prose">
-  <h1 class="section-title">Privacy</h1>
+  <h1 class="section-title">{{ t('nav_privacy') }}</h1>
   <p class="page-sub">{{ t('privacy_intro') }}</p>
-  <p><strong>What we store:</strong> your account email and name, your registry details, and the names/messages guests leave when reserving a gift. That's it — we keep only what the site needs to work.</p>
-  <p><strong>What we never see:</strong> your money and your card details. Store purchases happen on the store's own site; cash gifts go through the couple's own PayPal, Stripe, Bit or PayBox link. OurBayis never processes payments.</p>
-  <p><strong>Registry visibility:</strong> registries are unlisted by default — anyone with the link can view it, but it isn't searchable. If "show in search results" is enabled, guests can also find it by searching your names. You can change that any time in your registry settings.</p>
+  <p><strong>{{ t('privacy_store_t') }}:</strong> {{ t('privacy_store_b') }}</p>
+  <p><strong>{{ t('privacy_never_t') }}:</strong> {{ t('privacy_never_b') }}</p>
+  <p><strong>{{ t('privacy_visibility_t') }}:</strong> {{ t('privacy_visibility_b') }}</p>
   <h2 class="sub-title">{{ t('privacy_cookies_t') }}</h2>
   <p>{{ t('privacy_cookies_b') }}</p>
   <h2 class="sub-title">{{ t('privacy_counters_t') }}</h2>
@@ -18,7 +18,8 @@
   <h2 class="sub-title">{{ t('privacy_affiliate_t') }}</h2>
   <p>{{ t('privacy_affiliate_b') }}</p>
   <h2 class="sub-title">{{ t('privacy_delete_t') }}</h2>
-  <p>{{ t('privacy_delete_b') }} <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>.</p>
-  <p class="hint">{{ t('privacy_legal_note') }} This page describes the system's current behavior; it is not legal advice and should be reviewed before relying on it for GDPR/Israeli Privacy Protection Law compliance.</p>
+  <p>{{ t('privacy_delete_b') }}</p>
+  <p>{{ t('privacy_contact_b') }} <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>.</p>
+  <p class="hint">{{ t('privacy_legal_note') }}</p>
 </div>
 {% endblock %}

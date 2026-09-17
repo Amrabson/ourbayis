@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_cards.html" import gift_card with context %}
 {% block title %}{{ t('catalog_title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ t('catalog_sub') }}{% endblock %}
 {% block content %}
@@ -8,75 +9,63 @@
 
   <div class="glass filter-bar">
     <div class="chip-row" id="cat-chips-static">
-      <a class="chip {% if not cat %}active{% endif %}" href="{{ url_for('catalog_page', q=q or None) }}">{{ t('all_cats') }}</a>
+      <a class="chip {% if not cat %}active{% endif %}" href="{{ url_for('catalog_page', **dict(filters, cat=None, page=None)) }}">{{ t('all_cats') }}</a>
       {% for slug, (icon, en, he) in categories.items() %}
-      <a class="chip {% if cat == slug %}active{% endif %}" href="{{ url_for('catalog_page', cat=slug, q=q or None) }}">{{ cat_label(slug) }}</a>
+      <a class="chip {% if cat == slug %}active{% endif %}" href="{{ url_for('catalog_page', **dict(filters, cat=slug, page=None)) }}">{{ cat_label(slug) }}</a>
       {% endfor %}
     </div>
-    <form class="find-form catalog-search" method="get" action="{{ url_for('catalog_page') }}" style="margin-bottom:0">
+    <form class="catalog-controls" method="get" action="{{ url_for('catalog_page') }}">
       {% if cat %}<input type="hidden" name="cat" value="{{ cat }}">{% endif %}
-      <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_catalog') }}">
+      <label class="ctl ctl-search"><span class="sr-only">{{ t('search_catalog') }}</span>
+        <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_catalog') }}"></label>
+      <label class="ctl"><span class="ctl-label">{{ t('filter_price') }}</span>
+        <select name="price" data-autosubmit>
+          <option value="">{{ t('filter_price_any') }}</option>
+          {% for key in price_bands %}<option value="{{ key }}" {% if price == key %}selected{% endif %}>{{ t('price_band_' ~ key) }}</option>{% endfor %}
+        </select></label>
+      <label class="ctl"><span class="ctl-label">{{ t('filter_kind') }}</span>
+        <select name="kind" data-autosubmit>
+          <option value="">{{ t('filter_kind_all') }}</option>
+          <option value="product" {% if kind == 'product' %}selected{% endif %}>{{ t('filter_kind_product') }}</option>
+          <option value="idea" {% if kind == 'idea' %}selected{% endif %}>{{ t('filter_kind_idea') }}</option>
+        </select></label>
+      <label class="ctl"><span class="ctl-label">{{ t('filter_sort') }}</span>
+        <select name="sort" data-autosubmit>
+          <option value="">{{ t('sort_default') }}</option>
+          <option value="price_asc" {% if sort == 'price_asc' %}selected{% endif %}>{{ t('sort_price_asc') }}</option>
+          <option value="price_desc" {% if sort == 'price_desc' %}selected{% endif %}>{{ t('sort_price_desc') }}</option>
+          <option value="name" {% if sort == 'name' %}selected{% endif %}>{{ t('sort_name') }}</option>
+        </select></label>
       <button class="btn btn-ghost" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
     </form>
-    {% if cat or q %}
-    <p class="filter-summary">
-      {% if cat %}{{ cat_label(cat) }}{% endif %}{% if cat and q %} · {% endif %}{% if q %}“{{ q }}”{% endif %}
-      — <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a>
+    <p class="filter-summary" aria-live="polite">
+      <strong>{{ tf('result_count', n=total) }}</strong>
+      {% if cat or q or price or kind %}
+        · {% if cat %}{{ cat_label(cat) }}{% endif %}{% if q %} “{{ q }}”{% endif %}{% if price %} · {{ t('price_band_' ~ price) }}{% endif %}{% if kind %} · {{ t('filter_kind_' ~ kind) }}{% endif %}
+        — <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a>
+      {% endif %}
     </p>
-    {% endif %}
   </div>
 
   {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+  <p class="hint catalog-legend">{{ t('catalog_legend') }}</p>
   {% if not items %}
-    <p class="empty-note">{{ t('catalog_none') }}</p>
+    <p class="empty-note">{{ t('catalog_none') }} <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a></p>
   {% endif %}
 
   <div class="gift-grid">
     {% for item in items %}
-    <article class="gift-card">
-      {% if item['image'] %}
-      <div class="gift-ph gift-img"><img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" width="240" height="180"></div>
-      {% else %}
-      <div class="gift-ph ph-{{ item['category'] }} ill-box">
-        <svg class="ic ic-lg"><use href="#ill-{{ item['category'] if item['category'] in categories else 'home' }}"/></svg>
-      </div>
-      {% endif %}
-      <div class="gift-body">
-        {% if item['featured'] %}<span class="badge badge-gold">{{ t('featured_tag') }}</span>{% endif %}
-        {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
-        <h3>{{ pick(item, 'name') }}</h3>
-        <p class="gift-meta bdi">
-          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> {% set _e = estimate_label(item['price_nis']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
-          {% if item['store'] %} · {{ item['store'] }}{% endif %}
-        </p>
-        {% if item['price_status'] is defined and item['price_status'] == 'verified' and item['price_checked_at'] %}
-        <span class="badge badge-plain">{{ tf('price_checked_tag', date=item['price_checked_at'][:10]) }}</span>
-        {% elif item['price_status'] is defined %}
-        <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
-        {% endif %}
-        {% if item['availability'] is defined and item['availability'] == 'unavailable' %}
-        <span class="badge badge-plain badge-warn">{{ t('availability_unavailable_tag') }}</span>
-        {% endif %}
-        {% if item['model'] is defined and item['model'] %}<p class="gift-meta item-model bdi">{{ item['model'] }}</p>{% endif %}
-        {% if has_reg %}
-          {% if item['id'] in have %}
-          <span class="gifted-tag"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>
-          {% else %}
-          <form method="post" action="{{ url_for('items_add', back='catalog', cat=cat, q=q) }}">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <input type="hidden" name="catalog_id" value="{{ item['id'] }}">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
-          </form>
-          {% endif %}
-        {% elif user %}
-          <a class="btn btn-primary btn-block" href="{{ url_for('registry_new') }}">{{ t('dash_create') }}</a>
-        {% else %}
-          <a class="btn btn-primary btn-block" href="{{ url_for('signup') }}">{{ t('catalog_signup_add') }}</a>
-        {% endif %}
-      </div>
-    </article>
+      {{ gift_card(item, mode='catalog', have=have, has_reg=has_reg, back_args=dict(filters, page=page if page > 1 else None)) }}
     {% endfor %}
   </div>
+
+  {% if pages > 1 %}
+  <nav class="pager" aria-label="{{ t('pager_label') }}">
+    {% if page > 1 %}<a class="btn btn-ghost btn-sm" href="{{ url_for('catalog_page', **dict(filters, page=(page - 1) if page > 2 else None)) }}" rel="prev">{{ '→' if rtl else '←' }} {{ t('pager_prev') }}</a>{% endif %}
+    <span class="pager-status">{{ tf('pager_status', page=page, pages=pages) }}</span>
+    {% if page < pages %}<a class="btn btn-ghost btn-sm" href="{{ url_for('catalog_page', **dict(filters, page=page + 1)) }}" rel="next">{{ t('pager_next') }} {{ '←' if rtl else '→' }}</a>{% endif %}
+  </nav>
+  {% endif %}
 
   {% if not user %}
   <div class="cta-panel" style="margin-top:40px">

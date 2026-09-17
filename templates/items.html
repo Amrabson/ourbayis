@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_cards.html" import gift_media with context %}
 {% block title %}{{ t('items_title') }} — {{ brand }}{% endblock %}
 {% block content %}
 <div class="wrap section">
@@ -17,7 +18,42 @@
   </p>
   {% endif %}
 
-  <h2 class="sub-title">{{ t('items_catalog') }}</h2>
+  <h2 class="sub-title" id="mine" style="margin-top:1.2em">{{ t('your_items') }} ({{ mine | length }}) <a class="jump-link" href="#add-more">{{ t('items_add_more') }} ↓</a></h2>
+  {% if not mine %}
+    <p class="empty-note">{{ t('no_items') }}</p>
+  {% else %}
+  <div class="mine-list">
+    {% for m in mine %}
+    <form class="mine-row" method="post" action="{{ url_for('items_update', item_id=m['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="mine-info">
+        <strong>{{ pick(m, 'name') }}</strong>
+        <span class="gift-meta bdi">{% if m['price_nis'] %}₪{{ '{:,}'.format(m['price_nis']) }}{% endif %}{% if m['store'] %} · {{ m['store'] }}{% endif %}
+        {% set st = gift_status(m, breakdown) %}
+        {% if st.committed %} · <em class="claimed-note">{{ tf('claimed_n', n=st.committed) }}{% if st.reserved %} ({{ tf('qty_reserved', n=st.reserved) }}{% if st.reported %}, {{ tf('qty_reported', n=st.reported) }}{% endif %}{% if st.received %}, {{ tf('qty_received', n=st.received) }}{% endif %}){% elif st.reported or st.received %} ({% if st.reported %}{{ tf('qty_reported', n=st.reported) }}{% endif %}{% if st.reported and st.received %}, {% endif %}{% if st.received %}{{ tf('qty_received', n=st.received) }}{% endif %}){% endif %}</em>{% endif %}
+        {% if m['availability'] == 'unavailable' %} · <em class="warn-note">{{ t('availability_unavailable_tag') }}</em>{% endif %}
+        {% if not m['url'] and not reg['paypal_url'] and not reg['stripe_url'] and not reg['bit_url'] %}
+          · <em class="warn-note">{{ t('needs_link_note') }}</em>
+        {% endif %}
+        {% if m['price_status'] == 'verified' and m['price_checked_at'] %} · <span class="hint">{{ tf('price_checked', date=m['price_checked_at']) }}</span>
+        {% elif m['price_status'] == 'estimate' %} · <span class="hint">{{ t('price_estimate') }}</span>{% endif %}
+        </span>
+      </div>
+      <label class="mine-qty">{{ t('qty') }}
+        <input name="qty_wanted" type="number" min="1" max="99" value="{{ m['qty_wanted'] }}"></label>
+      <label class="check-label"><input type="checkbox" name="priority" {% if m['priority'] %}checked{% endif %}> <svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority') }}</label>
+      <div class="mine-actions">
+        <a class="btn btn-ghost btn-sm" href="{{ url_for('item_edit', item_id=m['id']) }}">{{ t('edit') }}</a>
+        <button class="btn btn-ghost btn-sm" type="submit">{{ t('save') }}</button>
+        <button class="btn btn-danger btn-sm" type="submit" name="delete" value="1"
+                data-confirm="{{ t('remove') }}?">{{ t('remove') }}</button>
+      </div>
+    </form>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <h2 class="sub-title" id="add-more">{{ t('items_catalog') }}</h2>
   <form class="filter-row" method="get" action="{{ url_for('items_manage') }}">
     <select name="cat" data-autosubmit>
       <option value="">{{ t('all_cats') }}</option>
@@ -32,16 +68,11 @@
   <div class="catalog-grid">
     {% for c in catalog %}
     <div class="catalog-card">
-      {% if c['image'] %}
-      <div class="gift-ph gift-ph-sm gift-img"><img src="{{ c['image'] }}" alt="" loading="lazy"></div>
-      {% else %}
-      <div class="gift-ph ph-{{ c['category'] }} gift-ph-sm">
-        <svg class="ic"><use href="#i-{{ categories[c['category']][0] if c['category'] in categories else 'house' }}"/></svg>
-      </div>
-      {% endif %}
+      {{ gift_media(c, small=True) }}
       <div class="catalog-body">
-        <h3>{% if c['brand'] %}<span class="item-brand">{{ c['brand'] }}</span> {% endif %}{{ pick(c, 'name') }}</h3>
-        <p class="gift-meta">{% if c['price_nis'] %}₪{{ c['price_nis'] }}{% endif %}{% if c['store'] %} · {{ c['store'] }}{% endif %}</p>
+        <h3>{{ pick(c, 'name') }}</h3>
+        <p class="gift-meta bdi">{% if c['price_nis'] %}<strong>₪{{ '{:,}'.format(c['price_nis']) }}</strong>{% endif %}{% if c['brand'] %} · {{ c['brand'] }}{% endif %}{% if c['store'] %} · {{ c['store'] }}{% endif %}
+        {% if c['availability'] == 'unavailable' %} · <span class="warn-note">{{ t('availability_unavailable_tag') }}</span>{% endif %}</p>
       </div>
       {% if c['id'] in have %}
       <span class="btn btn-ghost btn-sm" aria-disabled="true">{{ t('added_btn') }}</span>
@@ -77,39 +108,6 @@
       <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
     </form>
   </div>
-
-  <h2 class="sub-title" id="mine">{{ t('your_items') }} ({{ mine | length }})</h2>
-  {% if not mine %}
-    <p class="empty-note">{{ t('no_items') }}</p>
-  {% else %}
-  <div class="mine-list">
-    {% for m in mine %}
-    <form class="mine-row" method="post" action="{{ url_for('items_update', item_id=m['id']) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <div class="mine-info">
-        <strong>{{ pick(m, 'name') }}</strong>
-        <span class="gift-meta">{% if m['price_nis'] %}₪{{ m['price_nis'] }}{% endif %}{% if m['store'] %} · {{ m['store'] }}{% endif %}
-        {% if claimed.get(m['id']) %} · <em class="claimed-note">{{ tf('claimed_n', n=claimed.get(m['id'])) }}</em>{% endif %}
-        {% if not m['url'] and not reg['paypal_url'] and not reg['stripe_url'] and not reg['bit_url'] %}
-          · <em class="warn-note">{{ t('needs_link_note') }}</em>
-        {% endif %}
-        {% if m['price_status'] == 'verified' and m['price_checked_at'] %} · <span class="hint">{{ tf('price_checked', date=m['price_checked_at']) }}</span>
-        {% elif m['price_status'] == 'estimate' %} · <span class="hint">{{ t('price_estimate') }}</span>{% endif %}
-        </span>
-      </div>
-      <label class="mine-qty">{{ t('qty') }}
-        <input name="qty_wanted" type="number" min="1" max="99" value="{{ m['qty_wanted'] }}"></label>
-      <label class="check-label"><input type="checkbox" name="priority" {% if m['priority'] %}checked{% endif %}> <svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority') }}</label>
-      <div class="mine-actions">
-        <a class="btn btn-ghost btn-sm" href="{{ url_for('item_edit', item_id=m['id']) }}">{{ t('edit') }}</a>
-        <button class="btn btn-ghost btn-sm" type="submit">{{ t('save') }}</button>
-        <button class="btn btn-danger btn-sm" type="submit" name="delete" value="1"
-                data-confirm="{{ t('remove') }}?">{{ t('remove') }}</button>
-      </div>
-    </form>
-    {% endfor %}
-  </div>
-  {% endif %}
 
   {% if archived %}
   <details class="archived-panel">

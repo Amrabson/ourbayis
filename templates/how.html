@@ -47,13 +47,13 @@
     {% endfor %}
   </div>
 
-  <h2 class="sub-title">{{ t('reg_gifts') }}</h2>
-  <ol class="page-sub" style="padding-inline-start:20px">
-    <li>{{ t('claim_status_reserved') }}</li>
-    <li>{{ t('claim_status_reported') }}</li>
-    <li>{{ t('claim_status_received') }}</li>
+  <h2 class="sub-title">{{ t('how_status_t') }}</h2>
+  <ol class="page-sub status-legend" style="padding-inline-start:20px">
+    <li><span class="gifted-tag state-reserved">{{ t('status_reserved_short') }}</span> {{ t('claim_status_reserved') }}</li>
+    <li><span class="gifted-tag state-reported">{{ t('status_reported_short') }}</span> {{ t('claim_status_reported') }}</li>
+    <li><span class="gifted-tag state-received">{{ t('status_received_short') }}</span> {{ t('claim_status_received') }}</li>
   </ol>
-  <p class="hint">{{ t('claim_expiry_hint') }}</p>
+  <p class="hint">{{ t('claim_expiry_hint') }} {{ t('how_status_note') }}</p>
 
   <div class="faq-list" style="margin-top:34px">
     {% for n in [1, 2, 3, 4, 5, 6] %}

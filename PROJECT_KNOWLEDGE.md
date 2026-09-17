@@ -37,7 +37,7 @@ Flask 3 + SQLite, server-rendered Jinja2, no build step. Same architecture as Ba
   per test, so the real `ourbayis.db` is never touched by the suite.
 - `i18n.py` — `T_EN`/`T_HE` dicts, `t(key, lang)` (falls back EN → key), `CATEGORIES` (slug → icon/EN/HE), `EVENT_TYPES`.
 - `seed_catalog.json` — ~117 curated catalog items incl. quality/size variants (Israel-specific: platta, meicham, Shabbos lamp, sponja set, Shas set, sukkah…) + 3 shana bundles. **Seed-sync**: on every start, items whose `name` isn't in the DB are inserted (existing rows untouched — retire seed items by marking inactive in admin, not deleting).
-- `templates/` — base.html has inline SVG icon sprite, nav, footer, modal/copy/hamburger JS. Public pages use `t()`; admin pages are English-only.
+- `templates/` — base.html has the inline SVG icon sprite (nav icons + 6 category + 27 item illustrations), nav, footer. `_cards.html` holds the shared gift-card macros. Public pages use `t()`; admin pages are English-only.
 - `static/style.css` — "wedding invitation" aesthetic: parchment `#faf6ec`, navy `#223354`, gold `#a5762a`/`#c9a24a`; hairline borders + `3px double` gold frames on highlight panels; Bellefair (display serif) + Assistant (body) from Google Fonts (both cover Hebrew). RTL via `dir=rtl` on `<html>` + CSS logical properties. Homepage hero: gold line-art Jerusalem skyline + chuppah SVG with twinkling lights (`.tw` animation).
 
 ## Data model (schema v3, see ob_db.py MIGRATIONS + SPEC_V3.md)
@@ -197,6 +197,28 @@ image; `<img>` errors fall back to the illustration via app.js. All JS lives in 
 `data-autosubmit`, `data-confirm`, `data-print`, `data-share-beacon`, category chip filter.
 Gift grid: auto-fill ≥240px, 2 columns ≤520px, 1 column ≤430px. Prices/URLs/emails wrapped in
 `.bdi`/`<bdi>` for Hebrew. Header shows a currency toggle only when `OB_RATES` configures a second currency.
+
+## Shared gift presentation (review pass 2026-09-17)
+- `templates/_cards.html` — the only place a gift card / price line / facts block / status label is
+  defined; import `with context`. Used by index (mode `link`), catalog (`catalog`), registry
+  (`registry`), `/sample` (`sample`), the claim dialog, guest page and items page.
+- `item_claim_breakdown(reg_id)` → `{item_id: {reserved, reported, received, committed}}` (expired
+  reservations excluded); `item_claim_counts()` is a wrapper. `gift_status(item, breakdown)` returns
+  `state` ∈ open|partial|reserved|reported|received and `left`. Templates never compute status themselves.
+- Registry items carry `model`/`availability`/`notes*` copied from the catalog (migration 18).
+  `refresh-registry-links` refreshes url/image/store/brand/model/notes unless overridden, and
+  `availability` always. It never touches price/qty/priority/note or any claim amount.
+- `featured_items(db, limit)` orders unavailable and url-less items last. `sample_registry(db)` builds
+  the one sample fixture from it (synthetic states, no pay links, negative ids); `/sample` renders
+  `registry.html` with `is_sample=True`; the homepage preview uses the same fixture.
+- `illustration_for(item)` picks an `ill-*` symbol from `_ILLUSTRATION_RULES` (keyword on name/seed_key)
+  or the category drawing. No catalog row has a photo today.
+- Catalog: `CATALOG_PRICE_BANDS`, `CATALOG_SORTS`, `CATALOG_PAGE_SIZE=24`; filters live in the URL.
+- Shana packages: `PACKAGE_TIERS` in app.py (per tier delivery/setup/appliances/lead weeks) + i18n
+  `pkg_*`/`shana_term_*`; goods lists stay in `bundles.items_text` (admin-editable, insert-only sync).
+- `fmt_date(iso)` Jinja global for human dates (EN/HE); stored dates stay ISO.
+- Tooling: `tools/screenshots.py` (headless Chrome; needs ≥520px windows, phone checks in the Browser
+  pane), `tools/render_private.py` (logged-in pages on a temp DB), `tools/export_static.py` (docs/).
 
 ## SEO / privacy facts (current)
 `canonical_url`/`alt_urls`/`noindex` come from the context processor: canonical = path only (+`?lang=he`

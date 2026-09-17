@@ -8,8 +8,8 @@ Flask 3 + SQLite + Jinja2, no build step. See `PROJECT_KNOWLEDGE.md` for the arc
 `SPEC_V3.md` for the design decisions.
 
 ## Static preview (GitHub Pages)
-`docs/` is a read-only export of the public pages with a synthetic sample registry — forms and
-gifting are disabled there. Enable Pages on this repo (Settings → Pages → Deploy from branch →
+`docs/` is a read-only export of the public pages, including the app's own `/sample` registry
+(synthetic, built from featured catalog items) — forms and gifting are disabled there. Enable Pages on this repo (Settings → Pages → Deploy from branch →
 `/docs`) to share it. Regenerate after changes:
 
 ```bash

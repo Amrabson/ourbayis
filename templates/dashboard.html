@@ -11,12 +11,17 @@
     </div>
   {% else %}
 
-  {% if checklist and checklist | selectattr(1, 'equalto', false) | list %}
+  {% set _todo = checklist | selectattr(1, 'equalto', false) | list if checklist else [] %}
+  {% set _done = checklist | selectattr(1, 'equalto', true) | list if checklist else [] %}
+  {% if _todo %}
   <div class="checklist-panel">
-    <h2>{{ t('dash_checklist_title') }}</h2>
+    <h2>{{ t('dash_checklist_title') }} <span class="checklist-count">{{ tf('dash_checklist_progress', done=_done | length, total=checklist | length) }}</span></h2>
+    {% if _done %}
+    <p class="hint checklist-done-line"><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('dash_checklist_done_label') }}: {% for key, done in _done %}{{ t('dash_checklist_' ~ key) | lower }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+    {% endif %}
     <ul class="checklist">
-      {% for key, done in checklist %}
-      <li class="{{ 'is-done' if done else '' }}">
+      {% for key, done in _todo %}
+      <li>
         <svg class="ic ic-sm"><use href="#i-check"/></svg>
         <span>{{ t('dash_checklist_' ~ key) }}</span>
         {% if not done %}
@@ -71,20 +76,20 @@
     {% if queues['awaiting_confirm'] %}
     <div class="queue-card">
       <h3>{{ t('dash_queue_awaiting') }}</h3>
-      <ul>{% for g in queues['awaiting_confirm'] %}<li>{{ g['guest_name'] }} — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
+      <ul>{% for g in queues['awaiting_confirm'] %}<li><a href="#claim-{{ g['id'] }}">{{ g['guest_name'] }}</a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
     </div>
     {% endif %}
     {% if queues['waiting'] %}
     <div class="queue-card">
       <h3>{{ t('dash_queue_waiting') }}</h3>
-      <ul>{% for g in queues['waiting'] %}<li>{{ g['guest_name'] }} — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or '—' }}
-        {% if g['expires_at'] %}<span class="hint">({{ t('dash_queue_expires') }} {{ g['expires_at'][:10] }})</span>{% endif %}</li>{% endfor %}</ul>
+      <ul>{% for g in queues['waiting'] %}<li><a href="#claim-{{ g['id'] }}">{{ g['guest_name'] }}</a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or '—' }}
+        {% if g['expires_at'] %}<span class="hint">({{ t('dash_queue_expires') }} {{ fmt_date(g['expires_at']) }})</span>{% endif %}</li>{% endfor %}</ul>
     </div>
     {% endif %}
     {% if queues['unthanked'] %}
     <div class="queue-card">
       <h3>{{ t('dash_queue_unthanked') }}</h3>
-      <ul>{% for g in queues['unthanked'] %}<li>{{ g['guest_name'] }} — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
+      <ul>{% for g in queues['unthanked'] %}<li><a href="#claim-{{ g['id'] }}">{{ g['guest_name'] }}</a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
     </div>
     {% endif %}
   </div>
@@ -109,7 +114,7 @@
   <button class="btn btn-ghost btn-sm no-print" data-print>{{ t('print_list') }}</button>
   <div class="gift-list">
     {% for gft in gifts %}
-    <div class="gift-row {% if gft['thanked'] %}is-thanked{% endif %}">
+    <div class="gift-row {% if gft['thanked'] %}is-thanked{% endif %}" id="claim-{{ gft['id'] }}">
       <div>
         <strong>{{ gft['guest_name'] }}</strong>
         — {% if gft['kind'] == 'cash' %}{{ t('gift_cash') }}{% if gft['item_name'] %}: {{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) }}{% endif %}{% else %}{{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) or '—' }}{% if gft['qty'] > 1 %} ×{{ gft['qty'] }}{% endif %}{% endif %}
@@ -119,6 +124,7 @@
         {% elif gft['amount'] %}<p class="gift-msg">{{ gft['amount'] }} <span class="hint">({{ t('claim_legacy_note') }})</span></p>{% endif %}
         {% if gft['message'] %}<p class="gift-msg">“{{ gft['message'] }}”</p>{% endif %}
         {% if gft['guest_email'] %}<p class="gift-msg">{{ gft['guest_email'] }}</p>{% endif %}
+        {% if gft['item_availability'] == 'unavailable' and gft['status'] != 'received' %}<p class="gift-msg warn-note">{{ t('availability_unavailable_tag') }} — {{ t('dash_unavailable_hint') }}</p>{% endif %}
         {% if gft['kind'] == 'cash' and gft['item_url'] %}
         <a class="btn btn-gold btn-sm order-link" href="{{ gft['item_url'] }}" target="_blank" rel="noopener">
           <svg class="ic ic-sm"><use href="#i-link"/></svg>

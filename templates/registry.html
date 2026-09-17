@@ -1,22 +1,31 @@
 {% extends "base.html" %}
+{% from "_cards.html" import gift_card, price_line, gift_facts with context %}
 {% block title %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ t('reg_for') }} {{ pick(reg, 'couple_names') }}{% endblock %}
 {% block content %}
 
 <section class="reg-hero glass">
   <div class="wrap">
-    <p class="reg-eyebrow">{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · {{ reg['event_date'] }}{% endif %}{% if reg['city'] %} · {{ reg['city'] }}{% endif %}</p>
+    {% if is_sample %}<span class="sample-flag sample-flag-dark">{{ t('sample_label') }}</span>{% endif %}
+    <p class="reg-eyebrow">{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · <time datetime="{{ reg['event_date'] }}">{{ fmt_date(reg['event_date']) }}</time>{% endif %}{% if reg['city'] %} · {{ reg['city'] }}{% endif %}</p>
     <h1>{{ pick(reg, 'title') }}</h1>
     {% if days_to_go %}<p class="reg-countdown">✦ {{ tf('reg_countdown', n=days_to_go) }} ✦</p>{% endif %}
     {% if pick(reg, 'message') %}<p class="reg-message">“{{ pick(reg, 'message') }}”</p>{% endif %}
     {% if total %}
-    <div class="progress"><div class="progress-fill" style="width: {{ (100 * done // total) if total else 0 }}%"></div></div>
+    <div class="progress" role="img" aria-label="{{ tf('reg_progress', claimed=done, total=total) }}"><div class="progress-fill" style="width: {{ (100 * done // total) if total else 0 }}%"></div></div>
     <p class="progress-label">{{ tf('reg_progress', claimed=done, total=total) }}</p>
     {% endif %}
   </div>
 </section>
 
 <div class="wrap reg-body">
+
+  {% if is_sample %}
+  <div class="notice-panel sample-notice">
+    <svg class="ic"><use href="#i-star"/></svg>
+    <p>{{ t('sample_notice') }} <a href="{{ url_for('signup') }}">{{ t('cta_start') }}</a></p>
+  </div>
+  {% endif %}
 
   {% if bought_item and bought_item['url'] %}
   <div class="flash flash-ok buy-next">
@@ -34,10 +43,19 @@
     </div>
     <button class="btn btn-gold" data-modal="cash-modal">{{ t('reg_cash_btn') }}</button>
   </div>
+  {% elif is_sample %}
+  <div class="cash-card">
+    <div>
+      <h2><svg class="ic"><use href="#i-gift"/></svg> {{ t('reg_cash_title') }}</h2>
+      <p>{{ t('reg_cash_body') }}</p>
+    </div>
+    <span class="sample-btn-disabled sample-btn-inline" aria-disabled="true">{{ t('reg_cash_btn') }}</span>
+  </div>
   {% endif %}
 
-  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
   <h2 class="section-title">{{ t('reg_gifts') }}</h2>
+  <p class="hint reg-how-note">{{ t('reg_how_note') }}</p>
+  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
   {% if not items %}
     <p class="empty-note">{{ t('reg_empty') }}</p>
@@ -45,99 +63,60 @@
 
   {% set cats_present = items | map(attribute='category') | unique | list %}
   {% if cats_present | length > 1 %}
-  <div class="chip-row" id="cat-chips">
-    <button class="chip active" data-filter="all">{{ t('all_cats') }}</button>
+  <div class="chip-row" id="cat-chips" role="group" aria-label="{{ t('all_cats') }}">
+    <button class="chip active" data-filter="all" aria-pressed="true">{{ t('all_cats') }}</button>
     {% for c in cats_present %}
-    <button class="chip" data-filter="{{ c }}">{{ cat_label(c) }}</button>
+    <button class="chip" data-filter="{{ c }}" aria-pressed="false">{{ cat_label(c) }}</button>
     {% endfor %}
   </div>
   {% endif %}
 
   <div class="gift-grid">
     {% for item in items %}
-    {% set got = claimed.get(item['id'], 0) %}
-    {% set left = item['qty_wanted'] - got %}
-    <article class="gift-card {% if left <= 0 %}is-gifted{% endif %}" id="item-{{ item['id'] }}" data-cat="{{ item['category'] }}">
-      {% if item['image'] %}
-      <div class="gift-ph gift-img"><img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" width="240" height="180"></div>
-      {% else %}
-      <div class="gift-ph ph-{{ item['category'] }} ill-box">
-        <svg class="ic ic-lg"><use href="#ill-{{ item['category'] if item['category'] in categories else 'home' }}"/></svg>
-      </div>
-      {% endif %}
-      <div class="gift-body">
-        {% if item['priority'] %}<span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>{% endif %}
-        {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
-        <h3>{{ pick(item, 'name') }}</h3>
-        <p class="gift-meta bdi">
-          {% if item['price_nis'] %}<strong>₪{{ item['price_nis'] }}</strong> {% set _e = estimate_label(item['price_nis']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}{% else %}<strong>{{ t('price_not_set') }}</strong>{% endif %}
-          {% if item['store'] %} · {{ item['store'] }}{% endif %}
-        </p>
-        {% if item['price_status'] is defined and item['price_status'] == 'verified' and item['price_checked_at'] %}
-        <span class="badge badge-plain">{{ tf('price_checked_tag', date=item['price_checked_at'][:10]) }}</span>
-        {% elif item['price_status'] is defined %}
-        <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
-        {% endif %}
-        {% if item['qty_wanted'] > 1 %}<p class="gift-qty">{{ tf('left_of', left=left if left > 0 else 0, qty=item['qty_wanted']) }}</p>{% endif %}
-        {% if left > 0 %}
-          {% if item['url'] and pay_links %}
-          <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}">
-            <svg class="ic"><use href="#i-gift"/></svg> {{ t('gift_this') }}</button>
-          {% elif item['url'] %}
-          <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}">
-            <svg class="ic"><use href="#i-link"/></svg> {{ t('reserve_buy_btn') }}</button>
-          {% elif pay_links %}
-          <button class="btn btn-gold btn-block" data-modal="claim-{{ item['id'] }}">
-            <svg class="ic"><use href="#i-gift"/></svg> {{ t('send_money_btn') }}</button>
-          {% else %}
-          <p class="hint idea-note">{{ t('item_idea_note') }}</p>
-          {% endif %}
-        {% else %}
-        <span class="gifted-tag"><svg class="ic"><use href="#i-check"/></svg> {{ t('gifted') }}</span>
-        {% endif %}
-      </div>
-    </article>
+    {% set st = gift_status(item, breakdown) %}
+    {{ gift_card(item, mode=('sample' if is_sample else 'registry'), st=st, pay_links=pay_links) }}
 
-    {% if left > 0 and (item['url'] or pay_links) %}
-    <dialog class="modal" id="claim-{{ item['id'] }}">
+    {% if not is_sample and st.left > 0 and (item['url'] or pay_links) %}
+    <dialog class="modal" id="claim-{{ item['id'] }}" aria-labelledby="claim-{{ item['id'] }}-title">
       <form method="post" action="{{ url_for('claim_item', slug=reg['slug'], item_id=item['id']) }}" class="modal-body">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="form_key" value="{{ form_key }}">
         <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-        <button type="button" class="modal-x" data-close aria-label="Close">✕</button>
+        <button type="button" class="modal-x" data-close aria-label="{{ t('close') }}">✕</button>
         <p class="modal-eyebrow">{{ t('claim_title') }}</p>
-        {% if item['brand'] %}<span class="item-brand">{{ item['brand'] }}</span>{% endif %}
-        <h3>{{ pick(item, 'name') }}</h3>
+        <h3 id="claim-{{ item['id'] }}-title">{{ pick(item, 'name') }}</h3>
+        {{ price_line(item, cls='gift-price modal-price') }}
+        {{ gift_facts(item) }}
         {% if item['url'] %}
         <a class="store-link" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
           <svg class="ic"><use href="#i-link"/></svg>
-          {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }}</a>
+          {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
         {% endif %}
-        <p class="gift-meta modal-price">
-          {% if item['price_nis'] %}<strong class="bdi">₪{{ '{:,}'.format(item['price_nis']) }}</strong>
-          {% set _e = estimate_label(item['price_nis']) %}{% if _e %} <span class="usd bdi">{{ _e }}</span>{% endif %}
-          {% else %}{{ t('price_not_set') }}{% endif %}
-        </p>
-        <p class="hint">{{ t('claim_hint') }}
-          {% if not item['url'] %} {{ t('claim_cash_only_note') }}{% elif not pay_links %} {{ t('claim_store_only_note') }}{% endif %}</p>
+
         {% if item['url'] and pay_links %}
         <fieldset class="give-choice">
           <legend>{{ t('claim_how') }}</legend>
-          <label class="radio"><input type="radio" name="give" value="buy" checked> {{ t('claim_buy_opt') }}</label>
-          <label class="radio"><input type="radio" name="give" value="cash"> {{ t('claim_cash_opt') }}</label>
+          <label class="radio"><input type="radio" name="give" value="buy" checked>
+            <span><strong>{{ t('claim_buy_opt') }}</strong><small>{{ tf('claim_buy_opt_note', store=item['store'] or t('the_store')) }}</small></span></label>
+          <label class="radio"><input type="radio" name="give" value="cash">
+            <span><strong>{{ t('claim_cash_opt') }}</strong><small>{{ t('claim_cash_opt_note') }}</small></span></label>
         </fieldset>
-        {% elif pay_links %}
+        {% elif item['url'] %}
+        <p class="route-note"><strong>{{ t('claim_buy_opt') }}</strong> — {{ tf('claim_buy_opt_note', store=item['store'] or t('the_store')) }}</p>
+        {% else %}
         <input type="hidden" name="give" value="cash">
+        <p class="route-note"><strong>{{ t('claim_cash_opt') }}</strong> — {{ t('claim_cash_only_note') }}</p>
         {% endif %}
-        <label>{{ t('claim_name') }} *<input name="guest_name" required maxlength="120"></label>
-        <label>{{ t('claim_email') }}<input name="guest_email" type="email" maxlength="200"></label>
-        {% if left > 1 %}
+
+        <label>{{ t('claim_name') }} *<input name="guest_name" required maxlength="120" autocomplete="name"></label>
+        <label>{{ t('claim_email') }}<input name="guest_email" type="email" maxlength="200" autocomplete="email"></label>
+        {% if st.left > 1 %}
         <label>{{ t('claim_qty') }}
-          <select name="qty">{% for n in range(1, left + 1) %}<option>{{ n }}</option>{% endfor %}</select>
+          <select name="qty">{% for n in range(1, st.left + 1) %}<option>{{ n }}</option>{% endfor %}</select>
         </label>
         {% endif %}
         <label>{{ t('claim_msg') }}<textarea name="message" rows="2" maxlength="1000"></textarea></label>
-        <p class="hint">{{ t('claim_expiry_hint') }}</p>
+        <p class="hint">{{ t('claim_next_hint') }} {{ t('claim_expiry_hint') }}</p>
         <button class="btn btn-primary btn-block" type="submit">{{ t('claim_submit') }}</button>
       </form>
     </dialog>
@@ -145,19 +124,28 @@
     {% endfor %}
   </div>
 
+  {% if is_sample %}
+  <div class="cta-panel" style="margin-top:40px">
+    <h2>{{ t('sample_cta_title') }}</h2>
+    <p>{{ t('sample_cta_body') }}</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>
+  </div>
+  {% else %}
   <div class="share-row">
     <a class="btn btn-wa" target="_blank" rel="noopener"
        href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ url_for('registry', slug=reg['slug'], _external=True)) | urlencode }}">
       <svg class="ic"><use href="#i-wa"/></svg> {{ t('share_whatsapp') }}</a>
     <button class="btn btn-ghost" data-copy="{{ url_for('registry', slug=reg['slug'], _external=True) }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
   </div>
+  <p class="hint viral-note"><a href="{{ url_for('index') }}">{{ t('reg_make_your_own') }}</a></p>
+  {% endif %}
 </div>
 
-{% if pay_links %}
-<dialog class="modal" id="cash-modal">
+{% if pay_links and not is_sample %}
+<dialog class="modal" id="cash-modal" aria-labelledby="cash-modal-title">
   <div class="modal-body">
-    <button type="button" class="modal-x" data-close aria-label="Close">✕</button>
-    <h3>{{ t('reg_cash_title') }}</h3>
+    <button type="button" class="modal-x" data-close aria-label="{{ t('close') }}">✕</button>
+    <h3 id="cash-modal-title">{{ t('reg_cash_title') }}</h3>
     <p>{{ t('reg_cash_body') }}</p>
     {% for key, url in pay_links %}
     <a class="btn btn-primary btn-block" href="{{ url }}" target="_blank" rel="noopener">{{ t(key) }} →</a>
@@ -166,10 +154,10 @@
     <form method="post" action="{{ url_for('cash_gift', slug=reg['slug']) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label>{{ t('cash_name') }} *<input name="guest_name" required maxlength="120"></label>
-      <label>{{ t('cash_email') }}<input name="guest_email" type="email" maxlength="200"></label>
+      <label>{{ t('cash_name') }} *<input name="guest_name" required maxlength="120" autocomplete="name"></label>
+      <label>{{ t('cash_email') }}<input name="guest_email" type="email" maxlength="200" autocomplete="email"></label>
       <div class="form-2col">
-        <label>{{ t('cash_amount') }} *<input name="amount" type="number" min="0" step="0.01" required></label>
+        <label>{{ t('cash_amount') }} *<input name="amount" type="number" min="0" step="0.01" required inputmode="decimal"></label>
         <label>{{ t('cash_currency') }}
           <select name="currency">
             {% for c in currencies %}<option value="{{ c }}" {% if c == reg['display_currency'] %}selected{% endif %}>{{ c }}</option>{% endfor %}
@@ -184,3 +172,4 @@
 {% endif %}
 
 {% endblock %}
+{% block ad %}{% if not is_sample %}{{ super() }}{% endif %}{% endblock %}

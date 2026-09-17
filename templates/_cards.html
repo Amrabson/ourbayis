@@ -1,0 +1,147 @@
+{# Shared gift-card components — the single source of truth for how a gift
+   looks on the homepage, /catalog, /r/<slug>, /sample and the gift dialog.
+   Import with context:  {% from "_cards.html" import gift_card, gift_media, price_line, gift_facts with context %}
+   Rules (review 2026-09-15): name + price first; brand/model/store subordinate;
+   the stock flag and price-confidence tag travel with the item everywhere. #}
+
+{% macro gift_media(item, small=False) -%}
+  {%- set _cat = item['category'] if item['category'] in categories else 'home' -%}
+  {%- if item['image'] -%}
+  <div class="gift-ph gift-img ph-{{ _cat }} {% if small %}gift-ph-sm{% endif %}">
+    <img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" decoding="async" width="{{ 54 if small else 240 }}" height="{{ 54 if small else 180 }}">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-{{ illustration_for(item) }}"/></svg>
+  </div>
+  {%- else -%}
+  <div class="gift-ph ph-{{ _cat }} ill-box {% if small %}gift-ph-sm{% endif %}" role="img" aria-label="{{ tf('illustration_alt', name=pick(item, 'name')) }}">
+    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-{{ illustration_for(item) }}"/></svg>
+  </div>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro price_line(item, cls='gift-price') -%}
+  <p class="{{ cls }} bdi">
+    {%- if item['price_nis'] -%}
+      <strong>₪{{ '{:,}'.format(item['price_nis']) }}</strong>
+      {%- set _e = estimate_label(item['price_nis']) -%}
+      {%- if _e %} <span class="usd bdi">{{ _e }}</span>{% endif -%}
+    {%- else -%}
+      <strong>{{ t('price_not_set') }}</strong>
+    {%- endif -%}
+  </p>
+{%- endmacro %}
+
+{# brand · store line, model line, and the two status tags #}
+{% macro gift_facts(item, show_model=True) -%}
+  {%- set _brand = item['brand'] if 'brand' in item.keys() else '' -%}
+  {%- set _store = item['store'] if 'store' in item.keys() else '' -%}
+  {%- if _brand or _store -%}
+  <p class="gift-sub">{% if _brand %}<span class="item-brand">{{ _brand }}</span>{% endif %}{% if _brand and _store %} · {% endif %}{% if _store %}<span class="bdi">{{ _store }}</span>{% endif %}</p>
+  {%- endif -%}
+  {%- if show_model and 'model' in item.keys() and item['model'] -%}
+  <p class="gift-model bdi">{{ item['model'] }}</p>
+  {%- endif -%}
+  {%- set _ps = item['price_status'] if 'price_status' in item.keys() else '' -%}
+  {%- set _av = item['availability'] if 'availability' in item.keys() else '' -%}
+  {%- if (_ps and item['price_nis']) or _av == 'unavailable' -%}
+  <p class="gift-tags">
+    {%- if _ps == 'verified' and item['price_checked_at'] -%}
+      <span class="badge badge-plain">{{ tf('price_checked_tag', date=item['price_checked_at'][:10]) }}</span>
+    {%- elif _ps and item['price_nis'] -%}
+      <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
+    {%- endif -%}
+    {%- if _av == 'unavailable' -%}
+      <span class="badge badge-plain badge-warn">{{ t('availability_unavailable_tag') }}</span>
+    {%- endif -%}
+  </p>
+  {%- endif -%}
+{%- endmacro %}
+
+{# Status label for a registry item (public registry + sample). `st` is gift_status(item, breakdown). #}
+{% macro status_label(st) -%}
+  {%- if st.state == 'received' -%}
+    <span class="gifted-tag state-received"><svg class="ic"><use href="#i-check"/></svg> {{ t('status_received') }}</span>
+  {%- elif st.state == 'reported' -%}
+    <span class="gifted-tag state-reported"><svg class="ic"><use href="#i-check"/></svg> {{ t('status_reported') }}</span>
+  {%- elif st.state == 'reserved' -%}
+    <span class="gifted-tag state-reserved"><svg class="ic"><use href="#i-gift"/></svg> {{ t('status_reserved') }}</span>
+  {%- endif -%}
+{%- endmacro %}
+
+{# Quantity breakdown for multi-quantity items: "1 of 2 still available · 1 reserved" #}
+{% macro qty_line(st) -%}
+  {%- if st.qty > 1 -%}
+  <p class="gift-qty bdi">{{ tf('qty_available', left=st.left, qty=st.qty) }}
+    {%- set _parts = [] -%}
+    {%- if st.reserved %}{% set _ = _parts.append(tf('qty_reserved', n=st.reserved)) %}{% endif -%}
+    {%- if st.reported %}{% set _ = _parts.append(tf('qty_reported', n=st.reported)) %}{% endif -%}
+    {%- if st.received %}{% set _ = _parts.append(tf('qty_received', n=st.received)) %}{% endif -%}
+    {%- if _parts %} · {{ _parts | join(' · ') }}{% endif -%}
+  </p>
+  {%- endif -%}
+{%- endmacro %}
+
+{# mode: 'catalog' | 'registry' | 'sample' | 'link' (homepage strip: whole card links to the catalog) #}
+{% macro gift_card(item, mode='catalog', st=None, pay_links=[], have=[], has_reg=False, back_args={}) -%}
+  {%- set _tag = 'a' if mode == 'link' else 'article' -%}
+  <{{ _tag }} class="gift-card {% if st and st.left <= 0 %}is-gifted{% endif %} {% if mode == 'link' %}gift-card-link{% endif %}"
+    {% if mode == 'link' %}href="{{ url_for('catalog_page', cat=item['category'], q=None) }}#c-{{ item['id'] }}"{% endif %}
+    {% if mode in ('registry', 'sample') %}id="item-{{ item['id'] if item['id'] > 0 else 's' ~ (-item['id']) }}" data-cat="{{ item['category'] }}"{% endif %}
+    {% if mode == 'catalog' %}id="c-{{ item['id'] }}"{% endif %}>
+    {{ gift_media(item) }}
+    <div class="gift-body">
+      {%- if mode in ('registry', 'sample') and item['priority'] -%}
+      <span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>
+      {%- endif -%}
+      <h3>{{ pick(item, 'name') }}</h3>
+      {{ price_line(item) }}
+      {{ gift_facts(item) }}
+      {%- if st %}{{ qty_line(st) }}{% endif -%}
+
+      {%- if mode == 'catalog' -%}
+        {%- if has_reg -%}
+          {%- if item['id'] in have -%}
+          <span class="gifted-tag state-added"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>
+          {%- else -%}
+          <form method="post" action="{{ url_for('items_add', back='catalog', **back_args) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="catalog_id" value="{{ item['id'] }}">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
+          </form>
+          {%- endif -%}
+        {%- elif user -%}
+          <a class="btn btn-primary btn-block" href="{{ url_for('registry_new') }}">{{ t('dash_create') }}</a>
+        {%- else -%}
+          <form method="post" action="{{ url_for('items_add', back='catalog', **back_args) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="catalog_id" value="{{ item['id'] }}">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('catalog_signup_add') }}</button>
+          </form>
+        {%- endif -%}
+
+      {%- elif mode == 'registry' -%}
+        {%- if st.left > 0 -%}
+          {%- if item['url'] and pay_links -%}
+          <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('gift_this') }}</button>
+          {%- elif item['url'] -%}
+          <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}"><svg class="ic"><use href="#i-link"/></svg> {{ t('reserve_buy_btn') }}</button>
+          {%- elif pay_links -%}
+          <button class="btn btn-gold btn-block" data-modal="claim-{{ item['id'] }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('send_money_btn') }}</button>
+          {%- else -%}
+          <p class="hint idea-note">{{ t('item_idea_note') }}</p>
+          {%- endif -%}
+        {%- else -%}
+          {{ status_label(st) }}
+        {%- endif -%}
+
+      {%- elif mode == 'link' -%}
+        <span class="card-more">{{ t('card_view_catalog') }} {{ '←' if rtl else '→' }}</span>
+      {%- elif mode == 'sample' -%}
+        {%- if st.left > 0 -%}
+          <span class="sample-btn-disabled" aria-disabled="true">{% if item['url'] %}{{ t('gift_this') }}{% else %}{{ t('send_money_btn') }}{% endif %}</span>
+        {%- else -%}
+          {{ status_label(st) }}
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </{{ _tag }}>
+{%- endmacro %}

@@ -329,6 +329,26 @@ def go_url(item):
     return url_for("go_item", item_id=item["id"])
 
 
+_MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August",
+              "September", "October", "November", "December"]
+_MONTHS_HE = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט",
+              "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"]
+
+
+def fmt_date(iso, lang=None):
+    """Human-readable date for display ("15 December 2026" / "15 בדצמבר 2026")
+    from a stored ISO date or datetime string. The stored value is never
+    changed; anything unparsable is returned as-is."""
+    lang = lang or current_lang()
+    try:
+        d = date.fromisoformat((iso or "")[:10])
+    except (ValueError, TypeError):
+        return iso or ""
+    if lang == "he":
+        return f"{d.day} ב{_MONTHS_HE[d.month - 1]} {d.year}"
+    return f"{d.day} {_MONTHS_EN[d.month - 1]} {d.year}"
+
+
 def estimate_label(price_nis, lang=None):
     """"≈ $49 (approx., rate as of 2026-09-01)" in the session/registry display
     currency, or '' when that currency is ILS (no estimate needed) or isn't
@@ -364,14 +384,17 @@ def _insert_registry_item_from_catalog(db, reg_id, c):
     """Copy a catalog_items row onto a registry (used by items_add, items_starter,
     and pending_add-after-signup). Carries kind/price_status/price_checked_at
     forward per SPEC_V3 "Card rules"."""
+    def _c(field, default=""):
+        return c[field] if field in c.keys() and c[field] is not None else default
     db.execute(
         "INSERT INTO registry_items (registry_id, catalog_id, name, name_he, brand,"
-        " category, price_nis, store, url, image, kind, price_status, price_checked_at)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " category, price_nis, store, url, image, kind, price_status, price_checked_at,"
+        " model, availability, notes, notes_he)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (reg_id, c["id"], c["name"], c["name_he"], c["brand"], c["category"],
-         c["price_nis"], c["store"], c["url"], c["image"], c["kind"] if "kind" in c.keys() else "product",
-         c["price_status"] if "price_status" in c.keys() else "estimate",
-         c["price_checked_at"] if "price_checked_at" in c.keys() else ""))
+         c["price_nis"], c["store"], c["url"], c["image"], _c("kind", "product"),
+         _c("price_status", "estimate"), _c("price_checked_at"),
+         _c("model"), _c("availability", "unknown"), _c("notes"), _c("notes_he")))
 
 
 def _apply_pending_add(db, reg_id, catalog_ids):
@@ -391,17 +414,103 @@ def _apply_pending_add(db, reg_id, catalog_ids):
     return added
 
 
-def item_claim_counts(registry_id):
-    """Committed quantity per item: reserved/reported/received claims, minus
-    reserved claims that have expired (those free up the quantity again)."""
+def item_claim_breakdown(registry_id):
+    """Per-item committed quantity split by lifecycle status:
+    {item_id: {'reserved': n, 'reported': n, 'received': n, 'committed': n}}.
+    Expired reservations (status still 'reserved' but past expires_at) are not
+    counted — they free the quantity again even before `manage.py
+    expire-claims` runs. The public registry page uses this to label a card
+    Reserved / Reported / Received instead of a blanket "Gifted"."""
     now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     rows = get_db().execute(
-        "SELECT item_id, COALESCE(SUM(qty),0) AS n FROM claims"
+        "SELECT item_id, status, COALESCE(SUM(qty),0) AS n FROM claims"
         " WHERE registry_id=? AND item_id IS NOT NULL"
         " AND status IN ('reserved','reported','received')"
         " AND (expires_at IS NULL OR expires_at > ? OR status != 'reserved')"
-        " GROUP BY item_id", (registry_id, now)).fetchall()
-    return {r["item_id"]: r["n"] for r in rows}
+        " GROUP BY item_id, status", (registry_id, now)).fetchall()
+    out = {}
+    for r in rows:
+        d = out.setdefault(r["item_id"], dict(reserved=0, reported=0, received=0, committed=0))
+        d[r["status"]] += r["n"]
+        d["committed"] += r["n"]
+    return out
+
+
+def item_claim_counts(registry_id):
+    """Committed quantity per item (reserved + reported + received, minus
+    expired reservations). Thin wrapper over item_claim_breakdown()."""
+    return {k: v["committed"] for k, v in item_claim_breakdown(registry_id).items()}
+
+
+def gift_status(item, breakdown):
+    """Shared presentation rule for a registry item's gift state (used by the
+    public registry, the sample, the items page and tests):
+      state  — 'open' (nothing committed), 'partial' (some units still
+               available), or, when nothing is left: 'received' (every
+               committed unit confirmed by the couple), 'reported' (a guest
+               says it's bought/sent, not yet confirmed) or 'reserved'.
+      left   — units a guest can still take (never negative)
+    Nothing here implies payment verification; 'reported' is the guest's own
+    word and 'received' is the couple's confirmation."""
+    qty = item["qty_wanted"] if "qty_wanted" in item.keys() else 1
+    b = (breakdown or {}).get(item["id"]) or dict(reserved=0, reported=0, received=0, committed=0)
+    left = max(qty - b["committed"], 0)
+    if left > 0:
+        state = "partial" if b["committed"] else "open"
+    elif b["received"] >= qty:
+        state = "received"
+    elif b["reported"]:
+        state = "reported"
+    else:
+        state = "reserved"
+    return dict(state=state, left=left, qty=qty, **b)
+
+
+# keyword -> item-specific line illustration (<symbol id="ill-*"> in base.html).
+# Only used when an item has no photo; falls back to the category drawing.
+_ILLUSTRATION_RULES = (
+    (("hot plate", "platta", "פלטה"), "platta"),
+    (("urn", "meicham", "מיחם"), "urn"),
+    (("kettle", "קומקום"), "kettle"),
+    (("stand mixer", "hand mixer", "מיקסר"), "mixer"),
+    (("slow cooker", "crock", "cholent", "בישול איטי"), "slowcooker"),
+    (("towel", "bathrobe", "מגבת", "מגבות", "חלוק"), "towel"),
+    (("candlestick", "פמוט"), "candlesticks"),
+    (("kiddush", "קידוש"), "kiddush"),
+    (("challah", "חלה"), "challah"),
+    (("menorah", "chanukah", "חנוכייה"), "menorah"),
+    (("mezuzah", "מזוזה"), "mezuzah"),
+    (("dinnerware", "plates", "porcelain", "צלחות", "כלי אוכל"), "dinnerware"),
+    (("cutlery", "knife", "knives", "סכו", "סכין"), "cutlery"),
+    (("glassware", "wine", "pitcher", "carafe", "כוסות", "יין"), "glassware"),
+    (("pots", "frying pan", "סירים", "מחבת"), "pots"),
+    (("table", "chairs", "שולחן", "כיסא"), "table"),
+    (("sheet", "duvet", "blanket", "pillow", "bedspread", "mattress", "linen", "מצעים", "שמיכ", "כרית"), "bedding"),
+    (("fridge", "freezer", "מקרר", "מקפיא"), "fridge"),
+    (("washing", "washer", "dryer", "dishwasher", "מכונת כביסה", "מדיח", "מייבש"), "washer"),
+    (("oven", "microwave", "toaster", "air fryer", "תנור", "מיקרוגל", "טוסטר"), "oven"),
+    (("blender", "food processor", "בלנדר", "מעבד מזון"), "blender"),
+    (("coffee", "frother", "קפה"), "coffee"),
+    (("vacuum", "sponja", "broom", "שואב", "ספונג"), "cleaning"),
+    (("bookcase", "sefarim", "shas", "chumash", "siddur", "machzor", "bentcher", "ספרי", "ספרייה"), "books"),
+    (("sukkah", "esrog", "סוכה", "אתרוג"), "sukkah"),
+    (("lamp", "מנורה"), "lamp"),
+    (("fan", "heater", "dehumidifier", "מאוורר", "חימום", "לחות"), "fan"),
+    (("couch", "sofa", "rug", "curtain", "mirror", "ספה", "שטיח", "וילון", "מראה"), "sofa"),
+)
+
+
+def illustration_for(item):
+    """Symbol id (without the 'ill-' prefix) for an item without a photo:
+    item-specific when a keyword matches, otherwise the category drawing."""
+    name = ((item["name"] if "name" in item.keys() else "") or "").lower()
+    key = ((item["seed_key"] if "seed_key" in item.keys() else "") or "").lower().replace("-", " ")
+    hay = name + " " + key
+    for words, symbol in _ILLUSTRATION_RULES:
+        if any(w in hay for w in words):
+            return symbol
+    cat = item["category"] if "category" in item.keys() else "home"
+    return cat if cat in CATEGORIES else "home"
 
 
 def csv_safe(cell):
@@ -504,6 +613,9 @@ def inject_globals():
         go_url=go_url,
         ext_url=ext_url,
         estimate_note=lambda: estimate_note(lang),
+        gift_status=gift_status,
+        illustration_for=illustration_for,
+        fmt_date=lambda iso: fmt_date(iso, lang),
         canonical_url=canonical_url,
         alt_urls=alt_urls,
         noindex=default_noindex,
@@ -523,13 +635,72 @@ def reg_pay_links_for_item(item):
 
 
 # ---------------------------------------------------------------- public pages
+def featured_items(db, limit=8):
+    """Featured catalog items for promotional placement. Items flagged out of
+    stock at the last check sort last so the default strip prefers things a
+    guest can actually order today (the badge still shows if one is included)."""
+    return db.execute(
+        "SELECT * FROM catalog_items WHERE active=1 AND featured=1"
+        " ORDER BY (availability='unavailable'), (url=''), sort LIMIT ?", (limit,)).fetchall()
+
+
+# The one canonical sample registry (review 2026-09-15). Built from the live
+# catalog so it stays in step with real prices/links, with synthetic gift
+# states so visitors can see Reserved / Reported / Received and a multi-qty
+# card. Never a real couple, never a real payment destination — the sample
+# has no pay links and its buttons are inert (`is_sample`).
+_SAMPLE_STATES = [  # (qty_wanted, reserved, reported, received)
+    (1, 0, 0, 0), (2, 1, 0, 0), (1, 0, 0, 1), (1, 0, 1, 0), (1, 0, 0, 0), (1, 1, 0, 0),
+]
+
+
+def sample_registry(db, limit=6):
+    lang = current_lang()
+    items, breakdown = [], {}
+    picks = featured_items(db, limit=limit)
+    for i, c in enumerate(picks):
+        qty, res, rep, rec = _SAMPLE_STATES[i % len(_SAMPLE_STATES)]
+        row = dict(c)
+        row.update(id=-(i + 1), registry_id=0, catalog_id=c["id"], qty_wanted=qty,
+                   priority=1 if i == 0 else 0, archived=0, note="", note_he="", clicks=0)
+        items.append(row)
+        if res or rep or rec:
+            breakdown[row["id"]] = dict(reserved=res, reported=rep, received=rec,
+                                        committed=res + rep + rec)
+    reg = dict(id=0, slug="sample", title=_t("sample_reg_title", "en"),
+               title_he=_t("sample_reg_title", "he"), couple_names=_t("sample_reg_couple", "en"),
+               couple_names_he=_t("sample_reg_couple", "he"), event_type="wedding",
+               event_date="", city=_t("sample_reg_city", lang), message=_t("sample_reg_message", "en"),
+               message_he=_t("sample_reg_message", "he"), visibility="public",
+               display_currency="ILS", delivery_note="", delivery_note_he="",
+               paypal_url="", stripe_url="", bit_url="", views=0, user_id=0)
+    return reg, items, breakdown
+
+
 @app.route("/")
 def index():
     db = get_db()
-    featured = db.execute(
-        "SELECT * FROM catalog_items WHERE active=1 AND featured=1 ORDER BY sort LIMIT 8").fetchall()
+    featured = featured_items(db, limit=8)
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
-    return render_template("index.html", featured=featured, bundles=bundles)
+    sample_reg, sample_items, sample_breakdown = sample_registry(db, limit=4)
+    return render_template("index.html", featured=featured, bundles=bundles,
+                           sample_reg=sample_reg, sample_items=sample_items,
+                           sample_breakdown=sample_breakdown)
+
+
+@app.route("/sample")
+def sample():
+    """Read-only sample registry: the public registry template rendered on the
+    synthetic fixture. No claims can be made here (no dialogs, no POST routes
+    for slug 'sample'); `is_sample` disables every button."""
+    db = get_db()
+    reg, items, breakdown = sample_registry(db)
+    total = sum(i["qty_wanted"] for i in items)
+    done = sum(min(breakdown.get(i["id"], {}).get("committed", 0), i["qty_wanted"]) for i in items)
+    return render_template("registry.html", reg=reg, items=items, claimed={},
+                           breakdown=breakdown, total=total, done=done, bought_item=None,
+                           pay_links=[], days_to_go=None, is_owner=False, is_preview=False,
+                           is_sample=True)
 
 
 @app.route("/lang/<code>")
@@ -567,23 +738,71 @@ def catalog_page():
     db = get_db()
     cat = request.args.get("cat", "")
     q = (request.args.get("q") or "").strip()
+    price = request.args.get("price", "")
+    kind = request.args.get("kind", "")
+    sort = request.args.get("sort", "")
+    try:
+        page = max(1, int(request.args.get("page", 1)))
+    except ValueError:
+        page = 1
     sql = "SELECT * FROM catalog_items WHERE active=1"
     params = []
     if cat in CATEGORIES:
         sql += " AND category=?"
         params.append(cat)
     if q:
-        sql += " AND (name LIKE ? OR name_he LIKE ?)"
-        params += [f"%{q}%", f"%{q}%"]
-    items = db.execute(sql + " ORDER BY category, sort", params).fetchall()
+        sql += " AND (name LIKE ? OR name_he LIKE ? OR brand LIKE ?)"
+        params += [f"%{q}%", f"%{q}%", f"%{q}%"]
+    if price in CATALOG_PRICE_BANDS:
+        lo, hi = CATALOG_PRICE_BANDS[price]
+        sql += " AND price_nis >= ?"
+        params.append(lo)
+        if hi is not None:
+            sql += " AND price_nis < ?"
+            params.append(hi)
+    else:
+        price = ""
+    if kind in ("product", "idea"):
+        sql += " AND kind=?"
+        params.append(kind)
+    else:
+        kind = ""
+    order = CATALOG_SORTS.get(sort)
+    if order is None:
+        sort, order = "", CATALOG_SORTS[""]
+    total = db.execute(f"SELECT COUNT(*) FROM ({sql})", params).fetchone()[0]
+    pages = max(1, (total + CATALOG_PAGE_SIZE - 1) // CATALOG_PAGE_SIZE)
+    page = min(page, pages)
+    items = db.execute(sql + f" ORDER BY {order} LIMIT ? OFFSET ?",
+                       params + [CATALOG_PAGE_SIZE, (page - 1) * CATALOG_PAGE_SIZE]).fetchall()
     have = set()
     reg = user_registry()
     if reg:
         have = {r["catalog_id"] for r in db.execute(
             "SELECT catalog_id FROM registry_items WHERE registry_id=?"
             " AND catalog_id IS NOT NULL", (reg["id"],))}
-    return render_template("catalog.html", items=items, cat=cat, q=q,
-                           have=have, has_reg=bool(reg))
+    filters = dict(cat=cat or None, q=q or None, price=price or None, kind=kind or None,
+                   sort=sort or None)
+    return render_template("catalog.html", items=items, cat=cat, q=q, price=price, kind=kind,
+                           sort=sort, page=page, pages=pages, total=total, filters=filters,
+                           price_bands=CATALOG_PRICE_BANDS, have=have, has_reg=bool(reg))
+
+
+# Public catalog browsing controls (all server-side, URL-addressable so the
+# browser back button and the pending-add-through-signup redirect keep state).
+CATALOG_PAGE_SIZE = 24
+CATALOG_PRICE_BANDS = {  # key -> (min inclusive, max exclusive) in NIS
+    "under200": (0, 200),
+    "200_500": (200, 500),
+    "500_1500": (500, 1500),
+    "1500plus": (1500, None),
+}
+CATALOG_SORTS = {
+    "": "category, sort",
+    "price_asc": "price_nis, sort",
+    "price_desc": "price_nis DESC, sort",
+    "name": "name COLLATE NOCASE",
+}
 
 
 @app.route("/go/c/<int:catalog_id>")
@@ -684,7 +903,8 @@ def registry(slug):
     items = db.execute(
         "SELECT * FROM registry_items WHERE registry_id=? AND archived=0"
         " ORDER BY priority DESC, category, id", (reg["id"],)).fetchall()
-    claimed = item_claim_counts(reg["id"])
+    breakdown = item_claim_breakdown(reg["id"])
+    claimed = {k: v["committed"] for k, v in breakdown.items()}
     total = sum(i["qty_wanted"] for i in items)
     done = sum(min(claimed.get(i["id"], 0), i["qty_wanted"]) for i in items)
     bought_item = None
@@ -696,6 +916,7 @@ def registry(slug):
         except ValueError:
             pass
     return render_template("registry.html", reg=reg, items=items, claimed=claimed,
+                           breakdown=breakdown, is_sample=False,
                            total=total, done=done, bought_item=bought_item,
                            pay_links=reg_pay_links(reg), days_to_go=days_to_go,
                            is_owner=is_owner, is_preview=is_preview,
@@ -1079,7 +1300,8 @@ def dashboard():
         db = get_db()
         gifts = db.execute(
             "SELECT c.*, ri.name AS item_name, ri.name_he AS item_name_he,"
-            " ri.url AS item_url, ri.store AS item_store FROM claims c"
+            " ri.url AS item_url, ri.store AS item_store, ri.availability AS item_availability"
+            " FROM claims c"
             " LEFT JOIN registry_items ri ON ri.id = c.item_id"
             " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)).fetchall()
         n_items = db.execute("SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0",
@@ -1304,12 +1526,13 @@ def items_manage():
     archived_claim_counts = {a["id"]: db.execute(
         "SELECT COUNT(*) FROM claims WHERE item_id=?", (a["id"],)).fetchone()[0] for a in archived}
     have_catalog_ids = {m["catalog_id"] for m in mine if m["catalog_id"]}
-    claimed = item_claim_counts(reg["id"])
+    breakdown = item_claim_breakdown(reg["id"])
+    claimed = {k: v["committed"] for k, v in breakdown.items()}
     n_committed = sum(1 for m in mine if claimed.get(m["id"]))
     n_needs_link = sum(1 for m in mine if not m["url"] and not reg_pay_links(reg))
     return render_template("items.html", reg=reg, catalog=catalog, mine=mine, archived=archived,
                            archived_claim_counts=archived_claim_counts,
-                           have=have_catalog_ids, claimed=claimed, cat=cat, q=q,
+                           have=have_catalog_ids, claimed=claimed, breakdown=breakdown, cat=cat, q=q,
                            n_committed=n_committed, n_needs_link=n_needs_link)
 
 
@@ -1373,10 +1596,11 @@ def items_add():
         else:
             flash(_t("form_error", current_lang()), "err")
     if request.args.get("back") == "catalog":
-        return redirect(url_for("catalog_page", cat=request.args.get("cat", ""),
-                                q=request.args.get("q", "")))
+        keep = {k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "page")
+                if request.args.get(k)}
+        return redirect(url_for("catalog_page", **keep) + (f"#c-{cat_id}" if cat_id else ""))
     return redirect(url_for("items_manage", cat=request.args.get("cat", ""),
-                            q=request.args.get("q", "")))
+                            q=request.args.get("q", "")) + ("#add-more" if cat_id else "#mine"))
 
 
 STARTER_GROUPS_ORDER = ["first_week", "kitchen", "shabbos", "bedbath", "appliances"]
@@ -1697,7 +1921,22 @@ def shana():
             flash(_t("sr_done_t", lang) + " " + _t("sr_done_b", lang), "ok")
             return redirect(url_for("shana"))
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
-    return render_template("shana.html", bundles=bundles)
+    return render_template("shana.html", bundles=bundles, package_tiers=PACKAGE_TIERS)
+
+
+# Shana Rishonah package definition, per tier (review 2026-09-15). The goods
+# list lives in `bundles.items_text` (admin-editable); these are the service
+# terms that differ between tiers and must stay consistent between the cards,
+# the shared terms panel and the lead-time guidance. Values map to i18n keys
+# pkg_delivery_<delivery>, pkg_setup_yes/no, pkg_appliances_<appliances>,
+# pkg_lead_weeks. OWNER DECISION still open (see TODO_AI.md): whether Full
+# Nest's price includes appliance installation or it is quoted separately —
+# until decided, every tier says installation is confirmed in the quote.
+PACKAGE_TIERS = {
+    "basic": dict(delivery="before", setup=False, appliances="none", lead_weeks=3),
+    "standard": dict(delivery="before", setup=False, appliances="ask", lead_weeks=3),
+    "premium": dict(delivery="received", setup=True, appliances="included", lead_weeks=6),
+}
 
 
 # ---------------------------------------------------------------- admin
@@ -2236,7 +2475,7 @@ def robots():
 @app.route("/sitemap.xml")
 def sitemap():
     pages = [ext_url(p) for p in
-             ("index", "how", "find", "catalog_page", "shana", "about", "contact", "privacy")]
+             ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy")]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in pages:

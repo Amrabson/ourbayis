@@ -74,8 +74,9 @@ cd ~/ourbayis && venv/bin/python manage.py seed-sync --apply    # actually write
 # explicit overwrite of specific fields from the seed by seed_key (dry run by default)
 cd ~/ourbayis && venv/bin/python manage.py seed-sync --fields price_nis,url --apply
 
-# after editing catalog items in /admin/catalog: push url/image/store/brand out to
-# registry_items that came from the catalog and haven't been individually edited
+# after editing catalog items in /admin/catalog: push url/image/store/brand/model/notes and the
+# stock flag (availability) out to registry_items that came from the catalog; fields the couple
+# edited themselves are skipped (availability is always refreshed); claims are never touched
 cd ~/ourbayis && venv/bin/python manage.py refresh-registry-links           # dry run
 cd ~/ourbayis && venv/bin/python manage.py refresh-registry-links --apply
 ```
@@ -88,6 +89,11 @@ value from the seed, and pushing catalog edits out to registries.
 ## Backup / restore
 - **Backup**: `python manage.py backup` writes a verified online copy (via SQLite's own backup API + `PRAGMA integrity_check`) to `backups/ourbayis-<timestamp>.db`. `backups/` is gitignored — download copies off the server periodically. An admin can also download one on demand from `/admin/backup.db` (streamed, deleted from the server immediately after).
 - **Restore**: stop the web app (or at least don't rely on it not writing), copy the backup file over `ourbayis.db` (or point `OB_DB_PATH` at it), then `python manage.py check` before reloading.
+- **2026-09-17 deploy note**: migration 18 (`registry_items.model/availability/notes/notes_he`) applies
+  itself on the first import after deploy and backfills from the catalog. Run
+  `manage.py refresh-registry-links` (dry run, then `--apply`) afterwards so existing registries pick up
+  the stock flags, and edit the three bundles in `/admin/bundles` to the new wording (bundle sync is
+  insert-only). New public route: `/sample` (in the sitemap).
 - **Rollback after a bad migration/deploy**: restore the most recent `backups/ourbayis-*.db` copy from *before* the deploy (see above), `git checkout` (or re-upload) the previous commit's code, `python manage.py check`, then Reload. Migrations in `ob_db.py` are additive and idempotent (`ALTER TABLE ... ADD COLUMN`, `CREATE TABLE IF NOT EXISTS`) — there is no automatic down-migration, so a schema rollback always means restoring a pre-deploy DB backup, never rolling the schema back in place.
 
 ## 7. Custom domain (when ready)

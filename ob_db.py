@@ -427,6 +427,25 @@ def _m017_account_deletion_index(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_users_deleted_at ON users(deleted_at)")
 
 
+def _m018_registry_items_catalog_snapshot(db):
+    """Registry items copied from the catalog also carry the catalog's `model`,
+    `availability` (stock at last check) and bilingual `notes`, so a stock
+    warning shown on /catalog never silently disappears once the item sits on
+    a registry (review 2026-09-15). Backfilled from the catalog row; the
+    couple's own `overrides` are respected by refresh_registry_links()."""
+    for coldef in ("model TEXT DEFAULT ''", "availability TEXT DEFAULT 'unknown'",
+                   "notes TEXT DEFAULT ''", "notes_he TEXT DEFAULT ''"):
+        _add_column(db, "registry_items", coldef)
+    db.execute("""
+        UPDATE registry_items SET
+          model = COALESCE((SELECT model FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id), ''),
+          availability = COALESCE((SELECT availability FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id), 'unknown'),
+          notes = COALESCE((SELECT notes FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id), ''),
+          notes_he = COALESCE((SELECT notes_he FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id), '')
+        WHERE catalog_id IS NOT NULL
+    """)
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -554,23 +573,27 @@ def seed_overwrite(db, seed_items, fields, dry_run=False):
 
 
 def refresh_registry_links(db, dry_run=False):
-    """Copy url/image/store/brand from catalog_items onto registry_items that
-    came from the catalog (catalog_id set), for any of those fields the
-    couple has NOT overridden (registry_items.overrides is a comma list).
-    Never touches name/price/qty/priority/note or any claim. Returns a list
-    of (registry_item_id, field, old, new) diff rows."""
+    """Copy url/image/store/brand/model/notes and the stock flag
+    (`availability`) from catalog_items onto registry_items that came from
+    the catalog (catalog_id set), for any of those fields the couple has NOT
+    overridden (registry_items.overrides is a comma list). `availability` is
+    always taken from the catalog (it describes the store, not the couple's
+    wish). Never touches name/price/qty/priority/note or any claim — a
+    claim's `price_snapshot_minor`/`amount_minor` is the guest's committed
+    amount and is left alone. Returns (registry_item_id, field, old, new)."""
     diffs = []
-    fields = ("url", "image", "store", "brand")
+    fields = ("url", "image", "store", "brand", "model", "availability", "notes", "notes_he")
     rows = db.execute(
         "SELECT ri.*, c.url AS c_url, c.image AS c_image, c.store AS c_store,"
-        " c.brand AS c_brand FROM registry_items ri"
+        " c.brand AS c_brand, c.model AS c_model, c.availability AS c_availability,"
+        " c.notes AS c_notes, c.notes_he AS c_notes_he FROM registry_items ri"
         " JOIN catalog_items c ON c.id = ri.catalog_id"
         " WHERE ri.archived=0").fetchall()
     for row in rows:
         overrides = set(f for f in (row["overrides"] or "").split(",") if f)
         sets, params = [], []
         for field in fields:
-            if field in overrides:
+            if field in overrides and field != "availability":
                 continue
             old_val = row[field]
             new_val = row["c_" + field]
@@ -615,6 +638,7 @@ MIGRATIONS = [
     _m015_registry_items_price_status,
     _m016_registry_preview_flag,
     _m017_account_deletion_index,
+    _m018_registry_items_catalog_snapshot,
 ]
 
 

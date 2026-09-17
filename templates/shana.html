@@ -4,6 +4,7 @@
 {% block content %}
 <section class="reg-hero shana-hero">
   <div class="wrap">
+    <p class="reg-eyebrow">{{ t('shana_eyebrow') }}</p>
     <h1>{{ t('shana_title') }}</h1>
     <p class="reg-message">{{ t('shana_sub') }}</p>
   </div>
@@ -21,56 +22,69 @@
     {% endfor %}
   </div>
 
+  <h2 class="sub-title">{{ t('shana_packages_t') }}</h2>
+  <p class="page-sub">{{ t('shana_packages_sub') }}</p>
+
   <div class="bundle-grid">
     {% for b in bundles %}
-    <article class="bundle-card tier-{{ b['tier'] }}">
+    {% set tier = package_tiers.get(b['tier'], package_tiers['basic']) %}
+    {% set lines = pick(b, 'items_text').splitlines() | map('trim') | select | list %}
+    <article class="bundle-card tier-{{ b['tier'] }}" id="pkg-{{ b['slug'] }}">
       <h3>{{ pick(b, 'name') }}</h3>
-      <p class="bundle-price">{{ t('bundle_from') }} <strong>₪{{ '{:,}'.format(b['price_from']) }}</strong>
+      <p class="bundle-price">{{ t('bundle_from') }} <strong class="bdi">₪{{ '{:,}'.format(b['price_from']) }}</strong>
         {% set _e = estimate_label(b['price_from']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}</p>
       <p class="hint">{{ t('bundle_price_indicative') }}</p>
       <p class="bundle-desc">{{ pick(b, 'description') }}</p>
-      <details>
-        <summary>{{ t('shana_includes') }}</summary>
-        <ul>
-          {% for line in pick(b, 'items_text').splitlines() if line.strip() %}
-          <li>{{ line }}</li>
-          {% endfor %}
-        </ul>
+
+      <ul class="bundle-facts">
+        <li><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('pkg_delivery_' ~ tier['delivery']) }}</li>
+        <li class="{{ '' if tier['setup'] else 'is-no' }}"><svg class="ic ic-sm"><use href="#{{ 'i-check' if tier['setup'] else 'i-plus' }}"/></svg> {{ t('pkg_setup_yes') if tier['setup'] else t('pkg_setup_no') }}</li>
+        <li class="{{ '' if tier['appliances'] == 'included' else 'is-no' }}"><svg class="ic ic-sm"><use href="#{{ 'i-check' if tier['appliances'] == 'included' else 'i-plus' }}"/></svg> {{ t('pkg_appliances_' ~ tier['appliances']) }}</li>
+        <li><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ tf('pkg_lead_weeks', n=tier['lead_weeks']) }}</li>
+      </ul>
+
+      <p class="bundle-top"><strong>{{ t('shana_includes') }}:</strong> {{ lines[:4] | join(' · ') }}{% if lines | length > 4 %} …{% endif %}</p>
+      {% if lines | length > 4 %}
+      <details class="bundle-details">
+        <summary>{{ tf('shana_full_list', n=lines | length) }}</summary>
+        <ul>{% for line in lines %}<li>{{ line }}</li>{% endfor %}</ul>
       </details>
-      <details>
-        <summary>{{ t('shana_optional_extras') }}</summary>
-        <p>{{ t('shana_optional_extras_body') }}</p>
-      </details>
-      <details>
-        <summary>{{ t('shana_not_included') }}</summary>
-        <p>{{ t('shana_not_included_body') }}</p>
-      </details>
-      <details>
-        <summary>{{ t('shana_coord_vs_install') }}</summary>
-        <p>{{ t('shana_coord_vs_install_body') }}</p>
-      </details>
-      <p class="hint">{{ t('shana_lead_time') }}</p>
-      <a class="btn btn-primary btn-block" href="#request" data-bundle="{{ b['slug'] }}">{{ t('sr_submit') }}</a>
+      {% endif %}
+      <a class="btn {{ 'btn-gold' if b['tier'] == 'standard' else 'btn-primary' }} btn-block" href="#request" data-bundle="{{ b['slug'] }}">{{ tf('shana_choose', name=pick(b, 'name')) }}</a>
     </article>
     {% endfor %}
   </div>
 
-  <div class="notice-panel">
-    <svg class="ic"><use href="#i-star"/></svg>
-    <p>{{ t('shana_notice') }}</p>
+  {# Common terms — once, not repeated on every card #}
+  <div class="terms-panel" id="terms">
+    <h2 class="sub-title" style="margin-top:0">{{ t('shana_terms_t') }}</h2>
+    <dl class="terms-list">
+      <dt>{{ t('shana_term_delivery_t') }}</dt><dd>{{ t('shana_term_delivery_b') }}</dd>
+      <dt>{{ t('shana_term_install_t') }}</dt><dd>{{ t('shana_term_install_b') }}</dd>
+      <dt>{{ t('shana_optional_extras') }}</dt><dd>{{ t('shana_optional_extras_body') }}</dd>
+      <dt>{{ t('shana_not_included') }}</dt><dd>{{ t('shana_not_included_body') }}</dd>
+      <dt>{{ t('shana_term_timing_t') }}</dt><dd>{{ t('shana_term_timing_b') }}</dd>
+      <dt>{{ t('shana_term_quote_t') }}</dt><dd>{{ t('shana_term_quote_b') }}</dd>
+    </dl>
   </div>
 
   <div class="form-panel" id="request">
     <h2 class="section-title">{{ t('shana_form_title') }}</h2>
     <p class="page-sub">{{ t('shana_form_sub') }}</p>
-    <p class="hint">{{ t('shana_form_disclaimer') }}</p>
     <form method="post" action="{{ url_for('shana') }}#request" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <label class="selected-pkg">{{ t('sr_bundle') }}
+        <select name="bundle" id="bundle-select">
+          {% for b in bundles %}<option value="{{ b['slug'] }}">{{ pick(b, 'name') }} — {{ t('bundle_from') }} ₪{{ '{:,}'.format(b['price_from']) }}</option>{% endfor %}
+          <option value="custom">{{ t('sr_custom') }}</option>
+        </select>
+      </label>
+      <p class="hint contact-req">{{ t('sr_contact_hint') }}</p>
       <div class="form-2col">
-        <label>{{ t('sr_name') }} *<input name="name" required maxlength="120"></label>
-        <label>{{ t('sr_whatsapp') }}<input name="whatsapp" maxlength="40" placeholder="+1 / +972…"></label>
-        <label>{{ t('sr_email') }}<input name="email" type="email" maxlength="200"></label>
+        <label>{{ t('sr_name') }} *<input name="name" required maxlength="120" autocomplete="name"></label>
+        <label>{{ t('sr_whatsapp') }}<input name="whatsapp" maxlength="40" placeholder="+1 / +972…" autocomplete="tel" inputmode="tel"></label>
+        <label>{{ t('sr_email') }}<input name="email" type="email" maxlength="200" autocomplete="email"></label>
         <label>{{ t('sr_arrival') }}<input name="arrival" type="date"></label>
         <label>{{ t('sr_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim, Ramat Beit Shemesh…"></label>
         <label>{{ t('sr_neighborhood') }}<input name="neighborhood" maxlength="120"></label>
@@ -92,14 +106,9 @@
             <option value="not_sure">{{ t('budget_not_sure') }}</option>
           </select>
         </label>
-        <label>{{ t('sr_bundle') }}
-          <select name="bundle" id="bundle-select">
-            {% for b in bundles %}<option value="{{ b['slug'] }}">{{ pick(b, 'name') }} — ₪{{ '{:,}'.format(b['price_from']) }}+</option>{% endfor %}
-            <option value="custom">{{ t('sr_custom') }}</option>
-          </select>
-        </label>
       </div>
       <label>{{ t('sr_notes') }}<textarea name="notes" rows="3" maxlength="2000"></textarea></label>
+      <p class="hint">{{ t('shana_form_disclaimer') }}</p>
       <button class="btn btn-primary btn-lg" type="submit">{{ t('sr_submit') }}</button>
     </form>
   </div>

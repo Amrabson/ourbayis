@@ -15,8 +15,12 @@
     if (chips) chips.addEventListener("click", function (e) {
       var chip = e.target.closest(".chip");
       if (!chip) return;
-      chips.querySelectorAll(".chip").forEach(function (c) { c.classList.remove("active"); });
+      chips.querySelectorAll(".chip").forEach(function (c) {
+        c.classList.remove("active");
+        c.setAttribute("aria-pressed", "false");
+      });
       chip.classList.add("active");
+      chip.setAttribute("aria-pressed", "true");
       var f = chip.getAttribute("data-filter");
       document.querySelectorAll(".gift-card").forEach(function (card) {
         card.style.display = (f === "all" || card.getAttribute("data-cat") === f) ? "" : "none";
@@ -29,6 +33,8 @@
       var a = e.target.closest("[data-bundle]");
       if (!a) return;
       bundleSelect.value = a.getAttribute("data-bundle");
+      // keep the chosen package visible: the select sits at the top of the form
+      setTimeout(function () { bundleSelect.focus({ preventScroll: true }); }, 0);
     });
   });
 
@@ -48,7 +54,7 @@
           io.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.15 });
+    }, { threshold: 0.05, rootMargin: "0px 0px -5% 0px" });
     reveals.forEach(function (el) { io.observe(el); });
   });
 

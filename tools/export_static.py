@@ -5,8 +5,8 @@
     python tools/export_static.py --out /tmp/site
 
 What it does:
-- boots the app against a throwaway temp database, seeds a synthetic demo registry
-  ("Demo Couple" — no real people, no real payment links);
+- boots the app against a throwaway temp database; the "registry" preview is the
+  app's own canonical /sample fixture (no real people, no real payment links);
 - renders every public page in English and Hebrew through the Flask test client;
 - rewrites internal links to relative paths so the export works from a sub-path
   (GitHub project pages live at /<repo>/);
@@ -35,7 +35,6 @@ os.environ.pop("OB_SMTP_HOST", None)
 
 import app as A  # noqa: E402
 
-DEMO_SLUG = None
 PAGES = {  # url -> output dir (relative)
     "/": "",
     "/catalog": "catalog",
@@ -45,45 +44,9 @@ PAGES = {  # url -> output dir (relative)
     "/find": "find",
     "/privacy": "privacy",
     "/contact": "contact",
+    "/sample": "sample",
 }
 AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new")
-
-
-def seed_demo():
-    """Synthetic couple + registry with a handful of linked catalog items."""
-    global DEMO_SLUG
-    c = A.app.test_client()
-
-    def csrf():
-        with c.session_transaction() as s:
-            return s.get("_csrf")
-
-    c.get("/signup")
-    c.post("/signup", data=dict(csrf_token=csrf(), name="Demo Couple", email="demo@example.invalid",
-                                password="demo-password-only", password2="demo-password-only"))
-    c.get("/registry/new")
-    c.post("/registry/new", data=dict(csrf_token=csrf(), title="Demo & Example — Sample Registry",
-                                      title_he="דוגמה — רשימה לדוגמה", couple_names="Demo & Example",
-                                      couple_names_he="דוגמה ודוגמה", event_type="wedding",
-                                      event_date="2026-12-15", city="Yerushalayim",
-                                      message="This is a synthetic sample registry for the static preview.",
-                                      message_he="זו רשימה לדוגמה בלבד, לתצוגה הסטטית.",
-                                      visibility="public"))
-    import sqlite3
-    db = sqlite3.connect(os.environ["OB_DB_PATH"])
-    db.row_factory = sqlite3.Row
-    DEMO_SLUG = db.execute("SELECT slug FROM registries").fetchone()[0]
-    ids = [r[0] for r in db.execute(
-        "SELECT id FROM catalog_items WHERE active=1 ORDER BY featured DESC, url='' , sort LIMIT 10")]
-    for i in ids:
-        c.get("/registry/items")
-        c.post("/registry/items/add", data=dict(csrf_token=csrf(), catalog_id=str(i)))
-    # one "gifted" item so the page shows every state
-    first = db.execute("SELECT id FROM registry_items ORDER BY id LIMIT 1").fetchone()[0]
-    db.execute("INSERT INTO claims (registry_id, item_id, guest_name, qty, kind, status)"
-               " VALUES (1, ?, 'A guest', 1, 'item', 'received')", (first,))
-    db.commit()
-    db.close()
 
 
 def rel_prefix(out_dir):
@@ -103,9 +66,13 @@ def rewrite(html, out_dir, lang, go_map):
             return ""
         if path == "/catalog":
             m = re.search(r"cat=([a-z]+)", query or "")
-            return f"catalog/{m.group(1)}/" if m else "catalog/"
-        if path.startswith("/r/"):
-            return "registry/"
+            pg = re.search(r"page=(\d+)", query or "")
+            out = f"catalog/{m.group(1)}/" if m else "catalog/"
+            if pg and int(pg.group(1)) > 1:
+                out += f"page-{pg.group(1)}/"
+            return out
+        if path.startswith("/r/") or path == "/sample":
+            return "sample/"
         stripped = path.strip("/")
         if stripped in PAGES.values():
             return stripped + "/"
@@ -138,9 +105,6 @@ def rewrite(html, out_dir, lang, go_map):
     # server-only head tags that carry localhost URLs
     html = re.sub(r'<link rel="(canonical|alternate)"[^>]*>\n?', "", html)
     html = re.sub(r'<meta property="og:image"[^>]*>\n?', "", html)
-    # share buttons would otherwise carry the export machine's localhost URL
-    html = re.sub(r"http%3A//localhost/r/[^\"&]+", "https%3A//ourbayis.example/r/demo", html)
-    html = re.sub(r'data-copy="/r/[^"]*"', 'data-copy="https://ourbayis.example/r/demo"', html)
     html = html.replace("http://localhost", "")
     # currency toggle is meaningless without a server
     html = re.sub(r'<a class="lang-toggle cur-toggle"[^>]*>.*?</a>\s*', "", html, flags=re.S)
@@ -172,22 +136,26 @@ def main():
         "\n.demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;"
         "padding:8px 16px;letter-spacing:.2px}\n")
 
-    seed_demo()
     A.app.config["TESTING"] = True
     import sqlite3
     db = sqlite3.connect(os.environ["OB_DB_PATH"])
     go_map = {}
     for cid, url in db.execute("SELECT id, url FROM catalog_items WHERE url != ''"):
         go_map[f"/go/c/{cid}"] = url
-    for iid, url in db.execute("SELECT id, url FROM registry_items WHERE url != ''"):
-        go_map[f"/go/i/{iid}"] = url
+    n_active = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1").fetchone()[0]
+    per_cat = dict(db.execute(
+        "SELECT category, COUNT(*) FROM catalog_items WHERE active=1 GROUP BY category"))
     db.close()
 
     from i18n import CATEGORIES
     pages = dict(PAGES)
+    page_size = A.CATALOG_PAGE_SIZE
+    for n in range(2, (n_active + page_size - 1) // page_size + 1):
+        pages[f"/catalog?page={n}"] = f"catalog/page-{n}"
     for cat in CATEGORIES:
         pages[f"/catalog?cat={cat}"] = f"catalog/{cat}"
-    pages[f"/r/{DEMO_SLUG}"] = "registry"
+        for n in range(2, (per_cat.get(cat, 0) + page_size - 1) // page_size + 1):
+            pages[f"/catalog?cat={cat}&page={n}"] = f"catalog/{cat}/page-{n}"
     pages["/signup"] = "demo-only"
 
     written = 0
@@ -208,6 +176,13 @@ def main():
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(html, encoding="utf-8")
             written += 1
+    # the previous export published the sample at /registry/ — keep that URL alive
+    for old_dir, new_rel in (("registry", "../sample/"), ("he/registry", "../sample/")):
+        target = out / old_dir / "index.html"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(f'<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" '
+                          f'content="0; url={new_rel}"><a href="{new_rel}">Sample registry</a>',
+                          encoding="utf-8")
     shutil.rmtree(TMP, ignore_errors=True)
     print(f"wrote {written} pages to {out}")
 

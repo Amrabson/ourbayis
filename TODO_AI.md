@@ -19,14 +19,40 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [ ] Viral CTA on the public registry page ("Create your own registry") — small, bilingual.
 - [ ] Affiliate disclosure line near store buttons on registry/catalog (Amazon ToS) — one muted line.
 - [ ] `/guides` bilingual content section (SEO) — 4 launch articles specced in the July roadmap.
-- [ ] Registry page browsing polish for big registries: category anchor pills already exist;
-  add an "available only" toggle and "most wanted first" sort.
+- [ ] Registry page browsing polish for big registries: category chips exist; add an "available only"
+  toggle and "most wanted first" sort.
+- [ ] Item-specific illustrations cover ~27 shapes; extend `_ILLUSTRATION_RULES` when new seed items
+  don't match (they fall back to the category drawing, never to a wrong item).
 - [ ] Per-path page-view counter (privacy-safe) to feed /advertise numbers; funnel_events only
   counts named events today.
 - [ ] Hebrew registry-form fields could collapse into an "Add Hebrew" `<details>` (spec) — they are
   inline-but-optional today.
 - [ ] Group gifting / chip-in toward big-ticket items — deliberately deferred (SPEC_V3 "Defer").
 - [ ] Multiple registries per account, co-owners, live inventory — deferred.
+
+## Owner decisions from the 2026-09-17 review pass (publication blockers for the affected claims)
+- [ ] **Full Nest installation.** The package now says washer/fridge/microwave are "ordered and delivery
+  coordinated (installation confirmed in your quote)" and the terms panel says installation is priced
+  per item. Decide: is appliance installation included in the ₪17,900 starting price or always extra?
+  Then edit `PACKAGE_TIERS` / `pkg_appliances_included` and the bundle line accordingly.
+- [ ] **Who receives deliveries on Landing Basics / Home Sweet Home.** Copy currently says it "depends
+  on the package and is set out in your quote". Decide (couple / landlord / OurBayis for a fee) and
+  make `shana_term_delivery_b` specific.
+- [ ] **Bundle text on an existing database.** `bundle_sync` is insert-only, so a live DB keeps the old
+  "most popular" / "coordinated and installed" wording. Edit the three bundles in `/admin/bundles`
+  (or on a fresh install the seed is used). The static preview already shows the new text.
+- [ ] **Starting prices** (₪2,450 / ₪6,900 / ₪17,900) are unchanged and labelled indicative; confirm
+  or replace them.
+- [ ] **Product photos.** 0 of 117 catalog items have an image; cards use item-specific line drawings
+  labelled as illustrations. If you want photos for the 8 featured items, add only images you have the
+  right to use via `/admin/catalog` (`image` + `image_credit`); the card, homepage strip, registry and
+  dialog all pick them up automatically and fall back to the drawing on error.
+- [ ] **Exchange rate.** `ob_money` defaults to USD 3.7 when `OB_RATES` is unset (the static preview
+  shows that figure with the 2026-09-01 date from the exporter). Set a real `OB_RATES`/`OB_RATES_DATE`.
+- [ ] **Backup retention.** Privacy copy no longer promises a period; state one once you decide how long
+  `manage.py backup` files are kept, then update `privacy_delete_b` (EN+HE).
+- [ ] **Sample registry title/names** ("Our new bayis in Yerushalayim" / "A sample couple") — change
+  in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
 - [ ] **Real store links.** The 8 featured items have verified links in `seed_catalog.json`
@@ -53,9 +79,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   spot-check the mapping in `/admin/catalog?price_status=verified` and downgrade anything doubtful.
   Verified dates are ~10 weeks old; recheck big-ticket prices before launch. The remaining ~62 are estimates; spot-check the highest-
   value ones (fridge, mixer, appliances) before launch. Filter `/admin/catalog?price_status=estimate`.
-- [ ] **Legal review of privacy/terms** — `privacy.html` carries `[owner/legal review]` markers
-  (backup retention period, affiliate wording). Deletion copy now describes the self-service Account page.
-  There is no separate terms page yet — decide whether one is needed before launch.
+- [ ] **Legal review of privacy/terms** — `privacy.html` is now bilingual with no bracketed notes, but it
+  is a description of current behaviour, not reviewed legal text. There is no separate terms page yet —
+  decide whether one is needed before launch.
 - [ ] **PythonAnywhere scheduled tasks** — see DEPLOY_AI.md "Scheduled tasks" for the exact
   commands (`send-mail`, `expire-claims`, `backup`, `seed-sync --apply` after a `seed_catalog.json`
   edit).
