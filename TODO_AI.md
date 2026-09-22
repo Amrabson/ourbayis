@@ -55,10 +55,11 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Real store links.** 17 items now have verified KSP/store links (8 featured on 2026-09-14 + 9 appliances on 2026-09-23 — see CHANGELOG for the exact `seed-sync --fields … ` command to push them to the live DB).  in `seed_catalog.json`
-  Earlier note: on the live DB run the `seed-sync --fields … --apply` command from
-  the changelog, then `refresh-registry-links --apply`. The other ~109 items still have no URL: use
-  `/admin/catalog` (filter "missing store link") or extend `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
+- [ ] **Real store links.** 17 of 117 items have verified store links in `seed_catalog.json` (8 featured
+  on 2026-09-14 + 9 appliances on 2026-09-23). On the live DB run the `seed-sync --fields … --apply`
+  command from the 2026-09-23 CHANGELOG entry, then `refresh-registry-links --apply`. The other 100
+  items still have no URL: use `/admin/catalog` (filter "missing store link") or extend
+  `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.
 - [ ] **Images** — only add a product photo URL you have the right to use (the store's own listing
   image, or one you purchased/shot). `image_credit` field exists in the catalog admin form for
