@@ -16,7 +16,8 @@
       <label>{{ t('custom_url') }}<input name="url" maxlength="500" placeholder="https://…" value="{{ item['url'] }}"></label>
       <label>{{ t('custom_store') }}<input name="store" maxlength="120" value="{{ item['store'] }}"></label>
       <label>{{ t('custom_price') }}<input name="price_nis" type="number" min="0" max="99999" value="{{ item['price_nis'] }}"></label>
-      <label>{{ t('qty') }}<input name="qty_wanted" type="number" min="1" max="99" value="{{ item['qty_wanted'] }}"></label>
+      <label>{{ t('qty') }}<input name="qty_wanted" type="number" min="{{ [1, committed or 0] | max }}" max="99" value="{{ item['qty_wanted'] }}">
+        {% if committed %}<span class="hint">{{ tf('item_edit_committed_hint', n=committed) }}</span>{% endif %}</label>
       <label>{{ t('item_kind') }}
         <select name="kind">
           <option value="product" {% if item['kind'] == 'product' %}selected{% endif %}>{{ t('item_kind_product') }}</option>
@@ -35,7 +36,7 @@
       <label dir="rtl">{{ t('item_note_he') }}<textarea name="note_he" maxlength="1000" rows="2">{{ item['note_he'] }}</textarea></label>
     </details>
     <button class="btn btn-primary" type="submit">{{ t('save') }}</button>
-    <a class="btn btn-ghost" href="{{ url_for('items_manage') }}">{{ t('cancel') }}</a>
+    <a class="btn btn-ghost" href="{{ url_for('items_manage', _anchor='item-' ~ item['id']) }}">{{ t('cancel') }}</a>
   </form>
 </div>
 {% endblock %}

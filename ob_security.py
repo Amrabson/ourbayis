@@ -94,7 +94,7 @@ _PRIVATE_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "::1")
 def validate_url(u):
     """General external-URL sanity check (store/affiliate links): http(s),
     has a host, no embedded userinfo, not a bare IP/localhost, reasonable length."""
-    if not u or len(u) > 500:
+    if not u or len(u) > 500 or re.search(r"\s", u):
         return False
     try:
         p = urlparse(u)
@@ -105,6 +105,10 @@ def validate_url(u):
     if not p.netloc or "@" in p.netloc:
         return False
     host = p.hostname or ""
+    # a real dotted hostname (labels of letters/digits/hyphens, IDN letters allowed) —
+    # rejects "https://bad link" style input that urlparse happily accepts
+    if not re.fullmatch(r"(?:[\w-]+\.)+[\w-]{2,}", host) or "_" in host:
+        return False
     if host.lower() in _PRIVATE_HOSTS:
         return False
     if re.match(r"^\d{1,3}(\.\d{1,3}){3}$", host):

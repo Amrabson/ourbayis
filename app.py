@@ -1690,13 +1690,19 @@ def items_add():
         url = (f.get("url") or "").strip()[:500]
         if url and not url.startswith("http"):
             url = "https://" + url
-        if not valid_http_url(url):
+        url_dropped = bool(url) and not valid_http_url(url)
+        if url_dropped:
             url = ""
         try:
             price = max(0, int(f.get("price_nis") or 0))
         except ValueError:
             price = 0
-        if name:
+        duplicate = name and db.execute(
+            "SELECT 1 FROM registry_items WHERE registry_id=? AND archived=0 AND catalog_id IS NULL"
+            " AND name=? AND url=? AND price_nis=?", (reg["id"], name, url, price)).fetchone()
+        if url_dropped:
+            flash(_t("custom_url_dropped", current_lang()), "err")
+        if name and not duplicate:
             db.execute(
                 "INSERT INTO registry_items (registry_id, name, name_he, category,"
                 " price_nis, store, url, kind) VALUES (?,?,?,?,?,?,?,?)",
@@ -1705,7 +1711,7 @@ def items_add():
                  price, (f.get("store") or "").strip()[:120], url,
                  "product" if url else "idea"))
             _maybe_track_first_gifts(db, reg["id"])
-        else:
+        elif not name:
             flash(_t("form_error", current_lang()), "err")
     if request.args.get("back") == "catalog":
         keep = {k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "page")
@@ -1777,13 +1783,17 @@ def items_update(item_id):
     if not item:
         abort(404)
     lang = current_lang()
-    if request.form.get("delete"):
-        has_claims = db.execute("SELECT 1 FROM claims WHERE item_id=? LIMIT 1", (item_id,)).fetchone()
-        if has_claims:
-            db.execute("UPDATE registry_items SET archived=1 WHERE id=?", (item_id,))
-        else:
-            db.execute("DELETE FROM registry_items WHERE id=?", (item_id,))
-    else:
+    here = url_for("items_manage", _anchor=f"item-{item_id}")
+    # same write lock as the guest claim route, so a reservation landing at this
+    # moment can't slip past the quantity check or collide with the delete
+    with ob_db.write_txn(db):
+        if request.form.get("delete"):
+            has_claims = db.execute("SELECT 1 FROM claims WHERE item_id=? LIMIT 1", (item_id,)).fetchone()
+            if has_claims:
+                db.execute("UPDATE registry_items SET archived=1 WHERE id=?", (item_id,))
+            else:
+                db.execute("DELETE FROM registry_items WHERE id=?", (item_id,))
+            return redirect(url_for("items_manage", _anchor="mine"))
         try:
             qty = max(1, min(int(request.form.get("qty_wanted", 1)), 99))
         except ValueError:
@@ -1791,10 +1801,11 @@ def items_update(item_id):
         committed = item_claim_counts(reg["id"]).get(item_id, 0)
         if qty < committed:
             flash(_t("qty_below_committed", lang).format(n=committed), "err")
-            return redirect(url_for("items_manage"))
+            return redirect(here)
         db.execute("UPDATE registry_items SET qty_wanted=?, priority=? WHERE id=?",
                    (qty, 1 if request.form.get("priority") else 0, item_id))
-    return redirect(url_for("items_manage"))
+    flash(_t("item_updated", lang), "ok")
+    return redirect(here)
 
 
 _OVERRIDABLE_FIELDS = ("url", "image", "store", "brand", "name")
@@ -1814,19 +1825,28 @@ def item_edit(item_id):
     if not item:
         abort(404)
     lang = current_lang()
+    committed = item_claim_counts(reg["id"]).get(item_id, 0)
+
+    def _again():
+        # re-show the form with what the couple typed, not the stored values
+        typed = dict(item)
+        typed.update({k: v for k, v in request.form.items() if k in typed and k != "id"})
+        typed["priority"] = 1 if request.form.get("priority") else 0
+        return render_template("item_edit.html", reg=reg, item=typed, committed=committed)
+
     if request.method == "POST":
         f = request.form
         name = (f.get("name") or "").strip()[:200]
         if not name:
             flash(_t("form_error", lang), "err")
-            return render_template("item_edit.html", reg=reg, item=item)
+            return _again()
         url = (f.get("url") or "").strip()[:500]
         if url and not url.startswith("http"):
             url = "https://" + url
         url_ok = (not url) or valid_http_url(url)
         if url and not url_ok:
             flash(_t("bad_url", lang), "err")
-            return render_template("item_edit.html", reg=reg, item=item)
+            return _again()
         try:
             price = max(0, int(f.get("price_nis") or 0))
         except ValueError:
@@ -1835,10 +1855,6 @@ def item_edit(item_id):
             qty = max(1, min(int(f.get("qty_wanted", 1)), 99))
         except ValueError:
             qty = 1
-        committed = item_claim_counts(reg["id"]).get(item_id, 0)
-        if qty < committed:
-            flash(_t("qty_below_committed", lang).format(n=committed), "err")
-            return render_template("item_edit.html", reg=reg, item=item)
         store = (f.get("store") or "").strip()[:120]
         brand = (f.get("brand") or "").strip()[:80]
         new_vals = dict(name=name, url=url, store=store, brand=brand,
@@ -1848,18 +1864,23 @@ def item_edit(item_id):
             old = item[field] if field in item.keys() else ""
             if new_vals.get(field, old) != old:
                 overrides.add(field)
-        db.execute(
-            "UPDATE registry_items SET name=?, name_he=?, brand=?, price_nis=?, url=?, store=?,"
-            " qty_wanted=?, priority=?, note=?, note_he=?, variant=?,"
-            " kind=?, overrides=? WHERE id=?",
-            (name, (f.get("name_he") or "").strip()[:200], brand, price, url, store, qty,
-             1 if f.get("priority") else 0, (f.get("note") or "").strip()[:1000],
-             (f.get("note_he") or "").strip()[:1000], (f.get("variant") or "").strip()[:120],
-             f.get("kind") if f.get("kind") in ("product", "idea", "cash_need") else item["kind"],
-             ",".join(sorted(overrides)), item_id))
+        with ob_db.write_txn(db):
+            committed = item_claim_counts(reg["id"]).get(item_id, 0)
+            if qty < committed:
+                flash(_t("qty_below_committed", lang).format(n=committed), "err")
+                return _again()
+            db.execute(
+                "UPDATE registry_items SET name=?, name_he=?, brand=?, price_nis=?, url=?, store=?,"
+                " qty_wanted=?, priority=?, note=?, note_he=?, variant=?,"
+                " kind=?, overrides=? WHERE id=?",
+                (name, (f.get("name_he") or "").strip()[:200], brand, price, url, store, qty,
+                 1 if f.get("priority") else 0, (f.get("note") or "").strip()[:1000],
+                 (f.get("note_he") or "").strip()[:1000], (f.get("variant") or "").strip()[:120],
+                 f.get("kind") if f.get("kind") in ("product", "idea", "cash_need") else item["kind"],
+                 ",".join(sorted(overrides)), item_id))
         flash(_t("item_updated", lang), "ok")
-        return redirect(url_for("items_manage"))
-    return render_template("item_edit.html", reg=reg, item=item)
+        return redirect(url_for("items_manage", _anchor=f"item-{item_id}"))
+    return render_template("item_edit.html", reg=reg, item=item, committed=committed)
 
 
 def _owned_claim(claim_id):

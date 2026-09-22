@@ -634,3 +634,32 @@ def test_share_links_use_base_url(client, app_module, monkeypatch):
     html = client.get("/dashboard").get_data(as_text=True)
     assert f'data-copy="https://www.ourbayis.example/r/{reg["slug"]}"' in html
     assert "https%3A//www.ourbayis.example/r/" in html or "https%3A%2F%2Fwww.ourbayis.example" in html
+
+
+def test_custom_item_bad_link_is_reported_and_double_submit_ignored(client, app_module):
+    signup(client)
+    create_registry(client)
+    tok = get_csrf(client.get("/registry/items").get_data(as_text=True))
+    data = dict(csrf_token=tok, name="Hand-made mezuzah case", price_nis="250", url="not a url at all")
+    r = client.post("/registry/items/add", data=data, follow_redirects=True)
+    assert "left off" in r.get_data(as_text=True)
+    client.post("/registry/items/add", data=data)                        # the double click
+    rows = _db().execute("SELECT url FROM registry_items WHERE name='Hand-made mezuzah case'").fetchall()
+    assert len(rows) == 1 and rows[0]["url"] == ""
+
+
+def test_item_edit_keeps_typed_values_on_error_and_guards_qty(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["towel-set"])
+    item = list(items.values())[0]
+    _claim(app_module, reg["slug"], item["id"])
+    html = client.get(f"/registry/items/{item['id']}/edit").get_data(as_text=True)
+    assert 'min="1"' in html and "can&#39;t go below 1" in html
+    tok = get_csrf(html)
+    r = client.post(f"/registry/items/{item['id']}/edit",
+                    data=dict(csrf_token=tok, name="My renamed towels", url="bad link", qty_wanted="1"))
+    page = r.get_data(as_text=True)
+    assert "valid link" in page and 'value="My renamed towels"' in page   # typed value survives
+    r = client.post(f"/registry/items/{item['id']}/update", data=dict(csrf_token=tok, qty_wanted="3"))
+    assert r.headers["Location"].endswith(f"/registry/items#item-{item['id']}")
+    items_html = client.get("/registry/items").get_data(as_text=True)
+    assert f'id="item-{item["id"]}"' in items_html and "A guest has already reserved" in items_html

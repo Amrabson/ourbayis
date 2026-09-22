@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-23 (items page review)
+- **Store-link validation was too loose**: `ob_security.validate_url` accepted `https://bad link`
+  (urlparse takes any netloc). Now rejects whitespace and requires a dotted hostname (IDN letters
+  allowed, no underscores). All seed/DB links still pass. Affects the items page, item edit and
+  admin catalog.
+- **Quantity/remove are atomic with guest claims**: `items_update` and `item_edit` re-check
+  committed quantity and archive-vs-delete inside `ob_db.write_txn` (the claim route's lock), so a
+  reservation landing mid-edit can't over-commit an item or make a delete hit the FK.
+- **Item edit keeps what was typed** when validation fails (was re-rendering from the DB); qty input
+  `min` = committed, with a hint; Cancel returns to the item's row.
+- **Custom items**: an invalid link is reported ("left off — use Edit") instead of silently dropped;
+  an identical double-submit (same name/link/price) is ignored.
+- **Removing a reserved/given item** shows a specific confirm (their gift stays on the dashboard);
+  Remove button is `formnovalidate`.
+- Save/remove/edit return to `/registry/items#item-<id>` (row outlined via `:target`); save now
+  flashes "Item updated".
+- `qty_below_committed` copy fixed (said "lower the quantity below that", the rule is the opposite).
+- Tests: 91.
+
 ## 2026-09-22 (dashboard review)
 - **Release can no longer undo a received gift**: `/claim/<id>/cancel` (and `/release`) only acts on
   reserved/reported claims — a stale form from a second tab used to flip `received` → `cancelled`.
