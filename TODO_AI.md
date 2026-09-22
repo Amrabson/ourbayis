@@ -55,9 +55,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Real store links.** 17 of 117 items have verified store links in `seed_catalog.json` (8 featured
-  on 2026-09-14 + 9 appliances on 2026-09-23). On the live DB run the `seed-sync --fields … --apply`
-  command from the 2026-09-23 CHANGELOG entry, then `refresh-registry-links --apply`. The other 100
+- [ ] **Real store links.** 30 of 117 items have verified store links in `seed_catalog.json` (8 featured
+  on 2026-09-14; 9 appliances + 13 kitchen/bedding on 2026-09-23). On the live DB run the `seed-sync --fields … --apply`
+  command from the 2026-09-23 CHANGELOG entry, then `refresh-registry-links --apply`. The other 87
   items still have no URL: use `/admin/catalog` (filter "missing store link") or extend
   `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.

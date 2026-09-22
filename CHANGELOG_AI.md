@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-23 (store links: 13 kitchen + bedding KSP products)
+- **Price rule, confirmed on a control item:** on a KSP page the price block follows the Eilat notice;
+  the FIRST ₪ amount there is the regular price. A second amount right after it is a member price,
+  "מחיר אילת" is VAT-free Eilat, "חסוך והגש הצעה החל מ-" is a make-an-offer floor — all ignored.
+  (The 9 appliances from earlier today were re-checked against this rule; all correct.)
+- Kitchen: starter pots Food Appeal Flexi 7-pc ₪399 · premium Ninja NeverStick Ceramic Pro 10-pc
+  ₪799 · knife block Fresco 5 knives ₪89 (note mentions VIKING ₪499) · chef's knife Victorinox Swibo
+  21 cm ₪199 · mixing bowls Soltam ×4 ₪59 · Lock & Lock ×12 ₪119 · glass baking dishes Ibili ×3 ₪199
+  (item renamed from "…(Pyrex set)" — it isn't Pyrex; old name kept in `legacy_names`).
+- Bedding: sheet sets ×2 Arige Gad Ekko Cotton 160×200 ₪109 each → ₪218 · sateen Homestyle Infinity
+  ₪287 (listing is 180×200 — note says pick size) · mattress protector Arige Gad double ₪45 ·
+  winter blanket Vardinon Brooks ₪159 · winter duvet Vardinon Benjamin ₪229 · guest set Homestyle
+  single ₪79.
+- **Deliberately left unlinked** (no honest single-product match): milchig/fleishig cutting boards
+  (boards are sold singly), ceramic frying-pan set (only hybrid/single pans), duvet+pillows combo,
+  8-piece luxury towels, bath mats + caddy.
+- Stopped when KSP began showing a bot-verification page; KSP carries no Judaica anyway.
+- 30 of 117 catalog items now have verified links. Live DB: this batch renames one item, so include
+  name fields — `python manage.py seed-sync --fields name,name_he,url,store,brand,model,price_nis,kind,price_status,price_checked_at,price_source,availability,notes,notes_he` (dry run, then `--apply`), then
+  `python manage.py refresh-registry-links --apply`.
+
 ## 2026-09-23 (store links: 9 more verified KSP products)
 - Researched in the browser on ksp.co.il product pages (regular price read from the purchase block —
   NOT the lower "make an offer from" / club price; add-to-cart present, no "last unit" flag):
