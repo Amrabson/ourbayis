@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-22 (dashboard review)
+- **Release can no longer undo a received gift**: `/claim/<id>/cancel` (and `/release`) only acts on
+  reserved/reported claims — a stale form from a second tab used to flip `received` → `cancelled`.
+- **Lapsed reservations**: the dashboard shows a reserved claim past `expires_at` as expired (same as
+  the public page already treats it) even before `manage.py expire-claims` runs; it's no longer in
+  the "waiting" queue or the claimed/cash counts. Cancelled/expired rows sort last and are muted
+  (`.is-closed`).
+- **Late gifts can be confirmed**: `claim_confirm` accepts `expired` too (event note "late"), matching
+  the guest side, which already allows a late report.
+- **"Mark thanked"** only shows (and only toggles on) reported/received gifts; un-marking always works.
+- **Actions keep your place**: confirm/cancel/thanked redirect to `/dashboard#claim-<id>`
+  (`scroll-margin-top` clears the sticky header; the row is outlined via `:target`).
+- **Share links use `ext_url()`**: dashboard copy/WhatsApp link, printable insert, public registry
+  share buttons, og:image and homepage JSON-LD used `_external=True`, which ignores `OB_BASE_URL`
+  — the links couples paste into invitations now always carry the real domain.
+- Tests: 89.
+
 ## 2026-09-22 (improvement pass 3 — guest "your gift" page)
 - **/g/<token> reordered for phones**: status → the guest's next action (cash: amount + payment
   buttons; store: item + "Buy at …" button) → "save this link" (while reserved) → details/notes.

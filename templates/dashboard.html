@@ -43,11 +43,11 @@
     <h2>{{ t('dash_share') }}</h2>
     <p class="hint">{{ t('dash_share_hint') }}</p>
     <div class="share-link-row">
-      <code class="share-url">{{ url_for('registry', slug=reg['slug'], _external=True) }}</code>
-      <button class="btn btn-ghost" data-copy="{{ url_for('registry', slug=reg['slug'], _external=True) }}"
+      <code class="share-url">{{ ext_url('registry', slug=reg['slug']) }}</code>
+      <button class="btn btn-ghost" data-copy="{{ ext_url('registry', slug=reg['slug']) }}"
               data-copied-label="{{ t('copied') }}" data-share-beacon="{{ url_for('dashboard_shared') }}">{{ t('copy_link') }}</button>
       <a class="btn btn-wa" target="_blank" rel="noopener" data-share-beacon="{{ url_for('dashboard_shared') }}"
-         href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ url_for('registry', slug=reg['slug'], _external=True)) | urlencode }}">
+         href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ ext_url('registry', slug=reg['slug'])) | urlencode }}">
         <svg class="ic"><use href="#i-wa"/></svg> {{ t('share_whatsapp') }}</a>
     </div>
     <div class="qr-box">
@@ -114,7 +114,7 @@
   <button class="btn btn-ghost btn-sm no-print" data-print>{{ t('print_list') }}</button>
   <div class="gift-list">
     {% for gft in gifts %}
-    <div class="gift-row {% if gft['thanked'] %}is-thanked{% endif %}" id="claim-{{ gft['id'] }}">
+    <div class="gift-row {% if gft['thanked'] %}is-thanked{% endif %} {% if gft['status'] in ('cancelled', 'expired') %}is-closed{% endif %}" id="claim-{{ gft['id'] }}">
       <div>
         <strong>{{ gft['guest_name'] }}</strong>
         — {% if gft['kind'] == 'cash' %}{{ t('gift_cash') }}{% if gft['item_name'] %}: {{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) }}{% endif %}{% else %}{{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) or '—' }}{% if gft['qty'] > 1 %} ×{{ gft['qty'] }}{% endif %}{% endif %}
@@ -132,7 +132,7 @@
         {% endif %}
       </div>
       <div class="mine-actions">
-        {% if gft['status'] in ('reported', 'reserved') %}
+        {% if gft['status'] in ('reported', 'reserved', 'expired') %}
         <form method="post" action="{{ url_for('claim_confirm', claim_id=gft['id']) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="btn btn-gold btn-sm" type="submit">{{ t('dash_confirm_receipt') }}</button>
@@ -144,12 +144,14 @@
           <button class="btn btn-danger btn-sm" type="submit" data-confirm="{{ t('dash_release_confirm') }}">{{ t('dash_release') }}</button>
         </form>
         {% endif %}
+        {% if gft['thanked'] or gft['status'] in ('reported', 'received') %}
         <form method="post" action="{{ url_for('claim_thanked', claim_id=gft['id']) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="btn {% if gft['thanked'] %}btn-ghost{% else %}btn-gold{% endif %} btn-sm" type="submit">
             {% if gft['thanked'] %}<svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('dash_thanked') }}{% else %}{{ t('dash_mark_thanked') }}{% endif %}
           </button>
         </form>
+        {% endif %}
       </div>
     </div>
     {% endfor %}

@@ -1403,23 +1403,30 @@ def dashboard():
     gifts = stats = totals = checklist = queues = None
     if reg:
         db = get_db()
-        gifts = db.execute(
-            "SELECT c.*, ri.name AS item_name, ri.name_he AS item_name_he,"
-            " ri.url AS item_url, ri.store AS item_store, ri.availability AS item_availability"
-            " FROM claims c"
-            " LEFT JOIN registry_items ri ON ri.id = c.item_id"
-            " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)).fetchall()
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        gifts = []
+        for row in db.execute(
+                "SELECT c.*, ri.name AS item_name, ri.name_he AS item_name_he,"
+                " ri.url AS item_url, ri.store AS item_store, ri.availability AS item_availability"
+                " FROM claims c"
+                " LEFT JOIN registry_items ri ON ri.id = c.item_id"
+                " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)):
+            gft = dict(row)
+            # a reservation past its hold is already free on the public page; show it the
+            # same way here even before `manage.py expire-claims` flips the stored status
+            if gft["status"] == "reserved" and gft["expires_at"] and gft["expires_at"] <= now:
+                gft["status"] = "expired"
+            gifts.append(gft)
+        # open gifts first, cancelled/expired ones last (still newest-first within each group)
+        gifts.sort(key=lambda gft: gft["status"] in ("cancelled", "expired"))
         n_items = db.execute("SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0",
                              (reg["id"],)).fetchone()[0]
         n_usable = db.execute(
             "SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0"
             " AND (url != '' OR ?)", (reg["id"], 1 if reg_pay_links(reg) else 0)).fetchone()[0]
-        n_claimed = db.execute(
-            "SELECT COUNT(DISTINCT item_id) FROM claims WHERE registry_id=? AND item_id IS NOT NULL"
-            " AND status IN ('reserved','reported','received')", (reg["id"],)).fetchone()[0]
-        n_cash = db.execute(
-            "SELECT COUNT(*) FROM claims WHERE registry_id=? AND kind='cash'"
-            " AND status IN ('reserved','reported','received')", (reg["id"],)).fetchone()[0]
+        live = [gft for gft in gifts if gft["status"] in ("reserved", "reported", "received")]
+        n_claimed = len({gft["item_id"] for gft in live if gft["item_id"] is not None})
+        n_cash = sum(1 for gft in live if gft["kind"] == "cash")
         stats = dict(items=n_items, claimed=n_claimed, cash=n_cash,
                      views=reg["views"] if "views" in reg.keys() else 0)
         totals = {}
@@ -1869,12 +1876,14 @@ def claim_confirm(claim_id):
         c = _owned_claim(claim_id)
         if not c:
             abort(404)
-        if c["status"] in ("reported", "reserved"):
+        # 'expired' too: the gift can still arrive after the hold lapsed (guests can report late)
+        if c["status"] in ("reported", "reserved", "expired"):
             db.execute("UPDATE claims SET status='received', confirmed_at=? WHERE id=?",
                       (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim_id))
-            _log_claim_event(db, claim_id, "received", "owner")
+            _log_claim_event(db, claim_id, "received", "owner",
+                             "late" if c["status"] == "expired" else "")
             track("receipt_confirmed")
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
 
 
 @app.route("/claim/<int:claim_id>/release", methods=["POST"])
@@ -1888,10 +1897,12 @@ def claim_cancel(claim_id):
         c = _owned_claim(claim_id)
         if not c:
             abort(404)
-        db.execute("UPDATE claims SET status='cancelled', cancelled_by='owner', cancelled_at=? WHERE id=?",
-                  (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim_id))
-        _log_claim_event(db, claim_id, "cancelled", "owner")
-    return redirect(url_for("dashboard"))
+        # only open claims — a stale form (second tab) must never undo a received gift
+        if c["status"] in ("reserved", "reported"):
+            db.execute("UPDATE claims SET status='cancelled', cancelled_by='owner', cancelled_at=? WHERE id=?",
+                      (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim_id))
+            _log_claim_event(db, claim_id, "cancelled", "owner")
+    return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
 
 
 @app.route("/claim/<int:claim_id>/thanked", methods=["POST"])
@@ -1901,8 +1912,9 @@ def claim_thanked(claim_id):
     c = _owned_claim(claim_id)
     if not c:
         abort(404)
-    db.execute("UPDATE claims SET thanked=? WHERE id=?", (0 if c["thanked"] else 1, claim_id))
-    return redirect(url_for("dashboard"))
+    if c["thanked"] or c["status"] in ("reported", "received"):
+        db.execute("UPDATE claims SET thanked=? WHERE id=?", (0 if c["thanked"] else 1, claim_id))
+    return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
 
 
 @app.route("/dashboard/claims.csv")

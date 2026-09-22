@@ -31,7 +31,7 @@
       <div class="names">{{ pick(reg, 'couple_names') }}</div>
       <div class="tagline">{{ t('print_insert_tagline') }}</div>
       <img src="{{ url_for('dashboard_qr') }}" alt="QR">
-      <div class="url">{{ url_for('registry', slug=reg['slug'], _external=True) }}</div>
+      <div class="url">{{ ext_url('registry', slug=reg['slug']) }}</div>
     </div>
     {% endfor %}
   </div>

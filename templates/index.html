@@ -7,8 +7,8 @@
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "{{ brand }}",
-  "url": "{{ url_for('index', _external=True) }}",
-  "logo": "{{ url_for('static', filename='og.png', _external=True) }}"
+  "url": "{{ ext_url('index') }}",
+  "logo": "{{ ext_url('static', filename='og.png') }}"
 }
 </script>
 <script type="application/ld+json">
@@ -16,7 +16,7 @@
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "{{ brand }}",
-  "url": "{{ url_for('index', _external=True) }}"
+  "url": "{{ ext_url('index') }}"
 }
 </script>
 {% endblock %}

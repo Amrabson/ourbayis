@@ -587,3 +587,50 @@ def test_guest_can_email_themselves_the_manage_link(client, app_module, monkeypa
     assert mail and f"/g/{token}" in mail["body"]
     assert guest.post("/g/not-a-real-token/email",
                       data=dict(csrf_token=tok, email="a@b.co")).status_code == 404
+
+
+def test_dashboard_treats_lapsed_reservation_as_expired(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer", "towel-set"])
+    ids = [i["id"] for i in items.values()]
+    _claim(app_module, reg["slug"], ids[0], name="Lapsed Guest")
+    _claim(app_module, reg["slug"], ids[1], name="Active Guest")
+    db = _db()
+    db.execute("UPDATE claims SET expires_at='2000-01-01 00:00:00' WHERE guest_name='Lapsed Guest'")
+    db.commit()
+    html = client.get("/dashboard").get_data(as_text=True)
+    assert html.index("Active Guest") < html.rindex("Lapsed Guest")      # closed rows sort last
+    assert re.search(r'class="gift-row\s+is-closed"[^>]*>\s*<div>\s*<strong>Lapsed Guest', html)
+    assert re.search(r'<strong>1</strong><span>[^<]*</span></div>\s*<div class="stat-card"><strong>0', html)
+    # a late arrival can still be confirmed as received
+    cid = db.execute("SELECT id FROM claims WHERE guest_name='Lapsed Guest'").fetchone()[0]
+    r = client.post(f"/claim/{cid}/confirm", data=dict(csrf_token=get_csrf(html)))
+    assert r.headers["Location"].endswith(f"/dashboard#claim-{cid}")
+    assert _db().execute("SELECT status FROM claims WHERE id=?", (cid,)).fetchone()[0] == "received"
+
+
+def test_stale_release_never_undoes_a_received_gift(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    _claim(app_module, reg["slug"], list(items.values())[0]["id"])
+    cid = _db().execute("SELECT id FROM claims").fetchone()[0]
+    tok = get_csrf(client.get("/dashboard").get_data(as_text=True))
+    client.post(f"/claim/{cid}/confirm", data=dict(csrf_token=tok))
+    client.post(f"/claim/{cid}/cancel", data=dict(csrf_token=tok))      # e.g. from a second tab
+    assert _db().execute("SELECT status FROM claims WHERE id=?", (cid,)).fetchone()[0] == "received"
+
+
+def test_thanked_only_for_gifts_actually_given(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    _claim(app_module, reg["slug"], list(items.values())[0]["id"])
+    cid = _db().execute("SELECT id FROM claims").fetchone()[0]
+    html = client.get("/dashboard").get_data(as_text=True)
+    assert f"/claim/{cid}/thanked" not in html                           # still only reserved
+    client.post(f"/claim/{cid}/thanked", data=dict(csrf_token=get_csrf(html)))
+    assert _db().execute("SELECT thanked FROM claims WHERE id=?", (cid,)).fetchone()[0] == 0
+
+
+def test_share_links_use_base_url(client, app_module, monkeypatch):
+    reg, _ = _couple_with_catalog_items(client, app_module, [])
+    monkeypatch.setattr(app_module, "BASE_URL", "https://www.ourbayis.example")
+    html = client.get("/dashboard").get_data(as_text=True)
+    assert f'data-copy="https://www.ourbayis.example/r/{reg["slug"]}"' in html
+    assert "https%3A//www.ourbayis.example/r/" in html or "https%3A%2F%2Fwww.ourbayis.example" in html

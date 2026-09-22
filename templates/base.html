@@ -18,7 +18,7 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="{{ 'he_IL' if rtl else 'en_US' }}">
 <meta property="og:site_name" content="{{ brand }}">
-<meta property="og:image" content="{{ url_for('static', filename='og.png', _external=True) }}">
+<meta property="og:image" content="{{ ext_url('static', filename='og.png') }}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
 <link rel="icon" href="{{ url_for('favicon') }}" sizes="32x32">
