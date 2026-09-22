@@ -1548,6 +1548,13 @@ def _save_registry(reg):
     if not title or not couple:
         flash(_t("form_error", lang), "err")
         return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
+    event_date = (f.get("event_date") or "").strip()
+    if event_date:
+        try:
+            event_date = date.fromisoformat(event_date).isoformat()
+        except ValueError:
+            flash(_t("r_bad_date", lang), "err")
+            return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
     if pay_errors:
         for msg in pay_errors:
             flash(msg, "err")
@@ -1560,6 +1567,8 @@ def _save_registry(reg):
         changed_pay = any(pay[c] != (reg[c] if c in reg.keys() else "") for c in
                           ("paypal_url", "stripe_url", "bit_url"))
         if changed_pay:
+            if rate_limited("pay_reauth", limit=8, per=900):
+                abort(429)
             cur_pw = f.get("current_password") or ""
             user = db.execute("SELECT * FROM users WHERE id=?", (session["uid"],)).fetchone()
             if not cur_pw or not check_password_hash(user["pw_hash"], cur_pw):
@@ -1567,7 +1576,7 @@ def _save_registry(reg):
                 return render_template("registry_form.html", reg=reg, form=f, prefs=prefs, show_reauth=True)
     fields = (title, (f.get("title_he") or "").strip()[:160],
               couple, (f.get("couple_names_he") or "").strip()[:160],
-              event_type, (f.get("event_date") or "").strip()[:40],
+              event_type, event_date,
               (f.get("city") or "").strip()[:120],
               (f.get("message") or "").strip()[:2000],
               (f.get("message_he") or "").strip()[:2000],
@@ -1589,12 +1598,26 @@ def _save_registry(reg):
                 db.execute("UPDATE users SET session_ver=session_ver+1 WHERE id=?", (session["uid"],))
                 session["sv"] = db.execute("SELECT session_ver FROM users WHERE id=?",
                                            (session["uid"],)).fetchone()[0]
+                pay_changed = True
+            else:
+                pay_changed = False
+        if pay_changed:
+            # these links decide where guests' money goes: always tell the account owner
+            owner = db.execute("SELECT email FROM users WHERE id=?", (session["uid"],)).fetchone()
+            if owner and owner["email"]:
+                links = ("\n".join(u for u in (pay["paypal_url"], pay["stripe_url"], pay["bit_url"]) if u)
+                         or _t("mail_paylinks_none", lang))
+                send_mail(owner["email"], _t("mail_paylinks_subj", lang),
+                          _t("mail_paylinks_body", lang).format(links=links,
+                                                                 contact=ext_url("contact")))
         flash(_t("r_saved", lang), "ok")
         return redirect(url_for("dashboard"))
     slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
     while db.execute("SELECT 1 FROM registries WHERE slug=?", (slug,)).fetchone():
         slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
     with ob_db.write_txn(db):
+        if db.execute("SELECT 1 FROM registries WHERE user_id=?", (session["uid"],)).fetchone():
+            return redirect(url_for("registry_edit"))  # a double-submitted create form
         cur = db.execute(
             "INSERT INTO registries (user_id, slug, title, title_he, couple_names,"
             " couple_names_he, event_type, event_date, city, message, message_he,"

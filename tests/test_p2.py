@@ -663,3 +663,45 @@ def test_item_edit_keeps_typed_values_on_error_and_guards_qty(client, app_module
     assert r.headers["Location"].endswith(f"/registry/items#item-{item['id']}")
     items_html = client.get("/registry/items").get_data(as_text=True)
     assert f'id="item-{item["id"]}"' in items_html and "A guest has already reserved" in items_html
+
+
+def test_registry_form_keeps_visibility_and_rejects_bad_date(client, app_module):
+    signup(client)
+    create_registry(client)
+    html = client.get("/registry/edit").get_data(as_text=True)
+    r = client.post("/registry/edit", data=dict(
+        csrf_token=get_csrf(html), title="Our Home", couple_names="S & D", event_type="wedding",
+        event_date="next spring", visibility="public"))
+    page = r.get_data(as_text=True)
+    assert "pick the date from the calendar" in page
+    assert re.search(r'value="public"\s+checked', page)       # the couple's choice survives the error
+    assert _db().execute("SELECT event_date FROM registries").fetchone()[0] in ("", None)
+
+
+def test_payment_link_change_notifies_owner_and_reauth_is_rate_limited(client, app_module):
+    signup(client, email="owner@example.com")
+    create_registry(client)
+    tok = get_csrf(client.get("/registry/edit").get_data(as_text=True))
+    base = dict(csrf_token=tok, title="Our Home", couple_names="S & D", event_type="wedding",
+                visibility="unlisted", paypal_url="https://paypal.me/newlink")
+    client.post("/registry/edit", data=dict(base, current_password="password1"))
+    mail = _db().execute("SELECT body FROM mail_outbox WHERE to_addr='owner@example.com'"
+                         " AND subject LIKE '%payment links%'").fetchone()
+    assert mail and "paypal.me/newlink" in mail["body"]
+    tok = get_csrf(client.get("/registry/edit").get_data(as_text=True))  # session_ver was bumped
+    codes = [client.post("/registry/edit", data=dict(base, csrf_token=tok, paypal_url="https://paypal.me/other",
+                                                     current_password="wrong")).status_code
+             for _ in range(10)]
+    assert codes[0] == 200 and 429 in codes
+
+
+def test_double_submitted_create_makes_one_registry(client, app_module):
+    signup(client)
+    tok = get_csrf(client.get("/registry/new").get_data(as_text=True))
+    data = dict(csrf_token=tok, title="Our Home", couple_names="S & D", event_type="wedding",
+                visibility="unlisted")
+    client.post("/registry/new", data=data)
+    # the second POST of the same form (e.g. a double click) must not create another
+    r = client.post("/registry/new", data=data)
+    assert r.status_code == 302
+    assert _db().execute("SELECT COUNT(*) FROM registries").fetchone()[0] == 1

@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-23 (registry settings review)
+- **Payment-link changes email the account owner** (`mail_paylinks_*`, EN/HE) with the new links and
+  what to do if it wasn't them — these links decide where guest money goes.
+- **Current-password check for payment links is rate-limited** (`pay_reauth`, 8 per 15 min per IP)
+  — it was an unlimited password oracle for anyone holding a session.
+- **Visibility choice survives a validation error** (radios read the submitted value; the form
+  already did this for every other field).
+- **Event date validated server-side** (ISO date or empty, `r_bad_date`); garbage used to be stored
+  and silently break the countdown.
+- **One registry per user is checked under the write lock** in `_save_registry`, so a double-
+  submitted create can't make two.
+- Tests: 94.
+
 ## 2026-09-23 (items page review)
 - **Store-link validation was too loose**: `ob_security.validate_url` accepted `https://bad link`
   (urlparse takes any netloc). Now rejects whitespace and requires a dotted hostname (IDN letters

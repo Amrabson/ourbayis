@@ -97,11 +97,11 @@
       {% endif %}
 
       <h2 class="sub-title">{{ t('rform_step_visibility') }}</h2>
-      {% set cur_vis = (reg['visibility'] if reg else 'unlisted') %}
+      {% set cur_vis = (form.get('visibility') if form and form.get('visibility') else (reg['visibility'] if reg else 'unlisted')) %}
       <div class="visibility-radios">
         <label class="check-label"><input type="radio" name="visibility" value="draft" {% if cur_vis == 'draft' %}checked{% endif %}>
           <strong>{{ t('visibility_draft') }}</strong> — {{ t('visibility_draft_hint') }}</label>
-        <label class="check-label"><input type="radio" name="visibility" value="unlisted" {% if cur_vis == 'unlisted' or not reg %}checked{% endif %}>
+        <label class="check-label"><input type="radio" name="visibility" value="unlisted" {% if cur_vis == 'unlisted' %}checked{% endif %}>
           <strong>{{ t('visibility_unlisted') }}</strong> — {{ t('visibility_unlisted_hint') }}</label>
         <label class="check-label"><input type="radio" name="visibility" value="public" {% if cur_vis == 'public' %}checked{% endif %}>
           <strong>{{ t('visibility_public') }}</strong> — {{ t('visibility_public_hint') }}</label>
