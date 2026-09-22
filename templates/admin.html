@@ -19,6 +19,7 @@
 
   <div class="stat-row">
     <div class="stat-card"><strong>{{ stats.leads_new }}</strong><span>new shana leads</span></div>
+    <div class="stat-card {% if stats.followups_due %}stat-warn{% endif %}"><strong>{{ stats.followups_due }}</strong><span>follow-ups due</span></div>
     <div class="stat-card"><strong>{{ stats.registries }}</strong><span>registries</span></div>
     <div class="stat-card"><strong>{{ stats.users }}</strong><span>users</span></div>
     <div class="stat-card"><strong>{{ stats.claims }}</strong><span>gifts reserved</span></div>
@@ -29,20 +30,21 @@
     <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_leads_csv') }}" style="margin-inline-start:12px">Export CSV</a></h2>
   {% if not leads %}<p class="empty-note">No leads yet.</p>{% endif %}
   {% for l in leads %}
-  <div class="gift-row {% if l['status'] != 'new' %}is-thanked{% endif %}">
+  {% set _due = l['next_action_date'] and l['next_action_date'][:10] <= today and l['status'] not in lead_closed %}
+  <div class="gift-row {% if l['status'] in lead_closed %}is-thanked{% endif %} {% if _due %}is-due{% endif %}">
     <div>
       <strong><a href="{{ url_for('admin_lead', lead_id=l['id']) }}">{{ l['name'] }}</a></strong> · {{ l['bundle_slug'] }} · <span class="badge badge-{{ 'gold' if l['status'] == 'new' else 'plain' }}">{{ l['status'] }}</span>
       <p class="gift-msg">
-        {% if l['whatsapp'] %}<a href="https://wa.me/{{ l['whatsapp'] | replace('+','') | replace(' ','') | replace('-','') }}" target="_blank" rel="noopener">WhatsApp {{ l['whatsapp'] }}</a> · {% endif %}
+        {% if l['whatsapp'] %}<a href="https://wa.me/{{ l['whatsapp'] | wa_number }}" target="_blank" rel="noopener">WhatsApp {{ l['whatsapp'] }}</a> · {% endif %}
         {{ l['email'] }} · arrives {{ l['arrival'] or '?' }} · {{ l['city'] }}
-        {% if l['next_action_date'] %} · next: {{ l['next_action'] }} ({{ l['next_action_date'] }}){% endif %}</p>
+        {% if l['next_action_date'] %} · {% if _due %}<strong class="warn-note">due: {{ l['next_action'] or 'follow up' }} ({{ l['next_action_date'] }})</strong>{% else %}next: {{ l['next_action'] }} ({{ l['next_action_date'] }}){% endif %}{% endif %}</p>
       {% if l['notes'] %}<p class="gift-msg">“{{ l['notes'] }}”</p>{% endif %}
       <p class="gift-msg">{{ l['created_at'] }}</p>
     </div>
     <form method="post" action="{{ url_for('admin_lead_status', lead_id=l['id']) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <select name="status" data-autosubmit>
-        {% for s in ['new', 'contacted', 'quoted', 'accepted', 'arranging', 'completed', 'cancelled'] %}
+        {% for s in lead_statuses %}
         <option value="{{ s }}" {% if l['status'] == s %}selected{% endif %}>{{ s }}</option>
         {% endfor %}
       </select>
@@ -55,7 +57,7 @@
   {% for m in msgs %}
   <div class="gift-row {% if m['resolved'] %}is-thanked{% endif %}">
     <div>
-      <strong>{{ m['name'] or 'Anonymous' }}</strong> · {{ m['topic'] }} · {{ m['email'] }}
+      <strong>{{ m['name'] or 'Anonymous' }}</strong> · {{ m['topic'] }} · {% if m['email'] %}<a href="mailto:{{ m['email'] }}">{{ m['email'] }}</a>{% endif %}
       <p class="gift-msg">{{ m['body'] }}</p>
       <p class="gift-msg">{{ m['created_at'] }}</p>
     </div>

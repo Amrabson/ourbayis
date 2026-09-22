@@ -243,6 +243,20 @@ def valid_http_url(u):
     return ob_security.validate_url(u)
 
 
+def wa_number(raw):
+    """Digits for a wa.me link. wa.me needs the international form: a number
+    typed locally with a leading 0 (e.g. 050-123-4567) is taken as Israeli."""
+    digits = re.sub(r"\D", "", raw or "")
+    if (raw or "").strip().startswith("00"):
+        digits = digits[2:]
+    elif digits.startswith("0"):
+        digits = "972" + digits[1:]
+    return digits
+
+
+app.jinja_env.filters["wa_number"] = wa_number
+
+
 def ext_url(endpoint, **kw):
     """External URL for emails/sitemap/robots/share links — uses OB_BASE_URL
     when set (so it's correct behind a proxy without OB_TRUST_PROXY), else
@@ -271,9 +285,18 @@ def login_required(f):
     return wrapper
 
 
+ADMIN_SESSION_HOURS = 12  # admin can download the whole DB — don't keep that open for days
+
+
 def current_admin():
     name = session.get("admin")
     if not name:
+        return None
+    try:
+        started = datetime.fromisoformat(session.get("admin_at") or "")
+    except ValueError:
+        return None  # sessions from before admin_at existed have to log in again
+    if datetime.utcnow() - started > timedelta(hours=ADMIN_SESSION_HOURS):
         return None
     row = get_db().execute("SELECT * FROM admins WHERE username=?", (name,)).fetchone()
     if not row or row["session_ver"] != session.get("admin_sv"):
@@ -2101,6 +2124,9 @@ PACKAGE_TIERS = {
 
 
 # ---------------------------------------------------------------- admin
+_DUMMY_PW_HASH = generate_password_hash("not-a-real-admin-password")
+
+
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     db = get_db()
@@ -2110,10 +2136,14 @@ def admin_login():
             abort(429)
         row = db.execute("SELECT * FROM admins WHERE username=?",
                          ((request.form.get("username") or "").strip(),)).fetchone()
-        if row and check_password_hash(row["pw_hash"], request.form.get("password") or ""):
+        # hash-check even for an unknown username so response time doesn't reveal which exist
+        ok = check_password_hash(row["pw_hash"] if row else _DUMMY_PW_HASH,
+                                 request.form.get("password") or "")
+        if row and ok:
             session.clear()
             session["admin"] = row["username"]
             session["admin_sv"] = row["session_ver"]
+            session["admin_at"] = datetime.utcnow().isoformat(timespec="seconds")
             return redirect(url_for("admin_home"))
         flash("Wrong credentials", "err")
     return render_template("admin_login.html", no_admins=(n_admins == 0))
@@ -2129,8 +2159,12 @@ def admin_logout():
 @admin_required
 def admin_home():
     db = get_db()
-    leads = db.execute("SELECT * FROM shana_requests ORDER BY status='new' DESC, created_at DESC"
-                       " LIMIT 50").fetchall()
+    today = date.today().isoformat()
+    # due follow-ups first, then new leads, then everything else still open, closed ones last
+    leads = sorted(
+        db.execute("SELECT * FROM shana_requests ORDER BY created_at DESC LIMIT 200").fetchall(),
+        key=lambda l: (not _lead_due(l, today), l["status"] != "new",
+                       l["status"] in LEAD_CLOSED))[:50]
     msgs = db.execute("SELECT * FROM messages ORDER BY resolved, created_at DESC LIMIT 50").fetchall()
     stats = dict(
         registries=db.execute("SELECT COUNT(*) FROM registries").fetchone()[0],
@@ -2141,6 +2175,8 @@ def admin_home():
         missing_store_link=db.execute(
             "SELECT COUNT(*) FROM catalog_items WHERE active=1 AND url=''").fetchone()[0],
     )
+    today = date.today().isoformat()
+    stats["followups_due"] = sum(1 for l in leads if _lead_due(l, today))
     recent = db.execute("SELECT * FROM registries ORDER BY created_at DESC LIMIT 15").fetchall()
     mail_stats = ob_mail.outbox_counts(db)
     since = (date.today() - timedelta(days=30)).isoformat()
@@ -2148,7 +2184,14 @@ def admin_home():
         "SELECT name, SUM(n) AS n FROM funnel_events WHERE day>=? GROUP BY name ORDER BY n DESC",
         (since,)).fetchall()
     return render_template("admin.html", leads=leads, msgs=msgs, stats=stats, recent=recent,
-                           mail_stats=mail_stats, funnel=funnel)
+                           mail_stats=mail_stats, funnel=funnel, today=today,
+                           lead_closed=LEAD_CLOSED, lead_statuses=LEAD_STATUSES)
+
+
+def _lead_due(lead, today):
+    """Open lead whose next-action date has arrived (ISO dates compare as strings)."""
+    return bool(lead["next_action_date"]) and lead["next_action_date"][:10] <= today \
+        and lead["status"] not in LEAD_CLOSED
 
 
 @app.route("/admin/leads.csv")
@@ -2170,6 +2213,7 @@ def admin_leads_csv():
 
 
 LEAD_STATUSES = ("new", "contacted", "quoted", "accepted", "arranging", "completed", "cancelled")
+LEAD_CLOSED = ("completed", "cancelled")
 
 
 @app.route("/admin/lead/<int:lead_id>/status", methods=["POST"])
@@ -2178,7 +2222,7 @@ def admin_lead_status(lead_id):
     status = request.form.get("status", "new")
     if status in LEAD_STATUSES:
         get_db().execute("UPDATE shana_requests SET status=? WHERE id=?", (status, lead_id))
-    return redirect(request.referrer or url_for("admin_home"))
+    return redirect(ob_security.same_origin_referrer() or url_for("admin_home"))
 
 
 @app.route("/admin/lead/<int:lead_id>")
@@ -2469,6 +2513,9 @@ def _catalog_csv_diff(db, reader, write):
                     new_val = int(new_val or 0)
                 except ValueError:
                     continue
+                if field == "price_nis" and new_val < 0:
+                    errors.append(f"Row {i} ({existing['name']}): negative price {new_val} skipped")
+                    continue
             elif field in ("active", "featured"):
                 new_val = 1 if str(new_val).strip() in ("1", "true", "True") else 0
             old_val = existing[field] if field in existing.keys() else None
@@ -2533,11 +2580,20 @@ def admin_ads():
     db = get_db()
     if request.method == "POST":
         title = (request.form.get("title") or "").strip()[:200]
+        urls = {}
+        for field in ("link_url", "image"):
+            u = (request.form.get(field) or "").strip()[:500]
+            if u and not u.startswith(("http://", "https://")):
+                u = "https://" + u  # "example.com" would otherwise be a link into our own site
+            if u and not valid_http_url(u):
+                flash(f"That {'link' if field == 'link_url' else 'image'} URL doesn't look valid"
+                      " — the ad was not saved.", "err")
+                return redirect(url_for("admin_ads"))
+            urls[field] = u
         if title:
             db.execute("INSERT INTO ads (title, body, image, link_url) VALUES (?,?,?,?)",
                        (title, (request.form.get("body") or "").strip()[:500],
-                        (request.form.get("image") or "").strip()[:500],
-                        (request.form.get("link_url") or "").strip()[:500]))
+                        urls["image"], urls["link_url"]))
         return redirect(url_for("admin_ads"))
     rows = db.execute("SELECT * FROM ads ORDER BY created_at DESC").fetchall()
     return render_template("admin_ads.html", rows=rows)
@@ -2565,8 +2621,8 @@ def admin_password():
     pw = request.form.get("password") or ""
     if not check_password_hash(admin_row["pw_hash"], cur_pw):
         flash("Current password is wrong", "err")
-    elif len(pw) < 10:
-        flash("Password must be at least 10 characters", "err")
+    elif len(pw) < 12:
+        flash("Password must be at least 12 characters", "err")
     else:
         db = get_db()
         with ob_db.write_txn(db):

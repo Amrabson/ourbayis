@@ -4,6 +4,7 @@ dashboard, concierge, admin, privacy/SEO, /go/. See SPEC_V3.md "Catalog",
 "Onboarding & dashboard", "Concierge", "Privacy / SEO"."""
 import json
 import os
+import re
 
 import pytest
 
@@ -378,3 +379,43 @@ def test_migrated_legacy_db_gets_starter_groups_and_verified_links_stay_opt_in(t
     assert db.execute("SELECT COUNT(*) FROM catalog_items WHERE url != ''").fetchone()[0] == 0
     # the renamed seed item adopted the old row rather than inserting a second one
     assert db.execute("SELECT COUNT(*) FROM catalog_items WHERE name LIKE 'Folding table%'").fetchone()[0] == 1
+
+
+# ------------------------------------------------------------------ admin review 2026-09-23
+def test_admin_session_expires(client, app_module):
+    admin_login(client)
+    assert client.get("/admin").status_code == 200
+    with client.session_transaction() as s:
+        s["admin_at"] = "2000-01-01T00:00:00"
+    r = client.get("/admin")
+    assert r.status_code == 302 and "/admin/login" in r.headers["Location"]
+
+
+def test_admin_ad_urls_are_validated(client, app_module):
+    admin_login(client)
+    tok = get_csrf(client.get("/admin/ads").get_data(as_text=True))
+    r = client.post("/admin/ads", data=dict(csrf_token=tok, title="Movers", link_url="javascript:alert(1)"),
+                    follow_redirects=True)
+    assert "not saved" in r.get_data(as_text=True)
+    client.post("/admin/ads", data=dict(csrf_token=tok, title="Movers", link_url="movers.example.co.il/deal"))
+    with app_module.app.app_context():
+        rows = app_module.get_db().execute("SELECT title, link_url FROM ads").fetchall()
+    assert [tuple(r) for r in rows] == [("Movers", "https://movers.example.co.il/deal")]
+
+
+def test_admin_leads_flag_due_followups_and_fix_whatsapp_links(client, app_module):
+    admin_login(client)
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        db.execute("INSERT INTO shana_requests (name, email, whatsapp, bundle_slug, status, next_action,"
+                   " next_action_date) VALUES ('Due Couple', 'd@example.com', '050-123-4567',"
+                   " 'full-nest', 'quoted', 'Send quote', '2000-01-01')")
+        db.execute("INSERT INTO shana_requests (name, email, bundle_slug, status) VALUES"
+                   " ('Done Couple', 'x@example.com', 'full-nest', 'completed')")
+    html = client.get("/admin").get_data(as_text=True)
+    assert "follow-ups due" in html and "due: Send quote" in html
+    assert 'href="https://wa.me/972501234567"' in html
+    assert html.index("Due Couple") < html.index("Done Couple")
+    # only closed leads are dimmed
+    assert re.search(r'class="gift-row\s+is-due"', html)
+    assert re.search(r'class="gift-row is-thanked\s*"', html)

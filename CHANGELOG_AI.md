@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-23 (admin review)
+- **Admin sessions expire after 12 h** (`ADMIN_SESSION_HOURS`, `session["admin_at"]` stamped at
+  login; older sessions must log in again) — the admin can download the whole DB.
+- **Admin login hash-checks even unknown usernames** (`_DUMMY_PW_HASH`) so timing doesn't reveal
+  which usernames exist. Admin password change now needs 12+ chars (same as `create-admin`).
+- **Ads**: link and image URLs get `https://` if missing and must pass `validate_url`, else the ad
+  isn't saved — they render on every public page.
+- **Lead status redirect** uses `same_origin_referrer()` instead of the raw Referer.
+- **Leads list**: follow-ups whose `next_action_date` has arrived are sorted first, marked
+  ("due: …", gold edge) and counted in a "follow-ups due" stat card; only completed/cancelled
+  leads are dimmed (quoted/accepted/arranging used to look done).
+- **WhatsApp links** use the `wa_number` filter: digits only, `00` prefix dropped, a local
+  leading-0 number becomes 972… (wa.me needs international form).
+- Messages: email is a mailto link. Catalog CSV import rejects negative prices (reported per row).
+- Tests: 97.
+
 ## 2026-09-23 (registry settings review)
 - **Payment-link changes email the account owner** (`mail_paylinks_*`, EN/HE) with the new links and
   what to do if it wasn't them — these links decide where guest money goes.

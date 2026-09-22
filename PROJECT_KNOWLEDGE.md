@@ -79,7 +79,7 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   stored), 2h expiry, invalidates sibling tokens, bumps `session_ver`. Without SMTP configured,
   `/forgot` explains that and points to `/contact`.
 - Anti-spam: hidden `website` honeypot field on all public forms; `is_spam()` silently redirects bots. Registry `views` counter increments on guest (non-owner) page loads.
-- Admin: `/admin/login` — **no default admin anymore**; create one with `python manage.py
+- Admin: `/admin/login` — **no default admin anymore**; create one with `python manage.py Admin sessions expire after 12 h (`ADMIN_SESSION_HOURS`).
   create-admin <username>` (12+ char password). The login page shows that command when the
   `admins` table is empty. Session `admin` + `admin_sv`. Admin password change requires the current
   password. Manages: shana leads, messages, catalog CRUD (`/admin/catalog`), bundles, ads, mail

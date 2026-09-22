@@ -368,6 +368,7 @@ textarea { resize: vertical; }
 }
 .gift-row.is-thanked { opacity: .62; }
 .gift-row.is-closed { opacity: .55; background: transparent; }
+.gift-row.is-due { border-inline-start: 4px solid var(--gold); }
 .gift-row, .mine-row, #mine, #add-more { scroll-margin-top: 90px; }  /* land below the sticky header after an action */
 .mine-title { margin-top: 1.2em; }
 .gift-row:target, .mine-row:target { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
