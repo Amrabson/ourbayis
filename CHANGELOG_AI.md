@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-22 (owner decisions + email setup)
+- **Full Nest includes appliance installation** (owner decision): washer/fridge/microwave "delivered
+  and installed" on a standard hookup to existing water/drain/power points; new plumbing/electrical
+  work and other installation/assembly stay quoted per item. Updated the bundle seed text, the
+  `pkg_appliances_included` tier line, the terms panel (`shana_term_install_b`), EN+HE.
+- **Package prices confirmed** (₪2,450 / ₪6,900 / ₪17,900): "Indicative" → "Starting price — final
+  quote after we talk"; packages subtitle no longer says "indicative, not quotes".
+- **`bundle_sync` refreshes untouched seed text** via a per-bundle `replaces` map (earlier seed texts
+  collected from git history + local/snapshot DBs). Admin-edited text and prices are never touched.
+- **`instance/ob.env` settings file** read by app.py and manage.py — fixes scheduled `send-mail` /
+  `remind-claims` never having SMTP or `OB_BASE_URL` (they don't run passenger_wsgi.py).
+  `ob.env.example` template; DEPLOY_AI.md step 4b walks through a Gmail app password.
+- **`manage.py test-mail <to>`**: synchronous send that prints the real SMTP error.
+  `ob_mail.send_now()` shared with the outbox; port 465 (SSL) supported; sender shows as "OurBayis".
+- Removed an accidental duplicate of the KosherRoute project from the repo folder (untracked;
+  byte-identical to Documents/KosherRoute, sent to the Recycle Bin).
+- Tests: 82 (bundle-sync safety, Full Nest copy, env-file precedence).
+
 ## 2026-09-22 (mobile pass) — phone layout fixes
 - **Gift cards on phones (<=560px)** are now compact rows: 92px square illustration/photo beside the
   text instead of a full-width 4:3 box. Registry/catalog/homepage cards went from ~371px to ~258px

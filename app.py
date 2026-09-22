@@ -34,7 +34,8 @@ import ob_security
 from i18n import CATEGORIES, EVENT_TYPES, T_EN, cat_label, t as _t
 
 BASE = Path(__file__).resolve().parent
-DB_PATH = Path(os.environ.get("OB_DB_PATH") or (BASE / "ourbayis.db"))
+ob_security.load_env_file(ob_security.env_file_path(BASE))  # instance/ob.env, before any env read
+DB_PATH =Path(os.environ.get("OB_DB_PATH") or (BASE / "ourbayis.db"))
 
 BRAND = "OurBayis"
 BRAND_HE = "OurBayis"
@@ -1990,9 +1991,9 @@ def shana():
 # terms that differ between tiers and must stay consistent between the cards,
 # the shared terms panel and the lead-time guidance. Values map to i18n keys
 # pkg_delivery_<delivery>, pkg_setup_yes/no, pkg_appliances_<appliances>,
-# pkg_lead_weeks. OWNER DECISION still open (see TODO_AI.md): whether Full
-# Nest's price includes appliance installation or it is quoted separately —
-# until decided, every tier says installation is confirmed in the quote.
+# pkg_lead_weeks. Owner decision 2026-09-22: Full Nest's price includes standard
+# installation of the washer/fridge/microwave (existing hookups); other
+# installation, and new plumbing/electrical work, is quoted per item.
 PACKAGE_TIERS = {
     "basic": dict(delivery="before", setup=False, appliances="none", lead_weeks=3),
     "standard": dict(delivery="before", setup=False, appliances="ask", lead_weeks=3),

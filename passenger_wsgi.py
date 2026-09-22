@@ -25,8 +25,9 @@ os.environ.setdefault("OB_TRUST_PROXY", "1")
 os.environ.setdefault("OB_BASE_URL", "https://REPLACE-WITH-YOUR-DOMAIN")
 # os.environ.setdefault("OB_ALLOWED_HOSTS", "ourbayis.com,www.ourbayis.com")
 
-# --- optional: email notifications (leave unset to disable — mail still queues
-#     in mail_outbox and is visible via `python manage.py stats`, just unsent) ---
+# --- email: preferably NOT here — put SMTP settings in instance/ob.env (see
+#     ob.env.example / DEPLOY_AI.md 4b) so scheduled manage.py tasks get them too.
+#     Values set here still win over the file. Unset = mail queues but never sends ---
 # os.environ.setdefault("OB_SMTP_HOST", "smtp.gmail.com")
 # os.environ.setdefault("OB_SMTP_PORT", "587")
 # os.environ.setdefault("OB_SMTP_USER", "you@gmail.com")

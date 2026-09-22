@@ -7,6 +7,7 @@ import smtplib
 import threading
 from datetime import datetime, timedelta
 from email.message import EmailMessage
+from email.utils import formataddr
 
 import ob_db
 
@@ -20,6 +21,28 @@ def _smtp_config():
     pw = os.environ.get("OB_SMTP_PASS", "")
     port = int(os.environ.get("OB_SMTP_PORT", "587"))
     return host, port, user, pw
+
+
+def send_now(to, subject, body):
+    """Send one message synchronously; raises on any SMTP/socket error.
+    Port 465 uses implicit TLS, anything else STARTTLS (587 is the default)."""
+    host, port, user, pw = _smtp_config()
+    if not (host and user and pw):
+        raise RuntimeError("SMTP not configured (OB_SMTP_HOST / OB_SMTP_USER / OB_SMTP_PASS)")
+    msg = EmailMessage()
+    msg["From"] = formataddr((os.environ.get("OB_MAIL_FROM_NAME", "OurBayis"), user))
+    msg["To"] = to
+    msg["Subject"] = subject
+    msg.set_content(body)
+    if port == 465:
+        with smtplib.SMTP_SSL(host, port, timeout=15) as s:
+            s.login(user, pw)
+            s.send_message(msg)
+    else:
+        with smtplib.SMTP(host, port, timeout=15) as s:
+            s.starttls()
+            s.login(user, pw)
+            s.send_message(msg)
 
 
 def _now_iso():
@@ -62,15 +85,7 @@ def attempt(db, row_id):
     if not (host and user and pw):
         return  # stays queued — nothing to do without SMTP
     try:
-        msg = EmailMessage()
-        msg["From"] = user
-        msg["To"] = row["to_addr"]
-        msg["Subject"] = row["subject"]
-        msg.set_content(row["body"])
-        with smtplib.SMTP(host, port, timeout=15) as s:
-            s.starttls()
-            s.login(user, pw)
-            s.send_message(msg)
+        send_now(row["to_addr"], row["subject"], row["body"])
         with ob_db.write_txn(db):
             db.execute("UPDATE mail_outbox SET status='sent', sent_at=?, last_error='' WHERE id=?",
                        (_now_iso(), row_id))

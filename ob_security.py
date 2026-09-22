@@ -10,6 +10,38 @@ from urllib.parse import urlparse, unquote
 from flask import request
 
 
+def load_env_file(path):
+    """Read KEY=VALUE lines from a private settings file (default
+    instance/ob.env, gitignored) into os.environ without overriding anything
+    already set. Both the web app and manage.py call this, so scheduled tasks
+    (send-mail, remind-claims) see the same SMTP/base-URL settings as the site.
+    Blank lines and # comments are skipped; surrounding quotes are stripped."""
+    import os
+    try:
+        with open(path, encoding="utf-8") as f:
+            lines = f.read().splitlines()
+    except FileNotFoundError:
+        return 0
+    n = 0
+    for line in lines:
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, val = line.partition("=")
+        key, val = key.strip().removeprefix("export ").strip(), val.strip()
+        if len(val) >= 2 and val[0] == val[-1] and val[0] in "\"'":
+            val = val[1:-1]
+        if key and key not in os.environ:
+            os.environ[key] = val
+            n += 1
+    return n
+
+
+def env_file_path(base):
+    import os
+    return os.environ.get("OB_ENV_FILE") or os.path.join(base, "instance", "ob.env")
+
+
 def env_bool(name, default=False):
     import os
     raw = os.environ.get(name)

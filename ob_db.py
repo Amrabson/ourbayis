@@ -612,9 +612,20 @@ def refresh_registry_links(db, dry_run=False):
     return diffs
 
 
+_BUNDLE_TEXT_FIELDS = ("description", "description_he", "items_text", "items_text_he")
+
+
 def bundle_sync(db, bundles):
-    """Unchanged behaviour from Phase 1: insert bundles that aren't there yet
-    (matched by slug), never overwrite an existing one."""
+    """Insert bundles that aren't there yet (matched by slug). An existing row is
+    only updated field-by-field when its value is still one of the seed's own
+    earlier texts (`replaces` in seed_catalog.json) — so reworded seed copy
+    reaches a live DB, but anything edited in /admin/bundles is never touched."""
+    for b in bundles:
+        for field, old_values in (b.get("replaces") or {}).items():
+            if field in _BUNDLE_TEXT_FIELDS and old_values:
+                marks = ",".join("?" * len(old_values))
+                db.execute(f"UPDATE bundles SET {field}=? WHERE slug=? AND {field} IN ({marks})",
+                           (b.get(field, ""), b["slug"], *old_values))
     for i, b in enumerate(bundles):
         db.execute(
             "INSERT OR IGNORE INTO bundles (slug, name, name_he, tier, price_from,"

@@ -30,17 +30,17 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [ ] Multiple registries per account, co-owners, live inventory — deferred.
 
 ## Owner decisions from the 2026-09-17 review pass (publication blockers for the affected claims)
-- [ ] **Full Nest installation.** The package now says washer/fridge/microwave are "ordered and delivery
-  coordinated (installation confirmed in your quote)" and the terms panel says installation is priced
-  per item. Decide: is appliance installation included in the ₪17,900 starting price or always extra?
-  Then edit `PACKAGE_TIERS` / `pkg_appliances_included` and the bundle line accordingly.
+- [x] **Full Nest installation** — decided 2026-09-22: included. Washer/fridge/microwave are
+  "delivered and installed" on a standard hookup (existing water/drain/power points); new
+  plumbing/electrical work and installing/assembling anything else is quoted per item.
 - [x] **Who receives deliveries** — decided 2026-09-17: everything is delivered to the couple's
   apartment; with access (key/code/someone to open) deliveries are placed inside. Copy updated.
-- [ ] **Bundle text on an existing database.** `bundle_sync` is insert-only, so a live DB keeps the old
-  "most popular" / "coordinated and installed" wording. Edit the three bundles in `/admin/bundles`
-  (or on a fresh install the seed is used). The static preview already shows the new text.
-- [ ] **Starting prices** (₪2,450 / ₪6,900 / ₪17,900) are unchanged and labelled indicative; confirm
-  or replace them.
+- [x] **Bundle text on an existing database** — fixed 2026-09-22: `bundle_sync` now also refreshes a
+  text field whose value is still one of the seed's own earlier texts (`replaces` in
+  seed_catalog.json); admin edits are never overwritten. When rewording a bundle in the seed, add
+  the old text to its `replaces` list. Any pre-git wording not in that list: edit in `/admin/bundles`.
+- [x] **Starting prices** ₪2,450 / ₪6,900 / ₪17,900 — confirmed by the owner 2026-09-22. Copy now says
+  "Starting price — final quote after we talk" (no longer "indicative").
 - [ ] **Product photos.** 0 of 117 catalog items have an image; cards use item-specific line drawings
   labelled as illustrations. If you want photos for the 8 featured items, add only images you have the
   right to use via `/admin/catalog` (`image` + `image_credit`); the card, homepage strip, registry and
@@ -68,9 +68,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   `ob_security._PAY_HOSTS` allowlists `bitpay.co.il`/`payboxapp.com` by host only (their exact
   link *paths* aren't publicly documented); test with a real Bit/PayBox account before launch and
   tighten the allowlist if you learn the real path pattern.
-- [ ] **SMTP sender** — set `OB_SMTP_HOST/PORT/USER/PASS` + `OB_NOTIFY_EMAIL` (Gmail app password
-  or Zoho work fine). Without it, mail queues in `mail_outbox` but never sends — `/forgot` and
-  guest confirmation emails silently no-op.
+- [ ] **SMTP sender** — create `instance/ob.env` from `ob.env.example` (Gmail app password), then
+  `python manage.py test-mail you@gmail.com`. Step-by-step in DEPLOY_AI.md 4b. Without it, mail
+  queues in `mail_outbox` but never sends — `/forgot` and guest confirmation emails silently no-op.
 - [ ] **Rates** — schedule `manage.py fetch-rates` daily (see the decisions list above); `OB_RATES`
   env is only needed if you want to pin a fixed rate.
 - [ ] **Pricing verification** — 55 of 117 catalog items are marked `price_status='verified'` (dated

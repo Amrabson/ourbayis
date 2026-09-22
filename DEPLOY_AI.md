@@ -27,10 +27,33 @@ PythonAnywhere dashboard → **Web** tab → **Add a new web app** → choose **
 - **WSGI configuration file**: click it, delete everything, paste in the contents of [`passenger_wsgi.py`](passenger_wsgi.py) from this repo — but:
   - fix `project_home` to your real path (`/home/YOURUSERNAME/ourbayis`)
   - replace `OB_SECRET_KEY` with a real random value — generate one locally with `python -c "import secrets; print(secrets.token_hex(32))"` and paste the result in, don't leave the placeholder
-  - uncomment and fill in the SMTP lines if you want email notifications (a Gmail **app password**, not your normal password, works well)
+  - put email (SMTP) settings in `instance/ob.env`, not here — see **4b** below, so the scheduled tasks get them too
 - **Static files** section: add a mapping
   - URL: `/static/`
   - Directory: `/home/YOURUSERNAME/ourbayis/static/`
+
+## 4b. Email (SMTP) — `instance/ob.env`
+Without this, password-reset links, guest "save this link" emails, reminders and lead
+notifications are queued in `mail_outbox` but never sent. Settings go in one private file that
+the web app **and** `manage.py` (scheduled tasks) both read:
+
+1. **Gmail app password** — on the Google account that will send the mail: turn on
+   2-Step Verification, then open https://myaccount.google.com/apppasswords, create one
+   named "OurBayis", and copy the 16-letter code (your normal Gmail password will not work).
+2. **Create the file** — in the PythonAnywhere Files tab, open the project folder, then the
+   `instance` folder (create it if missing), and add a new file `ob.env`. Paste the contents of
+   [`ob.env.example`](ob.env.example) and fill in your address, the app password, your domain
+   (`OB_BASE_URL`) and where leads should go (`OB_NOTIFY_EMAIL`). `instance/` is gitignored, so
+   the password never goes into git.
+3. **Test it** — Bash console in the project folder, venv active:
+   `python manage.py test-mail you@gmail.com` → prints `Sent to …`, or the exact SMTP error
+   (`SMTPAuthenticationError` = wrong app password / 2-Step not on).
+4. **Reload** the web app (Web tab) so the site picks up the file, and add the `send-mail`
+   scheduled task below so anything that failed to send is retried.
+
+Gmail allows roughly 500 messages a day, plenty for launch. For mail from your own domain
+later (e.g. hello@ourbayis.com), a provider like Zoho Mail works the same way (host
+`smtp.zoho.com`, port 465) — check that your plan includes SMTP access; free tiers often do not.
 
 ## 5. Reload and check
 Click the big green **Reload** button, then open the app's `*.pythonanywhere.com` URL. Check the **Error log** and **Server log** links on the Web tab if anything 500s — importing `app.py` also runs migrations + catalog seed-sync, so the SQLite file, its schema, and its 117 catalog items get created automatically on first load; no manual DB step needed (but you do still need step 5b to create an admin).

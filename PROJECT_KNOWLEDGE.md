@@ -36,7 +36,7 @@ Flask 3 + SQLite, server-rendered Jinja2, no build step. Same architecture as Ba
 - `tests/` — pytest; `conftest.py` points `OB_DB_PATH` at a tmp file and re-imports `app` fresh
   per test, so the real `ourbayis.db` is never touched by the suite.
 - `i18n.py` — `T_EN`/`T_HE` dicts, `t(key, lang)` (falls back EN → key), `CATEGORIES` (slug → icon/EN/HE), `EVENT_TYPES`.
-- `seed_catalog.json` — ~117 curated catalog items incl. quality/size variants (Israel-specific: platta, meicham, Shabbos lamp, sponja set, Shas set, sukkah…) + 3 shana bundles. **Seed-sync**: on every start, items whose `name` isn't in the DB are inserted (existing rows untouched — retire seed items by marking inactive in admin, not deleting).
+- `seed_catalog.json` — ~117 curated catalog items incl. quality/size variants (Israel-specific: platta, meicham, Shabbos lamp, sponja set, Shas set, sukkah…) + 3 shana bundles. **Seed-sync**: on every start, items whose `name` isn't in the DB are inserted (existing rows untouched — retire seed items by marking inactive in admin, not deleting). Bundles: inserted by slug; a text field on an existing bundle is refreshed only while it still equals one of the seed's `replaces` values (the seed's own earlier wording), so admin edits survive.
 - `templates/` — base.html has the inline SVG icon sprite (nav icons + 6 category + 27 item illustrations), nav, footer. `_cards.html` holds the shared gift-card macros. Public pages use `t()`; admin pages are English-only.
 - `static/style.css` — "wedding invitation" aesthetic: parchment `#faf6ec`, navy `#223354`, gold `#a5762a`/`#c9a24a`; hairline borders + `3px double` gold frames on highlight panels; Bellefair (display serif) + Assistant (body) from Google Fonts (both cover Hebrew). RTL via `dir=rtl` on `<html>` + CSS logical properties. Homepage hero: gold line-art Jerusalem skyline + chuppah SVG with twinkling lights (`.tw` animation). Phones (<=560px): `.gift-card` switches to a compact row (92px thumb beside the text) and filter chips scroll in one line; `.reveal` sections are only hidden under `html.js` (set by app.js).
 
@@ -106,8 +106,12 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   `before_request` hook when the file's mtime changes; fallback is `{"USD": 3.7}` with no date. Rates
   drive the header currency toggle, the short `estimate_label()` "≈ $59" on cards and the one-per-page
   `estimate_note()` footnote — ILS is always the reference; `OB_ILS_PER_USD`/`usd()` are legacy), `OB_WHATSAPP`; email (optional): `OB_SMTP_HOST/PORT/USER/PASS`
-  + `OB_NOTIFY_EMAIL` — without SMTP, mail still queues in `mail_outbox` (visible via
-  `manage.py stats`) but nothing sends.
+  + `OB_NOTIFY_EMAIL` (+ optional `OB_MAIL_FROM_NAME`; port 465 = implicit TLS, else STARTTLS) —
+  without SMTP, mail still queues in `mail_outbox` (visible via `manage.py stats`) but nothing
+  sends. **Settings file:** `instance/ob.env` (KEY=VALUE, gitignored; template `ob.env.example`) is
+  loaded by both app.py and manage.py via `ob_security.load_env_file()` and never overrides a real
+  env var — so scheduled tasks get the same SMTP/base URL as the site. `OB_ENV_FILE` points
+  elsewhere (tests point it at a missing file). `manage.py test-mail <to>` sends one mail now.
 - `manage.py`: `create-admin`, `backup`, `send-mail` (flush the outbox — run on a schedule),
   `expire-claims` (run daily), `check` (integrity + config sanity, exit 1 on problems), `stats`.
 - Deploy target: PythonAnywhere like BashertBench. See [DEPLOY_AI.md](DEPLOY_AI.md) for the full walkthrough — `passenger_wsgi.py` is the ready-to-paste WSGI file (fix `project_home`, real `OB_SECRET_KEY`, `OB_BASE_URL` before using). Static mapping `/static/` → project static dir. Importing `app.py` runs migrations + catalog seed-sync automatically on first load; you still need `manage.py create-admin` once.

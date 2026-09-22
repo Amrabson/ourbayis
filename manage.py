@@ -4,6 +4,7 @@
 create-admin   -- interactively (or via OB_ADMIN_PASSWORD) create an admin user
 backup         -- online backup of the live DB with an integrity check
 send-mail      -- flush the mail outbox (run this on a schedule if SMTP is set)
+test-mail TO   -- send one email immediately and print the SMTP error if it fails
 expire-claims  -- flip reserved claims past expires_at to 'expired'
 check          -- integrity check + basic config sanity, exit 1 on problems
 stats          -- print basic counts (no PII)
@@ -23,9 +24,11 @@ from pathlib import Path
 
 import ob_db
 import ob_mail
+import ob_security
 from werkzeug.security import generate_password_hash
 
 BASE = Path(__file__).resolve().parent
+ob_security.load_env_file(ob_security.env_file_path(BASE))  # same settings as the web app
 
 
 def _db_path():
@@ -68,6 +71,21 @@ def cmd_send_mail(args):
     db = _open()
     n = ob_mail.flush(db, limit=args.limit)
     print(f"Processed {n} due message(s).")
+    return 0
+
+
+def cmd_test_mail(args):
+    """Send one message right now (not via the outbox) and print the real error,
+    so SMTP settings can be checked in seconds."""
+    host, port, user, _ = ob_mail._smtp_config()
+    print(f"SMTP: host={host or '(unset)'} port={port} user={user or '(unset)'}")
+    try:
+        ob_mail.send_now(args.to, "OurBayis test email",
+                         "If you can read this, OurBayis email is working.\n")
+    except Exception as e:  # noqa: BLE001 — show whatever smtplib raised
+        print(f"FAILED: {type(e).__name__}: {e}")
+        return 1
+    print(f"Sent to {args.to} — check the inbox (and spam folder).")
     return 0
 
 
@@ -248,6 +266,10 @@ def main():
     sp = sub.add_parser("send-mail")
     sp.add_argument("--limit", type=int, default=50)
     sp.set_defaults(fn=cmd_send_mail)
+
+    sp = sub.add_parser("test-mail", help="send one test email now and show any SMTP error")
+    sp.add_argument("to")
+    sp.set_defaults(fn=cmd_test_mail)
 
     sp = sub.add_parser("expire-claims")
     sp.set_defaults(fn=cmd_expire_claims)

@@ -502,3 +502,40 @@ def test_hebrew_fields_are_collapsed_until_filled(client, app_module):
     assert reg["title_he"] == "הבית שלנו"  # still saved by the same form post
     page = client.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
     assert "הבית שלנו" in page
+
+
+def test_bundle_sync_refreshes_only_untouched_seed_text(app_module):
+    import ob_db
+    seed = [dict(slug="full-nest", name="The Full Nest", tier="premium", price_from=17900,
+                 items_text="new list", description="new desc",
+                 replaces={"items_text": ["old list"], "description": ["old desc"],
+                           "price_from": [1]})]
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        db.execute("UPDATE bundles SET items_text='old list', description='edited in admin',"
+                   " price_from=17900 WHERE slug='full-nest'")
+        ob_db.bundle_sync(db, seed)
+        row = db.execute("SELECT * FROM bundles WHERE slug='full-nest'").fetchone()
+    assert row["items_text"] == "new list"            # still the old seed text -> refreshed
+    assert row["description"] == "edited in admin"    # admin edit -> never overwritten
+    assert row["price_from"] == 17900                 # only text fields are ever synced
+
+
+def test_full_nest_says_appliances_are_installed(client):
+    html = client.get("/shana-rishonah").get_data(as_text=True)
+    assert "delivered and installed" in html
+    assert "installation confirmed in your quote" not in html
+
+
+def test_env_file_fills_unset_vars_only(tmp_path, monkeypatch):
+    import ob_security
+    f = tmp_path / "ob.env"
+    f.write_text('# comment\nexport OB_T_A="one two"\nOB_T_B=from-file\n\nnot a setting\n',
+                 encoding="utf-8")
+    monkeypatch.delenv("OB_T_A", raising=False)
+    monkeypatch.setenv("OB_T_B", "from-env")
+    assert ob_security.load_env_file(f) == 1
+    assert os.environ["OB_T_A"] == "one two"      # quotes and `export` stripped
+    assert os.environ["OB_T_B"] == "from-env"     # a real env var always wins
+    monkeypatch.delenv("OB_T_A")
+    assert ob_security.load_env_file(tmp_path / "missing.env") == 0
