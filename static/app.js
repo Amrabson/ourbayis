@@ -2,6 +2,9 @@
 (function () {
   "use strict";
 
+  // .reveal sections are only hidden once this runs (html.js), so a failed script never blanks the page
+  document.documentElement.classList.add("js");
+
   document.addEventListener("DOMContentLoaded", function () {
     // hamburger nav toggle
     var burger = document.getElementById("hamburger"), nav = document.getElementById("main-nav");

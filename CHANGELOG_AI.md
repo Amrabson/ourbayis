@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-22 (mobile pass) — phone layout fixes
+- **Gift cards on phones (<=560px)** are now compact rows: 92px square illustration/photo beside the
+  text instead of a full-width 4:3 box. Registry/catalog/homepage cards went from ~371px to ~258px
+  tall at 375px, so a guest sees ~3 gifts per screen. Same macro everywhere, RTL-safe (logical margins).
+- **Header on small phones (<=430px)**: the hamburger was clipped (right edge at 392px on a 375px
+  screen). Tighter gaps/padding and a smaller brand name; it now fits in EN and HE.
+- **Catalog/registry filters on phones**: category chips scroll in one row; catalog search + button
+  share a row and the three selects sit on one row, so gifts appear on the first screen.
+- **Reveal-on-scroll no longer hides content without JS**: `app.js` adds `html.js`, and `.reveal`
+  is only hidden under `.js`, so a failed/blocked script can't leave homepage sections blank.
+- `docs/static` refreshed (HTML pages not re-committed — the only diff was CSRF-token churn).
+
 ## 2026-09-22 (later) — /guides content section + optional-Hebrew form fields
 - **`/guides` and `/guides/<slug>`**: four bilingual articles in a new `guides.py` module (kept out of
   i18n.py — long-form editorial, not UI strings; same `*_he` + English-fallback contract via
