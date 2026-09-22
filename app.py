@@ -144,7 +144,23 @@ def set_security_headers(resp):
     resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     if request.endpoint in NO_STORE_ENDPOINTS or (request.path.startswith("/g/")):
         resp.headers["Cache-Control"] = "no-store"
+    elif request.endpoint == "static" and request.args.get("v") and resp.status_code == 200:
+        # versioned URL (see static_cache_bust) — a new file gets a new URL, so cache for good
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
     return resp
+
+
+@app.url_defaults
+def static_cache_bust(endpoint, values):
+    """Append ?v=<mtime> to every url_for('static', ...) so browsers can keep
+    CSS/JS/images cached (one fewer round-trip per page for guests abroad)
+    and still pick up a deploy immediately."""
+    if endpoint == "static" and "v" not in values and values.get("filename"):
+        try:
+            mtime = os.stat(os.path.join(app.static_folder, values["filename"])).st_mtime_ns
+        except (OSError, ValueError):
+            return
+        values["v"] = format(mtime // 1_000_000, "x")
 
 
 def _ensure_csrf():
@@ -2527,6 +2543,14 @@ def admin_backup_download():
 
 
 # ---------------------------------------------------------------- misc
+@app.route("/favicon.ico")
+def favicon():
+    # browsers and search crawlers ask for /favicon.ico at the root regardless of <link rel=icon>
+    resp = app.send_static_file("favicon.ico")
+    resp.headers["Cache-Control"] = "public, max-age=604800"
+    return resp
+
+
 @app.route("/robots.txt")
 def robots():
     return app.response_class(

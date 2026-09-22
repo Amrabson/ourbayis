@@ -8,10 +8,10 @@
     <form method="post" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label>{{ t('your_name') }} *<input name="name" required maxlength="120" value="{{ request.form.get('name', '') }}"></label>
-      <label>{{ t('email') }} *<input name="email" type="email" required maxlength="200" value="{{ request.form.get('email', '') }}"></label>
-      <label>{{ t('password') }} *<input name="password" type="password" required minlength="8"></label>
-      <label>{{ t('password2') }} *<input name="password2" type="password" required minlength="8"></label>
+      <label>{{ t('your_name') }} *<input name="name" required maxlength="120" autocomplete="name" value="{{ request.form.get('name', '') }}"></label>
+      <label>{{ t('email') }} *<input name="email" type="email" required maxlength="200" autocomplete="email" value="{{ request.form.get('email', '') }}"></label>
+      <label>{{ t('password') }} *<input name="password" type="password" required minlength="8" autocomplete="new-password"></label>
+      <label>{{ t('password2') }} *<input name="password2" type="password" required minlength="8" autocomplete="new-password"></label>
       <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('signup_btn') }}</button>
     </form>
     <p class="auth-alt">{{ t('have_account') }} <a href="{{ url_for('login') }}">{{ t('login_btn') }}</a></p>

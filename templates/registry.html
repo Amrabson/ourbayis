@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "_cards.html" import gift_card, price_line, gift_facts with context %}
-{% block title %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
+{% block title %}{% if pick(reg, 'couple_names') %}{{ pick(reg, 'couple_names') }} · {% endif %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ t('reg_for') }} {{ pick(reg, 'couple_names') }}{% endblock %}
 {% block content %}
 
@@ -9,6 +9,7 @@
     {% if is_sample %}<span class="sample-flag sample-flag-dark">{{ t('sample_label') }}</span>{% endif %}
     <p class="reg-eyebrow">{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · <time datetime="{{ reg['event_date'] }}">{{ fmt_date(reg['event_date']) }}</time>{% endif %}{% if reg['city'] %} · {{ reg['city'] }}{% endif %}</p>
     <h1>{{ pick(reg, 'title') }}</h1>
+    {% if pick(reg, 'couple_names') %}<p class="reg-couple bdi">{{ pick(reg, 'couple_names') }}</p>{% endif %}
     {% if days_to_go %}<p class="reg-countdown">✦ {{ tf('reg_countdown', n=days_to_go) }} ✦</p>{% endif %}
     {% if pick(reg, 'message') %}<p class="reg-message">“{{ pick(reg, 'message') }}”</p>{% endif %}
     {% if total %}

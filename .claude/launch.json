@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "ourbayis",
+      "name": "ourbayis-dev",
       "runtimeExecutable": "python",
       "runtimeArgs": ["run_dev.py"],
       "port": 5001

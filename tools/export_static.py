@@ -88,6 +88,8 @@ def rewrite(html, out_dir, lang, go_map):
         attr, url = m.group(1), m.group(2)
         if url.startswith("/static/"):
             return f'{attr}="{pre_root}{url[1:]}"'
+        if url == "/favicon.ico":
+            return f'{attr}="{pre_root}static/favicon.ico"'
         if url.startswith("/go/"):
             return f'{attr}="{go_map.get(url, url)}"'
         if url.startswith("/lang/"):

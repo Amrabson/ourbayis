@@ -95,6 +95,8 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   For the Claude Browser preview use `run_dev.py` (launch config **`ourbayis-v3`** in the user-level
   `~/.claude/launch.json`) — it forces a throwaway DB in %TEMP% so the preview can't migrate the repo's
   `ourbayis.db`. The old `ourbayis` launch entry runs `app.py` on the real DB: don't use it.
+  The repo's own `.claude/launch.json` entry is `ourbayis-dev` (same run_dev.py). Static URLs carry
+  `?v=<mtime>` (`static_cache_bust`) and are cached immutable; icons come from `tools/make_icons.py`.
 - Env vars: `OB_SECRET_KEY` (required if `OB_SECURE_COOKIES`/`OB_ENV=production`; otherwise a dev
   key persists in gitignored `instance/dev_secret.txt`), `OB_SECURE_COOKIES=1` (prod),
   `OB_TRUST_PROXY=1` (enables ProxyFix — only set this behind a real proxy), `OB_BASE_URL` (used

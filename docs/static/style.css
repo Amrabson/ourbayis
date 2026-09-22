@@ -209,6 +209,7 @@ img, svg { vertical-align: middle; }
   color: var(--gold-bright); font-weight: 700; margin-bottom: 8px;
 }
 .reg-hero h1 { color: #fff; font-size: 2.6rem; }
+.reg-couple { color: var(--gold-bright); font-family: var(--font-display); font-size: 1.35rem; letter-spacing: .5px; margin: 2px 0 0; }
 .reg-message { color: #c6cdda; max-width: 64ch; margin: 8px auto 0; font-size: 1.05rem; }
 .progress {
   max-width: 420px; height: 8px; margin: 24px auto 6px;

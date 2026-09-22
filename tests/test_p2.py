@@ -539,3 +539,27 @@ def test_env_file_fills_unset_vars_only(tmp_path, monkeypatch):
     assert os.environ["OB_T_B"] == "from-env"     # a real env var always wins
     monkeypatch.delenv("OB_T_A")
     assert ob_security.load_env_file(tmp_path / "missing.env") == 0
+
+
+def test_static_urls_are_versioned_and_cached(client):
+    html = client.get("/").get_data(as_text=True)
+    m = re.search(r'href="(/static/style\.css\?v=[0-9a-f]+)"', html)
+    assert m, "style.css should carry a ?v= version"
+    r = client.get(m.group(1))
+    assert r.status_code == 200 and "immutable" in r.headers["Cache-Control"]
+    assert "immutable" not in client.get("/static/style.css").headers.get("Cache-Control", "")
+    fav = client.get("/favicon.ico")
+    assert fav.status_code == 200 and fav.mimetype in ("image/x-icon", "image/vnd.microsoft.icon")
+    assert 'rel="apple-touch-icon"' in html
+
+
+def test_registry_page_shows_couple_names(client):
+    signup(client)
+    create_registry(client, couple="Rivka & Yossi")
+    tok = get_csrf(client.get("/registry/edit").get_data(as_text=True))
+    html = client.get("/dashboard").get_data(as_text=True)
+    slug = re.search(r"/r/([a-z0-9-]+)", html).group(1)
+    client.post("/logout", data=dict(csrf_token=tok))
+    page = client.get(f"/r/{slug}").get_data(as_text=True)
+    assert 'class="reg-couple bdi">Rivka &amp; Yossi<' in page
+    assert "<title>Rivka &amp; Yossi · " in page

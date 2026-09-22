@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-22 (improvement pass 2)
+- **Couple names on the guest page**: `/r/<slug>` never showed `couple_names` (the one required
+  identifying field) — now under the title (`.reg-couple`) and first in the `<title>`, so guests
+  know they're on the right list and name searches match the tab/search title.
+- **Real icon files** (`tools/make_icons.py`, dev-time Pillow): `static/favicon.svg`,
+  `favicon.ico` (16/32/48, also served at `/favicon.ico` — was a 404 on every page load and Google
+  can't use a data: URI favicon) and a 180px `apple-touch-icon.png` for "Add to Home Screen";
+  `<meta name="theme-color">` navy.
+- **Static cache-busting**: `url_defaults` adds `?v=<mtime>` to every `url_for('static')`; versioned
+  requests get `Cache-Control: public, max-age=31536000, immutable` — saves a revalidation
+  round-trip per asset per page (guests abroad). On PythonAnywhere the /static/ mapping serves the
+  file directly (nginx ignores the query), and the changing URL still busts caches after a deploy.
+- **autocomplete** on signup/login/reset/forgot/contact (`name`, `email`, `new-password`,
+  `current-password`) so password managers and phone autofill work.
+- Static export maps `/favicon.ico` to `static/favicon.ico` (relative) for GitHub Pages; docs/ regenerated.
+- Project `.claude/launch.json` entry renamed `ourbayis-dev` — the user-level `ourbayis` entry of the
+  same name runs app.py on the real DB (use `ourbayis-v3` from a home-dir session).
+- Tests: 84.
+
 ## 2026-09-22 (owner decisions + email setup)
 - **Full Nest includes appliance installation** (owner decision): washer/fridge/microwave "delivered
   and installed" on a standard hookup to existing water/drain/power points; new plumbing/electrical

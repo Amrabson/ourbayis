@@ -8,8 +8,8 @@
     <form method="post" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label>{{ t('your_name') }}<input name="name" maxlength="120"></label>
-      <label>{{ t('email') }}<input name="email" type="email" maxlength="200"></label>
+      <label>{{ t('your_name') }}<input name="name" maxlength="120" autocomplete="name"></label>
+      <label>{{ t('email') }}<input name="email" type="email" maxlength="200" autocomplete="email"></label>
       <label>{{ t('topic') }}
         <select name="topic">
           {% for val in ['general', 'registry', 'shana', 'partner'] %}
