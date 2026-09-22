@@ -223,6 +223,18 @@ Gift grid: auto-fill ≥240px, 2 columns ≤520px, 1 column ≤430px. Prices/URL
 - Tooling: `tools/screenshots.py` (headless Chrome; needs ≥520px windows, phone checks in the Browser
   pane), `tools/render_private.py` (logged-in pages on a temp DB), `tools/export_static.py` (docs/).
 
+## Guides (2026-09-22)
+- `guides.py` — `GUIDES` list, `BY_SLUG`, `pick(obj, field, lang)`. Each guide: slug, icon (a symbol
+  already in base.html's sprite), updated, title/summary (+`_he`), `sections` of
+  `{h, p[], list[]}` (+`_he` twins, same lengths — enforced by a test), and a `cta` key into
+  `guides._CTAS`. Routes `/guides` and `/guides/<slug>`; Jinja globals `gpick` and `guide_cta`.
+  Add an article by appending to `GUIDES` — the index, sitemap, static export and screenshots tool
+  pick it up automatically. Content must stay claim-free (see the test's `banned` list).
+- Header nav collapses to the hamburger at **≤1200px** (not 900): six links plus the CTA no longer fit
+  beside the currency/language toggles. Check both languages before adding a seventh nav item.
+- Optional Hebrew inputs live in `<details class="he-fields">` (registry form, item edit), `open` when
+  a Hebrew value exists. Field names and server handling are unchanged.
+
 ## Batch 2026-09-22
 - `manage.py remind-claims` (daily, after `expire-claims`): see CHANGELOG; `claims.reminded_at`.
 - `count_page_views` after_request → `funnel_events` rows named `view:<endpoint>` for

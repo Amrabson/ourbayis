@@ -46,6 +46,7 @@ PAGES = {  # url -> output dir (relative)
     "/contact": "contact",
     "/sample": "sample",
     "/advertise": "advertise",
+    "/guides": "guides",
 }
 AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new")
 
@@ -72,6 +73,8 @@ def rewrite(html, out_dir, lang, go_map):
             if pg and int(pg.group(1)) > 1:
                 out += f"page-{pg.group(1)}/"
             return out
+        if path.startswith("/guides/"):
+            return "guides/" + path.rsplit("/", 1)[1] + "/"
         if path.startswith("/r/") or path == "/sample":
             return "sample/"
         stripped = path.strip("/")
@@ -158,6 +161,9 @@ def main():
         pages[f"/catalog?cat={cat}"] = f"catalog/{cat}"
         for n in range(2, (per_cat.get(cat, 0) + page_size - 1) // page_size + 1):
             pages[f"/catalog?cat={cat}&page={n}"] = f"catalog/{cat}/page-{n}"
+    import guides as _guides
+    for _g in _guides.GUIDES:
+        pages[f"/guides/{_g['slug']}"] = f"guides/{_g['slug']}"
     pages["/signup"] = "demo-only"
 
     written = 0

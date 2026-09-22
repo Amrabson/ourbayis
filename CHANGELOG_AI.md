@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-09-22 (later) — /guides content section + optional-Hebrew form fields
+- **`/guides` and `/guides/<slug>`**: four bilingual articles in a new `guides.py` module (kept out of
+  i18n.py — long-form editorial, not UI strings; same `*_he` + English-fallback contract via
+  `guides.pick()`). Launch set: *What a first apartment in Israel actually needs*, *Giving a gift to a
+  couple in Israel from abroad*, *Setting up a kosher kitchen in a new home*, *Before you buy: sizes,
+  plugs and delivery in Israel*. Article JSON-LD with `dateModified`, both languages in the sitemap
+  with `lastmod`, "More guides" cross-links, one CTA per article (catalog / sample / signup / shana).
+  Content rules: no customs, warranty or halachic claims; voltage and socket types stated as the
+  national supply with "check the label / the store page" for any specific product; Israeli bed sizes
+  given as what shops commonly sell, with "measure the mattress"; halachic questions pointed at a rav.
+  Linked from the main nav, the footer, the homepage three-step section and How It Works.
+- **Nav breakpoint**: with a sixth item the header stopped fitting beside the currency + language
+  toggles at ~1100px (the toggles were pushed off-screen). The nav now collapses to the hamburger at
+  ≤1200px instead of ≤900px; the rest of the responsive layout is unchanged. Measured in both
+  languages — Hebrew is the wider one.
+- **Optional Hebrew fields** collapse into an "Add Hebrew (optional)" `<details>` on the registry form
+  (title / names / message, and separately the delivery note) and on the item edit page (name / note).
+  Opened automatically when any Hebrew value already exists, so an existing registry never hides
+  content the couple typed. Same field names, same POST handler — nothing changed server-side.
+- Tests: +4 → **79 passed** (guides render in both languages, every guide fully bilingual with no
+  banned claims, guides linked and in the sitemap, Hebrew `<details>` collapsed until filled and still
+  saving). Static export now publishes 54 pages including the guides.
+
 ## 2026-09-22 — reminders, page-view counters, /advertise, registry browse controls, affiliate line
 - `manage.py remind-claims [--dry-run]`: one bilingual nudge per reservation that has a guest email,
   is 5+ days old, still `reserved`, not expired and not yet reminded (`claims.reminded_at`, migration

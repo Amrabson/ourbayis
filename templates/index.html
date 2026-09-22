@@ -107,7 +107,9 @@
     </div>
     {% endfor %}
   </div>
-  <p class="section-more"><a href="{{ url_for('how') }}">{{ t('how_full_link') }} {{ '←' if rtl else '→' }}</a></p>
+  <p class="section-more"><a href="{{ url_for('how') }}">{{ t('how_full_link') }} {{ '←' if rtl else '→' }}</a>
+    <span class="section-more-sep">·</span>
+    <a href="{{ url_for('guides') }}">{{ t('guides_link_from_home') }} {{ '←' if rtl else '→' }}</a></p>
 </section>
 
 {% if featured %}

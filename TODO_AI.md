@@ -18,13 +18,14 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Viral CTA on the public registry page (2026-09-17).
 - [x] Affiliate disclosure line (2026-09-22) — wording is generic; if you join Amazon Associates, add
   their required sentence to `affiliate_note` (EN+HE).
-- [ ] `/guides` bilingual content section (SEO) — 4 launch articles specced in the July roadmap.
+- [x] `/guides` bilingual content section — 4 launch articles (2026-09-22). Next articles go in
+  `guides.py`; keep them claim-free (the test enforces a banned-phrase list).
 - [x] Registry "available only" toggle + price sort (2026-09-22); server order is already most-wanted-first.
 - [ ] Item-specific illustrations cover ~27 shapes; extend `_ILLUSTRATION_RULES` when new seed items
   don't match (they fall back to the category drawing, never to a wrong item).
 - [x] Per-page view counters (2026-09-22) — `view:<endpoint>` rows in the admin funnel table.
-- [ ] Hebrew registry-form fields could collapse into an "Add Hebrew" `<details>` (spec) — they are
-  inline-but-optional today.
+- [x] Hebrew registry-form fields collapse into an "Add Hebrew" `<details>` (2026-09-22); same on the
+  item edit page.
 - [ ] Group gifting / chip-in toward big-ticket items — deliberately deferred (SPEC_V3 "Defer").
 - [ ] Multiple registries per account, co-owners, live inventory — deferred.
 

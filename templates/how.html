@@ -64,6 +64,10 @@
     {% endfor %}
   </div>
 
+  <p class="section-more"><a href="{{ url_for('guides') }}">{{ t('guides_link_from_how') }} {{ '←' if rtl else '→' }}</a></p>
+
+  <p class="section-more"><a href="{{ url_for('guides') }}">{{ t('guides_link_from_how') }} {{ '←' if rtl else '→' }}</a></p>
+
   <div class="cta-panel">
     <h2>{{ t('how_money_t') }}</h2>
     <p>{{ t('how_money_b') }}</p>

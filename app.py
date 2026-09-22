@@ -26,6 +26,7 @@ from flask import (Flask, abort, flash, g, redirect, render_template,
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
+import guides as ob_guides
 import ob_db
 import ob_mail
 import ob_money
@@ -101,7 +102,7 @@ NOINDEX_ENDPOINTS = {
 
 # ---------------------------------------------------------------- security
 PUBLIC_VIEW_ENDPOINTS = {"index", "catalog_page", "registry", "sample", "shana", "how", "about",
-                         "find", "advertise", "privacy", "contact"}
+                         "find", "advertise", "privacy", "contact", "guides", "guide"}
 
 
 @app.after_request
@@ -641,6 +642,8 @@ def inject_globals():
         go_url=go_url,
         ext_url=ext_url,
         estimate_note=lambda: estimate_note(lang),
+        gpick=lambda obj, field: ob_guides.pick(obj, field, lang),
+        guide_cta=guide_cta,
         gift_status=gift_status,
         illustration_for=illustration_for,
         fmt_date=lambda iso: fmt_date(iso, lang),
@@ -760,6 +763,26 @@ def about():
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
+
+
+@app.route("/guides")
+def guides():
+    return render_template("guides.html", guides=ob_guides.GUIDES)
+
+
+@app.route("/guides/<slug>")
+def guide(slug):
+    g = ob_guides.BY_SLUG.get(slug)
+    if not g:
+        abort(404)
+    others = [x for x in ob_guides.GUIDES if x["slug"] != slug][:3]
+    return render_template("guide.html", guide=g, others=others)
+
+
+def guide_cta(g):
+    """(url, i18n key) for the button at the end of a guide."""
+    endpoint, key = ob_guides._CTAS.get(g.get("cta", "start"), ("signup", "cta_start"))
+    return url_for(endpoint), key
 
 
 @app.route("/advertise")
@@ -2514,12 +2537,16 @@ def robots():
 def sitemap():
     pages = [ext_url(p) for p in
              ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy",
-              "advertise")]
+              "advertise", "guides")]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in pages:
         xml.append(f"<url><loc>{u}</loc></url>")
         xml.append(f"<url><loc>{u}{'&' if '?' in u else '?'}lang=he</loc></url>")
+    for g in ob_guides.GUIDES:
+        u = ext_url("guide", slug=g["slug"])
+        xml.append(f"<url><loc>{u}</loc><lastmod>{g['updated']}</lastmod></url>")
+        xml.append(f"<url><loc>{u}?lang=he</loc><lastmod>{g['updated']}</lastmod></url>")
     for r in get_db().execute("SELECT slug FROM registries WHERE visibility='public'"):
         xml.append(f"<url><loc>{ext_url('registry', slug=r['slug'])}</loc></url>")
     xml.append("</urlset>")

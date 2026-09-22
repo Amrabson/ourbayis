@@ -18,9 +18,7 @@
       <h2 class="sub-title">{{ t('rform_step_details') }}</h2>
       <div class="form-2col">
         <label>{{ t('r_title_label') }} *<input name="title" required maxlength="160" placeholder="{{ t('r_title_ph') }}" value="{{ val('title') }}"></label>
-        <label dir="rtl">{{ t('r_title_he') }}<input name="title_he" maxlength="160" value="{{ val('title_he') }}"></label>
         <label>{{ t('r_couple') }} *<input name="couple_names" required maxlength="160" placeholder="Sarah & Dovid Cohen" value="{{ val('couple_names') }}"></label>
-        <label dir="rtl">{{ t('r_couple_he') }}<input name="couple_names_he" maxlength="160" value="{{ val('couple_names_he') }}"></label>
         <label>{{ t('r_event_type') }}
           <select name="event_type">
             {% for slug, key in event_types.items() %}
@@ -32,7 +30,18 @@
         <label>{{ t('r_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim…" value="{{ val('city') }}"></label>
       </div>
       <label>{{ t('r_message') }}<textarea name="message" rows="3" maxlength="2000">{{ val('message') }}</textarea></label>
-      <label dir="rtl">{{ t('r_message_he') }}<textarea name="message_he" rows="3" maxlength="2000">{{ val('message_he') }}</textarea></label>
+
+      {# Optional Hebrew twins, collapsed by default; opened automatically when any is filled in #}
+      {% set he_details = val('title_he') or val('couple_names_he') or val('message_he') %}
+      <details class="he-fields" {% if he_details %}open{% endif %}>
+        <summary>{{ t('r_hebrew_details') }}</summary>
+        <p class="hint">{{ t('r_hebrew_hint') }}</p>
+        <div class="form-2col">
+          <label dir="rtl">{{ t('r_title_he') }}<input name="title_he" maxlength="160" value="{{ val('title_he') }}"></label>
+          <label dir="rtl">{{ t('r_couple_he') }}<input name="couple_names_he" maxlength="160" value="{{ val('couple_names_he') }}"></label>
+        </div>
+        <label dir="rtl">{{ t('r_message_he') }}<textarea name="message_he" rows="3" maxlength="2000">{{ val('message_he') }}</textarea></label>
+      </details>
 
       <h2 class="sub-title">{{ t('rform_step_prefs') }}</h2>
       <p class="hint">{{ t('rform_prefs_hint') }}</p>
@@ -69,8 +78,11 @@
       </div>
       <label>{{ t('pref_items_needed') }}<textarea name="items_needed" rows="2" maxlength="300" placeholder="{{ t('pref_items_needed_ph') }}">{{ prefs.get('items_needed', '') }}</textarea></label>
       <label>{{ t('r_delivery_note') }}<textarea name="delivery_note" rows="2" maxlength="1000">{{ val('delivery_note') }}</textarea></label>
-      <label dir="rtl">{{ t('r_delivery_note_he') }}<textarea name="delivery_note_he" rows="2" maxlength="1000">{{ val('delivery_note_he') }}</textarea></label>
       <p class="hint">{{ t('r_delivery_note_hint') }}</p>
+      <details class="he-fields" {% if val('delivery_note_he') %}open{% endif %}>
+        <summary>{{ t('r_hebrew_details') }}</summary>
+        <label dir="rtl">{{ t('r_delivery_note_he') }}<textarea name="delivery_note_he" rows="2" maxlength="1000">{{ val('delivery_note_he') }}</textarea></label>
+      </details>
 
       <h2 class="sub-title">{{ t('rform_step_payment') }}</h2>
       <p class="hint">{{ t('r_pay_hint') }}</p>

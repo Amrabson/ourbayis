@@ -358,6 +358,7 @@ def test_rates_file_is_hot_reloaded_and_env_wins(tmp_path, monkeypatch):
     assert ob_money.estimate(31000, "USD") == 10000
     # a corrupt file never wipes the previous good rates
     (tmp_path / "rates.json").write_text("{not json", encoding="utf-8")
+    monkeypatch.setattr(ob_money, "_rates_mtime", object())  # mtime can tie within the same second
     ob_money.ensure_fresh()
     assert ob_money.RATES == {"USD": 3.7}  # falls back to the default, never crashes
     monkeypatch.setenv("OB_RATES", '{"USD": 9.9}')
@@ -433,3 +434,71 @@ def test_registry_browse_controls_expose_availability(client, app_module):
     assert page.count('data-available="0"') == 1 and page.count('data-available="1"') == 3
     assert 'data-price="2290"' in page
     assert "affiliate links" in page
+
+
+# ------------------------------------------------------------------ guides + optional Hebrew fields
+def test_guides_index_and_articles_render_in_both_languages(client, app_module):
+    import guides as ob_guides
+    from markupsafe import escape  # Jinja escapes apostrophes/quotes in the copy
+    for lang in ("en", "he"):
+        index = client.get(f"/guides?lang={lang}").get_data(as_text=True)
+        for g in ob_guides.GUIDES:
+            assert f'/guides/{g["slug"]}' in index
+            page = client.get(f"/guides/{g['slug']}?lang={lang}").get_data(as_text=True)
+            assert str(escape(ob_guides.pick(g, "title", lang))) in page
+            assert '"@type": "Article"' in page
+            for s in g["sections"]:
+                assert str(escape(ob_guides.pick(s, "h", lang))) in page
+                for para in ob_guides.pick(s, "p", lang):
+                    assert str(escape(para))[:40] in page
+    assert client.get("/guides/not-a-guide").status_code == 404
+
+
+def test_every_guide_is_fully_bilingual_and_makes_no_banned_claims():
+    import guides as ob_guides
+    slugs = [g["slug"] for g in ob_guides.GUIDES]
+    assert len(slugs) == len(set(slugs))
+    banned = ("no customs", "guaranteed", "halachically permitted", "works with any", "we ship")
+    for g in ob_guides.GUIDES:
+        for field in ("title", "summary"):
+            assert g.get(field) and g.get(field + "_he"), (g["slug"], field)
+        for s in g["sections"]:
+            assert s.get("h") and s.get("h_he")
+            assert len(s["p"]) == len(s["p_he"])
+            if s.get("list"):
+                assert len(s["list"]) == len(s["list_he"])
+        blob = " ".join([g["title"], g["summary"]] +
+                        [x for s in g["sections"] for x in [s["h"]] + s["p"] + s.get("list", [])])
+        low = blob.lower()
+        assert "shabbat" not in low
+        for phrase in banned:
+            assert phrase not in low, (g["slug"], phrase)
+
+
+def test_guides_are_linked_and_in_the_sitemap(client):
+    import guides as ob_guides
+    home = client.get("/").get_data(as_text=True)
+    assert '/guides"' in home
+    sitemap = client.get("/sitemap.xml").get_data(as_text=True)
+    for g in ob_guides.GUIDES:
+        assert f"/guides/{g['slug']}</loc>" in sitemap
+        assert f"<lastmod>{g['updated']}</lastmod>" in sitemap
+    assert "/guides</loc>" in sitemap
+
+
+def test_hebrew_fields_are_collapsed_until_filled(client, app_module):
+    signup(client)
+    html = client.get("/registry/new").get_data(as_text=True)
+    assert 'class="he-fields"' in html and "Add Hebrew (optional)" in html
+    assert 'class="he-fields" open' not in html  # collapsed on a fresh form
+    tok = get_csrf(html)
+    client.post("/registry/new", data=dict(csrf_token=tok, title="Our Home", couple_names="S & D",
+                                           title_he="הבית שלנו", event_type="wedding",
+                                           visibility="unlisted"), follow_redirects=True)
+    html = client.get("/registry/edit").get_data(as_text=True)
+    assert 'class="he-fields" open' in html  # re-opened because a Hebrew value exists
+    with app_module.app.app_context():
+        reg = app_module.get_db().execute("SELECT * FROM registries").fetchone()
+    assert reg["title_he"] == "הבית שלנו"  # still saved by the same form post
+    page = client.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
+    assert "הבית שלנו" in page

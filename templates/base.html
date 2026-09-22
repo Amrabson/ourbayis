@@ -93,6 +93,7 @@
       <a href="{{ url_for('find') }}">{{ t('nav_find') }}</a>
       <a href="{{ url_for('shana') }}">{{ t('nav_shana') }}</a>
       <a href="{{ url_for('how') }}">{{ t('nav_how') }}</a>
+      <a href="{{ url_for('guides') }}">{{ t('nav_guides') }}</a>
       {% if user %}
         <a href="{{ url_for('dashboard') }}" class="nav-cta">{{ t('nav_dashboard') }}</a>
         <form method="post" action="{{ url_for('logout') }}" class="nav-logout-form">
@@ -165,6 +166,7 @@
       <a href="{{ url_for('find') }}">{{ t('nav_find') }}</a>
       <a href="{{ url_for('shana') }}">{{ t('nav_shana') }}</a>
       <a href="{{ url_for('how') }}">{{ t('nav_how') }}</a>
+      <a href="{{ url_for('guides') }}">{{ t('nav_guides') }}</a>
     </nav>
     <nav class="footer-links" aria-label="More">
       <strong>{{ brand }}</strong>

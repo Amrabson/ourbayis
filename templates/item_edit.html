@@ -11,7 +11,6 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="form-2col">
       <label>{{ t('custom_name') }} *<input name="name" required maxlength="200" value="{{ item['name'] }}"></label>
-      <label dir="rtl">{{ t('custom_name_he') }}<input name="name_he" maxlength="200" value="{{ item['name_he'] }}"></label>
       <label>{{ t('item_brand') }}<input name="brand" maxlength="80" value="{{ item['brand'] }}"></label>
       <label>{{ t('item_variant') }}<input name="variant" maxlength="120" value="{{ item['variant'] }}"></label>
       <label>{{ t('custom_url') }}<input name="url" maxlength="500" placeholder="https://…" value="{{ item['url'] }}"></label>
@@ -29,7 +28,12 @@
         <svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority') }}</label>
     </div>
     <label>{{ t('item_note') }}<textarea name="note" maxlength="1000" rows="2">{{ item['note'] }}</textarea></label>
-    <label dir="rtl">{{ t('item_note_he') }}<textarea name="note_he" maxlength="1000" rows="2">{{ item['note_he'] }}</textarea></label>
+    <details class="he-fields" {% if item['name_he'] or item['note_he'] %}open{% endif %}>
+      <summary>{{ t('r_hebrew_details') }}</summary>
+      <p class="hint">{{ t('r_hebrew_hint') }}</p>
+      <label dir="rtl">{{ t('custom_name_he') }}<input name="name_he" maxlength="200" value="{{ item['name_he'] }}"></label>
+      <label dir="rtl">{{ t('item_note_he') }}<textarea name="note_he" maxlength="1000" rows="2">{{ item['note_he'] }}</textarea></label>
+    </details>
     <button class="btn btn-primary" type="submit">{{ t('save') }}</button>
     <a class="btn btn-ghost" href="{{ url_for('items_manage') }}">{{ t('cancel') }}</a>
   </form>

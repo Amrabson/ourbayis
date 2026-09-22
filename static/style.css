@@ -526,15 +526,11 @@ html, body { overflow-x: clip; }
 }
 
 /* ---------------- responsive ---------------- */
-@media (max-width: 900px) {
-  .hero h1 { font-size: 2.4rem; }
-  .grid-3 { grid-template-columns: 1fr; }
-  .cat-grid { grid-template-columns: repeat(3, 1fr); }
-  .pop-grid { grid-template-columns: 1fr 1fr; }
-  .bundle-grid { grid-template-columns: 1fr; }
-  .form-2col { grid-template-columns: 1fr; }
-  .footer-inner { grid-template-columns: 1fr; gap: 22px; }
-
+/* The nav collapses before the rest of the layout does: five links plus the
+   sign-up button stop fitting beside the currency + language toggles at about
+   1200px (measured with the widest wording, Hebrew). Keep this in mind before
+   adding a sixth nav item — it is the first thing that overflows. */
+@media (max-width: 1200px) {
   .main-nav {
     display: none; position: absolute; top: 64px; inset-inline: 0;
     background: var(--paper); border-bottom: 1px solid var(--line);
@@ -544,7 +540,20 @@ html, body { overflow-x: clip; }
   .main-nav.open { display: flex; }
   .main-nav a { padding: 12px 14px; border-bottom: 0; }
   .main-nav a.nav-cta { margin-inline-start: 0; margin-top: 6px; text-align: center; }
+  .nav-logout-form, .main-nav .link-btn { width: 100%; }
+  .main-nav .link-btn { text-align: start; padding: 12px 14px; }
   .hamburger { display: block; }
+}
+
+@media (max-width: 900px) {
+  .hero h1 { font-size: 2.4rem; }
+  .grid-3 { grid-template-columns: 1fr; }
+  .cat-grid { grid-template-columns: repeat(3, 1fr); }
+  .pop-grid { grid-template-columns: 1fr 1fr; }
+  .bundle-grid { grid-template-columns: 1fr; }
+  .form-2col { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr; gap: 22px; }
+
 }
 @media (max-width: 520px) {
   .cat-grid { grid-template-columns: repeat(2, 1fr); }
@@ -995,3 +1004,34 @@ select.cur-toggle { width: auto; min-height: 0; margin: 0; padding: 5px 28px 5px
 .ad-band-empty { border-style: dotted; opacity: .8; }
 .ad-band-empty:hover { opacity: 1; }
 .advert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 20px 0 28px; }
+
+/* -------- guides -------- */
+.guide-list { display: flex; flex-direction: column; gap: 14px; margin: 22px 0 0; }
+.guide-card {
+  display: flex; gap: 18px; align-items: flex-start; text-decoration: none; color: var(--ink);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 20px 22px; box-shadow: var(--shadow); transition: transform .18s, box-shadow .18s, border-color .18s;
+}
+.guide-card:hover { border-color: var(--gold-bright); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.guide-icon { flex: none; width: 52px; height: 52px; border-radius: var(--radius-sm); background: var(--gold-soft); display: grid; place-items: center; }
+.guide-icon .ic-lg { width: 26px; height: 26px; }
+.guide-body { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.guide-body strong { font-family: var(--font-display); font-size: 1.35rem; font-weight: 400; color: var(--navy); line-height: 1.2; }
+.guide-summary { color: var(--ink-soft); font-size: .95rem; }
+.guide-more { color: var(--gold); font-weight: 700; font-size: .9rem; }
+.guide-article .guide-section { margin-bottom: 26px; }
+.guide-article p { font-size: 1.05rem; margin-bottom: .9em; }
+.guide-article .sub-title { margin-top: 1.6em; }
+.guide-updated { margin: -6px 0 22px; }
+.guide-bullets { margin: 0 0 4px; padding-inline-start: 22px; color: var(--ink); }
+.guide-bullets li { margin: 6px 0; }
+.guide-cta { margin-top: 34px; }
+.guide-cta h2 { margin-bottom: 14px; }
+.section-more-sep { color: var(--line); margin: 0 8px; }
+
+/* -------- optional Hebrew fields -------- */
+.he-fields { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--paper-deep); padding: 4px 16px; margin: 6px 0 14px; }
+.he-fields[open] { padding-bottom: 14px; }
+.he-fields > summary { cursor: pointer; font-weight: 700; color: var(--navy); padding: 13px 0; min-height: 44px; display: list-item; list-style-position: inside; }
+.he-fields > summary::marker { color: var(--gold); }
+.he-fields .hint { margin-top: 0; }

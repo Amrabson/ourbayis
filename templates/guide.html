@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}{{ gpick(guide, 'title') }} — {{ brand }}{% endblock %}
+{% block meta_desc %}{{ gpick(guide, 'summary') }}{% endblock %}
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": {{ gpick(guide, 'title') | tojson }},
+  "description": {{ gpick(guide, 'summary') | tojson }},
+  "dateModified": "{{ guide['updated'] }}",
+  "inLanguage": "{{ 'he' if rtl else 'en' }}",
+  "publisher": { "@type": "Organization", "name": {{ brand | tojson }} }
+}
+</script>
+{% endblock %}
+{% block content %}
+<article class="wrap section narrow guide-article">
+  <p class="eyebrow"><a href="{{ url_for('guides') }}">{{ t('guides_title') }}</a></p>
+  <h1 class="section-title">{{ gpick(guide, 'title') }}</h1>
+  <p class="page-sub">{{ gpick(guide, 'summary') }}</p>
+  <p class="hint guide-updated">{{ tf('guide_updated', date=fmt_date(guide['updated'])) }}</p>
+
+  {% for s in guide['sections'] %}
+  <section class="guide-section">
+    <h2 class="sub-title">{{ gpick(s, 'h') }}</h2>
+    {% for para in gpick(s, 'p') %}<p>{{ para }}</p>{% endfor %}
+    {% set bullets = gpick(s, 'list') %}
+    {% if bullets %}
+    <ul class="guide-bullets">{% for li in bullets %}<li>{{ li }}</li>{% endfor %}</ul>
+    {% endif %}
+  </section>
+  {% endfor %}
+
+  {% set cta = guide_cta(guide) %}
+  <div class="cta-panel guide-cta">
+    <h2>{{ t('guide_cta_title') }}</h2>
+    <a class="btn btn-primary btn-lg" href="{{ cta[0] }}">{{ t(cta[1]) }}</a>
+  </div>
+
+  {% if others %}
+  <h2 class="sub-title">{{ t('guides_more') }}</h2>
+  <div class="guide-list">
+    {% for g in others %}
+    <a class="guide-card" href="{{ url_for('guide', slug=g['slug']) }}">
+      <span class="guide-icon"><svg class="ic ic-lg" aria-hidden="true"><use href="#{{ g['icon'] }}"/></svg></span>
+      <span class="guide-body">
+        <strong>{{ gpick(g, 'title') }}</strong>
+        <span class="guide-summary">{{ gpick(g, 'summary') }}</span>
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</article>
+{% endblock %}
