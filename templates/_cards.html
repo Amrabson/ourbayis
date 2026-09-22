@@ -85,7 +85,7 @@
   {%- set _tag = 'a' if mode == 'link' else 'article' -%}
   <{{ _tag }} class="gift-card {% if st and st.left <= 0 %}is-gifted{% endif %} {% if mode == 'link' %}gift-card-link{% endif %}"
     {% if mode == 'link' %}href="{{ url_for('catalog_page', cat=item['category'], q=None) }}#c-{{ item['id'] }}"{% endif %}
-    {% if mode in ('registry', 'sample') %}id="item-{{ item['id'] if item['id'] > 0 else 's' ~ (-item['id']) }}" data-cat="{{ item['category'] }}"{% endif %}
+    {% if mode in ('registry', 'sample') %}id="item-{{ item['id'] if item['id'] > 0 else 's' ~ (-item['id']) }}" data-cat="{{ item['category'] }}" data-price="{{ item['price_nis'] or 0 }}" data-available="{{ '1' if (st and st.left > 0) else '0' }}"{% endif %}
     {% if mode == 'catalog' %}id="c-{{ item['id'] }}"{% endif %}>
     {{ gift_media(item) }}
     <div class="gift-body">

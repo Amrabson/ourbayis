@@ -13,18 +13,16 @@ admin queues/CSV/outbox, draft/unlisted/public, canonical/hreflang/JSON-LD/og im
 parchment redesign, currency estimates with a rate note. 47 automated tests.
 
 ## Still open (code)
-- [ ] Guest reminder email / "did you get a chance to order X?" scheduled task (needs a `reminded`
-  column + `manage.py remind-claims`; bounded, never twice).
-- [ ] `/advertise` page (inbound ad sales) and a "your ad here" line in the ad band.
-- [ ] Viral CTA on the public registry page ("Create your own registry") — small, bilingual.
-- [ ] Affiliate disclosure line near store buttons on registry/catalog (Amazon ToS) — one muted line.
+- [x] Guest reminder email — `manage.py remind-claims` (2026-09-22).
+- [x] `/advertise` page + "your ad here" band (2026-09-22).
+- [x] Viral CTA on the public registry page (2026-09-17).
+- [x] Affiliate disclosure line (2026-09-22) — wording is generic; if you join Amazon Associates, add
+  their required sentence to `affiliate_note` (EN+HE).
 - [ ] `/guides` bilingual content section (SEO) — 4 launch articles specced in the July roadmap.
-- [ ] Registry page browsing polish for big registries: category chips exist; add an "available only"
-  toggle and "most wanted first" sort.
+- [x] Registry "available only" toggle + price sort (2026-09-22); server order is already most-wanted-first.
 - [ ] Item-specific illustrations cover ~27 shapes; extend `_ILLUSTRATION_RULES` when new seed items
   don't match (they fall back to the category drawing, never to a wrong item).
-- [ ] Per-path page-view counter (privacy-safe) to feed /advertise numbers; funnel_events only
-  counts named events today.
+- [x] Per-page view counters (2026-09-22) — `view:<endpoint>` rows in the admin funnel table.
 - [ ] Hebrew registry-form fields could collapse into an "Add Hebrew" `<details>` (spec) — they are
   inline-but-optional today.
 - [ ] Group gifting / chip-in toward big-ticket items — deliberately deferred (SPEC_V3 "Defer").

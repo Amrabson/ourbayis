@@ -48,7 +48,7 @@
   </div>
 
   {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
-  <p class="hint catalog-legend">{{ t('catalog_legend') }}</p>
+  <p class="hint catalog-legend">{{ t('catalog_legend') }} {{ t('affiliate_note') }}</p>
   {% if not items %}
     <p class="empty-note">{{ t('catalog_none') }} <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a></p>
   {% endif %}

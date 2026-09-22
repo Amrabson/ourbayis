@@ -49,6 +49,7 @@
     <a class="store-link bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
       <svg class="ic"><use href="#i-link"/></svg> {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
     {% endif %}
+    {% if item['url'] %}<p class="hint">{{ t('affiliate_note') }}</p>{% endif %}
     {% endif %}
 
     {% if claim['kind'] == 'cash' and pay_links %}

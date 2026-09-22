@@ -18,7 +18,7 @@ import argparse
 import getpass
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 import ob_db
@@ -85,6 +85,54 @@ def cmd_expire_claims(args):
                 "INSERT INTO claim_events (claim_id, event, actor, note) VALUES (?,?,?,?)",
                 (r["id"], "expired", "system", ""))
     print(f"Expired {len(rows)} claim(s).")
+    return 0
+
+
+REMIND_AFTER_DAYS = 5   # reservation age before the single nudge
+REMIND_LIMIT = 200       # per run, so a backlog never floods the outbox
+
+
+def cmd_remind_claims(args):
+    """Queue ONE reminder to each guest who reserved a gift with an email,
+    hasn't reported it after REMIND_AFTER_DAYS, and hasn't been reminded.
+    Idempotent: sets claims.reminded_at, so re-running never sends twice.
+    Bodies are bilingual (claims don't record the guest's language)."""
+    import i18n
+    db = _open()
+    cutoff = (datetime.utcnow() - timedelta(days=REMIND_AFTER_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    base = os.environ.get("OB_BASE_URL", "").rstrip("/")
+    rows = db.execute(
+        "SELECT c.id, c.guest_email, c.token_hash, c.expires_at, c.kind,"
+        " ri.name AS item_name, r.title AS reg_title, r.slug FROM claims c"
+        " JOIN registries r ON r.id = c.registry_id"
+        " LEFT JOIN registry_items ri ON ri.id = c.item_id"
+        " WHERE c.status='reserved' AND c.guest_email != '' AND c.reminded_at IS NULL"
+        " AND c.created_at <= ? AND (c.expires_at IS NULL OR c.expires_at > ?)"
+        " ORDER BY c.created_at LIMIT ?", (cutoff, now, REMIND_LIMIT)).fetchall()
+    if args.dry_run:
+        print(f"{len(rows)} reminder(s) would be queued.")
+        return 0
+    sent = 0
+    for r in rows:
+        # the raw recovery token is never stored, so the reminder points at the
+        # registry (the guest's own "save this link" email carried the /g/ link)
+        link = f"{base}/r/{r['slug']}" if base else f"/r/{r['slug']}"
+        item = r["item_name"] or i18n.t("gift_cash", "en")
+        item_he = r["item_name"] or i18n.t("gift_cash", "he")
+        subject = i18n.t("mail_remind_subj", "en").format(item=item)
+        body = (i18n.t("mail_remind_body", "en").format(item=item, title=r["reg_title"], link=link,
+                                                        until=(r["expires_at"] or "")[:10])
+                + "\n\n— — —\n\n"
+                + i18n.t("mail_remind_body", "he").format(item=item_he, title=r["reg_title"], link=link,
+                                                          until=(r["expires_at"] or "")[:10]))
+        with ob_db.write_txn(db):
+            # mark first, then queue — a crash between the two loses one nudge, never repeats it
+            db.execute("UPDATE claims SET reminded_at=? WHERE id=? AND reminded_at IS NULL",
+                       (now, r["id"]))
+            ob_mail.enqueue(db, r["guest_email"], subject, body)
+        sent += 1
+    print(f"Queued {sent} reminder(s).")
     return 0
 
 
@@ -203,6 +251,11 @@ def main():
 
     sp = sub.add_parser("expire-claims")
     sp.set_defaults(fn=cmd_expire_claims)
+
+    sp = sub.add_parser("remind-claims",
+                        help="queue one nudge per stale reservation that has a guest email")
+    sp.add_argument("--dry-run", action="store_true")
+    sp.set_defaults(fn=cmd_remind_claims)
 
     sp = sub.add_parser("check")
     sp.set_defaults(fn=cmd_check)

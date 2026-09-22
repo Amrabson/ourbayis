@@ -54,7 +54,7 @@
   {% endif %}
 
   <h2 class="section-title">{{ t('reg_gifts') }}</h2>
-  <p class="hint reg-how-note">{{ t('reg_how_note') }}</p>
+  <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}</p>
   {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
   {% if not items %}
@@ -62,12 +62,26 @@
   {% endif %}
 
   {% set cats_present = items | map(attribute='category') | unique | list %}
-  {% if cats_present | length > 1 %}
-  <div class="chip-row" id="cat-chips" role="group" aria-label="{{ t('all_cats') }}">
-    <button class="chip active" data-filter="all" aria-pressed="true">{{ t('all_cats') }}</button>
-    {% for c in cats_present %}
-    <button class="chip" data-filter="{{ c }}" aria-pressed="false">{{ cat_label(c) }}</button>
-    {% endfor %}
+  {% if items | length > 3 %}
+  <div class="reg-controls" id="reg-controls">
+    {% if cats_present | length > 1 %}
+    <div class="chip-row" id="cat-chips" role="group" aria-label="{{ t('all_cats') }}">
+      <button class="chip active" data-filter="all" aria-pressed="true">{{ t('all_cats') }}</button>
+      {% for c in cats_present %}
+      <button class="chip" data-filter="{{ c }}" aria-pressed="false">{{ cat_label(c) }}</button>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="reg-controls-row">
+      <label class="check-label reg-available"><input type="checkbox" id="only-available"> {{ t('reg_only_available') }}</label>
+      <label class="reg-sort"><span class="sr-only">{{ t('filter_sort') }}</span>
+        <select id="reg-sort">
+          <option value="">{{ t('reg_sort_default') }}</option>
+          <option value="price_asc">{{ t('sort_price_asc') }}</option>
+          <option value="price_desc">{{ t('sort_price_desc') }}</option>
+        </select></label>
+      <span class="hint reg-count" id="reg-count" aria-live="polite" data-label="{{ t('result_count') }}"></span>
+    </div>
   </div>
   {% endif %}
 

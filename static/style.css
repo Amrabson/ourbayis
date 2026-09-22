@@ -985,3 +985,13 @@ dialog:focus-visible { outline: none; }
 .jump-link { font: 600 .9rem var(--font-body); margin-inline-start: 12px; color: var(--gold); }
 .cur-form { display: inline-flex; margin: 0; }
 select.cur-toggle { width: auto; min-height: 0; margin: 0; padding: 5px 28px 5px 12px; background: transparent; font-weight: 700; cursor: pointer; font-size: .9rem; direction: ltr; }
+.reg-controls { margin: 0 0 18px; }
+.reg-controls .chip-row { margin-bottom: 10px; }
+.reg-controls-row { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.reg-available { margin: 0; font-size: .92rem; }
+.reg-sort { margin: 0; }
+.reg-sort select { width: auto; margin: 0; min-height: 38px; padding: 6px 30px 6px 12px; font-size: .92rem; }
+.reg-count { margin-inline-start: auto; }
+.ad-band-empty { border-style: dotted; opacity: .8; }
+.ad-band-empty:hover { opacity: 1; }
+.advert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 20px 0 28px; }

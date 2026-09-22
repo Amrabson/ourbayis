@@ -6,7 +6,7 @@
 <title>הבית החדש שלנו בירושלים — OurBayis</title>
 <meta name="description" content="רשימה עבור זוג לדוגמה">
 
-<meta name="csrf-token" content="d5a7bb3fde9febda1e0bf4a2be9a127b">
+<meta name="csrf-token" content="dfdc551145b0b6fdc30d5f406043b81f">
 
 
 <meta property="og:title" content="הבית החדש שלנו בירושלים — OurBayis">
@@ -144,24 +144,38 @@
   
 
   <h2 class="section-title">רשימת המתנות</h2>
-  <p class="hint reg-how-note">משריינים מתנה, ואז קונים אותה בחנות המקושרת או שולחים לזוג את הכסף — ומודיעים להם שהיא בדרך. שריון שומר את המתנה ל-14 יום.</p>
+  <p class="hint reg-how-note">משריינים מתנה, ואז קונים אותה בחנות המקושרת או שולחים לזוג את הכסף — ומודיעים להם שהיא בדרך. שריון שומר את המתנה ל-14 יום. חלק מקישורי החנויות הם קישורי שותפים: OurBayis עשוי לקבל עמלה קטנה, ללא עלות לכם או לזוג.</p>
   <p class="hint rates-note">סכומים עם ≈ ב-USD הם הערכה משוערת בלבד (שער נכון ל-⁨2026-09-17⁩) להתמצאות. המחירים נקבעים בשקלים; מה שתשלמו בפועל תלוי בחנות או בספק התשלום ובשער של הבנק שלכם.</p>
 
   
 
   
   
-  <div class="chip-row" id="cat-chips" role="group" aria-label="כל הקטגוריות">
-    <button class="chip active" data-filter="all" aria-pressed="true">כל הקטגוריות</button>
+  <div class="reg-controls" id="reg-controls">
     
-    <button class="chip" data-filter="appliances" aria-pressed="false">מוצרי חשמל</button>
+    <div class="chip-row" id="cat-chips" role="group" aria-label="כל הקטגוריות">
+      <button class="chip active" data-filter="all" aria-pressed="true">כל הקטגוריות</button>
+      
+      <button class="chip" data-filter="appliances" aria-pressed="false">מוצרי חשמל</button>
+      
+      <button class="chip" data-filter="dining" aria-pressed="false">שולחן שבת ואירוח</button>
+      
+      <button class="chip" data-filter="bedding" aria-pressed="false">מצעים ואמבטיה</button>
+      
+      <button class="chip" data-filter="judaica" aria-pressed="false">יודאיקה ותשמישי קדושה</button>
+      
+    </div>
     
-    <button class="chip" data-filter="dining" aria-pressed="false">שולחן שבת ואירוח</button>
-    
-    <button class="chip" data-filter="bedding" aria-pressed="false">מצעים ואמבטיה</button>
-    
-    <button class="chip" data-filter="judaica" aria-pressed="false">יודאיקה ותשמישי קדושה</button>
-    
+    <div class="reg-controls-row">
+      <label class="check-label reg-available"><input type="checkbox" id="only-available"> להציג רק מתנות שעדיין פנויות</label>
+      <label class="reg-sort"><span class="sr-only">מיון</span>
+        <select id="reg-sort">
+          <option value="">לפי סדר הזוג (הכי רצוי קודם)</option>
+          <option value="price_asc">מחיר: מהנמוך לגבוה</option>
+          <option value="price_desc">מחיר: מהגבוה לנמוך</option>
+        </select></label>
+      <span class="hint reg-count" id="reg-count" aria-live="polite" data-label="{n} מתנות"></span>
+    </div>
   </div>
   
 
@@ -170,7 +184,7 @@
     
     <article class="gift-card  "
     
-    id="item-s1" data-cat="appliances"
+    id="item-s1" data-cat="appliances" data-price="305" data-available="1"
     >
     <div class="gift-ph ph-appliances ill-box " role="img" aria-label="פלטת שבת — איור, לא תמונת מוצר">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-platta"/></svg>
@@ -185,7 +199,7 @@
     
     <article class="gift-card  "
     
-    id="item-s2" data-cat="appliances"
+    id="item-s2" data-cat="appliances" data-price="499" data-available="1"
     >
     <div class="gift-ph ph-appliances ill-box " role="img" aria-label="מיחם מים לשבת — איור, לא תמונת מוצר">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-urn"/></svg>
@@ -200,7 +214,7 @@
     
     <article class="gift-card is-gifted "
     
-    id="item-s3" data-cat="appliances"
+    id="item-s3" data-cat="appliances" data-price="2290" data-available="0"
     >
     <div class="gift-ph ph-appliances ill-box " role="img" aria-label="מיקסר עומד — איור, לא תמונת מוצר">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-mixer"/></svg>
@@ -215,7 +229,7 @@
     
     <article class="gift-card is-gifted "
     
-    id="item-s4" data-cat="dining"
+    id="item-s4" data-cat="dining" data-price="199" data-available="0"
     >
     <div class="gift-ph ph-dining ill-box " role="img" aria-label="סט כלי אוכל — בשרי — איור, לא תמונת מוצר">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-dinnerware"/></svg>
@@ -230,7 +244,7 @@
     
     <article class="gift-card  "
     
-    id="item-s5" data-cat="bedding"
+    id="item-s5" data-cat="bedding" data-price="200" data-available="1"
     >
     <div class="gift-ph ph-bedding ill-box " role="img" aria-label="סט מגבות — איור, לא תמונת מוצר">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-towel"/></svg>
@@ -245,7 +259,7 @@
     
     <article class="gift-card is-gifted "
     
-    id="item-s6" data-cat="judaica"
+    id="item-s6" data-cat="judaica" data-price="300" data-available="0"
     >
     <div class="gift-ph ph-judaica ill-box " role="img" aria-label="פמוטי שבת — איור, לא תמונת מוצר">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-candlesticks"/></svg>
@@ -296,7 +310,7 @@
       <strong>OurBayis</strong>
       <a href="../../he/about/">אודות</a>
       <a href="../../he/contact/">צור קשר</a>
-      <a href="../../he/contact/">פרסמו אצלנו</a>
+      <a href="../../he/advertise/">פרסמו אצלנו</a>
       <a href="../../he/privacy/">פרטיות</a>
     </nav>
   </div>

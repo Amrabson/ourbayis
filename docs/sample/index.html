@@ -6,7 +6,7 @@
 <title>Our new bayis in Yerushalayim — OurBayis</title>
 <meta name="description" content="Registry for A sample couple">
 
-<meta name="csrf-token" content="c52efcff0b44e9e58ab688b0380b3f6a">
+<meta name="csrf-token" content="db2c0454d9b1b9e36bc7e25779a0bd62">
 
 
 <meta property="og:title" content="Our new bayis in Yerushalayim — OurBayis">
@@ -144,24 +144,38 @@
   
 
   <h2 class="section-title">Gift list</h2>
-  <p class="hint reg-how-note">Reserve a gift, then buy it from the linked store or send the money to the couple — and let them know it&#39;s on its way. Reservations hold a gift for 14 days.</p>
+  <p class="hint reg-how-note">Reserve a gift, then buy it from the linked store or send the money to the couple — and let them know it&#39;s on its way. Reservations hold a gift for 14 days. Some store links are affiliate links: OurBayis may earn a small commission at no cost to you or the couple.</p>
   <p class="hint rates-note">≈ amounts in USD are approximate estimates (rate as of ⁨2026-09-17⁩) for orientation only. Prices are set in shekels; what you actually pay depends on the store or payment provider and your bank&#39;s rate.</p>
 
   
 
   
   
-  <div class="chip-row" id="cat-chips" role="group" aria-label="All categories">
-    <button class="chip active" data-filter="all" aria-pressed="true">All categories</button>
+  <div class="reg-controls" id="reg-controls">
     
-    <button class="chip" data-filter="appliances" aria-pressed="false">Appliances</button>
+    <div class="chip-row" id="cat-chips" role="group" aria-label="All categories">
+      <button class="chip active" data-filter="all" aria-pressed="true">All categories</button>
+      
+      <button class="chip" data-filter="appliances" aria-pressed="false">Appliances</button>
+      
+      <button class="chip" data-filter="dining" aria-pressed="false">Dining &amp; Shabbos table</button>
+      
+      <button class="chip" data-filter="bedding" aria-pressed="false">Bedding &amp; Bath</button>
+      
+      <button class="chip" data-filter="judaica" aria-pressed="false">Judaica</button>
+      
+    </div>
     
-    <button class="chip" data-filter="dining" aria-pressed="false">Dining &amp; Shabbos table</button>
-    
-    <button class="chip" data-filter="bedding" aria-pressed="false">Bedding &amp; Bath</button>
-    
-    <button class="chip" data-filter="judaica" aria-pressed="false">Judaica</button>
-    
+    <div class="reg-controls-row">
+      <label class="check-label reg-available"><input type="checkbox" id="only-available"> Show only gifts still available</label>
+      <label class="reg-sort"><span class="sr-only">Sort</span>
+        <select id="reg-sort">
+          <option value="">Couple&#39;s order (most wanted first)</option>
+          <option value="price_asc">Price: low to high</option>
+          <option value="price_desc">Price: high to low</option>
+        </select></label>
+      <span class="hint reg-count" id="reg-count" aria-live="polite" data-label="{n} gifts"></span>
+    </div>
   </div>
   
 
@@ -170,7 +184,7 @@
     
     <article class="gift-card  "
     
-    id="item-s1" data-cat="appliances"
+    id="item-s1" data-cat="appliances" data-price="305" data-available="1"
     >
     <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Shabbos hot plate (platta) — illustration, not a product photo">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-platta"/></svg>
@@ -185,7 +199,7 @@
     
     <article class="gift-card  "
     
-    id="item-s2" data-cat="appliances"
+    id="item-s2" data-cat="appliances" data-price="499" data-available="1"
     >
     <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Shabbos urn (meicham) — illustration, not a product photo">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-urn"/></svg>
@@ -200,7 +214,7 @@
     
     <article class="gift-card is-gifted "
     
-    id="item-s3" data-cat="appliances"
+    id="item-s3" data-cat="appliances" data-price="2290" data-available="0"
     >
     <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Stand mixer — illustration, not a product photo">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-mixer"/></svg>
@@ -215,7 +229,7 @@
     
     <article class="gift-card is-gifted "
     
-    id="item-s4" data-cat="dining"
+    id="item-s4" data-cat="dining" data-price="199" data-available="0"
     >
     <div class="gift-ph ph-dining ill-box " role="img" aria-label="Dinnerware set — fleishig — illustration, not a product photo">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-dinnerware"/></svg>
@@ -230,7 +244,7 @@
     
     <article class="gift-card  "
     
-    id="item-s5" data-cat="bedding"
+    id="item-s5" data-cat="bedding" data-price="200" data-available="1"
     >
     <div class="gift-ph ph-bedding ill-box " role="img" aria-label="Towel set — illustration, not a product photo">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-towel"/></svg>
@@ -245,7 +259,7 @@
     
     <article class="gift-card is-gifted "
     
-    id="item-s6" data-cat="judaica"
+    id="item-s6" data-cat="judaica" data-price="300" data-available="0"
     >
     <div class="gift-ph ph-judaica ill-box " role="img" aria-label="Shabbos candlesticks — illustration, not a product photo">
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-candlesticks"/></svg>
@@ -296,7 +310,7 @@
       <strong>OurBayis</strong>
       <a href="../about/">About</a>
       <a href="../contact/">Contact</a>
-      <a href="../contact/">Advertise with us</a>
+      <a href="../advertise/">Advertise with us</a>
       <a href="../privacy/">Privacy</a>
     </nav>
   </div>

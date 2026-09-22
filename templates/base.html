@@ -134,6 +134,12 @@
 </main>
 
 {% block ad %}
+{% if not site_ad and request.endpoint in ('index', 'catalog_page', 'find', 'how') %}
+<div class="wrap"><a class="ad-band ad-band-empty" href="{{ url_for('advertise') }}">
+  <span class="ad-tag">{{ t('sponsored') }}</span>
+  <span class="ad-body">{{ t('ad_your_ad_here') }} {{ '←' if rtl else '→' }}</span>
+</a></div>
+{% endif %}
 {% if site_ad %}
 <div class="wrap"><a class="ad-band" href="{{ site_ad['link_url'] or '#' }}" {% if site_ad['link_url'] %}target="_blank" rel="noopener sponsored"{% endif %}>
   <span class="ad-tag">{{ t('sponsored') }}</span>
@@ -164,7 +170,7 @@
       <strong>{{ brand }}</strong>
       <a href="{{ url_for('about') }}">{{ t('nav_about') }}</a>
       <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>
-      <a href="{{ url_for('contact') }}?topic=partner">{{ t('footer_advertise') }}</a>
+      <a href="{{ url_for('advertise') }}">{{ t('footer_advertise') }}</a>
       <a href="{{ url_for('privacy') }}">{{ t('nav_privacy') }}</a>
     </nav>
   </div>

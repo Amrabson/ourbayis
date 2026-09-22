@@ -373,3 +373,63 @@ def test_currency_select_and_query_route(client, app_module):
     assert r.status_code == 302 and r.headers["Location"].endswith("/catalog")
     assert "≈ £" in client.get("/catalog").get_data(as_text=True)
     assert client.get("/currency?code=XXX").status_code == 302  # ignored, no 500
+
+
+# ------------------------------------------------------------------ batch 3: reminders, views, advertise, browse controls
+def test_remind_claims_is_bounded_and_idempotent(client, app_module, tmp_path):
+    import subprocess
+    import sys
+    reg, items = _couple_with_catalog_items(client, app_module, ["towel-set", "stand-mixer"], pay=True)
+    ids = list(items)
+    _claim(app_module, reg["slug"], items[ids[0]]["id"], guest_email="g1@example.com")
+    _claim(app_module, reg["slug"], items[ids[1]]["id"])  # no email → never reminded
+    env = {**os.environ, "OB_DB_PATH": os.environ["OB_DB_PATH"], "OB_BASE_URL": "https://ourbayis.example",
+           "PYTHONIOENCODING": "utf-8"}
+    run = lambda *a: subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), "remind-claims", *a],
+                                    cwd=BASE, env=env, capture_output=True, text=True)
+    assert "0 reminder(s) would be queued" in run("--dry-run").stdout  # too fresh
+    with app_module.app.app_context():
+        app_module.get_db().execute("UPDATE claims SET created_at = datetime('now', '-6 days')")
+    assert "Queued 1 reminder(s)" in run().stdout
+    assert "Queued 0 reminder(s)" in run().stdout  # never twice
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        mail = db.execute("SELECT to_addr, subject, body FROM mail_outbox WHERE subject LIKE '%reminder%'").fetchall()
+        assert len(mail) == 1 and mail[0]["to_addr"] == "g1@example.com"
+        assert "Towel set" in mail[0]["subject"] and "https://ourbayis.example/r/" in mail[0]["body"]
+        assert "שלום" in mail[0]["body"]  # bilingual body
+        assert db.execute("SELECT COUNT(*) FROM claims WHERE reminded_at IS NOT NULL").fetchone()[0] == 1
+
+
+def test_page_views_are_counted_without_pii_and_skip_owner(client, app_module):
+    app_module.app.test_client().get("/")
+    app_module.app.test_client().get("/catalog?cat=kitchen")
+    reg, _ = _couple_with_catalog_items(client, app_module, ["towel-set"])
+    client.get(f"/r/{reg['slug']}")  # the owner's own visit
+    app_module.app.test_client().get(f"/r/{reg['slug']}")  # a guest
+    with app_module.app.app_context():
+        rows = {r["name"]: r["n"] for r in app_module.get_db().execute("SELECT name, n FROM funnel_events")}
+    assert rows["view:index"] == 1 and rows["view:catalog_page"] == 1
+    assert rows["view:registry"] == 1
+    assert not any(k.startswith("view:") and ("kitchen" in k or reg["slug"] in k) for k in rows)
+
+
+def test_advertise_page_and_empty_ad_band(client):
+    for lang in ("en", "he"):
+        html = client.get(f"/advertise?lang={lang}").get_data(as_text=True)
+        assert "topic=partner" in html and "ad-band" not in html  # no ad band on the ad page itself
+    home = client.get("/").get_data(as_text=True)
+    assert 'class="ad-band ad-band-empty"' in home and 'href="/advertise"' in home
+    assert "affiliate links" in client.get("/catalog?lang=en").get_data(as_text=True)
+
+
+def test_registry_browse_controls_expose_availability(client, app_module):
+    reg, items = _couple_with_catalog_items(
+        client, app_module, ["towel-set", "stand-mixer", "shabbos-urn-meicham", "electric-kettle"])
+    ids = list(items)
+    _claim(app_module, reg["slug"], items[ids[0]]["id"])
+    page = client.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    assert 'id="only-available"' in page and 'id="reg-sort"' in page
+    assert page.count('data-available="0"') == 1 and page.count('data-available="1"') == 3
+    assert 'data-price="2290"' in page
+    assert "affiliate links" in page

@@ -21,7 +21,7 @@ CANDIDATES = [
     "google-chrome", "chromium", "chrome",
 ]
 PAGES = {"home": "/", "sample": "/sample", "catalog": "/catalog", "shana": "/shana-rishonah",
-         "how": "/how-it-works", "about": "/about", "privacy": "/privacy"}
+         "how": "/how-it-works", "about": "/about", "privacy": "/privacy", "advertise": "/advertise"}
 # headless Chrome on Windows won't lay out narrower than ~500px, so phone-width
 # checks are done in the in-app Browser pane (resize_window "mobile") instead.
 WIDTHS = {"desktop": (1280, 2400), "tablet": (768, 2400), "narrow": (520, 2200)}

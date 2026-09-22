@@ -223,6 +223,15 @@ Gift grid: auto-fill ≥240px, 2 columns ≤520px, 1 column ≤430px. Prices/URL
 - Tooling: `tools/screenshots.py` (headless Chrome; needs ≥520px windows, phone checks in the Browser
   pane), `tools/render_private.py` (logged-in pages on a temp DB), `tools/export_static.py` (docs/).
 
+## Batch 2026-09-22
+- `manage.py remind-claims` (daily, after `expire-claims`): see CHANGELOG; `claims.reminded_at`.
+- `count_page_views` after_request → `funnel_events` rows named `view:<endpoint>` for
+  `PUBLIC_VIEW_ENDPOINTS`; `g.registry_owner_uid` is set by the registry route so owner self-views are skipped.
+- `/advertise` page (`advertise.html`, i18n `adv_*`); empty-ad "Your ad here" band in base.html.
+- Registry browse controls (`#reg-controls`, `#only-available`, `#reg-sort`) handled in app.js
+  `applyRegistryView()`; cards expose `data-cat`/`data-price`/`data-available`.
+- `affiliate_note` i18n key: the only affiliate disclosure text — reuse it, don't write another.
+
 ## SEO / privacy facts (current)
 `canonical_url`/`alt_urls`/`noindex` come from the context processor: canonical = path only (+`?lang=he`
 for the Hebrew variant), hreflang en/he/x-default, `noindex` for admin/dashboard/account/edit/`/g/` pages,

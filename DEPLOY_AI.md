@@ -77,6 +77,10 @@ cd ~/ourbayis && venv/bin/python manage.py seed-sync --fields price_nis,url --ap
 # after editing catalog items in /admin/catalog: push url/image/store/brand/model/notes and the
 # stock flag (availability) out to registry_items that came from the catalog; fields the couple
 # edited themselves are skipped (availability is always refreshed); claims are never touched
+# daily, after expire-claims: one bilingual nudge to guests who reserved 5+ days ago with an
+# email and haven't reported; never sends twice (claims.reminded_at). Needs SMTP to actually go out.
+cd ~/ourbayis && venv/bin/python manage.py remind-claims
+
 # daily: refresh the ≈ conversion rates (ECB reference rates via frankfurter.app, no key needed);
 # writes instance/rates.json, the web app re-reads it on the next request — no Reload needed
 cd ~/ourbayis && venv/bin/python manage.py fetch-rates

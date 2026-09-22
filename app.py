@@ -100,6 +100,29 @@ NOINDEX_ENDPOINTS = {
 
 
 # ---------------------------------------------------------------- security
+PUBLIC_VIEW_ENDPOINTS = {"index", "catalog_page", "registry", "sample", "shana", "how", "about",
+                         "find", "advertise", "privacy", "contact"}
+
+
+@app.after_request
+def count_page_views(resp):
+    """Privacy-safe per-page counters (no IP, no UA, no path params): one
+    funnel row per endpoint per day, for public HTML GETs only. Feeds the
+    admin funnel table and the audience figures the owner can quote to
+    advertisers. Owners viewing their own registry are not counted."""
+    try:
+        if (request.method == "GET" and resp.status_code == 200
+                and request.endpoint in PUBLIC_VIEW_ENDPOINTS
+                and resp.mimetype == "text/html" and not session.get("admin")):
+            owner_uid = None
+            if request.endpoint == "registry" and getattr(g, "registry_owner_uid", None):
+                owner_uid = g.registry_owner_uid
+            track("view:" + request.endpoint, owner_uid=owner_uid)
+    except Exception:  # noqa: BLE001 — counting must never break a page
+        pass
+    return resp
+
+
 @app.before_request
 def refresh_rates():
     ob_money.ensure_fresh()  # picks up instance/rates.json written by `manage.py fetch-rates`
@@ -739,6 +762,13 @@ def privacy():
     return render_template("privacy.html")
 
 
+@app.route("/advertise")
+def advertise():
+    """Inbound ad / partnership page. Deliberately carries no audience numbers
+    (nothing to cite yet) — the admin funnel has the real page-view counts."""
+    return render_template("advertise.html")
+
+
 @app.route("/catalog")
 def catalog_page():
     """Public catalog — browse everything without an account."""
@@ -884,6 +914,7 @@ def registry(slug):
     if not reg:
         abort(404)
     is_owner = session.get("uid") == reg["user_id"]
+    g.registry_owner_uid = reg["user_id"]
     if reg["display_currency"] in ob_money.CURRENCIES and reg["display_currency"] != "ILS":
         g.display_currency = reg["display_currency"]  # couple's suggested guest currency
     if reg["visibility"] == "draft" and not is_owner and not session.get("admin"):
@@ -2482,7 +2513,8 @@ def robots():
 @app.route("/sitemap.xml")
 def sitemap():
     pages = [ext_url(p) for p in
-             ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy")]
+             ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy",
+              "advertise")]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in pages:

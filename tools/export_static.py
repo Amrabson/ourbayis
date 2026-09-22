@@ -45,6 +45,7 @@ PAGES = {  # url -> output dir (relative)
     "/privacy": "privacy",
     "/contact": "contact",
     "/sample": "sample",
+    "/advertise": "advertise",
 }
 AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new")
 

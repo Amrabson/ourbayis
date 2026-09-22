@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-09-22 — reminders, page-view counters, /advertise, registry browse controls, affiliate line
+- `manage.py remind-claims [--dry-run]`: one bilingual nudge per reservation that has a guest email,
+  is 5+ days old, still `reserved`, not expired and not yet reminded (`claims.reminded_at`, migration
+  19; the flag is set before the mail is queued so a crash can lose a nudge but never duplicate one;
+  200 per run). Links to the registry page — the raw `/g/` token is never stored, so it can't be resent.
+- Privacy-safe page views: `after_request` counts `view:<endpoint>` per day in `funnel_events` for
+  public HTML GETs (no IP/UA/params; owners viewing their own registry and admins excluded). Shows in
+  the admin funnel table; gives the owner real numbers to quote to advertisers.
+- `/advertise` (bilingual, in sitemap): audience, three formats, no invented traffic figures, links to
+  the contact form with `topic=partner`. Footer "Advertise with us" now points there; when no ad is
+  active, the homepage/catalog/find/how pages show a dotted "Your ad here" band linking to it.
+- Registry page: "Show only gifts still available" toggle + price sort (client-side; cards carry
+  `data-available`/`data-price`; dialogs move with their cards; live count). Also on `/sample`.
+- Affiliate disclosure (one muted sentence) on the registry, catalog and guest page near store links.
+- Tests: +4 → **75 passed**.
+
 ## 2026-09-17 — live-ish exchange rates + delivery decision
 - `manage.py fetch-rates` pulls ECB reference rates (frankfurter.app, free, no key) for
   USD/GBP/EUR/CAD/AUD/ZAR, inverts them to ILS-per-unit and writes `instance/rates.json` atomically

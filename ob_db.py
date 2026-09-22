@@ -427,6 +427,11 @@ def _m017_account_deletion_index(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_users_deleted_at ON users(deleted_at)")
 
 
+def _m019_claim_reminders(db):
+    """One bounded reminder per reservation (`manage.py remind-claims`)."""
+    _add_column(db, "claims", "reminded_at TEXT")
+
+
 def _m018_registry_items_catalog_snapshot(db):
     """Registry items copied from the catalog also carry the catalog's `model`,
     `availability` (stock at last check) and bilingual `notes`, so a stock
@@ -639,6 +644,7 @@ MIGRATIONS = [
     _m016_registry_preview_flag,
     _m017_account_deletion_index,
     _m018_registry_items_catalog_snapshot,
+    _m019_claim_reminders,
 ]
 
 
