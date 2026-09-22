@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-23 (store links: 4 Judaica items at Heichal Menachem)
+- heichal.co.il category pages (Shabbos → cups / challah boards / covers / havdalah) mark unavailable
+  items "לא זמין במלאי"; each pick's product page shows a single price and a quantity selector with no
+  such notice in the product block. Kiddush cup with tray, 925-silver plated, 8.5 cm ₪198 · silver-
+  plated havdalah set ₪220 · bamboo challah board + knife ₪179 · leather-look challah cover ₪110.
+  Notes say plated ≠ solid silver and remind couples to check the cup holds a revi'is.
+- Netilas yadayim "cup & basin" left unlinked (the shop sells cups only).
+- 34 of 117 catalog items now have verified links. Same live-DB `seed-sync --fields …` command as the
+  kitchen/bedding entry below.
+
 ## 2026-09-23 (store links: 13 kitchen + bedding KSP products)
 - **Price rule, confirmed on a control item:** on a KSP page the price block follows the Eilat notice;
   the FIRST ₪ amount there is the regular price. A second amount right after it is a member price,
