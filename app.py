@@ -1174,7 +1174,34 @@ def guest_manage(token):
     if claim["item_id"]:
         item = db.execute("SELECT * FROM registry_items WHERE id=?", (claim["item_id"],)).fetchone()
     return render_template("guest_manage.html", claim=claim, reg=reg, item=item,
-                           token=token, pay_links=reg_pay_links(reg))
+                           token=token, pay_links=reg_pay_links(reg), can_email=ob_mail.configured())
+
+
+@app.route("/g/<token>/email", methods=["POST"])
+def guest_email_link(token):
+    """Email the guest their private /g/ link — for guests who skipped the
+    optional email field and would otherwise lose the gift with the tab. The
+    address is kept on the claim (only if none was given) so the reminder
+    reaches them too."""
+    lang = current_lang()
+    db = get_db()
+    if rate_limited("guest_link_mail", limit=5, per=3600):
+        abort(429)
+    email = (request.form.get("email") or "").strip()[:200]
+    if not _EMAIL_RE.match(email):
+        flash(_t("guest_email_link_bad", lang), "err")
+        return redirect(url_for("guest_manage", token=token))
+    with ob_db.write_txn(db):
+        claim = db.execute("SELECT id, guest_email FROM claims WHERE token_hash=?",
+                           (ob_security.hash_token(token),)).fetchone()
+        if not claim:
+            abort(404)
+        if not claim["guest_email"]:
+            db.execute("UPDATE claims SET guest_email=? WHERE id=?", (email, claim["id"]))
+    send_mail(email, _t("mail_guest_manage_subj", lang),
+              _t("mail_guest_manage_body", lang).format(link=ext_url("guest_manage", token=token)))
+    flash(_t("guest_email_link_sent", lang), "ok")
+    return redirect(url_for("guest_manage", token=token))
 
 
 @app.route("/g/<token>/report", methods=["POST"])

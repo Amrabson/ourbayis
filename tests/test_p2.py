@@ -563,3 +563,27 @@ def test_registry_page_shows_couple_names(client):
     page = client.get(f"/r/{slug}").get_data(as_text=True)
     assert 'class="reg-couple bdi">Rivka &amp; Yossi<' in page
     assert "<title>Rivka &amp; Yossi · " in page
+
+
+def test_guest_can_email_themselves_the_manage_link(client, app_module, monkeypatch):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    token = _claim(app_module, reg["slug"], list(items.values())[0]["id"])
+    guest = app_module.app.test_client()
+    html = guest.get(f"/g/{token}").get_data(as_text=True)
+    assert "Email me this link" not in html          # hidden while SMTP isn't configured
+    monkeypatch.setattr(app_module.ob_mail, "configured", lambda: True)
+    html = guest.get(f"/g/{token}").get_data(as_text=True)
+    assert "Email me this link" in html
+    tok = get_csrf(html)
+    r = guest.post(f"/g/{token}/email", data=dict(csrf_token=tok, email="not-an-email"),
+                   follow_redirects=True)
+    assert "look right" in r.get_data(as_text=True)
+    r = guest.post(f"/g/{token}/email", data=dict(csrf_token=tok, email="aunt@example.com"),
+                   follow_redirects=True)
+    assert "check your inbox" in r.get_data(as_text=True)
+    db = _db()
+    assert db.execute("SELECT guest_email FROM claims").fetchone()[0] == "aunt@example.com"
+    mail = db.execute("SELECT to_addr, body FROM mail_outbox WHERE to_addr='aunt@example.com'").fetchone()
+    assert mail and f"/g/{token}" in mail["body"]
+    assert guest.post("/g/not-a-real-token/email",
+                      data=dict(csrf_token=tok, email="a@b.co")).status_code == 404

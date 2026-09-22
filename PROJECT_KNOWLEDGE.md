@@ -67,7 +67,7 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
 
 ## Key flows
 - Public catalog: `/catalog` (no login) — browse/filter/search all active catalog items; logged-in couples add directly (`items_add?back=catalog`), visitors see signup CTA. Global catalog is edited ONLY in `/admin/catalog`.
-- Guest gifting: `/r/<slug>` → "Gift this" opens `<dialog>` → POST claim → redirected to `/g/<token>`, a no-login guest manage page with status, payment buttons (provider-labelled via `classify_pay_url`), the store link, and a "save this link" copyable URL. From there: report (bought/sent it) or cancel.
+- Guest gifting: `/r/<slug>` → "Gift this" opens `<dialog>` → POST claim → redirected to `/g/<token>`, a no-login guest manage page with status, payment buttons (provider-labelled via `classify_pay_url`), the store link, and a "save this link" copyable URL. From there: report (bought/sent it) or cancel. The /g/ page leads with the next action (pay block or store button); `POST /g/<token>/email` mails the link to guests who skipped the email field (only shown when SMTP is configured).
 - Cash gift: general cash modal takes a numeric amount + currency select (not free text) → claim kind='cash', status='reported' (a self-report, never phrased as "sent you money" or "payment verified").
 - Language: `/lang/<code>` and `/currency/<code>` redirect to `ob_security.same_origin_referrer()` (never the raw `Referer`); `pick(row, field)` prefers `field_he` in Hebrew.
 - i18n rule: **write "Shabbos" not "Shabbat"** in English content (same audience convention as BashertBench).
@@ -94,7 +94,7 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
 - Local: `python app.py` → port **5001** (BashertBench uses 5000). Debug via `OB_DEBUG=1`.
   For the Claude Browser preview use `run_dev.py` (launch config **`ourbayis-v3`** in the user-level
   `~/.claude/launch.json`) — it forces a throwaway DB in %TEMP% so the preview can't migrate the repo's
-  `ourbayis.db`. The old `ourbayis` launch entry runs `app.py` on the real DB: don't use it.
+  `ourbayis.db`. (The old user-level `ourbayis` entry that ran app.py on the real DB was deleted 2026-09-22.)
   The repo's own `.claude/launch.json` entry is `ourbayis-dev` (same run_dev.py). Static URLs carry
   `?v=<mtime>` (`static_cache_bust`) and are cached immutable; icons come from `tools/make_icons.py`.
 - Env vars: `OB_SECRET_KEY` (required if `OB_SECURE_COOKIES`/`OB_ENV=production`; otherwise a dev

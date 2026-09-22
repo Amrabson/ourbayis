@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-22 (improvement pass 3 — guest "your gift" page)
+- **/g/<token> reordered for phones**: status → the guest's next action (cash: amount + payment
+  buttons; store: item + "Buy at …" button) → "save this link" (while reserved) → details/notes.
+  Previously the payment block sat below the product facts and the save-link box at the very end.
+  The status panel stacks (`.notice-stack`) instead of squeezing its title into a narrow column;
+  inline styles moved to classes.
+- **Path-specific reserved note** (`guest_reserved_note_cash` / `_buy`, EN+HE) instead of "buy it
+  or send the money" after the guest already chose.
+- **"Email me this link"** (`POST /g/<token>/email`, rate-limited 5/h per IP): for guests who skipped
+  the optional email field. Stores the address on the claim only if none was given (so
+  `remind-claims` reaches them) and queues `mail_guest_manage_*`. Shown only when
+  `ob_mail.configured()` (host+user+pass) — never promises mail that can't send.
+- Removed the user-level `ourbayis` launch entry (ran app.py on the real DB) from ~/.claude/launch.json.
+- Tests: 85.
+
 ## 2026-09-22 (improvement pass 2)
 - **Couple names on the guest page**: `/r/<slug>` never showed `couple_names` (the one required
   identifying field) — now under the title (`.reg-couple`) and first in the `<title>`, so guests

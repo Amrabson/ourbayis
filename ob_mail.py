@@ -23,6 +23,12 @@ def _smtp_config():
     return host, port, user, pw
 
 
+def configured():
+    """True when enough SMTP settings exist for a send to actually be attempted."""
+    host, _, user, pw = _smtp_config()
+    return bool(host and user and pw)
+
+
 def send_now(to, subject, body):
     """Send one message synchronously; raises on any SMTP/socket error.
     Port 465 uses implicit TLS, anything else STARTTLS (587 is the default)."""
