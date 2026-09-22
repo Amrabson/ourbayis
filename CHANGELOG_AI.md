@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-09-23 (store links: 9 more verified KSP products)
+- Researched in the browser on ksp.co.il product pages (regular price read from the purchase block —
+  NOT the lower "make an offer from" / club price; add-to-cart present, no "last unit" flag):
+  electric kettle Gold Line ATL-2707W ₪64 (KSP lists it as tevilah-exempt — note says confirm with
+  your rav) · toaster oven Gold Line ATL-6640 40 L ₪233 · microwave Sharp R-703Z(K) ₪460 · vacuum
+  Samsung SC4540 ₪299 · fans ×2 Midea FS40-15F ₪149 each → ₪298 · washing machine LG WFS8014WB 8 kg
+  ₪1,865 · dishwasher Midea WQP14-W7633C-W ₪1,372 · fridge Sharp SJ-8420-SL 421 L ₪3,570 · built-in
+  oven AEG ABU51229M with Shabbos mode ₪2,466. Placeholder brands (Tefal/Electrolux/Bosch…) replaced
+  by the real product; item names stay generic; notes give alternatives and what we did NOT verify
+  (e.g. fridge Shabbos mode).
+- Catalog now has 17 of 117 items with a verified store link.
+- **Live DB:** seed data never overwrites existing rows. Apply with (dry run first, then --apply):
+  `python manage.py seed-sync --fields url,store,brand,model,price_nis,kind,price_status,price_checked_at,price_source,availability,notes,notes_he` then `python manage.py refresh-registry-links --apply`.
+
 ## 2026-09-23 (admin review)
 - **Admin sessions expire after 12 h** (`ADMIN_SESSION_HOURS`, `session["admin_at"]` stamped at
   login; older sessions must log in again) — the admin can download the whole DB.

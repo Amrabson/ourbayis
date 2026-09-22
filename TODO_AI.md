@@ -55,8 +55,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Real store links.** The 8 featured items have verified links in `seed_catalog.json`
-  (2026-09-14, see CHANGELOG) — on the live DB run the `seed-sync --fields … --apply` command from
+- [ ] **Real store links.** 17 items now have verified KSP/store links (8 featured on 2026-09-14 + 9 appliances on 2026-09-23 — see CHANGELOG for the exact `seed-sync --fields … ` command to push them to the live DB).  in `seed_catalog.json`
+  Earlier note: on the live DB run the `seed-sync --fields … --apply` command from
   the changelog, then `refresh-registry-links --apply`. The other ~109 items still have no URL: use
   `/admin/catalog` (filter "missing store link") or extend `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.
