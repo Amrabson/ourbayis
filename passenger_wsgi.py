@@ -9,8 +9,9 @@ ships with placeholders, not real keys.
 import os
 import sys
 
-# Path to the project on PythonAnywhere, e.g. /home/yourusername/ourbayis
-project_home = "/home/YOURUSERNAME/ourbayis"
+# Path to the project on PythonAnywhere — its own subfolder, never the home folder
+# (the same account serves BashertBench from /home/bashertbench itself)
+project_home = "/home/bashertbench/ourbayis"
 if project_home not in sys.path:
     sys.path.insert(0, project_home)
 

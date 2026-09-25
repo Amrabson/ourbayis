@@ -1,19 +1,27 @@
 # Deploying OurBayis to PythonAnywhere
 
+> **This account also hosts BashertBench (live).** The PythonAnywhere username is `bashertbench`, so
+> `/home/bashertbench` is the home folder *and* BashertBench's site — its `app.py`, `static/` and
+> `templates/` sit loose there. OurBayis must live only in its own subfolder, **`/home/bashertbench/ourbayis`**. Every path
+> below is written out in full; don't shorten to `~/`, and never unzip or clone OurBayis into the home
+> folder itself. A second web app needs a plan with room for it — check the Web tab shows
+> "Add a new web app" before starting.
+
 Mirrors the BashertBench setup (same host, same pattern). Free tier works to start; upgrade to a paid plan when you're ready for a custom domain (needed for Amazon Associates approval and to look credible to couples).
 
 ## 1. Get the code onto PythonAnywhere
 In a PythonAnywhere **Bash console**:
 ```bash
-git clone <your-repo-url> ourbayis      # if the code is in git
+cd /home/bashertbench
+git clone <your-repo-url> ourbayis      # if the code is in git -> creates /home/bashertbench/ourbayis
 # — or —
-# upload the OurBayis folder via the Files tab if it isn't in git yet
+# upload the OurBayis folder via the Files tab into /home/bashertbench/ourbayis (create that folder first)
 ```
 If it's not in git yet, that's worth doing first (even just `git init` + a private GitHub repo) — makes future updates a `git pull` instead of re-uploading files.
 
 ## 2. Create a virtualenv and install dependencies
 ```bash
-cd ~/ourbayis
+cd /home/bashertbench/ourbayis
 python3.11 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -23,14 +31,14 @@ pip install -r requirements.txt
 PythonAnywhere dashboard → **Web** tab → **Add a new web app** → choose **Manual configuration** (not the Flask template — we already have our own WSGI setup) → pick the same Python version as your venv.
 
 ## 4. Point it at the code
-- **Virtualenv** field: `/home/YOURUSERNAME/ourbayis/venv`
+- **Virtualenv** field: `/home/bashertbench/ourbayis/venv`
 - **WSGI configuration file**: click it, delete everything, paste in the contents of [`passenger_wsgi.py`](passenger_wsgi.py) from this repo — but:
-  - fix `project_home` to your real path (`/home/YOURUSERNAME/ourbayis`)
+  - fix `project_home` to your real path (`/home/bashertbench/ourbayis`)
   - replace `OB_SECRET_KEY` with a real random value — generate one locally with `python -c "import secrets; print(secrets.token_hex(32))"` and paste the result in, don't leave the placeholder
   - put email (SMTP) settings in `instance/ob.env`, not here — see **4b** below, so the scheduled tasks get them too
 - **Static files** section: add a mapping
   - URL: `/static/`
-  - Directory: `/home/YOURUSERNAME/ourbayis/static/`
+  - Directory: `/home/bashertbench/ourbayis/static/`
 
 ## 4b. Email (SMTP) — `instance/ob.env`
 Without this, password-reset links, guest "save this link" emails, reminders and lead
@@ -74,42 +82,42 @@ It prompts for a password (12+ chars), or set `OB_ADMIN_PASSWORD` in the environ
 
 ## Scheduled tasks (PythonAnywhere "Tasks" tab)
 v3 phase 1 adds a mail outbox and a claim-expiry sweep; neither runs itself without SMTP configured
-or a scheduled task. All commands assume the venv is active (`source venv/bin/activate`) or you
-call `venv/bin/python` directly, from `~/ourbayis`:
+or a scheduled task. Paste each command into the Tasks tab exactly as written — full paths, so they
+work from anywhere (manage.py finds the database and `instance/ob.env` next to itself):
 ```bash
 # once a day (or more often), only useful once OB_SMTP_* is set:
-cd ~/ourbayis && venv/bin/python manage.py send-mail
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py send-mail
 
 # once a day: flips reservations past their 14-day hold to 'expired'
-cd ~/ourbayis && venv/bin/python manage.py expire-claims
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py expire-claims
 
 # weekly, before any deploy that touches the schema, or just as a habit:
-cd ~/ourbayis && venv/bin/python manage.py backup
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py backup
 ```
 `manage.py check` is worth running after any deploy — it checks DB integrity, foreign keys, that at least one admin exists, and secret-key/cookie config sanity; exits 1 if anything's wrong.
 
 ### Catalog maintenance commands (v3 phase 3, run manually — not scheduled)
 ```bash
 # after editing seed_catalog.json: adopt/insert new items, never overwrites existing DB rows
-cd ~/ourbayis && venv/bin/python manage.py seed-sync            # dry run, prints a diff table
-cd ~/ourbayis && venv/bin/python manage.py seed-sync --apply    # actually writes
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py seed-sync            # dry run, prints a diff table
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py seed-sync --apply    # actually writes
 
 # explicit overwrite of specific fields from the seed by seed_key (dry run by default)
-cd ~/ourbayis && venv/bin/python manage.py seed-sync --fields price_nis,url --apply
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py seed-sync --fields price_nis,url --apply
 
 # after editing catalog items in /admin/catalog: push url/image/store/brand/model/notes and the
 # stock flag (availability) out to registry_items that came from the catalog; fields the couple
 # edited themselves are skipped (availability is always refreshed); claims are never touched
 # daily, after expire-claims: one bilingual nudge to guests who reserved 5+ days ago with an
 # email and haven't reported; never sends twice (claims.reminded_at). Needs SMTP to actually go out.
-cd ~/ourbayis && venv/bin/python manage.py remind-claims
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py remind-claims
 
 # daily: refresh the ≈ conversion rates (ECB reference rates via frankfurter.app, no key needed);
 # writes instance/rates.json, the web app re-reads it on the next request — no Reload needed
-cd ~/ourbayis && venv/bin/python manage.py fetch-rates
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py fetch-rates
 
-cd ~/ourbayis && venv/bin/python manage.py refresh-registry-links           # dry run
-cd ~/ourbayis && venv/bin/python manage.py refresh-registry-links --apply
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py refresh-registry-links           # dry run
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py refresh-registry-links --apply
 ```
 The web app also runs `seed_sync()`/`bundle_sync()` automatically on every import (i.e. every
 `Reload`), so a `seed_catalog.json` edit that only *adds new items* (new `seed_key`s) needs no
@@ -132,7 +140,7 @@ PythonAnywhere requires a **paid plan** for custom domains (same tier BashertBen
 
 ## Updating the live site later
 ```bash
-cd ~/ourbayis
+cd /home/bashertbench/ourbayis
 git pull            # or re-upload changed files
 source venv/bin/activate
 pip install -r requirements.txt   # only if requirements.txt changed
