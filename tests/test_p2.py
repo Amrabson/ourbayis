@@ -268,8 +268,11 @@ def test_public_copy_has_no_internal_notes_or_unsupported_claims(client, path):
 
 # ------------------------------------------------------------------ catalog browsing
 def test_catalog_filters_sort_and_pagination(client, app_module):
+    import json
+    seed = json.loads(open(os.path.join(BASE, "seed_catalog.json"), encoding="utf-8").read())["items"]
+    n_active = sum(1 for it in seed if it.get("active") is not False)
     html = client.get("/catalog").get_data(as_text=True)
-    assert "117 gifts" in html and "Page 1 of 5" in html and 'rel="next"' in html
+    assert f"{n_active} gifts" in html and "Page 1 of " in html and 'rel="next"' in html
     html = client.get("/catalog?price=1500plus&kind=product&sort=price_desc").get_data(as_text=True)
     prices = [int(p.replace(",", "")) for p in re.findall(r"<strong>₪([\d,]+)</strong>", html)]
     assert prices and prices == sorted(prices, reverse=True) and min(prices) >= 1500
@@ -278,7 +281,7 @@ def test_catalog_filters_sort_and_pagination(client, app_module):
     assert client.get("/catalog?page=abc&sort=evil&price=x").status_code == 200
     assert "Nothing matches" in client.get("/catalog?q=zzzzzz").get_data(as_text=True)
     he = client.get("/catalog?lang=he").get_data(as_text=True)
-    assert "117 מתנות" in he
+    assert f"{n_active} מתנות" in he
 
 
 def test_catalog_add_keeps_filter_state_and_pending_add_flow(client, app_module):
@@ -705,3 +708,23 @@ def test_double_submitted_create_makes_one_registry(client, app_module):
     r = client.post("/registry/new", data=data)
     assert r.status_code == 302
     assert _db().execute("SELECT COUNT(*) FROM registries").fetchone()[0] == 1
+
+
+def test_retired_seed_items_are_inactive_and_hidden(client, app_module):
+    """Seed items marked "active": false (combos split into single products) are inserted
+    retired on a fresh install: not in /catalog, not in the starter picker."""
+    import json
+    seed = json.loads(open(os.path.join(BASE, "seed_catalog.json"), encoding="utf-8").read())["items"]
+    retired = [it for it in seed if it.get("active") is False]
+    assert retired, "expected at least one retired seed item"
+    db = _db()
+    for it in retired:
+        row = db.execute("SELECT active FROM catalog_items WHERE seed_key=?", (it["seed_key"],)).fetchone()
+        assert row is not None and row["active"] == 0, it["seed_key"]
+    signup(client)
+    create_registry(client)
+    starter = client.get("/registry/items/starter").get_data(as_text=True)
+    catalog = client.get("/catalog?q=Duvet").get_data(as_text=True)
+    for it in retired:
+        assert it["name"] not in starter and it["name"] not in catalog
+    assert "Summer duvet (double)" in starter  # its replacement is offered instead

@@ -491,7 +491,9 @@ def seed_sync(db, seed_items, dry_run=False):
          row (including featured/starter_group, so a fresh install gets a
          working starter pack).
     Retired items (active=0) are matched by seed_key like any other row, so
-    they are never re-inserted. Returns a dict of counters."""
+    they are never re-inserted. A seed item with `"active": false` is inserted
+    retired on a fresh install; on a live DB retire it with
+    `seed-sync --fields active --apply` (seed_overwrite). Returns a dict of counters."""
     counters = dict(adopted=0, inserted=0, unchanged=0)
     have_keys = {r["seed_key"] for r in
                  db.execute("SELECT seed_key FROM catalog_items WHERE seed_key IS NOT NULL")}
@@ -538,15 +540,16 @@ def seed_sync(db, seed_items, dry_run=False):
             db.execute(
                 "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store,"
                 " url, sort, seed_key, kind, featured, starter_group, price_status,"
-                " price_checked_at, price_source, model, variant, availability, notes, notes_he)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " price_checked_at, price_source, model, variant, availability, notes, notes_he, active)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (it["name"], it.get("name_he", ""), it.get("brand", ""),
                  it.get("category", "home"), it.get("price_nis", 0), it.get("store", ""),
                  it.get("url", ""), i, key, it.get("kind", "product"),
                  1 if it.get("featured") else 0, it.get("starter_group", ""),
                  it.get("price_status", "estimate"), it.get("price_checked_at", ""),
                  it.get("price_source", ""), it.get("model", ""), it.get("variant", ""),
-                 it.get("availability", "unknown"), it.get("notes", ""), it.get("notes_he", "")))
+                 it.get("availability", "unknown"), it.get("notes", ""), it.get("notes_he", ""),
+                 0 if it.get("active") is False else 1))
     return counters
 
 

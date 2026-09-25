@@ -365,18 +365,26 @@ def test_migrated_legacy_db_gets_starter_groups_and_verified_links_stay_opt_in(t
         pytest.skip("snapshot DB not available")
     db_path = tmp_path / "legacy.db"
     shutil.copy(snap, db_path)
+    import json
+    import sqlite3
+    pre = sqlite3.connect(db_path)
+    legacy_max_id = pre.execute("SELECT MAX(id) FROM catalog_items").fetchone()[0]
+    pre.close()
+    seed_items = json.loads((Path(BASE) / "seed_catalog.json").read_text(encoding="utf-8"))["items"]
     monkeypatch.setenv("OB_DB_PATH", str(db_path))
     monkeypatch.setenv("OB_SECRET_KEY", "test-secret-key")
     for mod in list(sys.modules):
         if mod == "app" or mod.startswith("ob_"):
             del sys.modules[mod]
     import app  # noqa: F401  (runs migrate + seed_sync)
-    import sqlite3
     db = sqlite3.connect(db_path)
     groups = {r[0] for r in db.execute("SELECT DISTINCT starter_group FROM catalog_items")}
     assert {"first_week", "kitchen", "shabbos", "bedbath", "appliances"} <= groups
-    assert db.execute("SELECT COUNT(*) FROM catalog_items").fetchone()[0] == 117  # no duplicates
-    assert db.execute("SELECT COUNT(*) FROM catalog_items WHERE url != ''").fetchone()[0] == 0
+    # every seed item exactly once: old rows adopted, only genuinely new seed items inserted
+    assert db.execute("SELECT COUNT(*) FROM catalog_items").fetchone()[0] == len(seed_items)
+    # adoption never copies a store link onto a row that already existed (new rows may have one)
+    assert db.execute("SELECT COUNT(*) FROM catalog_items WHERE url != '' AND id <= ?",
+                      (legacy_max_id,)).fetchone()[0] == 0
     # the renamed seed item adopted the old row rather than inserting a second one
     assert db.execute("SELECT COUNT(*) FROM catalog_items WHERE name LIKE 'Folding table%'").fetchone()[0] == 1
 

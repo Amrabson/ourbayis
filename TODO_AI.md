@@ -55,10 +55,10 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Real store links.** 38 of 117 items (36 of the 44 starter-pack items) have verified store links in
-  `seed_catalog.json` (8 on 2026-09-14, 26 on 2026-09-23, 4 on 2026-09-25). On the live DB run the `seed-sync --fields … --apply`
-  command from the 2026-09-23 CHANGELOG entry, then `refresh-registry-links --apply`. The other 79
-  items still have no URL: use `/admin/catalog` (filter "missing store link") or extend
+- [ ] **Real store links.** 47 of 120 active items (45 of the 47 starter-pack items) have verified store links
+  in `seed_catalog.json`; 3 combo items were retired and split on 2026-09-25. On the live DB run the three commands at the end
+  of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. The other 73
+  active items still have no URL: use `/admin/catalog` (filter "missing store link") or extend
   `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.
 - [ ] **Images** — only add a product photo URL you have the right to use (the store's own listing

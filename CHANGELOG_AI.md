@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-25 (combo items split into single products)
+- **Seed items can be retired:** `"active": false` in seed_catalog.json inserts the row retired on a
+  fresh install (`seed_sync` INSERT now writes `active`); on a live DB, include `active` in
+  `seed-sync --fields`. Retired rows stay on any registry that already copied them.
+- Retired → replaced by: milchig/fleishig cutting-board set → Berox 30×40 red (fleishig) ₪69 + blue
+  (milchig) ₪66 · duvet+pillows → pillows ×2 (Arige Gad, ₪24 each → ₪48) + summer duvet (Vardinon
+  Tani, ₪195) · bath mats+caddy → non-slip bath mat (Nino, ₪49) + shower shelf (Aquila, ₪59). New
+  items carry the old starter groups.
+- Renamed in place (old names in `legacy_names`): netilas cup+basin → "Netilas yadayim cup" (Heichal
+  Menachem stainless, ₪90) · ceramic pan set → "Ceramic frying pan (26 cm)" (Ninja ZeroStick, ₪139) ·
+  8-piece towels → "Towel set — 8 pieces (2 packs of 4)" (Homestyle London ₪149 × 2 → ₪298).
+- Catalog: 123 seed rows, 120 active, 47 linked. Starter packs 45 of 47 linked (left: pump thermos,
+  sponja set — no honest single product found).
+- Tests: count-based tests now derive from seed_catalog.json; new test that retired seed items are
+  inactive and hidden from /catalog and the starter picker. 98 tests.
+- **Live DB command now:** `python manage.py seed-sync --apply` (inserts the 6 new items), then
+  `python manage.py seed-sync --fields active,name,name_he,url,store,brand,model,price_nis,kind,price_status,price_checked_at,price_source,availability,notes,notes_he` (dry run, then `--apply`), then
+  `python manage.py refresh-registry-links --apply`.
+
 ## 2026-09-25 (deploy paths + 4 more starter-pack links)
 - **DEPLOY_AI.md / passenger_wsgi.py use full `/home/bashertbench/ourbayis` paths** and open with a
   warning: the PythonAnywhere account also hosts BashertBench *in the home folder itself*, so `~/` or
