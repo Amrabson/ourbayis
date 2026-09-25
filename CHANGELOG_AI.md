@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-25 (deploy paths + 4 more starter-pack links)
+- **DEPLOY_AI.md / passenger_wsgi.py use full `/home/bashertbench/ourbayis` paths** and open with a
+  warning: the PythonAnywhere account also hosts BashertBench *in the home folder itself*, so `~/` or
+  a clone into home would land next to the live site. Scheduled-task commands are now full paths
+  (manage.py resolves the DB and `instance/ob.env` from its own folder, same as the web app).
+- KSP links (same price rule as 2026-09-23): milchig dinnerware Soltam Opal 18-pc tempered glass ₪139
+  (white — the fleishig set is turquoise) · cutlery Soltam Berlin 26-pc ₪155 each → ₪310 for two ·
+  large Shabbos hot plate Gold Line ATL-500 ₪109 (title says Tzomet-approved; note says check) ·
+  Hidurit 40-cup urn ₪361 (no approval claimed).
+- 38 of 117 catalog items linked; starter packs 36 of 44. Unlinked starter items are the ones with no
+  honest single product: cutting-board pair, pump thermos, duvet+pillows, bath mats+caddy, netilas
+  cup+basin, sponja set, ceramic pan set, 8-piece towels.
+
 ## 2026-09-23 (store links: 4 Judaica items at Heichal Menachem)
 - heichal.co.il category pages (Shabbos → cups / challah boards / covers / havdalah) mark unavailable
   items "לא זמין במלאי"; each pick's product page shows a single price and a quantity selector with no
