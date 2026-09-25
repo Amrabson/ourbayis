@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-25 (error page survives a DB outage)
+- `_error_page` rendered `error.html`, whose layout's context processor queries the DB (ad slot,
+  current user). With the DB locked/missing, the 500 handler itself raised and guests got Werkzeug's
+  bare "Internal Server Error". Now it falls back to `_BARE_ERROR_HTML` — static, bilingual, only the
+  stylesheet, logs the failure — and still returns the right status. It deliberately doesn't promise
+  a reservation was saved (a failed write rolls back); it tells the guest to check before retrying.
+- Test `test_error_page_survives_a_database_outage` (102 tests).
+
 ## 2026-09-25 (colour contrast, WCAG AA)
 - Measured every visible text node on /, /sample (EN+HE), /catalog, /shana-rishonah, /guides, /find,
   /about, a /g/ guest page and a live registry, against its real background.

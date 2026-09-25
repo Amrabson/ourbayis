@@ -773,3 +773,25 @@ def test_palette_text_contrast_meets_wcag_aa():
     assert ratio(tok["gold-bright"], tok["navy-deep"]) >= 4.5   # gold text on the dark hero/footer
     wa = re.search(r"\.btn-wa \{ background: (#[0-9a-fA-F]{6})", css).group(1)
     assert ratio("#ffffff", wa) >= 4.5                   # WhatsApp share button
+
+
+def test_error_page_survives_a_database_outage(app_module, monkeypatch):
+    """The normal error page uses the layout, which queries the DB; if the DB is what broke,
+    guests must still get a friendly (bilingual) page, not a bare server error."""
+    import logging
+    import sqlite3
+
+    def boom():
+        raise sqlite3.OperationalError("database is locked")
+
+    monkeypatch.setattr(app_module, "get_db", boom)
+    app_module.app.config["PROPAGATE_EXCEPTIONS"] = False
+    app_module.app.config["TESTING"] = False
+    logging.disable(logging.CRITICAL)
+    try:
+        r = app_module.app.test_client().get("/")
+    finally:
+        logging.disable(logging.NOTSET)
+    html = r.get_data(as_text=True)
+    assert r.status_code == 500
+    assert "went wrong on our side" in html and "משהו השתבש" in html

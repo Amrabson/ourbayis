@@ -2722,7 +2722,25 @@ def sitemap():
 
 # ---------------------------------------------------------------- error handlers
 def _error_page(code):
-    return app.make_response(render_template("error.html", code=code)), code
+    try:
+        return app.make_response(render_template("error.html", code=code)), code
+    except Exception:  # noqa: BLE001 — the layout needs the DB; if that's what broke, don't 500 again
+        app.logger.exception("error page itself failed to render (code %s)", code)
+        return app.make_response(_BARE_ERROR_HTML), code
+
+
+# Last-resort page when the normal layout can't render (e.g. the database is locked or
+# missing): no DB, no templates, no scripts — just the stylesheet and a link home, EN + HE.
+_BARE_ERROR_HTML = """<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex"><title>OurBayis — temporarily unavailable</title>
+<link rel="stylesheet" href="/static/style.css"></head>
+<body><main class="wrap section narrow" style="text-align:center">
+<h1 class="section-title">Something went wrong on our side</h1>
+<p class="page-sub">Please try again in a minute. If you were reserving a gift, check whether it went through before trying again.</p>
+<p class="page-sub" dir="rtl" lang="he">משהו השתבש אצלנו. נסו שוב בעוד דקה. אם שריינתם מתנה, בדקו אם השריון נקלט לפני שמנסים שוב.</p>
+<p><a class="btn btn-primary btn-lg" href="/">OurBayis</a></p>
+</main></body></html>"""
 
 
 @app.errorhandler(400)
