@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-09-25 (gift dialog: scrollbar click no longer closes it)
+- app.js closed any `<dialog>` on a click whose target was the dialog itself (meant for the
+  backdrop). The gift dialog scrolls on short laptop screens (`overflow: auto`), and a click/drag on
+  its scrollbar also targets `<dialog>` — closing it mid-form and losing what the guest typed. Now it
+  closes only for real pointer clicks (`e.detail > 0`) outside the dialog's bounding box. Verified in
+  the browser at 1280×600: edge click keeps it open, backdrop click closes it.
+
 ## 2026-09-25 (error page survives a DB outage)
 - `_error_page` rendered `error.html`, whose layout's context processor queries the DB (ad slot,
   current user). With the DB locked/missing, the 500 handler itself raised and guests got Werkzeug's

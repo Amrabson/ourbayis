@@ -120,7 +120,14 @@
     }
     var closer = e.target.closest("[data-close]");
     if (closer) { var d = closer.closest("dialog"); if (d) d.close(); }
-    if (e.target.tagName === "DIALOG") e.target.close(); // click on backdrop
+    // click on the backdrop closes — but only when the pointer is really outside the box:
+    // a click on the dialog's own scrollbar also targets <dialog> and must not lose the form
+    if (e.target.tagName === "DIALOG" && e.detail > 0) {
+      var r = e.target.getBoundingClientRect();
+      if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) {
+        e.target.close();
+      }
+    }
 
     // data-print: print the page
     var printBtn = e.target.closest("[data-print]");
