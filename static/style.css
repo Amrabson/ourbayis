@@ -6,12 +6,12 @@
   --paper-deep: #f1e9d6;
   --card: #fffdf7;
   --ink: #28304a;
-  --ink-soft: #6f6a5e;
+  --ink-soft: #6c675c;  /* was #6f6a5e (4.45:1 on paper-deep) */
   --line: #e3d9c2;
   --navy: #223354;
   --navy-deep: #16223c;
   --navy-soft: #e9ecf3;
-  --gold: #a5762a;
+  --gold: #876022;  /* was #a5762a (3.7:1 on paper); now >=4.6:1 on every light bg, WCAG AA */
   --gold-bright: #c9a24a;
   --gold-soft: #f3e9cf;
   --green: #2e6b4f;
@@ -120,8 +120,8 @@ img, svg { vertical-align: middle; }
 .btn-ghost:hover { background: var(--navy-soft); }
 .btn-gold { background: var(--gold); color: var(--paper); border-color: var(--gold); }
 .btn-gold:hover { background: var(--gold-bright); color: var(--navy-deep); }
-.btn-wa { background: #1faf58; color: #fff; }
-.btn-wa:hover { background: #178a45; }
+.btn-wa { background: #107c41; color: #fff; }  /* WhatsApp green darkened: white text 5.3:1 (was 2.9:1) */
+.btn-wa:hover { background: #0b6434; }
 .btn-wa .ic { fill: currentColor; }
 .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
 .btn-danger:hover { background: var(--danger-soft); }
@@ -515,13 +515,14 @@ html, body { overflow-x: clip; }
   padding-top: 44px; padding-bottom: 30px;
 }
 .brand-footer { color: #fff; }
+.brand-footer .brand-name em { color: var(--gold-bright); }  /* dark gold is for light backgrounds only */
 .brand-footer .brand-mark { background: rgba(255, 255, 255, .1); border-color: transparent; }
 .footer-tag { color: #97a1b6; margin-top: 12px; max-width: 40ch; }
 .footer-links { display: flex; flex-direction: column; gap: 8px; }
 .footer-links strong { color: var(--gold-bright); margin-bottom: 4px; font-family: var(--font-display); font-size: 1.1rem; letter-spacing: .5px; }
 .footer-links a { color: #b9c1d1; text-decoration: none; }
 .footer-links a:hover { color: var(--gold-bright); }
-.footer-legal { border-top: 1px solid rgba(255, 255, 255, .12); padding-top: 16px; padding-bottom: 20px; font-size: .88rem; color: #7e889e; }
+.footer-legal { border-top: 1px solid rgba(255, 255, 255, .12); padding-top: 16px; padding-bottom: 20px; font-size: .88rem; color: #939cb0; }  /* was #7e889e (4.4:1 on navy-deep) */
 
 /* ---------------- admin / prose ---------------- */
 .admin-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }

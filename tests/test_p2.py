@@ -748,3 +748,28 @@ def test_verified_prices_always_point_at_a_real_product():
            if it.get("active") is not False and it.get("price_status") == "verified"
            and not (it.get("url") and it.get("price_checked_at"))]
     assert not bad, f"verified without a store link/date: {bad}"
+
+
+def test_palette_text_contrast_meets_wcag_aa():
+    """Text colours from style.css's :root tokens against the backgrounds they sit on
+    (WCAG AA, 4.5:1 for normal text). Guards the 2026-09-25 contrast pass."""
+    css = open(os.path.join(BASE, "static", "style.css"), encoding="utf-8").read()
+    tok = dict(re.findall(r"--([a-z-]+):\s*(#[0-9a-fA-F]{6})", css))
+
+    def lum(h):
+        c = [int(h[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+        c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+    def ratio(a, b):
+        hi, lo = sorted((lum(a), lum(b)), reverse=True)
+        return (hi + 0.05) / (lo + 0.05)
+
+    light = ["paper", "paper-deep", "card", "gold-soft"]
+    for fg in ("ink", "ink-soft", "gold", "navy", "green", "danger"):
+        for bg in light:
+            assert ratio(tok[fg], tok[bg]) >= 4.5, (fg, bg, round(ratio(tok[fg], tok[bg]), 2))
+    assert ratio(tok["paper"], tok["gold"]) >= 4.5       # .btn-gold text (cash-gift buttons)
+    assert ratio(tok["gold-bright"], tok["navy-deep"]) >= 4.5   # gold text on the dark hero/footer
+    wa = re.search(r"\.btn-wa \{ background: (#[0-9a-fA-F]{6})", css).group(1)
+    assert ratio("#ffffff", wa) >= 4.5                   # WhatsApp share button

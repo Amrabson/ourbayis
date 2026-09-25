@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-25 (colour contrast, WCAG AA)
+- Measured every visible text node on /, /sample (EN+HE), /catalog, /shana-rishonah, /guides, /find,
+  /about, a /g/ guest page and a live registry, against its real background.
+- `--gold` #a5762a → **#876022**: gold text was 3.7:1 on paper / 3.3:1 on gold-soft, and the gold
+  cash-gift buttons (cream on gold) 3.7:1 — now ≥4.6:1 everywhere. `--ink-soft` #6f6a5e → #6c675c
+  (was 4.45:1 on paper-deep). Decorative line-art strokes keep the lighter gold.
+- Footer: "Bayis" in the footer logo now uses `--gold-bright` (dark gold on navy was 2.8:1);
+  copyright line #7e889e → #939cb0 (5.7:1).
+- WhatsApp share button #1faf58 → #107c41 (white text 2.9:1 → 5.3:1).
+- After the change: 0 failing text/background combinations on all scanned pages.
+- New test `test_palette_text_contrast_meets_wcag_aa` checks the token pairs from style.css.
+
 ## 2026-09-25 ("price checked" now always means a real product)
 - 27 items were `price_status='verified'` with only "Zap.co.il + brand/retailer sites" as source and no
   store link — cards showed "Price checked 2026-07-05" on generic ideas like "Couch". Downgraded to
