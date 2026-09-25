@@ -738,3 +738,13 @@ def test_illustrations_do_not_mislabel_kitchen_and_bath_items(app_module):
     assert ill(item("Shower shelf", "bedding")) == "towel"
     assert ill(item("Hot water pump pot (for Shabbos)", "dining")) == "urn"
     assert ill(item("Sheet sets (x2)", "bedding")) == "bedding"               # still a bed
+
+
+def test_verified_prices_always_point_at_a_real_product():
+    """A "Price checked <date>" tag is only honest if there is a product page behind it."""
+    import json
+    seed = json.loads(open(os.path.join(BASE, "seed_catalog.json"), encoding="utf-8").read())["items"]
+    bad = [it["seed_key"] for it in seed
+           if it.get("active") is not False and it.get("price_status") == "verified"
+           and not (it.get("url") and it.get("price_checked_at"))]
+    assert not bad, f"verified without a store link/date: {bad}"
