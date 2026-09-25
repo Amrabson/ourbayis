@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-25 ("price checked" now always means a real product)
+- 27 items were `price_status='verified'` with only "Zap.co.il + brand/retailer sites" as source and no
+  store link — cards showed "Price checked 2026-07-05" on generic ideas like "Couch". Downgraded to
+  `estimate` (price kept; `price_source` says it was a July range, no specific product). Every
+  verified item now has a store link.
+- Re-verified 10 of them with real KSP products (same price rule): air fryer Ninja AF500EU ₪699 ·
+  coffee machine Philips 1200 EP1200 ₪1,089 (bean-to-cup; note compares capsule machines) · food
+  processor Bosch MCM3110W ₪399 · hand mixer Bosch MFQ22100 ₪159 · stick blender Bosch MSM66110 ₪249
+  · SodaStream Terra ₪229 · robot vacuum Xiaomi S40C ₪779 · dryer Bosch Serie 4 heat pump ₪3,375 ·
+  Brita Style ₪149 · premium kettle Bosch DesignLine ₪277 (note: ask your rav about tevilah).
+- 57 of 120 active items linked. Live DB: `price_status,price_checked_at` must be in the
+  `seed-sync --fields` list (the 2026-09-25 split entry's command already includes both).
+
 ## 2026-09-25 (illustration fixes)
 - `_ILLUSTRATION_RULES`: "Baking pans & cookie sheets" matched "sheet" and showed a **bed**; new
   rules run first — baking pans/dishes → kitchen drawing, bath mat/shower → towel, "pump pot" → urn.

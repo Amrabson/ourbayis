@@ -55,9 +55,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Real store links.** 47 of 120 active items (45 of the 47 starter-pack items) have verified store links
+- [ ] **Real store links.** 57 of 120 active items (45 of the 47 starter-pack items) have verified store links
   in `seed_catalog.json`; 3 combo items were retired and split on 2026-09-25. On the live DB run the three commands at the end
-  of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. The other 73
+  of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. The other 63
   active items still have no URL: use `/admin/catalog` (filter "missing store link") or extend
   `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.
@@ -74,11 +74,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   queues in `mail_outbox` but never sends — `/forgot` and guest confirmation emails silently no-op.
 - [ ] **Rates** — schedule `manage.py fetch-rates` daily (see the decisions list above); `OB_RATES`
   env is only needed if you want to pin a fixed rate.
-- [ ] **Pricing verification** — 55 of 117 catalog items are marked `price_status='verified'` (dated
-  2026-07-03/05, see CHANGELOG_AI.md) — the July notes only claim 31 branded + 8 big-ticket items, so
-  spot-check the mapping in `/admin/catalog?price_status=verified` and downgrade anything doubtful.
-  Verified dates are ~10 weeks old; recheck big-ticket prices before launch. The remaining ~62 are estimates; spot-check the highest-
-  value ones (fridge, mixer, appliances) before launch. Filter `/admin/catalog?price_status=estimate`.
+- [x] **Pricing verification** — done 2026-09-25: "verified" now only on items with a store
+  link checked on the product page (57). The July Zap-range items without a product were
+  downgraded to estimates. Re-check prices before launch if more than ~2 months pass.
 - [ ] **Legal review of privacy/terms** — `privacy.html` is now bilingual with no bracketed notes, but it
   is a description of current behaviour, not reviewed legal text. There is no separate terms page yet —
   decide whether one is needed before launch.

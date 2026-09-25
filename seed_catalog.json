@@ -296,17 +296,21 @@
       "name": "Hand mixer",
       "name_he": "מיקסר ידני",
       "category": "appliances",
-      "price_nis": 180,
+      "price_nis": 159,
       "store": "KSP",
-      "url": "",
-      "brand": "Braun",
+      "url": "https://ksp.co.il/web/item/80976",
+      "brand": "Bosch",
       "seed_key": "hand-mixer",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 80976, regular price at check, add-to-cart present",
+      "model": "Bosch CleverMixx MFQ22100 — hand mixer",
+      "availability": "in_stock",
+      "notes": "Two-year official Bosch warranty.",
+      "notes_he": "שנתיים אחריות יבואן רשמי של בוש."
     },
     {
       "name": "Stand mixer",
@@ -332,17 +336,21 @@
       "name": "Immersion blender",
       "name_he": "בלנדר מוט",
       "category": "appliances",
-      "price_nis": 200,
+      "price_nis": 249,
       "store": "KSP",
-      "url": "",
-      "brand": "Braun",
+      "url": "https://ksp.co.il/web/item/419791",
+      "brand": "Bosch",
       "seed_key": "immersion-blender",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 419791, regular price at check, add-to-cart present",
+      "model": "Bosch ErgoMixx MSM66110 — stainless stick blender with beaker, 600 W",
+      "availability": "in_stock",
+      "notes": "Two-year official Bosch warranty.",
+      "notes_he": "שנתיים אחריות יבואן רשמי של בוש."
     },
     {
       "name": "Slow cooker (for cholent!)",
@@ -512,9 +520,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Serving platters & bowls",
@@ -565,17 +573,21 @@
       "name": "Water carbonator (Soda machine)",
       "name_he": "מכשיר סודה",
       "category": "dining",
-      "price_nis": 320,
+      "price_nis": 229,
       "store": "KSP",
-      "url": "",
+      "url": "https://ksp.co.il/web/item/358686",
       "brand": "SodaStream",
       "seed_key": "water-carbonator-soda-machine",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 358686, regular price at check, add-to-cart present",
+      "model": "SodaStream Terra — machine + gas cylinder + 1 L bottle",
+      "availability": "in_stock",
+      "notes": "Comes with a gas cylinder, ready to use.",
+      "notes_he": "מגיע עם מיכל גז, מוכן לשימוש."
     },
     {
       "name": "Duvet & pillows set",
@@ -589,9 +601,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "bedbath",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'",
       "active": false,
       "notes": "Retired 2026-09-25 — split into single products so each can link to one real item."
     },
@@ -1308,17 +1320,21 @@
       "name": "Water filter pitcher",
       "name_he": "קנקן עם מסנן מים",
       "category": "kitchen",
-      "price_nis": 150,
-      "store": "Home Center",
-      "url": "",
+      "price_nis": 149,
+      "store": "KSP",
+      "url": "https://ksp.co.il/web/item/447249",
       "brand": "Brita",
       "seed_key": "water-filter-pitcher",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 447249, regular price at check, add-to-cart present",
+      "model": "Brita Style Essential 2.4 L + Maxtra Pro filter",
+      "availability": "in_stock",
+      "notes": "Replacement filters are sold separately (a 3-pack is on the same site).",
+      "notes_he": "סננים חלופיים נמכרים בנפרד (יש מארז של 3 באותו אתר)."
     },
     {
       "name": "Stainless dish drying rack",
@@ -1339,17 +1355,21 @@
       "name": "Electric kettle — premium stainless",
       "name_he": "קומקום חשמלי — נירוסטה פרימיום",
       "category": "appliances",
-      "price_nis": 279,
+      "price_nis": 277,
       "store": "KSP",
-      "url": "",
-      "brand": "Tefal",
+      "url": "https://ksp.co.il/web/item/80844",
+      "brand": "Bosch",
       "seed_key": "electric-kettle-premium-stainless",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 80844, regular price at check, add-to-cart present",
+      "model": "Bosch DesignLine TWK4P440 — 1.7 L stainless kettle, 2400 W",
+      "availability": "in_stock",
+      "notes": "Two-year official Bosch warranty. Check with your rav whether it needs tevilah.",
+      "notes_he": "שנתיים אחריות יבואן רשמי של בוש. כדאי לברר עם הרב לגבי טבילה."
     },
     {
       "name": "Shabbos hot plate — large family size",
@@ -1395,17 +1415,21 @@
       "name": "Coffee machine",
       "name_he": "מכונת קפה",
       "category": "appliances",
-      "price_nis": 750,
+      "price_nis": 1089,
       "store": "KSP",
-      "url": "",
-      "brand": "Nespresso",
+      "url": "https://ksp.co.il/web/item/126420",
+      "brand": "Philips",
       "seed_key": "coffee-machine",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 126420, regular price at check, add-to-cart present",
+      "model": "Philips 1200 Series EP1200/00 — bean-to-cup espresso machine",
+      "availability": "in_stock",
+      "notes": "Grinds fresh beans. Capsule machines (e.g. Nespresso) cost less up front but more per cup — both are fine gifts.",
+      "notes_he": "טוחנת פולים טריים. מכונות קפסולות (כמו נספרסו) זולות יותר בקנייה ויקרות יותר לכל כוס — שתיהן מתנה טובה."
     },
     {
       "name": "Milk frother",
@@ -1419,41 +1443,49 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Food processor",
       "name_he": "מעבד מזון",
       "category": "appliances",
-      "price_nis": 450,
+      "price_nis": 399,
       "store": "KSP",
-      "url": "",
-      "brand": "Braun",
+      "url": "https://ksp.co.il/web/item/80877",
+      "brand": "Bosch",
       "seed_key": "food-processor",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 80877, regular price at check, add-to-cart present",
+      "model": "Bosch MultiTalent 3 MCM3110W — 2.3 L food processor, 800 W",
+      "availability": "in_stock",
+      "notes": "Two-year official Bosch warranty.",
+      "notes_he": "שנתיים אחריות יבואן רשמי של בוש."
     },
     {
       "name": "Air fryer",
       "name_he": "מטגן אוויר (אייר פרייר)",
       "category": "appliances",
-      "price_nis": 550,
+      "price_nis": 699,
       "store": "KSP",
-      "url": "",
-      "brand": "Tefal",
+      "url": "https://ksp.co.il/web/item/454253",
+      "brand": "Ninja",
       "seed_key": "air-fryer",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 454253, regular price at check, add-to-cart present",
+      "model": "Ninja AF500EU — 10.4 L dual-basket air fryer, 2470 W",
+      "availability": "in_stock",
+      "notes": "Two baskets, so two dishes cook at once. A smaller Gold Line 5.4 L was ₪265 at the same check (last unit).",
+      "notes_he": "שתי מגירות — אפשר לבשל שני דברים בבת אחת. דגם קטן יותר של Gold Line (5.4 ליטר) עלה ₪265 באותה בדיקה (יחידה אחרונה)."
     },
     {
       "name": "Blender — full size",
@@ -1491,33 +1523,41 @@
       "name": "Robot vacuum",
       "name_he": "שואב אבק רובוטי",
       "category": "appliances",
-      "price_nis": 1200,
+      "price_nis": 779,
       "store": "KSP",
-      "url": "",
+      "url": "https://ksp.co.il/web/item/404993",
       "brand": "Xiaomi",
       "seed_key": "robot-vacuum",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-03",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 404993, regular price at check, add-to-cart present",
+      "model": "Xiaomi S40C — robot vacuum and mop",
+      "availability": "in_stock",
+      "notes": "Vacuums and mops — handy with Israeli stone floors. Two-year official warranty.",
+      "notes_he": "שואב ושוטף — שימושי במיוחד עם רצפות אבן. שנתיים אחריות יבואן רשמי."
     },
     {
       "name": "Clothes dryer",
       "name_he": "מייבש כביסה",
       "category": "appliances",
-      "price_nis": 2200,
-      "store": "Machsanei Chashmal",
-      "url": "",
-      "brand": "Electrolux",
+      "price_nis": 3375,
+      "store": "KSP",
+      "url": "https://ksp.co.il/web/item/405941",
+      "brand": "Bosch",
       "seed_key": "clothes-dryer",
       "kind": "product",
       "featured": false,
       "starter_group": "",
       "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_checked_at": "2026-09-25",
+      "price_source": "ksp.co.il item 405941, regular price at check, add-to-cart present",
+      "model": "Bosch Serie 4 WTH85225IL — 8 kg heat-pump condenser dryer",
+      "availability": "in_stock",
+      "notes": "Heat-pump dryers cost more but use far less electricity. Cheaper condenser models exist on the same site.",
+      "notes_he": "מייבשי משאבת חום יקרים יותר אבל חוסכים הרבה חשמל. יש באתר גם דגמי קונדנסור זולים יותר."
     },
     {
       "name": "Dishwasher",
@@ -1571,9 +1611,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Oven",
@@ -1607,9 +1647,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Porcelain dinnerware — premium milchig",
@@ -1623,9 +1663,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Wine glasses (12)",
@@ -1639,9 +1679,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Glass serving bowls",
@@ -1655,9 +1695,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Cake stand & dessert set",
@@ -1794,9 +1834,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Bathrobe set — his & hers",
@@ -1810,9 +1850,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Guest linen set",
@@ -1846,9 +1886,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Candlesticks — sterling silver",
@@ -1876,9 +1916,9 @@
       "kind": "idea",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Challah knife — engraved",
@@ -1982,9 +2022,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Couch",
@@ -1998,9 +2038,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Coffee table",
@@ -2014,9 +2054,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Area rug",
@@ -2045,9 +2085,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     },
     {
       "name": "Curtains (2 rooms)",
@@ -2122,9 +2162,9 @@
       "kind": "product",
       "featured": false,
       "starter_group": "",
-      "price_status": "verified",
-      "price_checked_at": "2026-07-05",
-      "price_source": "Zap.co.il + brand/retailer sites"
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "Estimate from a 2026-07-05 range on Zap.co.il and retailer sites — no specific product linked, so not shown as 'price checked'"
     }
   ],
   "bundles": [
