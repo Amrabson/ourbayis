@@ -538,8 +538,11 @@ def gift_status(item, breakdown):
 # keyword -> item-specific line illustration (<symbol id="ill-*"> in base.html).
 # Only used when an item has no photo; falls back to the category drawing.
 _ILLUSTRATION_RULES = (
+    # checked before the broad rules below: "cookie sheets" must not hit "sheet" (bedding)
+    (("cookie sheet", "baking pan", "baking dish", "kugel pan", "תבנית"), "kitchen"),
+    (("bath mat", "shower", "מקלחת", "אמבטיה"), "towel"),
     (("hot plate", "platta", "פלטה"), "platta"),
-    (("urn", "meicham", "מיחם"), "urn"),
+    (("urn", "meicham", "pump pot", "מיחם"), "urn"),
     (("kettle", "קומקום"), "kettle"),
     (("stand mixer", "hand mixer", "מיקסר"), "mixer"),
     (("slow cooker", "crock", "cholent", "בישול איטי"), "slowcooker"),

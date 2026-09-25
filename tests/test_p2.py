@@ -728,3 +728,13 @@ def test_retired_seed_items_are_inactive_and_hidden(client, app_module):
     for it in retired:
         assert it["name"] not in starter and it["name"] not in catalog
     assert "Summer duvet (double)" in starter  # its replacement is offered instead
+
+
+def test_illustrations_do_not_mislabel_kitchen_and_bath_items(app_module):
+    ill = app_module.illustration_for
+    item = lambda name, cat: {"name": name, "seed_key": "", "category": cat}  # noqa: E731
+    assert ill(item("Baking pans & cookie sheets", "kitchen")) == "kitchen"   # not a bed
+    assert ill(item("Non-slip bath mat", "bedding")) == "towel"
+    assert ill(item("Shower shelf", "bedding")) == "towel"
+    assert ill(item("Hot water pump pot (for Shabbos)", "dining")) == "urn"
+    assert ill(item("Sheet sets (x2)", "bedding")) == "bedding"               # still a bed

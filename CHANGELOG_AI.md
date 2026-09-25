@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-09-25 (illustration fixes)
+- `_ILLUSTRATION_RULES`: "Baking pans & cookie sheets" matched "sheet" and showed a **bed**; new
+  rules run first — baking pans/dishes → kitchen drawing, bath mat/shower → towel, "pump pot" → urn.
+  Regression test added (99 tests).
+
 ## 2026-09-25 (combo items split into single products)
 - **Seed items can be retired:** `"active": false` in seed_catalog.json inserts the row retired on a
   fresh install (`seed_sync` INSERT now writes `active`); on a live DB, include `active` in
