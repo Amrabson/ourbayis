@@ -1081,7 +1081,7 @@ def claim_item(slug, item_id):
                     " price_snapshot_currency, token_hash, token_created_at, idempotency_key,"
                     " expires_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (reg["id"], item_id, name,
-                     (request.form.get("guest_email") or "").strip()[:200],
+                     _guest_email(),
                      (request.form.get("message") or "").strip()[:1000], qty,
                      "cash" if give_cash else "item", "reserved", amount_minor, currency,
                      price_minor, "ILS", token_hash, datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
@@ -1109,13 +1109,19 @@ def claim_item(slug, item_id):
         send_mail(owner["email"], _t(kind_txt + "_subj", lang).format(title=reg["title"]),
                   _t(kind_txt + "_body", lang).format(name=result["name"], item=item["name"],
                                                        qty=result["qty"]))
-    if request.form.get("guest_email"):
-        send_mail((request.form.get("guest_email") or "").strip(),
+    if _guest_email():
+        send_mail(_guest_email(),
                   _t("mail_guest_manage_subj", lang),
                   _t("mail_guest_manage_body", lang).format(
                       link=ext_url("guest_manage", token=result["token"])))
     track("reservation", owner_uid=reg["user_id"])
     return redirect(url_for("guest_manage", token=result["token"]))
+
+
+def _guest_email():
+    """The optional guest email from a reserve/cash form, or "" when it isn't one valid address."""
+    email = (request.form.get("guest_email") or "").strip()
+    return email if ob_security.valid_email(email) else ""
 
 
 class _Abort(Exception):
@@ -1160,7 +1166,7 @@ def cash_gift(slug):
                     "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message,"
                     " qty, kind, status, amount_minor, currency, token_hash, token_created_at,"
                     " idempotency_key) VALUES (?, NULL, ?, ?, ?, 1, 'cash', 'reported', ?, ?, ?, ?, ?)",
-                    (reg["id"], name, (request.form.get("guest_email") or "").strip()[:200],
+                    (reg["id"], name, _guest_email(),
                      (request.form.get("message") or "").strip()[:1000], amount_minor, currency,
                      ob_security.hash_token(token), datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
                      form_key or None))
@@ -1179,8 +1185,8 @@ def cash_gift(slug):
         send_mail(owner["email"], _t("mail_cash_subj", lang).format(title=reg["title"]),
                   _t("mail_cash_body", lang).format(
                       name=name, amount=ob_money.fmt_minor(amount_minor, currency, lang)))
-    if request.form.get("guest_email"):
-        send_mail((request.form.get("guest_email") or "").strip(),
+    if _guest_email():
+        send_mail(_guest_email(),
                   _t("mail_guest_manage_subj", lang),
                   _t("mail_guest_manage_body", lang).format(link=ext_url("guest_manage", token=token)))
     track("guest_report", owner_uid=reg["user_id"])
@@ -1214,7 +1220,7 @@ def guest_email_link(token):
     if rate_limited("guest_link_mail", limit=5, per=3600):
         abort(429)
     email = (request.form.get("email") or "").strip()[:200]
-    if not _EMAIL_RE.match(email):
+    if not ob_security.valid_email(email):
         flash(_t("guest_email_link_bad", lang), "err")
         return redirect(url_for("guest_manage", token=token))
     with ob_db.write_txn(db):
@@ -1290,7 +1296,7 @@ def signup():
         email = (request.form.get("email") or "").strip().lower()[:200]
         pw = request.form.get("password") or ""
         pw2 = request.form.get("password2") or ""
-        if not name or not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        if not name or not ob_security.valid_email(email):
             flash(_t("form_error", lang), "err")
         elif len(pw) < 8:
             flash(_t("pw_short", lang), "err")
@@ -2063,7 +2069,6 @@ def account_delete():
     return redirect(url_for("index"))
 
 
-_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 # ---------------------------------------------------------------- shana rishonah
@@ -2080,7 +2085,7 @@ def shana():
         name = (f.get("name") or "").strip()[:120]
         email = (f.get("email") or "").strip()[:200]
         whatsapp_digits = re.sub(r"\D", "", f.get("whatsapp") or "")
-        has_contact = (email and _EMAIL_RE.match(email)) or len(whatsapp_digits) >= 8
+        has_contact = ob_security.valid_email(email) or len(whatsapp_digits) >= 8
         if not name or not has_contact:
             flash(_t("shana_contact_required", lang) if name else _t("form_error", lang), "err")
         else:

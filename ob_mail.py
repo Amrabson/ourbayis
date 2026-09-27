@@ -10,9 +10,11 @@ from email.message import EmailMessage
 from email.utils import formataddr
 
 import ob_db
+import ob_security
 
 BACKOFF_MINUTES = [1, 5, 30, 120, 720]  # 1m, 5m, 30m, 2h, 12h
 MAX_ATTEMPTS = 6
+LEASE_MINUTES = 10  # how long one sender holds a row before another may retry it
 
 
 def _smtp_config():
@@ -58,8 +60,10 @@ def _now_iso():
 def enqueue(db, to, subject, body, db_path=None):
     """Insert a queued row and, if SMTP is configured, kick off a best-effort
     background attempt on its own connection. Always returns the row id."""
-    if not to:
-        return None
+    to = (to or "").strip()
+    if not ob_security.valid_email(to):
+        return None  # empty, or not exactly one address — never queue a multi-recipient send
+    subject = " ".join((subject or "").split())  # a newline in a header would fail every retry
     with ob_db.write_txn(db):
         cur = db.execute(
             "INSERT INTO mail_outbox (to_addr, subject, body, status, next_attempt_at)"
@@ -84,12 +88,21 @@ def attempt(db, row_id):
     """Try to send one queued row now. Marks sent on success; on failure bumps
     attempts, schedules the next try with backoff, records last_error (never
     the body), and marks 'failed' after MAX_ATTEMPTS."""
-    row = db.execute("SELECT * FROM mail_outbox WHERE id=?", (row_id,)).fetchone()
-    if not row or row["status"] == "sent":
-        return
     host, port, user, pw = _smtp_config()
     if not (host and user and pw):
         return  # stays queued — nothing to do without SMTP
+    # Take a lease first: the background thread from enqueue() and `manage.py send-mail` can
+    # reach the same row at once; only the one that moves next_attempt_at forward sends it.
+    # If this process dies mid-send the lease simply runs out and the row is retried.
+    now = _now_iso()
+    lease = (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=LEASE_MINUTES)).strftime("%Y-%m-%d %H:%M:%S")
+    with ob_db.write_txn(db):
+        took = db.execute(
+            "UPDATE mail_outbox SET next_attempt_at=? WHERE id=? AND status='queued' AND next_attempt_at<=?",
+            (lease, row_id, now)).rowcount
+        row = db.execute("SELECT * FROM mail_outbox WHERE id=?", (row_id,)).fetchone()
+    if not took or not row:
+        return
     try:
         send_now(row["to_addr"], row["subject"], row["body"])
         with ob_db.write_txn(db):

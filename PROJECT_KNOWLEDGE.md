@@ -24,7 +24,10 @@ Flask 3 + SQLite, server-rendered Jinja2, no build step. Same architecture as Ba
   `rate_limited(db, bucket, key, limit, per)` backed by `rate_events`.
 - `ob_mail.py` — `mail_outbox` table; `enqueue()` always queues, fires a best-effort background
   send only if SMTP env vars are set; `attempt()` handles backoff/failure; `flush()` is what
-  `manage.py send-mail` calls. Never logs a message body.
+  `manage.py send-mail` calls. Never logs a message body. `enqueue()` drops any recipient that
+  isn't exactly one address (`ob_security.valid_email`, also used by signup/guest/shana forms) and
+  flattens the subject to one line; `attempt()` first takes a 10-minute lease on the row
+  (`next_attempt_at`), so the background thread and a scheduled flush never both send it.
 - `ob_money.py` — everything in integer minor units (agorot/cents). `to_minor`, `fmt_minor`,
   `parse_legacy_amount` (strict — used only for the one-time migration of old free-text amounts),
   `RATES`/`CURRENCIES` from `OB_RATES` env, `estimate()`.

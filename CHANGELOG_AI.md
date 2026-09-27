@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-09-27 (email hardening)
+- Reserve and cash-gift forms stored and mailed the optional guest email with no server check
+  (only the browser's `type=email`). A hand-made POST with `me@x.com,victim@y.com` got accepted,
+  so the site could be used to send its "manage your gift" email to extra people. Now
+  `_guest_email()` returns "" unless it's one valid address; the gift still goes through.
+- One shared `ob_security.valid_email` (rejects commas, semicolons, `<>`, quotes, whitespace,
+  newlines; accepts `+` tags and apostrophes) replaces three copies of a looser regex (signup,
+  guest link email, shana inquiry).
+- `ob_mail.enqueue` refuses anything that isn't one address (covers every caller, incl.
+  `manage.py remind-claims`) and flattens the subject to one line — a newline from a registry
+  title would have made `EmailMessage` raise on every retry until the row failed.
+- Double send: the background send started by `enqueue()` and a scheduled `manage.py send-mail`
+  could both pick up a fresh row and deliver it twice. `attempt()` now takes a 10-minute lease on
+  the row before sending; only the sender that moved `next_attempt_at` sends. A crash mid-send just
+  lets the lease run out and the row is retried.
+- tests/test_mail.py (14 tests: address rules, crafted guest email, enqueue guards, concurrent
+  senders, backoff) — 131 tests.
+
 ## 2026-09-27 (logged-in pages audit, admin password form, utcnow)
 - Same markup audit over the couple and admin pages (via the test client, temp DB). Fixed:
   - /registry/items catalog filter: category select, search box and the icon-only search button had

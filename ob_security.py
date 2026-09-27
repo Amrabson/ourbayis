@@ -91,6 +91,15 @@ def same_origin_referrer():
 _PRIVATE_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "::1")
 
 
+# one address, no list/display-name syntax: a comma, semicolon, angle bracket, quote or
+# whitespace could turn one "email" field into several recipients or break the header
+_EMAIL_RE = re.compile(r"[^@\s,;<>()\[\]\"\\:]+@[^@\s,;<>()\[\]\"\\:']+\.[^@\s,;<>()\[\]\"\\:']+")
+
+
+def valid_email(s):
+    return bool(s) and len(s) <= 200 and bool(_EMAIL_RE.fullmatch(s))
+
+
 def validate_url(u):
     """General external-URL sanity check (store/affiliate links): http(s),
     has a host, no embedded userinfo, not a bare IP/localhost, reasonable length."""
