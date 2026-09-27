@@ -311,11 +311,11 @@ def test_reset_token_single_use_and_session_invalidation(app_module, monkeypatch
         db = app_module.get_db()
         import ob_security
         token = ob_security.new_token()
-        from datetime import datetime, timedelta
+        from datetime import datetime, timedelta, timezone
         db.execute(
             "INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES"
             " ((SELECT id FROM users WHERE email='reset@b.com'), ?, ?)",
-            (ob_security.hash_token(token), (datetime.utcnow() + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")))
+            (ob_security.hash_token(token), (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")))
 
     r = client.get(f"/reset/{token}")
     assert r.status_code == 200

@@ -24,6 +24,7 @@
 {% endblock %}
 {% block content %}
 <div class="wrap section">
+  <h1 class="sr-only">{{ t('print_insert_title') }}</h1>
   <button class="btn btn-primary print-toolbar" data-print>{{ t('print_insert_button') }}</button>
   <div class="insert-page">
     {% for _ in range(2) %}

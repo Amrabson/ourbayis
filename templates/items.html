@@ -55,14 +55,14 @@
 
   <h2 class="sub-title" id="add-more">{{ t('items_catalog') }}</h2>
   <form class="filter-row" method="get" action="{{ url_for('items_manage') }}">
-    <select name="cat" data-autosubmit>
+    <select name="cat" data-autosubmit aria-label="{{ t('all_cats') }}">
       <option value="">{{ t('all_cats') }}</option>
       {% for slug, (icon, en, he) in categories.items() %}
       <option value="{{ slug }}" {% if cat == slug %}selected{% endif %}>{{ cat_label(slug) }}</option>
       {% endfor %}
     </select>
-    <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_catalog') }}">
-    <button class="btn btn-ghost" type="submit"><svg class="ic"><use href="#i-search"/></svg></button>
+    <input type="search" name="q" value="{{ q }}" placeholder="{{ t('search_catalog') }}" aria-label="{{ t('search_catalog') }}">
+    <button class="btn btn-ghost" type="submit" aria-label="{{ t('find_btn') }}"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
   </form>
 
   <div class="catalog-grid">

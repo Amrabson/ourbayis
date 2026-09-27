@@ -174,7 +174,7 @@ def fetch_rates(codes=FETCH_CURRENCIES, timeout=15):
     tmp = RATES_FILE + ".tmp"
     with open(tmp, "w", encoding="utf-8") as fh:
         json.dump({"rates": rates, "date": date, "source": "frankfurter.app (ECB)",
-                   "fetched_at": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}, fh, indent=1)
+                   "fetched_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S")}, fh, indent=1)
     os.replace(tmp, RATES_FILE)
     ensure_fresh()
     return rates, date

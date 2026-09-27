@@ -19,7 +19,7 @@ import argparse
 import getpass
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import ob_db
@@ -61,7 +61,7 @@ def cmd_create_admin(args):
 
 
 def cmd_backup(args):
-    dst = args.dest or str(BASE / "backups" / f"ourbayis-{datetime.utcnow():%Y-%m-%d-%H%M%S}.db")
+    dst = args.dest or str(BASE / "backups" / f"ourbayis-{datetime.now(timezone.utc).replace(tzinfo=None):%Y-%m-%d-%H%M%S}.db")
     path = ob_db.backup(_db_path(), dst)
     print(f"Backup written and verified: {path}")
     return 0
@@ -91,7 +91,7 @@ def cmd_test_mail(args):
 
 def cmd_expire_claims(args):
     db = _open()
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
     with ob_db.write_txn(db):
         rows = db.execute(
             "SELECT id FROM claims WHERE status='reserved' AND expires_at IS NOT NULL"
@@ -117,8 +117,8 @@ def cmd_remind_claims(args):
     Bodies are bilingual (claims don't record the guest's language)."""
     import i18n
     db = _open()
-    cutoff = (datetime.utcnow() - timedelta(days=REMIND_AFTER_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    cutoff = (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=REMIND_AFTER_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
     base = os.environ.get("OB_BASE_URL", "").rstrip("/")
     rows = db.execute(
         "SELECT c.id, c.guest_email, c.token_hash, c.expires_at, c.kind,"

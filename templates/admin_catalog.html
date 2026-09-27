@@ -19,14 +19,14 @@
   </div>
 
   <form class="filter-row" method="get" action="{{ url_for('admin_catalog') }}">
-    <input type="search" name="q" value="{{ q }}" placeholder="Search name or seed_key">
-    <select name="cat" data-autosubmit>
+    <input type="search" name="q" value="{{ q }}" placeholder="Search name or seed_key" aria-label="Search name or seed_key">
+    <select name="cat" data-autosubmit aria-label="Category">
       <option value="">All categories</option>
       {% for slug, (icon, en, he) in categories.items() %}
       <option value="{{ slug }}" {% if cat == slug %}selected{% endif %}>{{ en }}</option>
       {% endfor %}
     </select>
-    <select name="price_status" data-autosubmit>
+    <select name="price_status" data-autosubmit aria-label="Price status">
       <option value="">Any price status</option>
       <option value="verified" {% if price_status == 'verified' %}selected{% endif %}>Verified</option>
       <option value="estimate" {% if price_status == 'estimate' %}selected{% endif %}>Estimate</option>
@@ -35,7 +35,7 @@
     <label class="check-label"><input type="checkbox" name="missing_url" value="1" {% if missing_url %}checked{% endif %} data-autosubmit> missing store link</label>
     <label class="check-label"><input type="checkbox" name="missing_image" value="1" {% if missing_image %}checked{% endif %} data-autosubmit> missing image</label>
     <label class="check-label"><input type="checkbox" name="inactive" value="1" {% if show_inactive %}checked{% endif %} data-autosubmit> include retired</label>
-    <button class="btn btn-ghost" type="submit"><svg class="ic"><use href="#i-search"/></svg></button>
+    <button class="btn btn-ghost" type="submit" aria-label="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
   </form>
 
   {% for r in rows %}

@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-09-27 (logged-in pages audit, admin password form, utcnow)
+- Same markup audit over the couple and admin pages (via the test client, temp DB). Fixed:
+  - /registry/items catalog filter: category select, search box and the icon-only search button had
+    no accessible name (screen readers said "button"). Labelled with existing i18n keys (EN+HE).
+  - /admin/catalog: same for its search box, two selects and icon button.
+  - /dashboard/print had no h1 — added a visually hidden one.
+  - /admin password form said "10+ chars" / `minlength=10`, but the server requires 12 — typing 10–11
+    characters passed the browser and was then rejected. Now 12, plus aria-labels and
+    `autocomplete=current-password/new-password` for password managers.
+- `datetime.utcnow()` (deprecated in Python 3.12+; 26 calls) → `datetime.now(timezone.utc)
+  .replace(tzinfo=None)`: identical naive-UTC values, so stored strings/comparisons are unchanged.
+  Test run warnings 644 → 0.
+- New tests/test_a11y.py: 18 logged-in pages (EN+HE) checked for one h1, heading order, unique ids,
+  labelled fields, named buttons; admin password minimum (117 tests).
+
 ## 2026-09-27 (heading outline + page audit)
 - Audited 19 public pages for duplicate ids, unlabeled fields, images without alt, empty
   buttons/links, `_blank` without noopener and heading order. Only issue: /catalog, /find and

@@ -5,7 +5,7 @@ See SPEC_V3.md "Module layout" / ob_mail.py. Never logs message bodies."""
 import os
 import smtplib
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from email.message import EmailMessage
 from email.utils import formataddr
 
@@ -52,7 +52,7 @@ def send_now(to, subject, body):
 
 
 def _now_iso():
-    return datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def enqueue(db, to, subject, body, db_path=None):
@@ -99,7 +99,7 @@ def attempt(db, row_id):
         attempts = row["attempts"] + 1
         status = "failed" if attempts >= MAX_ATTEMPTS else "queued"
         idx = min(attempts - 1, len(BACKOFF_MINUTES) - 1)
-        next_at = (datetime.utcnow() + timedelta(minutes=BACKOFF_MINUTES[idx])).strftime("%Y-%m-%d %H:%M:%S")
+        next_at = (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(minutes=BACKOFF_MINUTES[idx])).strftime("%Y-%m-%d %H:%M:%S")
         err = type(e).__name__  # error class only — never body content, and no secrets
         with ob_db.write_txn(db):
             db.execute(

@@ -16,7 +16,7 @@ import re
 import secrets
 import sqlite3
 import unicodedata
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from functools import wraps
 from urllib.parse import urlencode
 from pathlib import Path
@@ -296,7 +296,7 @@ def current_admin():
         started = datetime.fromisoformat(session.get("admin_at") or "")
     except ValueError:
         return None  # sessions from before admin_at existed have to log in again
-    if datetime.utcnow() - started > timedelta(hours=ADMIN_SESSION_HOURS):
+    if datetime.now(timezone.utc).replace(tzinfo=None) - started > timedelta(hours=ADMIN_SESSION_HOURS):
         return None
     row = get_db().execute("SELECT * FROM admins WHERE username=?", (name,)).fetchone()
     if not row or row["session_ver"] != session.get("admin_sv"):
@@ -490,7 +490,7 @@ def item_claim_breakdown(registry_id):
     counted — they free the quantity again even before `manage.py
     expire-claims` runs. The public registry page uses this to label a card
     Reserved / Reported / Received instead of a blanket "Gifted"."""
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
     rows = get_db().execute(
         "SELECT item_id, status, COALESCE(SUM(qty),0) AS n FROM claims"
         " WHERE registry_id=? AND item_id IS NOT NULL"
@@ -601,7 +601,7 @@ def track(name, owner_uid=None):
         return
     if owner_uid is not None and session.get("uid") == owner_uid:
         return
-    day = datetime.utcnow().strftime("%Y-%m-%d")
+    day = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d")
     db = get_db()
     with ob_db.write_txn(db):
         db.execute(
@@ -994,7 +994,7 @@ def registry(slug):
     if is_preview:
         prefs = _prefs(reg)
         if not prefs.get("previewed_at"):
-            prefs["previewed_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            prefs["previewed_at"] = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
             db.execute("UPDATE registries SET preferences_json=? WHERE id=?",
                       (json.dumps(prefs), reg["id"]))
     days_to_go = None
@@ -1071,7 +1071,7 @@ def claim_item(slug, item_id):
             price_minor = int(item["price_nis"]) * 100
             amount_minor = price_minor * qty if give_cash else None
             currency = "ILS" if give_cash else None
-            expires_at = (datetime.utcnow() + timedelta(days=14)).strftime("%Y-%m-%d %H:%M:%S")
+            expires_at = (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=14)).strftime("%Y-%m-%d %H:%M:%S")
             token = ob_security.new_token()
             token_hash = ob_security.hash_token(token)
             try:
@@ -1084,7 +1084,7 @@ def claim_item(slug, item_id):
                      (request.form.get("guest_email") or "").strip()[:200],
                      (request.form.get("message") or "").strip()[:1000], qty,
                      "cash" if give_cash else "item", "reserved", amount_minor, currency,
-                     price_minor, "ILS", token_hash, datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                     price_minor, "ILS", token_hash, datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
                      form_key or None, expires_at))
             except sqlite3.IntegrityError:
                 # duplicate form_key = a repeated POST (double-click/retry). If
@@ -1162,7 +1162,7 @@ def cash_gift(slug):
                     " idempotency_key) VALUES (?, NULL, ?, ?, ?, 1, 'cash', 'reported', ?, ?, ?, ?, ?)",
                     (reg["id"], name, (request.form.get("guest_email") or "").strip()[:200],
                      (request.form.get("message") or "").strip()[:1000], amount_minor, currency,
-                     ob_security.hash_token(token), datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                     ob_security.hash_token(token), datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
                      form_key or None))
             except sqlite3.IntegrityError:
                 remembered = (session.get("claim_tokens") or {}).get(form_key) if form_key else None
@@ -1244,7 +1244,7 @@ def guest_report(token):
             return redirect(url_for("guest_manage", token=token))
         late = 1 if claim["status"] == "expired" else 0
         db.execute("UPDATE claims SET status='reported', reported_at=?, late=? WHERE id=?",
-                   (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), late, claim["id"]))
+                   (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), late, claim["id"]))
         _log_claim_event(db, claim["id"], "reported", "guest", "late" if late else "")
         reg = db.execute("SELECT * FROM registries WHERE id=?", (claim["registry_id"],)).fetchone()
     owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
@@ -1269,7 +1269,7 @@ def guest_cancel(token):
             flash(_t("guest_action_invalid", lang), "err")
             return redirect(url_for("guest_manage", token=token))
         db.execute("UPDATE claims SET status='cancelled', cancelled_by='guest', cancelled_at=? WHERE id=?",
-                   (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim["id"]))
+                   (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), claim["id"]))
         _log_claim_event(db, claim["id"], "cancelled", "guest")
     flash(_t("guest_cancel_done", lang), "ok")
     return redirect(url_for("guest_manage", token=token))
@@ -1357,10 +1357,10 @@ def forgot():
         user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         if user:
             token = ob_security.new_token()
-            expires_at = (datetime.utcnow() + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+            expires_at = (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
             with ob_db.write_txn(db):
                 db.execute("UPDATE password_resets SET used_at=? WHERE user_id=? AND used_at IS NULL",
-                          (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), user["id"]))
+                          (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), user["id"]))
                 db.execute(
                     "INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?,?,?)",
                     (user["id"], ob_security.hash_token(token), expires_at))
@@ -1379,7 +1379,7 @@ def reset_password(token):
     row = db.execute(
         "SELECT * FROM password_resets WHERE token_hash=? AND used_at IS NULL",
         (ob_security.hash_token(token),)).fetchone()
-    now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
     if not row or row["expires_at"] < now:
         flash(_t("reset_invalid", lang), "err")
         return redirect(url_for("forgot"))
@@ -1429,7 +1429,7 @@ def dashboard():
     gifts = stats = totals = checklist = queues = None
     if reg:
         db = get_db()
-        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
         gifts = []
         for row in db.execute(
                 "SELECT c.*, ri.name AS item_name, ri.name_he AS item_name_he,"
@@ -1481,7 +1481,7 @@ def dashboard_shared():
         db = get_db()
         prefs = _prefs(reg)
         if not prefs.get("shared_at"):
-            prefs["shared_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            prefs["shared_at"] = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
             with ob_db.write_txn(db):
                 db.execute("UPDATE registries SET preferences_json=? WHERE id=?",
                           (json.dumps(prefs), reg["id"]))
@@ -1570,7 +1570,7 @@ def _save_registry(reg):
             prefs[pf] = val
         else:
             prefs.pop(pf, None)
-    prefs["visibility_reviewed_at"] = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    prefs["visibility_reviewed_at"] = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
     if not title or not couple:
         flash(_t("form_error", lang), "err")
         return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
@@ -1949,7 +1949,7 @@ def claim_confirm(claim_id):
         # 'expired' too: the gift can still arrive after the hold lapsed (guests can report late)
         if c["status"] in ("reported", "reserved", "expired"):
             db.execute("UPDATE claims SET status='received', confirmed_at=? WHERE id=?",
-                      (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim_id))
+                      (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), claim_id))
             _log_claim_event(db, claim_id, "received", "owner",
                              "late" if c["status"] == "expired" else "")
             track("receipt_confirmed")
@@ -1970,7 +1970,7 @@ def claim_cancel(claim_id):
         # only open claims — a stale form (second tab) must never undo a received gift
         if c["status"] in ("reserved", "reported"):
             db.execute("UPDATE claims SET status='cancelled', cancelled_by='owner', cancelled_at=? WHERE id=?",
-                      (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), claim_id))
+                      (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), claim_id))
             _log_claim_event(db, claim_id, "cancelled", "owner")
     return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
 
@@ -2146,7 +2146,7 @@ def admin_login():
             session.clear()
             session["admin"] = row["username"]
             session["admin_sv"] = row["session_ver"]
-            session["admin_at"] = datetime.utcnow().isoformat(timespec="seconds")
+            session["admin_at"] = datetime.now(timezone.utc).replace(tzinfo=None).isoformat(timespec="seconds")
             return redirect(url_for("admin_home"))
         flash("Wrong credentials", "err")
     return render_template("admin_login.html", no_admins=(n_admins == 0))
@@ -2403,7 +2403,7 @@ def admin_catalog_edit(item_id=None):
                 " store=?, url=?, image=?, active=?, featured=?, sort=?, kind=?, model=?, variant=?,"
                 " image_credit=?, price_status=?, price_checked_at=?, price_source=?, availability=?,"
                 " notes=?, notes_he=?, starter_group=?, updated_at=? WHERE id=?",
-                vals + (datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"), item_id))
+                vals + (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), item_id))
             if n_registry_refs:
                 flash("Changes here don't rewrite gifts already copied to registries — "
                       "run `manage.py refresh-registry-links` to push url/image/store/brand out.", "ok")
