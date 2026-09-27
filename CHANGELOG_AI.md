@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-27 (registry list: sort reset, Back button, stuck buttons)
+- Picking "Suggested order" after a price sort did nothing — the cards stayed price-sorted. Cards
+  now remember their original position (`data-order`) and the empty sort value restores it (dialogs
+  stay paired with their cards).
+- After Back, the browser restored "only available" and the sort select but the list showed
+  everything in the original order. The view is re-applied on `pageshow` (form state is restored
+  after DOMContentLoaded). Verified in the browser: back → 6 available gifts, ascending price.
+- Double-submit guard marks the buttons it disables; on a back/forward-cache restore they're
+  re-enabled, so a returning guest isn't left with a dead "Reserve" button.
+- Removed an unused variable in `applyRegistryView`.
+
 ## 2026-09-25 (gift dialog: scrollbar click no longer closes it)
 - app.js closed any `<dialog>` on a click whose target was the dialog itself (meant for the
   backdrop). The gift dialog scrolls on short laptop screens (`overflow: auto`), and a click/drag on

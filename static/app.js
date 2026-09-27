@@ -21,6 +21,8 @@
     var regCount = document.getElementById("reg-count");
     var grid = document.querySelector(".gift-grid");
     var catFilter = "all";
+    // remember the couple's own order so "Suggested order" can put it back after a price sort
+    if (grid) grid.querySelectorAll(".gift-card[data-cat]").forEach(function (card, i) { card.setAttribute("data-order", i); });
     function applyRegistryView() {
       if (!grid) return;
       var cards = Array.prototype.slice.call(grid.querySelectorAll(".gift-card[data-cat]"));
@@ -29,13 +31,14 @@
         var ok = (catFilter === "all" || card.getAttribute("data-cat") === catFilter) &&
                  (!onlyAvail || !onlyAvail.checked || card.getAttribute("data-available") === "1");
         card.style.display = ok ? "" : "none";
-        var dlg = card.nextElementSibling;
         if (ok) shown++;
       });
-      if (regSort && regSort.value) {
+      if (regSort) {
         var dir = regSort.value === "price_desc" ? -1 : 1;
+        var key = regSort.value ? "data-price" : "data-order";
         cards.slice().sort(function (a, b) {
-          return dir * ((+a.getAttribute("data-price") || 0) - (+b.getAttribute("data-price") || 0));
+          return dir * ((+a.getAttribute(key) || 0) - (+b.getAttribute(key) || 0)) ||
+                 (+a.getAttribute("data-order") - +b.getAttribute("data-order"));
         }).forEach(function (card) {
           var dlg = card.nextElementSibling && card.nextElementSibling.tagName === "DIALOG" ? card.nextElementSibling : null;
           grid.appendChild(card);
@@ -58,6 +61,11 @@
     });
     if (onlyAvail) onlyAvail.addEventListener("change", applyRegistryView);
     if (regSort) regSort.addEventListener("change", applyRegistryView);
+    // browsers restore the checkbox/select after Back or reload; make the list match them
+    // (they're restored after DOMContentLoaded, so check again on pageshow)
+    window.addEventListener("pageshow", function () {
+      if (grid && ((onlyAvail && onlyAvail.checked) || (regSort && regSort.value))) applyRegistryView();
+    });
 
     // shana bundle-picker: clicking a bundle's CTA pre-selects it in the form
     var bundleSelect = document.getElementById("bundle-select");
@@ -197,6 +205,15 @@
     }
     // prevent double submits
     var b = form.querySelector("button[type=submit]");
-    if (b) setTimeout(function () { b.disabled = true; }, 0);
+    if (b) setTimeout(function () { b.disabled = true; b.setAttribute("data-auto-disabled", ""); }, 0);
+  });
+
+  // coming Back to a page from the back/forward cache would otherwise leave its buttons dead
+  window.addEventListener("pageshow", function (e) {
+    if (!e.persisted) return;
+    document.querySelectorAll("[data-auto-disabled]").forEach(function (b) {
+      b.disabled = false;
+      b.removeAttribute("data-auto-disabled");
+    });
   });
 })();
