@@ -839,3 +839,12 @@ def test_bots_get_redirected_but_are_not_counted(client, app_module, ua, counted
 def test_robots_keeps_crawlers_off_click_redirects(client):
     body = client.get("/robots.txt").get_data(as_text=True)
     assert "Disallow: /go/" in body
+
+
+def test_public_dates_are_localised(client):
+    """Price-checked tags showed a raw ISO date ("המחיר נבדק ב-2026-09-14")."""
+    he = client.get("/catalog?lang=he").get_data(as_text=True)
+    assert "המחיר נבדק ב-" in he
+    assert not re.search(r"נבדק ב-\d{4}-\d\d-\d\d", he)
+    en = client.get("/catalog?lang=en").get_data(as_text=True)
+    assert re.search(r"Price checked \d{1,2} [A-Z][a-z]+ \d{4}", en)

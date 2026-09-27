@@ -45,7 +45,7 @@
   {%- if (_ps and item['price_nis']) or _av == 'unavailable' -%}
   <p class="gift-tags">
     {%- if _ps == 'verified' and item['price_checked_at'] -%}
-      <span class="badge badge-plain">{{ tf('price_checked_tag', date=item['price_checked_at'][:10]) }}</span>
+      <span class="badge badge-plain">{{ tf('price_checked_tag', date=fmt_date(item['price_checked_at'])) }}</span>
     {%- elif _ps and item['price_nis'] -%}
       <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
     {%- endif -%}

@@ -17,7 +17,7 @@
       <a class="card find-card" href="{{ url_for('registry', slug=r['slug']) }}">
         <div>
           <h3>{{ pick(r, 'couple_names') }}</h3>
-          <p class="gift-meta">{{ t('event_' ~ r['event_type']) }}{% if r['event_date'] %} · {{ r['event_date'] }}{% endif %}{% if r['city'] %} · {{ r['city'] }}{% endif %}</p>
+          <p class="gift-meta">{{ t('event_' ~ r['event_type']) }}{% if r['event_date'] %} · <time datetime="{{ r['event_date'] }}">{{ fmt_date(r['event_date']) }}</time>{% endif %}{% if r['city'] %} · {{ r['city'] }}{% endif %}</p>
         </div>
         <span class="btn btn-ghost">{{ t('find_view') }} →</span>
       </a>

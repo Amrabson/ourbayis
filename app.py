@@ -443,7 +443,7 @@ def estimate_note(lang=None):
            or ("USD" if "USD" in ob_money.CURRENCIES else "ILS"))
     if cur == "ILS" or cur not in ob_money.CURRENCIES:
         return ""
-    date = "⁨" + ob_money.RATES_DATE + "⁩" if ob_money.RATES_DATE else ""
+    date = "⁨" + fmt_date(ob_money.RATES_DATE, lang) + "⁩" if ob_money.RATES_DATE else ""
     key = "estimate_note_dated" if ob_money.RATES_DATE else "estimate_note"
     return _t(key, lang).format(cur=cur, date=date)
 

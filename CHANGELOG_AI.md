@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-27 (localised dates on public pages)
+- Mobile Hebrew pass on a live registry: every card's tag read "המחיר נבדק ב-2026-09-14" (raw ISO).
+  Now `fmt_date` → "המחיר נבדק ב-14 בספטמבר 2026" / "Price checked 14 September 2026"; fits on one
+  line at 375 px. Same fix for the ≈-estimate footnote's rate date and /find result event dates
+  (the latter also wrapped in `<time datetime>` like the registry header).
+- Checked for horizontal overflow at 375 px in Hebrew: none (only the category chip scroller,
+  by design).
+- Test `test_public_dates_are_localised` — 141 tests.
+
 ## 2026-09-27 (password reset)
 - /forgot decided "email works" from `OB_SMTP_HOST` alone. With a half-filled `instance/ob.env`
   (host but no user/password) it told the couple "check your inbox" while nothing could ever send.
