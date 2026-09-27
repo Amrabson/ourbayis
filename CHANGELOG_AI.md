@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-09-27 (heading outline + page audit)
+- Audited 19 public pages for duplicate ids, unlabeled fields, images without alt, empty
+  buttons/links, `_blank` without noopener and heading order. Only issue: /catalog, /find and
+  /advertise jumped h1 → h3 (card titles), which breaks screen-reader heading navigation. Added a
+  visually hidden h2 above each card group (`catalog_items_h`, `find_results_h`, `adv_who_h`, EN+HE);
+  nothing changes visually.
+- Also measured SQL per page (≤8 queries, no N+1; registry page ~85 ms on the dev DB) — no change needed.
+- Test `test_public_pages_have_sound_heading_outline_and_unique_ids` over 13 pages (115 tests).
+
 ## 2026-09-27 (registry list: sort reset, Back button, stuck buttons)
 - Picking "Suggested order" after a price sort did nothing — the cards stayed price-sorted. Cards
   now remember their original position (`data-order`) and the empty sort value restores it (dialogs

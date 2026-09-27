@@ -53,6 +53,7 @@
     <p class="empty-note">{{ t('catalog_none') }} <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a></p>
   {% endif %}
 
+  <h2 class="sr-only">{{ t('catalog_items_h') }}</h2>
   <div class="gift-grid">
     {% for item in items %}
       {{ gift_card(item, mode='catalog', have=have, has_reg=has_reg, back_args=dict(filters, page=page if page > 1 else None)) }}

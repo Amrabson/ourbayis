@@ -795,3 +795,16 @@ def test_error_page_survives_a_database_outage(app_module, monkeypatch):
     html = r.get_data(as_text=True)
     assert r.status_code == 500
     assert "went wrong on our side" in html and "משהו השתבש" in html
+
+
+@pytest.mark.parametrize("path", ["/", "/catalog", "/catalog?cat=kitchen", "/sample", "/sample?lang=he",
+                                  "/shana-rishonah", "/guides", "/find?q=a", "/advertise", "/about",
+                                  "/how-it-works", "/login", "/signup"])
+def test_public_pages_have_sound_heading_outline_and_unique_ids(client, path):
+    """One h1, no skipped heading levels (screen-reader navigation), no duplicate ids."""
+    html = client.get(path).get_data(as_text=True)
+    levels = [int(h) for h in re.findall(r"<h([1-6])[\s>]", html)]
+    assert levels.count(1) == 1, (path, levels)
+    assert not [(a, b) for a, b in zip(levels, levels[1:]) if b > a + 1], (path, levels)
+    ids = re.findall(r'\sid="([^"]+)"', html)
+    assert len(ids) == len(set(ids)), (path, sorted({i for i in ids if ids.count(i) > 1}))

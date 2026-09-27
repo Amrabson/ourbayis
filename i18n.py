@@ -11,6 +11,7 @@ T_EN = {
     "nav_find": "Find a registry",
     "nav_catalog": "Gift catalog",
     "catalog_title": "The gift catalog",
+    "catalog_items_h": "Gifts",
     "catalog_signup_add": "Sign up to add",
     "catalog_none": "Nothing matches — try a different search or category.",
     "nav_start": "Start a registry",
@@ -45,6 +46,7 @@ T_EN = {
 
     # Find
     "find_title": "Find a registry",
+    "find_results_h": "Registries found",
     "find_sub": "Search by the couple's name (English or Hebrew).",
     "find_placeholder": "e.g. Cohen, Sarah & Dovid…",
     "find_btn": "Search",
@@ -624,6 +626,7 @@ T_EN = {
     "reg_sort_default": "Couple's order (most wanted first)",
     "ad_your_ad_here": "Your ad here — reach couples setting up a home in Israel and their families abroad",
     "adv_title": "Advertise with us",
+    "adv_who_h": "Who you reach",
     "adv_sub": "OurBayis is read by couples furnishing a home in Israel and by the family and friends abroad who buy their gifts. If that's who you serve, let's talk.",
     "adv_who1_t": "Couples building a home",
     "adv_who1_b": "Chassanim and kallahs, new olim and shana-rishonah arrivals choosing appliances, linen, dinnerware and Judaica for an Israeli apartment.",
@@ -675,6 +678,7 @@ T_HE = {
     "nav_find": "חיפוש רשימה",
     "nav_catalog": "קטלוג המתנות",
     "catalog_title": "קטלוג המתנות",
+    "catalog_items_h": "מתנות",
     "catalog_signup_add": "הירשמו כדי להוסיף",
     "catalog_none": "אין תוצאות — נסו חיפוש או קטגוריה אחרת.",
     "nav_start": "פתיחת רשימה",
@@ -706,6 +710,7 @@ T_HE = {
     "how_money_t": "מי משלם למי?",
 
     "find_title": "חיפוש רשימה",
+    "find_results_h": "רשימות שנמצאו",
     "find_sub": "חפשו לפי שם הזוג (אנגלית או עברית).",
     "find_placeholder": "לדוגמה: כהן, שרה ודוד…",
     "find_btn": "חיפוש",
@@ -1277,6 +1282,7 @@ T_HE = {
     "reg_sort_default": "לפי סדר הזוג (הכי רצוי קודם)",
     "ad_your_ad_here": "המודעה שלכם כאן — הגיעו לזוגות שמקימים בית בישראל ולמשפחותיהם בחו״ל",
     "adv_title": "פרסמו אצלנו",
+    "adv_who_h": "את מי תפגשו",
     "adv_sub": "ב-OurBayis קוראים זוגות שמרהטים בית בישראל, והמשפחה והחברים בחו״ל שקונים להם את המתנות. אם זה הקהל שלכם — בואו נדבר.",
     "adv_who1_t": "זוגות שמקימים בית",
     "adv_who1_b": "חתנים וכלות, עולים חדשים וזוגות בשנה ראשונה שבוחרים מוצרי חשמל, מצעים, כלי אוכל ויודאיקה לדירה ישראלית.",

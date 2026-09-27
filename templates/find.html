@@ -11,6 +11,7 @@
 
   {% if results is not none %}
     {% if results %}
+    <h2 class="sr-only">{{ t('find_results_h') }}</h2>
     <div class="find-results">
       {% for r in results %}
       <a class="card find-card" href="{{ url_for('registry', slug=r['slug']) }}">
