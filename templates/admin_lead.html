@@ -9,7 +9,7 @@
 
   <div class="panel">
     <p>{% if lead['email'] %}<a href="mailto:{{ lead['email'] }}">{{ lead['email'] }}</a>{% endif %}
-       {% if lead['whatsapp'] %} · <a href="https://wa.me/{{ lead['whatsapp'] | replace('+','') | replace(' ','') }}" target="_blank" rel="noopener">WhatsApp: {{ lead['whatsapp'] }}</a>{% endif %}</p>
+       {% if lead['whatsapp'] %} · <a href="https://wa.me/{{ lead['whatsapp'] | wa_number }}" target="_blank" rel="noopener">WhatsApp: {{ lead['whatsapp'] }}</a>{% endif %}</p>
     <p class="gift-meta">Arrival: {{ lead['arrival'] or '—' }} · City: {{ lead['city'] or '—' }} ·
       Neighborhood: {{ lead['neighborhood'] or '—' }} · Furnishing: {{ lead['furnishing'] }} ·
       Budget: {{ lead['budget'] or '—' }} · Bundle: {{ lead['bundle_slug'] or 'custom' }}</p>

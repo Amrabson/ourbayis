@@ -248,6 +248,8 @@ Gift grid: auto-fill ≥240px, 2 columns ≤520px, 1 column ≤430px. Prices/URL
 - `manage.py remind-claims` (daily, after `expire-claims`): see CHANGELOG; `claims.reminded_at`.
 - `count_page_views` after_request → `funnel_events` rows named `view:<endpoint>` for
   `PUBLIC_VIEW_ENDPOINTS`; `g.registry_owner_uid` is set by the registry route so owner self-views are skipped.
+  `is_bot()` (User-Agent regex; empty UA counts as a bot) makes `track()` and the `/go/` click
+  increments skip crawlers, link-preview fetchers and scripts; robots.txt disallows `/go/`.
 - `/advertise` page (`advertise.html`, i18n `adv_*`); empty-ad "Your ad here" band in base.html.
 - Registry browse controls (`#reg-controls`, `#only-available`, `#reg-sort`) handled in app.js
   `applyRegistryView()`; cards expose `data-cat`/`data-price`/`data-available`.

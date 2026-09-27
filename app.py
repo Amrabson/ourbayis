@@ -594,10 +594,23 @@ def csv_safe(cell):
     return text
 
 
+_BOT_UA_RE = re.compile(
+    r"bot|crawl|spider|slurp|preview|fetch|scan|monitor|curl|wget|python-|httpx|go-http|java/|"
+    r"headless|lighthouse|facebookexternalhit|whatsapp|telegram|discord|skype", re.I)
+
+
+def is_bot():
+    """Crawlers, link-preview fetchers and scripts: they still get every page and
+    redirect, but aren't counted — the funnel and click numbers are what the owner
+    quotes to advertisers, so they must be people."""
+    ua = request.headers.get("User-Agent") or ""
+    return not ua or bool(_BOT_UA_RE.search(ua))
+
+
 def track(name, owner_uid=None):
-    """No-PII daily funnel counters. Skipped for admins and for the registry
-    owner viewing their own registry (so self-visits don't inflate funnels)."""
-    if session.get("admin"):
+    """No-PII daily funnel counters. Skipped for admins, for bots (is_bot), and for
+    the registry owner viewing their own registry (so self-visits don't inflate funnels)."""
+    if session.get("admin") or is_bot():
         return
     if owner_uid is not None and session.get("uid") == owner_uid:
         return
@@ -917,7 +930,8 @@ def go_catalog(catalog_id):
     row = db.execute("SELECT * FROM catalog_items WHERE id=?", (catalog_id,)).fetchone()
     if not row or not valid_http_url(row["url"]):
         abort(404)
-    db.execute("UPDATE catalog_items SET clicks = clicks + 1 WHERE id=?", (catalog_id,))
+    if not is_bot():
+        db.execute("UPDATE catalog_items SET clicks = clicks + 1 WHERE id=?", (catalog_id,))
     track("handoff_click")
     return redirect(row["url"], code=302)
 
@@ -928,7 +942,8 @@ def go_item(item_id):
     row = db.execute("SELECT * FROM registry_items WHERE id=?", (item_id,)).fetchone()
     if not row or not valid_http_url(row["url"]):
         abort(404)
-    db.execute("UPDATE registry_items SET clicks = clicks + 1 WHERE id=?", (item_id,))
+    if not is_bot():
+        db.execute("UPDATE registry_items SET clicks = clicks + 1 WHERE id=?", (item_id,))
     reg = db.execute("SELECT user_id FROM registries WHERE id=?", (row["registry_id"],)).fetchone()
     track("handoff_click", owner_uid=reg["user_id"] if reg else None)
     return redirect(row["url"], code=302)
@@ -2701,7 +2716,7 @@ def favicon():
 @app.route("/robots.txt")
 def robots():
     return app.response_class(
-        "User-agent: *\nDisallow: /admin\nDisallow: /dashboard\nDisallow: /g/\n"
+        "User-agent: *\nDisallow: /admin\nDisallow: /dashboard\nDisallow: /g/\nDisallow: /go/\n"
         f"Sitemap: {ext_url('sitemap')}\n", mimetype="text/plain")
 
 

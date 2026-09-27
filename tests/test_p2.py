@@ -808,3 +808,34 @@ def test_public_pages_have_sound_heading_outline_and_unique_ids(client, path):
     assert not [(a, b) for a, b in zip(levels, levels[1:]) if b > a + 1], (path, levels)
     ids = re.findall(r'\sid="([^"]+)"', html)
     assert len(ids) == len(set(ids)), (path, sorted({i for i in ids if ids.count(i) > 1}))
+
+
+BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/128.0 Safari/537.36")
+
+
+@pytest.mark.parametrize("ua,counted", [
+    (BROWSER_UA, True),
+    ("Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)", False),
+    ("WhatsApp/2.23.20.0", False),
+    ("facebookexternalhit/1.1", False),
+    ("curl/8.4.0", False),
+    ("", False),
+])
+def test_bots_get_redirected_but_are_not_counted(client, app_module, ua, counted):
+    """Click and view numbers are what the owner quotes to advertisers — people only."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["towel-set"])
+    item = next(iter(items.values()))
+    visitor = app_module.app.test_client()
+    r = visitor.get(f"/go/i/{item['id']}", headers={"User-Agent": ua})
+    assert r.status_code == 302 and r.headers["Location"] == item["url"]
+    visitor.get(f"/r/{reg['slug']}", headers={"User-Agent": ua})
+    db = _db()
+    clicks = db.execute("SELECT clicks FROM registry_items WHERE id=?", (item["id"],)).fetchone()[0]
+    views = db.execute("SELECT COALESCE(SUM(n), 0) FROM funnel_events WHERE name='view:registry'").fetchone()[0]
+    assert (clicks, views) == ((1, 1) if counted else (0, 0))
+
+
+def test_robots_keeps_crawlers_off_click_redirects(client):
+    body = client.get("/robots.txt").get_data(as_text=True)
+    assert "Disallow: /go/" in body

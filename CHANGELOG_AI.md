@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-27 (honest audience numbers)
+- Page views, funnel events and store-link clicks are the figures the owner quotes to advertisers,
+  but every crawler, WhatsApp/Facebook link-preview fetch and script was counted as a visitor.
+  New `is_bot()` (User-Agent pattern; no UA = bot) — `track()` and the `/go/` click increments
+  skip them. Bots still get every page and redirect normally.
+- robots.txt now disallows `/go/` so search engines don't crawl (and count) store redirects.
+- /admin/lead WhatsApp link built the number with two `replace`s (a dashed or local 05x number
+  gave a broken wa.me link); now uses the same `wa_number` filter as the admin list.
+- 7 tests (browser counted; Googlebot/WhatsApp/facebook/curl/empty UA redirected but not counted;
+  robots) — 138 tests.
+
 ## 2026-09-27 (email hardening)
 - Reserve and cash-gift forms stored and mailed the optional guest email with no server check
   (only the browser's `type=email`). A hand-made POST with `me@x.com,victim@y.com` got accepted,
