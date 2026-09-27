@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-27 (password reset)
+- /forgot decided "email works" from `OB_SMTP_HOST` alone. With a half-filled `instance/ob.env`
+  (host but no user/password) it told the couple "check your inbox" while nothing could ever send.
+  Now uses `ob_mail.configured()` (host + user + password) and otherwise sends them to /contact as
+  before. The unused `SMTP_HOST` constant is gone.
+- /reset checked the token before the write transaction, so two simultaneous submits of one link
+  (two tabs, double tap) could both set a password. The token is now spent atomically inside the
+  lock (`UPDATE … WHERE used_at IS NULL AND expires_at>=now`, rowcount) before the password changes;
+  the loser is sent to /forgot with the usual "link expired or used" message.
+- 2 tests (half-configured SMTP; two tabs on one reset link) — 140 tests.
+
 ## 2026-09-27 (honest audience numbers)
 - Page views, funnel events and store-link clicks are the figures the owner quotes to advertisers,
   but every crawler, WhatsApp/Facebook link-preview fetch and script was counted as a visitor.

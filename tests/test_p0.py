@@ -304,7 +304,6 @@ def test_logout_requires_post(app_module):
 
 
 def test_reset_token_single_use_and_session_invalidation(app_module, monkeypatch):
-    monkeypatch.setattr(app_module, "SMTP_HOST", "smtp.example.com")
     client = app_module.app.test_client()
     signup(client, email="reset@b.com")
     with app_module.app.app_context():
@@ -390,3 +389,42 @@ def test_error_pages(app_module):
     assert r.status_code == 404
     html = r.get_data(as_text=True)
     assert "OurBayis" in html
+
+
+def test_forgot_is_honest_when_smtp_is_only_half_configured(app_module, monkeypatch):
+    """A host without user/password sends nothing — don't tell the couple 'check your inbox'."""
+    monkeypatch.setenv("OB_SMTP_HOST", "smtp.gmail.com")
+    monkeypatch.delenv("OB_SMTP_USER", raising=False)
+    monkeypatch.delenv("OB_SMTP_PASS", raising=False)
+    client = app_module.app.test_client()
+    signup(client, email="half@b.com")
+    client.post("/logout", data=dict(csrf_token=get_csrf(client.get("/dashboard").get_data(as_text=True))))
+    tok = get_csrf(client.get("/forgot").get_data(as_text=True))
+    r = client.post("/forgot", data=dict(csrf_token=tok, email="half@b.com"))
+    assert r.status_code == 302 and r.headers["Location"].endswith("/contact")
+
+
+def test_reset_link_sets_the_password_only_once(app_module):
+    """Two tabs open on the same reset link: the second submit must not change it again."""
+    client = app_module.app.test_client()
+    signup(client, email="twice@b.com")
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        import ob_security
+        from datetime import datetime, timedelta, timezone
+        token = ob_security.new_token()
+        db.execute(
+            "INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES"
+            " ((SELECT id FROM users WHERE email='twice@b.com'), ?, ?)",
+            (ob_security.hash_token(token), (datetime.now(timezone.utc).replace(tzinfo=None)
+                                             + timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")))
+    tab1, tab2 = app_module.app.test_client(), app_module.app.test_client()
+    t1 = get_csrf(tab1.get(f"/reset/{token}").get_data(as_text=True))
+    t2 = get_csrf(tab2.get(f"/reset/{token}").get_data(as_text=True))
+    tab1.post(f"/reset/{token}", data=dict(csrf_token=t1, password="firstpass1", password2="firstpass1"))
+    r = tab2.post(f"/reset/{token}", data=dict(csrf_token=t2, password="secondpass2", password2="secondpass2"))
+    assert r.status_code == 302 and "/forgot" in r.headers["Location"]
+    from werkzeug.security import check_password_hash
+    with app_module.app.app_context():
+        h = app_module.get_db().execute("SELECT pw_hash FROM users WHERE email='twice@b.com'").fetchone()[0]
+    assert check_password_hash(h, "firstpass1")

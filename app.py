@@ -45,7 +45,6 @@ BASE_URL = os.environ.get("OB_BASE_URL", "").rstrip("/")
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("OB_ALLOWED_HOSTS", "").split(",") if h.strip()]
 
 # Optional SMTP — leave unset and the site works fine, mail just stays queued.
-SMTP_HOST = os.environ.get("OB_SMTP_HOST", "")
 NOTIFY_EMAIL = os.environ.get("OB_NOTIFY_EMAIL", "")  # owner: shana leads + contact msgs
 
 app = Flask(__name__)
@@ -1371,7 +1370,7 @@ def forgot():
         email = (request.form.get("email") or "").strip().lower()
         if rate_limited(f"forgot_email:{email}", limit=5, per=3600):
             abort(429)
-        if not SMTP_HOST:
+        if not ob_mail.configured():  # host AND user AND password — a half-set ob.env sends nothing
             flash(_t("forgot_noemail", lang), "err")
             return redirect(url_for("contact"))
         db = get_db()
@@ -1412,12 +1411,22 @@ def reset_password(token):
         elif pw != pw2:
             flash(_t("pw_mismatch", lang), "err")
         else:
+            pw_hash = generate_password_hash(pw)
             with ob_db.write_txn(db):
-                db.execute(
-                    "UPDATE users SET pw_hash=?, session_ver=session_ver+1 WHERE id=?",
-                    (generate_password_hash(pw), row["user_id"]))
-                db.execute("UPDATE password_resets SET used_at=? WHERE user_id=? AND used_at IS NULL",
-                          (now, row["user_id"]))
+                # spend this token first, under the lock: of two simultaneous submits only one
+                # gets rowcount 1 — a reset link sets the password exactly once
+                spent = db.execute(
+                    "UPDATE password_resets SET used_at=? WHERE id=? AND used_at IS NULL AND expires_at>=?",
+                    (now, row["id"], now)).rowcount
+                if spent:
+                    db.execute(
+                        "UPDATE users SET pw_hash=?, session_ver=session_ver+1 WHERE id=?",
+                        (pw_hash, row["user_id"]))
+                    db.execute("UPDATE password_resets SET used_at=? WHERE user_id=? AND used_at IS NULL",
+                              (now, row["user_id"]))
+            if not spent:
+                flash(_t("reset_invalid", lang), "err")
+                return redirect(url_for("forgot"))
             flash(_t("reset_done", lang), "ok")
             return redirect(url_for("login"))
     return render_template("reset.html", token=token)
