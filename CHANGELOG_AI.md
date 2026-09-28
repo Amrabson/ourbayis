@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-28 (`manage.py check` catches quiet config mistakes)
+- New WARNING lines (exit code unchanged): email off; `OB_BASE_URL` missing / not https / https
+  without `OB_ENV=production` or `OB_SECURE_COOKIES` (cookies not Secure); `OB_NOTIFY_EMAIL` missing
+  or invalid (leads only in /admin); emails that failed for good (→ /admin/outbox); no
+  `instance/rates.json` or one older than 7 days (daily `fetch-rates` stopped).
+- New PROBLEM (exit 1): email half set up (some of OB_SMTP_HOST/USER/PASS missing — nothing can send).
+- `check` on a brand-new/wrong DB file crashed with "no such table: admins"; now explains it.
+- `remind-claims` without `OB_BASE_URL` queued reminders whose only link was a bare "/r/…" that no
+  mail app can open. It now refuses (exit 1) and says why; `--dry-run` still works.
+- 2 tests — 157 tests.
+
 ## 2026-09-28 (backup retention)
 - `manage.py backup` never deleted anything, so a scheduled weekly backup would slowly fill the
   PythonAnywhere quota (each copy is the whole DB). New `--keep N` (default 14): after the new copy

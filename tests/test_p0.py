@@ -428,3 +428,48 @@ def test_reset_link_sets_the_password_only_once(app_module):
     with app_module.app.app_context():
         h = app_module.get_db().execute("SELECT pw_hash FROM users WHERE email='twice@b.com'").fetchone()[0]
     assert check_password_hash(h, "firstpass1")
+
+
+def test_check_flags_quiet_config_mistakes(app_module, tmp_path):
+    """`manage.py check` after a deploy: half-set email is a PROBLEM (exit 1); missing site
+    address / notify email are WARNINGs; a brand-new DB file is explained, not a traceback."""
+    import subprocess
+    import sys
+
+    def run(cmd, **env):
+        return subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), cmd], cwd=BASE,
+                              env={**os.environ, "OB_DB_PATH": os.environ["OB_DB_PATH"],
+                                   "PYTHONIOENCODING": "utf-8", **env},
+                              capture_output=True, text=True, encoding="utf-8")
+
+    subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), "create-admin", "owner"], cwd=BASE,
+                   env={**os.environ, "OB_DB_PATH": os.environ["OB_DB_PATH"],
+                        "OB_ADMIN_PASSWORD": "a-very-long-admin-password"}, capture_output=True)
+    r = run("check", OB_SMTP_HOST="smtp.gmail.com", OB_SMTP_USER="", OB_SMTP_PASS="",
+            OB_BASE_URL="", OB_NOTIFY_EMAIL="")
+    assert r.returncode == 1
+    assert "PROBLEM: email is half set up — missing OB_SMTP_USER, OB_SMTP_PASS" in r.stdout
+    assert "WARNING: OB_BASE_URL is not set" in r.stdout
+    assert "WARNING: OB_NOTIFY_EMAIL is not set" in r.stdout
+
+    r = run("check", OB_SMTP_HOST="", OB_SMTP_USER="", OB_SMTP_PASS="",
+            OB_BASE_URL="https://ourbayis.example", OB_ENV="production", OB_SECRET_KEY="k",
+            OB_NOTIFY_EMAIL="owner@example.com", OB_RATES='{"USD":3.7}')
+    assert r.returncode == 0, r.stdout
+    assert "WARNING: email is off" in r.stdout and "OB_BASE_URL" not in r.stdout
+
+    fresh = subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), "check"], cwd=BASE,
+                           env={**os.environ, "OB_DB_PATH": str(tmp_path / "new.db"), "PYTHONIOENCODING": "utf-8"},
+                           capture_output=True, text=True, encoding="utf-8")
+    assert fresh.returncode == 1 and "has no OurBayis tables yet" in fresh.stdout
+    assert "Traceback" not in fresh.stderr
+
+
+def test_remind_claims_refuses_without_site_address(app_module):
+    import subprocess
+    import sys
+    r = subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), "remind-claims"], cwd=BASE,
+                       env={**os.environ, "OB_DB_PATH": os.environ["OB_DB_PATH"], "OB_BASE_URL": "",
+                            "PYTHONIOENCODING": "utf-8"},
+                       capture_output=True, text=True, encoding="utf-8")
+    assert r.returncode == 1 and "OB_BASE_URL is not set" in r.stdout

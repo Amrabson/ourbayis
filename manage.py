@@ -134,6 +134,11 @@ def cmd_remind_claims(args):
     cutoff = (datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=REMIND_AFTER_DAYS)).strftime("%Y-%m-%d %H:%M:%S")
     now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
     base = os.environ.get("OB_BASE_URL", "").rstrip("/")
+    if not base and not args.dry_run:
+        # the reminder's only link is to the registry; without the site address it would be a
+        # bare "/r/…" that no mail app can open
+        print("OB_BASE_URL is not set (instance/ob.env) — not queuing reminders with broken links.")
+        return 1
     rows = db.execute(
         "SELECT c.id, c.guest_email, c.token_hash, c.expires_at, c.kind,"
         " ri.name AS item_name, ri.name_he AS item_name_he, r.title AS reg_title,"
@@ -150,7 +155,7 @@ def cmd_remind_claims(args):
     for r in rows:
         # the raw recovery token is never stored, so the reminder points at the
         # registry (the guest's own "save this link" email carried the /g/ link)
-        link = f"{base}/r/{r['slug']}" if base else f"/r/{r['slug']}"
+        link = f"{base}/r/{r['slug']}"
         item = r["item_name"] or i18n.t("gift_cash", "en")
         item_he = r["item_name_he"] or r["item_name"] or i18n.t("gift_cash", "he")
         title_he = r["reg_title_he"] or r["reg_title"]
@@ -176,6 +181,11 @@ def cmd_check(args):
     """Read-only: never migrates, so it's safe to run against any copy of the DB."""
     problems = []
     db = _open(migrate=False)
+    if not ob_db.has_table(db, "admins"):
+        # a brand-new (or wrong) database file: nothing below can be checked yet
+        print(f"PROBLEM: {_db_path()} has no OurBayis tables yet — start the app once (or run "
+              "`python manage.py stats`) to create them, or check OB_DB_PATH points at the real database")
+        return 1
     pending = ob_db.pending_migrations(db)
     if pending:
         problems.append(f"{len(pending)} pending migration(s) — they run automatically when the"
@@ -192,12 +202,58 @@ def cmd_check(args):
     secure = os.environ.get("OB_SECURE_COOKIES")
     if secure and not os.environ.get("OB_SECRET_KEY"):
         problems.append("OB_SECURE_COOKIES set but OB_SECRET_KEY missing")
+    warnings = _config_warnings(db, problems)
+    for w in warnings:
+        print(f"WARNING: {w}")
     if problems:
         for p in problems:
             print(f"PROBLEM: {p}")
         return 1
-    print("OK — no problems found.")
+    print("OK — no problems found." + (f" ({len(warnings)} warning(s) above.)" if warnings else ""))
     return 0
+
+
+def _config_warnings(db, problems):
+    """Settings that fail quietly on a live server. Appends hard failures to `problems`,
+    returns the softer ones (printed, exit code unaffected)."""
+    warnings = []
+    host = os.environ.get("OB_SMTP_HOST", "")
+    user = os.environ.get("OB_SMTP_USER", "")
+    pw = os.environ.get("OB_SMTP_PASS", "")
+    if any((host, user, pw)) and not all((host, user, pw)):
+        missing = [n for n, v in (("OB_SMTP_HOST", host), ("OB_SMTP_USER", user), ("OB_SMTP_PASS", pw)) if not v]
+        problems.append(f"email is half set up — missing {', '.join(missing)}: nothing can send "
+                        "(fix instance/ob.env, then `python manage.py test-mail you@example.com`)")
+    elif not host:
+        warnings.append("email is off (no OB_SMTP_*): /forgot sends people to /contact and guest "
+                        "emails wait in the outbox — see DEPLOY_AI.md 4b")
+    base = os.environ.get("OB_BASE_URL", "")
+    if not base:
+        warnings.append("OB_BASE_URL is not set — links in emails queued by manage.py (reminders) "
+                        "can't be built; set it to https://your-domain in instance/ob.env")
+    elif not base.startswith("https://"):
+        warnings.append(f"OB_BASE_URL is not https ({base}) — links in emails and share previews use it")
+    elif not (os.environ.get("OB_SECURE_COOKIES") or os.environ.get("OB_ENV") == "production"):
+        warnings.append("OB_BASE_URL is https but neither OB_ENV=production nor OB_SECURE_COOKIES is "
+                        "set — login cookies aren't marked Secure")
+    notify = os.environ.get("OB_NOTIFY_EMAIL", "")
+    if not ob_security.valid_email(notify):
+        warnings.append("OB_NOTIFY_EMAIL is not set to one valid address — Shana Rishonah leads and "
+                        "contact messages only show up in /admin, with no email to you")
+    failed = db.execute("SELECT COUNT(*) FROM mail_outbox WHERE status='failed'").fetchone()[0]
+    if failed:
+        warnings.append(f"{failed} email(s) failed for good — see /admin/outbox (Retry is there)")
+    if not os.environ.get("OB_RATES"):
+        rates_file = BASE / "instance" / "rates.json"
+        if not rates_file.exists():
+            warnings.append("no exchange rates yet — the ≈ $ estimates use the built-in 3.7; run "
+                            "`python manage.py fetch-rates` and schedule it daily")
+        else:
+            age_days = (datetime.now().timestamp() - rates_file.stat().st_mtime) / 86400
+            if age_days > 7:
+                warnings.append(f"instance/rates.json is {int(age_days)} days old — is the daily "
+                                "`fetch-rates` task still running?")
+    return warnings
 
 
 def cmd_stats(args):

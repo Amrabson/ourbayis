@@ -95,7 +95,7 @@ work from anywhere (manage.py finds the database and `instance/ob.env` next to i
 # (keeps the newest 14 copies in backups/ and deletes older ones; --keep N to change, 0 = keep all):
 /home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py backup
 ```
-`manage.py check` is worth running after any deploy — it checks DB integrity, foreign keys, that at least one admin exists, and secret-key/cookie config sanity; exits 1 if anything's wrong.
+`manage.py check` is worth running after any deploy — it checks DB integrity, foreign keys, that at least one admin exists, and secret-key/cookie config sanity; exits 1 if anything's wrong (including email half set up). It also prints WARNING lines for settings that fail quietly: email off, `OB_BASE_URL` / `OB_NOTIFY_EMAIL` missing, failed emails in the outbox, stale exchange rates. Read them before going live.
 
 ### Catalog maintenance commands (v3 phase 3, run manually — not scheduled)
 ```bash
