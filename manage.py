@@ -18,6 +18,7 @@ refresh-registry-links -- copy url/image/store/brand from catalog to registry_it
 import argparse
 import getpass
 import os
+import re
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -61,9 +62,22 @@ def cmd_create_admin(args):
 
 
 def cmd_backup(args):
-    dst = args.dest or str(BASE / "backups" / f"ourbayis-{datetime.now(timezone.utc).replace(tzinfo=None):%Y-%m-%d-%H%M%S}.db")
+    """Verified copy into backups/ (or --dest). Then, only for the default folder, delete the
+    oldest `ourbayis-*.db` beyond the newest --keep (default 14) so a scheduled backup can't
+    slowly fill the hosting quota. --keep 0 keeps everything; a custom --dest is never pruned."""
+    folder = Path(os.environ.get("OB_BACKUP_DIR") or BASE / "backups")
+    dst = args.dest or str(folder / f"ourbayis-{datetime.now(timezone.utc).replace(tzinfo=None):%Y-%m-%d-%H%M%S}.db")
     path = ob_db.backup(_db_path(), dst)
     print(f"Backup written and verified: {path}")
+    if not args.dest and args.keep > 0:
+        # only files this command named (ourbayis-YYYY-MM-DD-HHMMSS.db) — never a hand-made
+        # snapshot like ourbayis-snapshot-2026-09-14.db; the names sort oldest-first
+        auto = re.compile(r"ourbayis-\d{4}-\d\d-\d\d-\d{6}\.db")
+        old = sorted(f for f in folder.glob("ourbayis-*.db") if auto.fullmatch(f.name))[:-args.keep]
+        for f in old:
+            f.unlink()
+        if old:
+            print(f"Removed {len(old)} older backup(s); keeping the newest {args.keep}.")
     return 0
 
 
@@ -265,6 +279,8 @@ def main():
 
     sp = sub.add_parser("backup")
     sp.add_argument("--dest", default=None)
+    sp.add_argument("--keep", type=int, default=14,
+                    help="keep only the newest N backups in backups/ (default 14; 0 = keep all)")
     sp.set_defaults(fn=cmd_backup)
 
     sp = sub.add_parser("send-mail")

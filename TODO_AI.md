@@ -49,8 +49,10 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   it writes `instance/rates.json` (ECB reference rates via frankfurter.app, USD/GBP/EUR/CAD/AUD/ZAR)
   and the running app picks it up without a reload. Until that runs, the built-in USD 3.7 fallback
   shows with no date. `OB_RATES` env still overrides everything if you prefer a fixed rate.
-- [ ] **Backup retention.** Privacy copy no longer promises a period; state one once you decide how long
-  `manage.py backup` files are kept, then update `privacy_delete_b` (EN+HE).
+- [ ] **Backup retention.** Privacy copy no longer promises a period. Since 2026-09-28 `manage.py backup`
+  keeps the newest 14 automatic copies in `backups/` (`--keep N` to change; hand-named snapshots are never
+  pruned) — weekly backups = about 14 weeks. Once you settle N, state it in `privacy_delete_b` (EN+HE),
+  and remember copies you downloaded off the server aren't covered.
 - [ ] **Sample registry title/names** ("Our new bayis in Yerushalayim" / "A sample couple") — change
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 

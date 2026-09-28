@@ -986,3 +986,28 @@ def test_failed_login_keeps_the_email(client):
     page = client.post("/login", data=dict(csrf_token=get_csrf(html), email="dovid@example.com",
                                            password="wrong-password")).get_data(as_text=True)
     assert 'value="dovid@example.com"' in page
+
+
+def test_backup_keeps_newest_n_and_never_touches_hand_made_snapshots(app_module, tmp_path):
+    """A weekly scheduled backup must not slowly fill the hosting quota."""
+    import subprocess
+    import sys
+    folder = tmp_path / "backups"
+    folder.mkdir()
+    for day in range(1, 17):                                   # 16 older automatic backups
+        (folder / f"ourbayis-2026-01-{day:02d}-120000.db").write_bytes(b"x")
+    (folder / "ourbayis-snapshot-2026-09-14.db").write_bytes(b"keep me")
+    env = {**os.environ, "OB_DB_PATH": os.environ["OB_DB_PATH"], "OB_BACKUP_DIR": str(folder)}
+    r = subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), "backup"],
+                       cwd=BASE, env=env, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    names = sorted(p.name for p in folder.iterdir())
+    auto = [n for n in names if n != "ourbayis-snapshot-2026-09-14.db"]
+    assert "ourbayis-snapshot-2026-09-14.db" in names
+    assert len(auto) == 14                                     # the new one + the 13 newest old ones
+    assert "ourbayis-2026-01-01-120000.db" not in names and "ourbayis-2026-01-16-120000.db" in names
+    assert "Removed 3 older backup(s)" in r.stdout
+    r = subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), "backup", "--keep", "0"],
+                       cwd=BASE, env=env, capture_output=True, text=True)
+    assert r.returncode == 0 and "Removed" not in r.stdout    # --keep 0: nothing removed
+    assert "ourbayis-2026-01-04-120000.db" in {p.name for p in folder.iterdir()}

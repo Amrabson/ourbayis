@@ -91,7 +91,8 @@ work from anywhere (manage.py finds the database and `instance/ob.env` next to i
 # once a day: flips reservations past their 14-day hold to 'expired'
 /home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py expire-claims
 
-# weekly, before any deploy that touches the schema, or just as a habit:
+# weekly, before any deploy that touches the schema, or just as a habit
+# (keeps the newest 14 copies in backups/ and deletes older ones; --keep N to change, 0 = keep all):
 /home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py backup
 ```
 `manage.py check` is worth running after any deploy — it checks DB integrity, foreign keys, that at least one admin exists, and secret-key/cookie config sanity; exits 1 if anything's wrong.

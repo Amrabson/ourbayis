@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-09-28 (backup retention)
+- `manage.py backup` never deleted anything, so a scheduled weekly backup would slowly fill the
+  PythonAnywhere quota (each copy is the whole DB). New `--keep N` (default 14): after the new copy
+  is written and verified, the oldest automatic copies beyond N are removed. Only files named by the
+  command (`ourbayis-YYYY-MM-DD-HHMMSS.db`) are ever pruned — a hand-made snapshot such as
+  `ourbayis-snapshot-2026-09-14.db` is left alone — and a custom `--dest` is never pruned.
+  `--keep 0` keeps everything. `OB_BACKUP_DIR` overrides the folder (used by the test).
+- DEPLOY_AI.md schedule note and TODO_AI "Backup retention" updated (privacy wording still the
+  owner's decision). Test — 155 tests.
+
 ## 2026-09-28 (reminder email wording)
 - `manage.py remind-claims`: the Hebrew half of the bilingual reminder used the English gift name
   and registry title even when Hebrew ones exist, and both halves printed the hold date as raw ISO
