@@ -6,7 +6,7 @@
 <title>Shana Rishonah setup service — OurBayis</title>
 <meta name="description" content="Arriving in Israel for a year or for good? We can get your apartment ready before you walk in: the basics ordered and delivered — and, on the top package, unpacked and set up.">
 
-<meta name="csrf-token" content="1a579c71baef8bbd12540d5899066c1c">
+<meta name="csrf-token" content="2bc7ef6e1177453b4495c2a83842a709">
 
 
 <meta property="og:title" content="Shana Rishonah setup service — OurBayis">
@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../static/style.css?v=1a0d8a4eac3">
+<link rel="stylesheet" href="../static/style.css?v=1a0e752811e">
 
 
 </head>
@@ -105,8 +105,6 @@
   </div>
 </header>
 
-
-  
 
 
 <main id="main">
@@ -244,39 +242,42 @@
   <div class="form-panel" id="request">
     <h2 class="section-title">Request your setup</h2>
     <p class="page-sub">No payment now. We reply personally to discuss what you need and send a quote.</p>
+    
+      
+    
     <form method="post" action="../shana-rishonah/#request" class="stack-form">
-      <input type="hidden" name="csrf_token" value="1a579c71baef8bbd12540d5899066c1c">
+      <input type="hidden" name="csrf_token" value="2bc7ef6e1177453b4495c2a83842a709">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label class="selected-pkg">Which package? (you can change your mind later)
         <select name="bundle" id="bundle-select">
-          <option value="landing-basics">Landing Basics — from ₪2,450</option><option value="home-sweet-home">Home Sweet Home — from ₪6,900</option><option value="full-nest">The Full Nest — from ₪17,900</option>
-          <option value="custom">Not sure yet — help me choose</option>
+          <option value="landing-basics" >Landing Basics — from ₪2,450</option><option value="home-sweet-home" >Home Sweet Home — from ₪6,900</option><option value="full-nest" >The Full Nest — from ₪17,900</option>
+          <option value="custom" >Not sure yet — help me choose</option>
         </select>
       </label>
       <p class="hint contact-req">We need at least one way to reach you: a WhatsApp number or an email address.</p>
       <div class="form-2col">
-        <label>Your name *<input name="name" required maxlength="120" autocomplete="name"></label>
-        <label>WhatsApp number<input name="whatsapp" maxlength="40" placeholder="+1 / +972…" autocomplete="tel" inputmode="tel"></label>
-        <label>Email<input name="email" type="email" maxlength="200" autocomplete="email"></label>
-        <label>Arrival / move-in date<input name="arrival" type="date"></label>
-        <label>City in Israel<input name="city" maxlength="120" placeholder="Yerushalayim, Ramat Beit Shemesh…"></label>
-        <label>Neighborhood (optional)<input name="neighborhood" maxlength="120"></label>
+        <label>Your name *<input name="name" required maxlength="120" autocomplete="name" value=""></label>
+        <label>WhatsApp number<input name="whatsapp" maxlength="40" placeholder="+1 / +972…" autocomplete="tel" inputmode="tel" value=""></label>
+        <label>Email<input name="email" type="email" maxlength="200" autocomplete="email" value=""></label>
+        <label>Arrival / move-in date<input name="arrival" type="date" value=""></label>
+        <label>City in Israel<input name="city" maxlength="120" placeholder="Yerushalayim, Ramat Beit Shemesh…" value=""></label>
+        <label>Neighborhood (optional)<input name="neighborhood" maxlength="120" value=""></label>
         <label>Furnishing status
           <select name="furnishing">
-            <option value="unknown">Not sure yet</option>
-            <option value="empty">Empty</option>
-            <option value="partly">Partly furnished</option>
-            <option value="furnished">Fully furnished</option>
+            <option value="unknown" >Not sure yet</option>
+            <option value="empty" >Empty</option>
+            <option value="partly" >Partly furnished</option>
+            <option value="furnished" >Fully furnished</option>
           </select>
         </label>
         <label>Budget
           <select name="budget">
             <option value="">—</option>
-            <option value="under_3000">Under ₪3,000</option>
-            <option value="3000_6000">₪3,000–6,000</option>
-            <option value="6000_10000">₪6,000–10,000</option>
-            <option value="10000_plus">₪10,000+</option>
-            <option value="not_sure">Not sure</option>
+            <option value="under_3000" >Under ₪3,000</option>
+            <option value="3000_6000" >₪3,000–6,000</option>
+            <option value="6000_10000" >₪6,000–10,000</option>
+            <option value="10000_plus" >₪10,000+</option>
+            <option value="not_sure" >Not sure</option>
           </select>
         </label>
       </div>
@@ -323,7 +324,7 @@
   <div class="wrap footer-legal">© 2026 OurBayis · All rights reserved.</div>
 </footer>
 
-<script src="../static/app.js?v=1a0e3d7aecf"></script>
+<script src="../static/app.js?v=1a0e7524e88"></script>
 
 <script src="../demo.js"></script></body>
 </html>

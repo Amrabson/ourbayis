@@ -125,13 +125,15 @@
   </div>
 </header>
 
+{% block flashes %}
 {% with msgs = get_flashed_messages(with_categories=true) %}
   {% if msgs %}
-    <div class="wrap">
-      {% for cat, m in msgs %}<div class="flash flash-{{ cat }}">{{ m }}</div>{% endfor %}
+    <div class="wrap flash-stack" data-close-label="{{ t('close') }}">
+      {% for cat, m in msgs %}<div class="flash flash-{{ cat }}" role="{{ 'alert' if cat == 'err' else 'status' }}">{{ m }}</div>{% endfor %}
     </div>
   {% endif %}
 {% endwith %}
+{% endblock %}
 
 <main id="main">
 {% block content %}{% endblock %}

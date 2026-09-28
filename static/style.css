@@ -134,6 +134,13 @@ img, svg { vertical-align: middle; }
 .flash { margin: 14px 0; padding: 12px 18px; border-radius: var(--radius-sm); font-weight: 600; }
 .flash-ok { background: var(--green-soft); color: var(--green); border: 1px solid #bed7c6; }
 .flash-err { background: var(--danger-soft); color: var(--danger); border: 1px solid #e8c4b8; }
+/* page opened at a #fragment: messages float at the bottom so they're seen (app.js) */
+.flash-toast { position: fixed; z-index: 60; bottom: 16px; left: 16px; right: 16px; max-width: 560px;
+  margin: 0 auto; padding: 0; }
+.flash-toast .flash { margin: 8px 0 0; box-shadow: var(--shadow-lg); padding-inline-end: 44px; }
+.flash-x { position: absolute; top: 14px; inset-inline-end: 6px; width: 32px; height: 32px; border: 0;
+  background: transparent; color: inherit; font-size: 1rem; cursor: pointer; border-radius: 50%; }
+.flash-x:hover, .flash-x:focus-visible { background: rgba(0, 0, 0, .06); }
 .buy-next a { font-weight: 700; color: var(--green); }
 
 /* ---------------- hero ---------------- */

@@ -1071,7 +1071,7 @@ def claim_item(slug, item_id):
     db = get_db()
     name = (request.form.get("guest_name") or "").strip()[:120]
     if not name:
-        flash(_t("form_error", lang), "err")
+        flash(_t("claim_name_required", lang), "err")
         return redirect(url_for("registry", slug=slug) + f"#item-{item_id}")
 
     result = {}
@@ -1183,7 +1183,7 @@ def cash_gift(slug):
     if currency not in ob_money.CURRENCIES:
         currency = "ILS"
     if not name:
-        flash(_t("form_error", lang), "err")
+        flash(_t("claim_name_required", lang), "err")
         return redirect(url_for("registry", slug=slug))
     try:
         amount_minor = ob_money.to_minor(request.form.get("amount") or "0", currency)
@@ -2156,7 +2156,9 @@ def shana():
             flash(_t("sr_done_t", lang) + " " + _t("sr_done_b", lang), "ok")
             return redirect(url_for("shana"))
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
-    return render_template("shana.html", bundles=bundles, package_tiers=PACKAGE_TIERS)
+    # a rejected POST re-renders with what was typed (up to 2000 chars of notes) instead of blanking it
+    return render_template("shana.html", bundles=bundles, package_tiers=PACKAGE_TIERS,
+                           form=request.form if request.method == "POST" else {})
 
 
 # Shana Rishonah package definition, per tier (review 2026-09-15). The goods

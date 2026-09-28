@@ -6,7 +6,7 @@
 <title>שירות הקמה לשנה ראשונה — OurBayis</title>
 <meta name="description" content="מגיעים לישראל לשנה או לתמיד? אנחנו יכולים להכין לכם את הדירה לפני שאתם נכנסים: הבסיס מוזמן ומגיע — ובחבילה העליונה גם נפרק ומסודר.">
 
-<meta name="csrf-token" content="7b923a5bd62c453cb99b5747904f12e4">
+<meta name="csrf-token" content="6d6e1a2726f8eeef1d74593b1f4d1d5d">
 
 
 <meta property="og:title" content="שירות הקמה לשנה ראשונה — OurBayis">
@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../static/style.css?v=1a0d8a4eac3">
+<link rel="stylesheet" href="../../static/style.css?v=1a0e752811e">
 
 
 </head>
@@ -105,8 +105,6 @@
   </div>
 </header>
 
-
-  
 
 
 <main id="main">
@@ -244,39 +242,42 @@
   <div class="form-panel" id="request">
     <h2 class="section-title">בקשת הקמה</h2>
     <p class="page-sub">בלי תשלום עכשיו. נחזור אליכם אישית כדי לדבר על מה שאתם צריכים ולשלוח הצעת מחיר.</p>
+    
+      
+    
     <form method="post" action="../../he/shana-rishonah/#request" class="stack-form">
-      <input type="hidden" name="csrf_token" value="7b923a5bd62c453cb99b5747904f12e4">
+      <input type="hidden" name="csrf_token" value="6d6e1a2726f8eeef1d74593b1f4d1d5d">
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label class="selected-pkg">איזו חבילה? (אפשר לשנות אחר כך)
         <select name="bundle" id="bundle-select">
-          <option value="landing-basics">בסיס לנחיתה — החל מ־ ₪2,450</option><option value="home-sweet-home">בית מתוק — החל מ־ ₪6,900</option><option value="full-nest">הקן המלא — החל מ־ ₪17,900</option>
-          <option value="custom">עדיין לא בטוחים — עזרו לי לבחור</option>
+          <option value="landing-basics" >בסיס לנחיתה — החל מ־ ₪2,450</option><option value="home-sweet-home" >בית מתוק — החל מ־ ₪6,900</option><option value="full-nest" >הקן המלא — החל מ־ ₪17,900</option>
+          <option value="custom" >עדיין לא בטוחים — עזרו לי לבחור</option>
         </select>
       </label>
       <p class="hint contact-req">צריך לפחות דרך אחת ליצור איתכם קשר: מספר וואטסאפ או כתובת אימייל.</p>
       <div class="form-2col">
-        <label>השם שלכם *<input name="name" required maxlength="120" autocomplete="name"></label>
-        <label>מספר וואטסאפ<input name="whatsapp" maxlength="40" placeholder="+1 / +972…" autocomplete="tel" inputmode="tel"></label>
-        <label>אימייל<input name="email" type="email" maxlength="200" autocomplete="email"></label>
-        <label>תאריך נחיתה / כניסה לדירה<input name="arrival" type="date"></label>
-        <label>עיר בישראל<input name="city" maxlength="120" placeholder="Yerushalayim, Ramat Beit Shemesh…"></label>
-        <label>שכונה (אופציונלי)<input name="neighborhood" maxlength="120"></label>
+        <label>השם שלכם *<input name="name" required maxlength="120" autocomplete="name" value=""></label>
+        <label>מספר וואטסאפ<input name="whatsapp" maxlength="40" placeholder="+1 / +972…" autocomplete="tel" inputmode="tel" value=""></label>
+        <label>אימייל<input name="email" type="email" maxlength="200" autocomplete="email" value=""></label>
+        <label>תאריך נחיתה / כניסה לדירה<input name="arrival" type="date" value=""></label>
+        <label>עיר בישראל<input name="city" maxlength="120" placeholder="Yerushalayim, Ramat Beit Shemesh…" value=""></label>
+        <label>שכונה (אופציונלי)<input name="neighborhood" maxlength="120" value=""></label>
         <label>מצב ריהוט
           <select name="furnishing">
-            <option value="unknown">עדיין לא ידוע</option>
-            <option value="empty">ריקה</option>
-            <option value="partly">מרוהטת חלקית</option>
-            <option value="furnished">מרוהטת לגמרי</option>
+            <option value="unknown" >עדיין לא ידוע</option>
+            <option value="empty" >ריקה</option>
+            <option value="partly" >מרוהטת חלקית</option>
+            <option value="furnished" >מרוהטת לגמרי</option>
           </select>
         </label>
         <label>תקציב
           <select name="budget">
             <option value="">—</option>
-            <option value="under_3000">עד ₪3,000</option>
-            <option value="3000_6000">₪3,000–6,000</option>
-            <option value="6000_10000">₪6,000–10,000</option>
-            <option value="10000_plus">₪10,000+</option>
-            <option value="not_sure">לא בטוחים</option>
+            <option value="under_3000" >עד ₪3,000</option>
+            <option value="3000_6000" >₪3,000–6,000</option>
+            <option value="6000_10000" >₪6,000–10,000</option>
+            <option value="10000_plus" >₪10,000+</option>
+            <option value="not_sure" >לא בטוחים</option>
           </select>
         </label>
       </div>
@@ -323,7 +324,7 @@
   <div class="wrap footer-legal">© 2026 OurBayis · כל הזכויות שמורות.</div>
 </footer>
 
-<script src="../../static/app.js?v=1a0e3d7aecf"></script>
+<script src="../../static/app.js?v=1a0e7524e88"></script>
 
 <script src="../../demo.js"></script></body>
 </html>

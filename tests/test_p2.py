@@ -943,3 +943,36 @@ def test_share_link_and_preview_follow_the_couples_language(client, app_module):
     assert "מקימים בית חדש" in desc and "Sarah &amp; Dovid" in desc
     page = app_module.app.test_client().get(f"/r/{slug}?lang=en").get_data(as_text=True)
     assert "See the gifts they&#39;d love and reserve one." in page
+
+
+def test_shana_form_keeps_what_was_typed_and_shows_messages_at_the_form(client):
+    """The form posts to #request, so the page opens at the form: the message must be there
+    (not at the top, off-screen), and a rejected request must not blank 2000 chars of notes."""
+    html = client.get("/shana-rishonah").get_data(as_text=True)
+    r = client.post("/shana-rishonah", data=dict(
+        csrf_token=get_csrf(html), name="Test Lead", city="Yerushalayim", bundle="custom",
+        furnishing="partly", budget="3000_6000", notes="Arriving after Sukkos, two rooms."))
+    page = r.get_data(as_text=True)
+    panel = page[page.index('id="request"'):]
+    assert "Please add a WhatsApp number or email" in panel
+    assert page.count("Please add a WhatsApp number or email") == 1      # not also at the top
+    assert 'value="Test Lead"' in panel and 'value="Yerushalayim"' in panel
+    assert ">Arriving after Sukkos, two rooms.</textarea>" in panel
+    assert 'value="partly" selected' in panel and 'value="3000_6000" selected' in panel
+    r = client.post("/shana-rishonah", data=dict(
+        csrf_token=get_csrf(html), name="Test Lead", whatsapp="+972 50 123 4567"), follow_redirects=True)
+    page = r.get_data(as_text=True)
+    assert "Got it — mazel tov!" in page[page.index('id="request"'):]
+
+
+def test_blank_guest_name_gets_a_specific_message(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    item = next(iter(items.values()))
+    g = app_module.app.test_client()
+    html = g.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    r = g.post(f"/r/{reg['slug']}/claim/{item['id']}", data=dict(
+        csrf_token=get_csrf(html), form_key=get_form_key(html), guest_name="   ", give="buy"))
+    assert r.headers["Location"].endswith(f"#item-{item['id']}")
+    page = g.get(r.headers["Location"]).get_data(as_text=True)
+    assert "Please add your name so the couple knows who the gift is from" in page
+    assert 'class="wrap flash-stack"' in page                      # app.js turns it into a toast

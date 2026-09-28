@@ -78,6 +78,24 @@
     });
   });
 
+  // Messages render at the top of the page, but many actions send you back to a spot lower down
+  // (#item-12, #mine, #claim-3) — so the "done" / "that didn't work" line would be off-screen.
+  // When the page opens at a #fragment, show the messages as a toast pinned to the bottom instead.
+  document.addEventListener("DOMContentLoaded", function () {
+    var stack = document.querySelector(".flash-stack");
+    if (!stack || !location.hash) return;
+    stack.classList.add("flash-toast");
+    var x = document.createElement("button");
+    x.type = "button";
+    x.className = "flash-x";
+    x.textContent = "✕";
+    x.setAttribute("aria-label", stack.getAttribute("data-close-label") || "Close");
+    x.addEventListener("click", function () { stack.remove(); });
+    stack.appendChild(x);
+    // a success note fades on its own; an error waits until it's closed
+    if (!stack.querySelector(".flash-err")) setTimeout(function () { stack.remove(); }, 7000);
+  });
+
   // v3 phase 2: reveal-on-scroll for elements marked .reveal
   document.addEventListener("DOMContentLoaded", function () {
     var reveals = document.querySelectorAll(".reveal");

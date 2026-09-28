@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-09-28 (messages you can actually see; Shana form keeps input)
+- **Shana Rishonah form:** it posts to `#request` and the success redirect inherits that fragment,
+  so both outcomes opened at the form while the message sat at the top of the page, off-screen.
+  On success people saw an empty form and no "Got it — mazel tov!" (and could submit again); on
+  a rejected request (e.g. no WhatsApp/email) they saw an empty form with no explanation — and
+  everything they'd typed, notes included, was gone. Now the message renders inside the form panel
+  (`{% block flashes %}` in base.html, overridden on shana.html; role=alert/status) and a rejected
+  POST re-renders with every field and select refilled.
+- **Everywhere else that redirects to a spot on the page** (`#item-12` after a gift attempt, `#mine`,
+  `#claim-3` on the dashboard): app.js turns the top-of-page messages into a toast pinned to the
+  bottom of the screen with a close button when the page opens at a fragment. Success notes fade
+  after 7 s; errors stay until closed. Verified in the browser (fixed, 16 px from the bottom, RTL
+  close button on the correct side).
+- A gift attempt with a blank name said "Please check the highlighted fields" — nothing is
+  highlighted after the redirect. Now `claim_name_required` (EN+HE) for item and cash gifts.
+- 2 tests — 152 tests.
+
 ## 2026-09-28 (share links + link previews)
 - Text scan of every public page in EN+HE (44 pages): clean — only brand names are Latin on HE pages.
 - Registry link previews (WhatsApp/Facebook/og:description + meta description) said only
