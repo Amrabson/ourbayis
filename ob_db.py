@@ -466,6 +466,12 @@ def _m020_model_he(db):
     """)
 
 
+def _m021_mail_reply_to(db):
+    """Owner notifications (contact message, Shana lead) carry the sender's address as
+    Reply-To, so hitting Reply in the owner's mail app answers the person, not the site."""
+    _add_column(db, "mail_outbox", "reply_to TEXT DEFAULT ''")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -676,6 +682,7 @@ MIGRATIONS = [
     _m018_registry_items_catalog_snapshot,
     _m019_claim_reminders,
     _m020_model_he,
+    _m021_mail_reply_to,
 ]
 
 

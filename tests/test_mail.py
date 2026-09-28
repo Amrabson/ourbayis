@@ -61,7 +61,7 @@ def test_two_senders_never_deliver_the_same_row_twice(app_module, monkeypatch):
     sent = []
     path = os.environ["OB_DB_PATH"]
 
-    def fake_send(to, subject, body):
+    def fake_send(to, subject, body, **kw):
         sent.append(to)
         if len(sent) == 1:  # a second sender arrives while the first is mid-send
             other = ob_db.connect(path)
@@ -87,7 +87,7 @@ def test_failed_send_is_retried_after_backoff_not_lease(app_module, monkeypatch)
     monkeypatch.setenv("OB_SMTP_PASS", "x")
     monkeypatch.setattr(ob_mail.threading, "Thread", lambda **kw: type("T", (), {"start": lambda s: None})())
 
-    def boom(*a):
+    def boom(*a, **kw):
         raise OSError("down")
 
     monkeypatch.setattr(ob_mail, "send_now", boom)
@@ -97,3 +97,38 @@ def test_failed_send_is_retried_after_backoff_not_lease(app_module, monkeypatch)
         ob_mail.attempt(db, rid)
         row = db.execute("SELECT status, attempts, last_error FROM mail_outbox WHERE id=?", (rid,)).fetchone()
         assert (row["status"], row["attempts"], row["last_error"]) == ("queued", 1, "OSError")
+
+
+def test_owner_notifications_reply_to_the_sender(client, app_module, monkeypatch):
+    """Contact messages and Shana leads: hitting Reply answers the person, not the site."""
+    import ob_mail
+    monkeypatch.setattr(app_module, "NOTIFY_EMAIL", "owner@example.com")
+    from conftest import get_csrf
+    html = client.get("/contact").get_data(as_text=True)
+    client.post("/contact", data=dict(csrf_token=get_csrf(html), name="Rivka",
+                                      email="rivka@example.com", body="Question about shipping"))
+    html = client.get("/shana-rishonah").get_data(as_text=True)
+    client.post("/shana-rishonah", data=dict(csrf_token=get_csrf(html), name="Lead",
+                                             email="bad, list@x.com", whatsapp="+972501234567"))
+    rows = _db().execute("SELECT subject, reply_to FROM mail_outbox WHERE to_addr='owner@example.com'"
+                         " ORDER BY id").fetchall()
+    assert [r["reply_to"] for r in rows] == ["rivka@example.com", ""]    # invalid address dropped
+
+    sent = {}
+
+    class FakeSMTP:
+        def __init__(self, *a, **k): pass
+        def __enter__(self): return self
+        def __exit__(self, *a): return False
+        def starttls(self): pass
+        def login(self, *a): pass
+        def send_message(self, msg): sent["msg"] = msg
+
+    monkeypatch.setenv("OB_SMTP_HOST", "smtp.example.com")
+    monkeypatch.setenv("OB_SMTP_USER", "site@example.com")
+    monkeypatch.setenv("OB_SMTP_PASS", "x")
+    monkeypatch.setattr(ob_mail.smtplib, "SMTP", FakeSMTP)
+    ob_mail.send_now("owner@example.com", "s", "b", reply_to="rivka@example.com")
+    assert sent["msg"]["Reply-To"] == "rivka@example.com"
+    ob_mail.send_now("owner@example.com", "s", "b", reply_to="x@y.com, z@w.com")
+    assert sent["msg"]["Reply-To"] is None

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-09-28 (Reply-To on owner notifications; login keeps email)
+- Contact messages and Shana Rishonah leads are emailed to `OB_NOTIFY_EMAIL` from the site's own
+  address, so hitting Reply answered the site. They now carry `Reply-To: <the sender's email>`
+  (only when it's one valid address). New `mail_outbox.reply_to` (migration 21), `enqueue(...,
+  reply_to=)`, `send_now(..., reply_to=)`.
+- /login re-shows the typed email after a wrong password.
+- Tests — 154 tests.
+
 ## 2026-09-28 (messages you can actually see; Shana form keeps input)
 - **Shana Rishonah form:** it posts to `#request` and the success redirect inherits that fragment,
   so both outcomes opened at the form while the message sat at the top of the page, off-screen.

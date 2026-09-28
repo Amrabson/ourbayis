@@ -976,3 +976,10 @@ def test_blank_guest_name_gets_a_specific_message(client, app_module):
     page = g.get(r.headers["Location"]).get_data(as_text=True)
     assert "Please add your name so the couple knows who the gift is from" in page
     assert 'class="wrap flash-stack"' in page                      # app.js turns it into a toast
+
+
+def test_failed_login_keeps_the_email(client):
+    html = client.get("/login").get_data(as_text=True)
+    page = client.post("/login", data=dict(csrf_token=get_csrf(html), email="dovid@example.com",
+                                           password="wrong-password")).get_data(as_text=True)
+    assert 'value="dovid@example.com"' in page

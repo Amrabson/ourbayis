@@ -181,8 +181,8 @@ def rate_limited(bucket, limit=20, per=600):
     return ob_security.rate_limited(get_db(), bucket, request.remote_addr, limit, per)
 
 
-def send_mail(to, subject, body):
-    return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH)
+def send_mail(to, subject, body, reply_to=""):
+    return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH, reply_to=reply_to)
 
 
 # ---------------------------------------------------------------- database
@@ -999,7 +999,8 @@ def contact():
                 NOTIFY_EMAIL,
                 f"OurBayis contact: {(request.form.get('topic') or 'general')}",
                 f"From: {request.form.get('name', '')} <{request.form.get('email', '')}>\n\n"
-                f"{body[:4000]}\n\nAdmin: {ext_url('admin_home')}")
+                f"{body[:4000]}\n\nAdmin: {ext_url('admin_home')}",
+                reply_to=(request.form.get("email") or "").strip())
             flash(_t("contact_done", current_lang()), "ok")
             return redirect(url_for("contact"))
     return render_template("contact.html")
@@ -2151,7 +2152,8 @@ def shana():
                 f"Arrival: {f.get('arrival', '')}\nCity: {f.get('city', '')}\n"
                 f"Neighborhood: {f.get('neighborhood', '')}\nFurnishing: {f.get('furnishing', '')}\n"
                 f"Budget: {f.get('budget', '')}\nBundle: {f.get('bundle', '')}\n"
-                f"Notes: {f.get('notes', '')}\n\nAdmin: {ext_url('admin_home')}")
+                f"Notes: {f.get('notes', '')}\n\nAdmin: {ext_url('admin_home')}",
+                reply_to=email)
             track("concierge_inquiry")
             flash(_t("sr_done_t", lang) + " " + _t("sr_done_b", lang), "ok")
             return redirect(url_for("shana"))
