@@ -30,12 +30,17 @@
       <div class="mine-info">
         <strong>{{ pick(m, 'name') }}</strong>
         <span class="gift-meta bdi">{% if m['price_nis'] %}₪{{ '{:,}'.format(m['price_nis']) }}{% endif %}{% if m['store'] %} · {{ m['store'] }}{% endif %}
-        {% if st.committed %} · <em class="claimed-note">{{ tf('claimed_n', n=st.committed) }}{% if st.reserved %} ({{ tf('qty_reserved', n=st.reserved) }}{% if st.reported %}, {{ tf('qty_reported', n=st.reported) }}{% endif %}{% if st.received %}, {{ tf('qty_received', n=st.received) }}{% endif %}){% elif st.reported or st.received %} ({% if st.reported %}{{ tf('qty_reported', n=st.reported) }}{% endif %}{% if st.reported and st.received %}, {% endif %}{% if st.received %}{{ tf('qty_received', n=st.received) }}{% endif %}){% endif %}</em>{% endif %}
+        {% if st.committed %}
+          {%- set _parts = [] -%}
+          {%- if st.reserved %}{% set _ = _parts.append(tf('qty_reserved', n=st.reserved)) %}{% endif -%}
+          {%- if st.reported %}{% set _ = _parts.append(tf('qty_reported', n=st.reported)) %}{% endif -%}
+          {%- if st.received %}{% set _ = _parts.append(tf('qty_received', n=st.received)) %}{% endif -%}
+          {{ ' · ' }}<em class="claimed-note">{{ _parts | join(', ') }}</em>{% endif %}
         {% if m['availability'] == 'unavailable' %} · <em class="warn-note">{{ t('availability_unavailable_tag') }}</em>{% endif %}
         {% if not m['url'] and not reg['paypal_url'] and not reg['stripe_url'] and not reg['bit_url'] %}
           · <em class="warn-note">{{ t('needs_link_note') }}</em>
         {% endif %}
-        {% if m['price_status'] == 'verified' and m['price_checked_at'] %} · <span class="hint">{{ tf('price_checked', date=m['price_checked_at']) }}</span>
+        {% if m['price_status'] == 'verified' and m['price_checked_at'] %} · <span class="hint">{{ tf('price_checked', date=fmt_date(m['price_checked_at'])) }}</span>
         {% elif m['price_status'] == 'estimate' %} · <span class="hint">{{ t('price_estimate') }}</span>{% endif %}
         </span>
       </div>
@@ -71,7 +76,7 @@
       {{ gift_media(c, small=True) }}
       <div class="catalog-body">
         <h3>{{ pick(c, 'name') }}</h3>
-        <p class="gift-meta bdi">{% if c['price_nis'] %}<strong>₪{{ '{:,}'.format(c['price_nis']) }}</strong>{% endif %}{% if c['brand'] %} · {{ c['brand'] }}{% endif %}{% if c['store'] %} · {{ c['store'] }}{% endif %}
+        <p class="gift-meta bdi">{% if c['price_nis'] %}<strong>₪{{ '{:,}'.format(c['price_nis']) }}</strong>{% endif %}{% if c['brand'] %} · {{ c['brand'] }}{% endif %}{% if c['store'] and c['store'] != c['brand'] %} · {{ c['store'] }}{% endif %}
         {% if c['availability'] == 'unavailable' %} · <span class="warn-note">{{ t('availability_unavailable_tag') }}</span>{% endif %}</p>
       </div>
       {% if c['id'] in have %}

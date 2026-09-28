@@ -859,3 +859,31 @@ def test_hebrew_prefix_takes_maqaf_before_latin_store(app_module, store, expect)
     """"בMachsanei" is wrong Hebrew typography; a Hebrew store name stays joined."""
     assert app_module.tf("view_at_store", "he", store=store) == expect
     assert app_module.tf("view_at_store", "en", store="KSP").endswith("at KSP")
+
+
+def test_confirmed_cash_gift_no_longer_offers_to_pay(client, app_module):
+    """After the couple confirms a cash gift, the guest's page must not keep showing
+    "amount to send" + the PayPal button — a returning guest could pay twice."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer"], pay=True)
+    item = next(iter(items.values()))
+    token = _claim(app_module, reg["slug"], item["id"], give="cash")
+    g = app_module.app.test_client()
+    assert "paypal.me/sarahdovid" in g.get(f"/g/{token}").get_data(as_text=True)
+    with app_module.app.app_context():
+        cid = app_module.get_db().execute("SELECT id FROM claims").fetchone()[0]
+    html = client.get("/dashboard").get_data(as_text=True)
+    client.post(f"/claim/{cid}/confirm", data=dict(csrf_token=get_csrf(html)))
+    page = g.get(f"/g/{token}").get_data(as_text=True)
+    assert "paypal.me/sarahdovid" not in page and "Amount to send" not in page
+
+
+def test_items_page_status_line_does_not_repeat_itself(client, app_module):
+    """Was "1 reserved (1 reserved)"; also no raw ISO dates, no "IKEA · IKEA"."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    _claim(app_module, reg["slug"], next(iter(items.values()))["id"])
+    page = client.get("/registry/items").get_data(as_text=True)
+    note = re.search(r'<em class="claimed-note">(.*?)</em>', page, re.S).group(1)
+    assert " ".join(note.split()) == "1 reserved"
+    text = re.sub(r"<[^>]+>", " ", page)
+    assert not re.search(r"checked \d{4}-\d\d-\d\d", text)
+    assert "IKEA · IKEA" not in text and "Vardinon · Vardinon" not in text

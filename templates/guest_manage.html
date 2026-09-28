@@ -20,7 +20,9 @@
     </div>
 {% endmacro %}
 {% macro cash_pay_block() %}
-    {% if claim['kind'] == 'cash' and pay_links %}
+    {# pay buttons only while the money may still be on its way — never after the couple confirmed
+       it (or it was cancelled), or a returning guest could send it a second time #}
+    {% if claim['kind'] == 'cash' and pay_links and claim['status'] in ('reserved', 'reported') %}
     <div class="pay-block">
       {% if claim['amount_minor'] is not none %}
       <p class="pay-amount">{{ t('guest_send_amount') }} <strong class="bdi">{{ fmt_money(claim['amount_minor'], claim['currency']) }}</strong>

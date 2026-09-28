@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-28 (couple + guest pages review, rendered via tools/render_private.py)
+- **Paid-twice risk:** a guest's page for a cash gift kept showing "Amount to send" and the PayPal
+  button after the couple had confirmed receiving it (or it was cancelled). Pay buttons now show
+  only while the claim is reserved/reported; afterwards just the amount.
+- Dashboard queue said "(פג תוקף 12 באוקטובר 2026)" — "expired" — about reservations that are still
+  held. Now "משוריין עד …" / "held until …", matching the guest page.
+- /registry/items status read "1 reserved (1 reserved)" (EN and HE use the same words for the
+  headline and the breakdown). Now just the breakdown: "1 reserved", "1 on the way, 1 received".
+- /registry/items still printed raw ISO price-check dates → `fmt_date`.
+- "IKEA · IKEA", "Vardinon · Vardinon": the store is no longer repeated when it equals the brand
+  (catalog picker and every gift card).
+- 2 tests — 146 tests.
+
 ## 2026-09-28 (Hebrew maqaf before Latin store names)
 - Mobile Hebrew walk-through of the guest flow (registry → gift dialog → reserve → /g/ page).
   Store names were glued to the Hebrew prefix: "לפרטי המוצר בMachsanei Chashmal", "לקנייה בKSP",

@@ -34,6 +34,7 @@
 {% macro gift_facts(item, show_model=True) -%}
   {%- set _brand = item['brand'] if 'brand' in item.keys() else '' -%}
   {%- set _store = item['store'] if 'store' in item.keys() else '' -%}
+  {%- if _store and _brand and _store | lower == _brand | lower %}{% set _store = '' %}{% endif -%}
   {%- if _brand or _store -%}
   <p class="gift-sub">{% if _brand %}<span class="item-brand">{{ _brand }}</span>{% endif %}{% if _brand and _store %} · {% endif %}{% if _store %}<span class="bdi">{{ _store }}</span>{% endif %}</p>
   {%- endif -%}
