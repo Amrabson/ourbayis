@@ -1354,6 +1354,25 @@ EVENT_TYPES = {
 }
 
 
+_MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August",
+              "September", "October", "November", "December"]
+_MONTHS_HE = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט",
+              "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"]
+
+
+def format_date(iso, lang="en"):
+    """"15 December 2026" / "15 בדצמבר 2026" from a stored ISO date or datetime
+    string; anything unparsable is returned as-is."""
+    from datetime import date
+    try:
+        d = date.fromisoformat((iso or "")[:10])
+    except (ValueError, TypeError):
+        return iso or ""
+    if lang == "he":
+        return f"{d.day} ב{_MONTHS_HE[d.month - 1]} {d.year}"
+    return f"{d.day} {_MONTHS_EN[d.month - 1]} {d.year}"
+
+
 def t(key, lang="en"):
     if lang == "he":
         val = T_HE.get(key)

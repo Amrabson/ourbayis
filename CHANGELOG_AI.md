@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-09-28 (reminder email wording)
+- `manage.py remind-claims`: the Hebrew half of the bilingual reminder used the English gift name
+  and registry title even when Hebrew ones exist, and both halves printed the hold date as raw ISO
+  ("2026-10-12"). Now the Hebrew half uses `name_he` / `title_he` (falling back to English) and the
+  date reads "12 October 2026" / "12 באוקטובר 2026".
+- Date wording moved to `i18n.format_date(iso, lang)` so emails queued from manage.py read the same
+  as the site; `app.fmt_date` delegates to it.
+- The reminder still links to the registry, not the guest's /g/ page — only the token hash is
+  stored (by design); guests who get reminders gave an email, so their confirmation has the link.
+- Reminder test extended — 154 tests.
+
 ## 2026-09-28 (Reply-To on owner notifications; login keeps email)
 - Contact messages and Shana Rishonah leads are emailed to `OB_NOTIFY_EMAIL` from the site's own
   address, so hitting Reply answered the site. They now carry `Reply-To: <the sender's email>`

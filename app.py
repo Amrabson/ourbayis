@@ -31,7 +31,7 @@ import ob_db
 import ob_mail
 import ob_money
 import ob_security
-from i18n import CATEGORIES, EVENT_TYPES, T_EN, cat_label, t as _t
+from i18n import CATEGORIES, EVENT_TYPES, T_EN, cat_label, format_date, t as _t
 
 BASE = Path(__file__).resolve().parent
 ob_security.load_env_file(ob_security.env_file_path(BASE))  # instance/ob.env, before any env read
@@ -404,24 +404,11 @@ def go_url(item):
     return url_for("go_item", item_id=item["id"])
 
 
-_MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August",
-              "September", "October", "November", "December"]
-_MONTHS_HE = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט",
-              "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"]
-
-
 def fmt_date(iso, lang=None):
     """Human-readable date for display ("15 December 2026" / "15 בדצמבר 2026")
-    from a stored ISO date or datetime string. The stored value is never
-    changed; anything unparsable is returned as-is."""
-    lang = lang or current_lang()
-    try:
-        d = date.fromisoformat((iso or "")[:10])
-    except (ValueError, TypeError):
-        return iso or ""
-    if lang == "he":
-        return f"{d.day} ב{_MONTHS_HE[d.month - 1]} {d.year}"
-    return f"{d.day} {_MONTHS_EN[d.month - 1]} {d.year}"
+    from a stored ISO date or datetime string (i18n.format_date). The stored
+    value is never changed; anything unparsable is returned as-is."""
+    return format_date(iso, lang or current_lang())
 
 
 def estimate_label(price_nis, lang=None):

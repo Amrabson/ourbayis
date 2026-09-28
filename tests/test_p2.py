@@ -402,6 +402,9 @@ def test_remind_claims_is_bounded_and_idempotent(client, app_module, tmp_path):
         assert len(mail) == 1 and mail[0]["to_addr"] == "g1@example.com"
         assert "Towel set" in mail[0]["subject"] and "https://ourbayis.example/r/" in mail[0]["body"]
         assert "שלום" in mail[0]["body"]  # bilingual body
+        assert "״סט מגבות״" in mail[0]["body"]  # Hebrew half names the gift in Hebrew
+        assert not re.search(r"\d{4}-\d\d-\d\d", mail[0]["body"])  # "12 October 2026", not ISO
+        assert re.search(r"\d{1,2} ב[א-ת]+ \d{4}", mail[0]["body"])
         assert db.execute("SELECT COUNT(*) FROM claims WHERE reminded_at IS NOT NULL").fetchone()[0] == 1
 
 

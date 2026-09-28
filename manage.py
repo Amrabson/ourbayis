@@ -122,7 +122,8 @@ def cmd_remind_claims(args):
     base = os.environ.get("OB_BASE_URL", "").rstrip("/")
     rows = db.execute(
         "SELECT c.id, c.guest_email, c.token_hash, c.expires_at, c.kind,"
-        " ri.name AS item_name, r.title AS reg_title, r.slug FROM claims c"
+        " ri.name AS item_name, ri.name_he AS item_name_he, r.title AS reg_title,"
+        " r.title_he AS reg_title_he, r.slug FROM claims c"
         " JOIN registries r ON r.id = c.registry_id"
         " LEFT JOIN registry_items ri ON ri.id = c.item_id"
         " WHERE c.status='reserved' AND c.guest_email != '' AND c.reminded_at IS NULL"
@@ -137,13 +138,16 @@ def cmd_remind_claims(args):
         # registry (the guest's own "save this link" email carried the /g/ link)
         link = f"{base}/r/{r['slug']}" if base else f"/r/{r['slug']}"
         item = r["item_name"] or i18n.t("gift_cash", "en")
-        item_he = r["item_name"] or i18n.t("gift_cash", "he")
+        item_he = r["item_name_he"] or r["item_name"] or i18n.t("gift_cash", "he")
+        title_he = r["reg_title_he"] or r["reg_title"]
         subject = i18n.t("mail_remind_subj", "en").format(item=item)
-        body = (i18n.t("mail_remind_body", "en").format(item=item, title=r["reg_title"], link=link,
-                                                        until=(r["expires_at"] or "")[:10])
+        body = (i18n.t("mail_remind_body", "en").format(
+                    item=item, title=r["reg_title"], link=link,
+                    until=i18n.format_date(r["expires_at"], "en"))
                 + "\n\n— — —\n\n"
-                + i18n.t("mail_remind_body", "he").format(item=item_he, title=r["reg_title"], link=link,
-                                                          until=(r["expires_at"] or "")[:10]))
+                + i18n.t("mail_remind_body", "he").format(
+                    item=item_he, title=title_he, link=link,
+                    until=i18n.format_date(r["expires_at"], "he")))
         with ob_db.write_txn(db):
             # mark first, then queue — a crash between the two loses one nudge, never repeats it
             db.execute("UPDATE claims SET reminded_at=? WHERE id=? AND reminded_at IS NULL",
