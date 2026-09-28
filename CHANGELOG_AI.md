@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-28 (Hebrew maqaf before Latin store names)
+- Mobile Hebrew walk-through of the guest flow (registry → gift dialog → reserve → /g/ page).
+  Store names were glued to the Hebrew prefix: "לפרטי המוצר בMachsanei Chashmal", "לקנייה בKSP",
+  "אתם מזמינים מMachsanei…". New `tf(key, lang, **kw)` (the Jinja `tf` global now calls it) adds a
+  maqaf when a one/two-letter prefix (ו/ב/ל/מ/ה/כ/ש) is directly followed by a Latin letter or digit:
+  "ב-Machsanei Chashmal", "מ-KSP"; a Hebrew store name stays joined ("במחסני חשמל"). No static
+  Hebrew string is affected (checked all of T_HE). Verified the RTL order on the /g/ button by
+  measuring glyph positions.
+- Rest of the flow checked: dialog labels all attached (the unlabeled field is the honeypot), status
+  stepper, save-your-link notice, localised rate date and expiry date — fine.
+- Test `test_hebrew_prefix_takes_maqaf_before_latin_store` — 144 tests.
+
 ## 2026-09-27 (localised dates on public pages)
 - Mobile Hebrew pass on a live registry: every card's tag read "המחיר נבדק ב-2026-09-14" (raw ISO).
   Now `fmt_date` → "המחיר נבדק ב-14 בספטמבר 2026" / "Price checked 14 September 2026"; fits on one

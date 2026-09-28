@@ -659,6 +659,17 @@ def ext_url_path(path, args, lang_code):
     return full + (("?" + qs) if qs else "")
 
 
+# Hebrew one-letter prefixes (ב/מ/ל/ה/ו/כ/ש, up to two) take a maqaf before a Latin word or a
+# number: "ב-KSP", "מ-Machsanei Chashmal" — but "במחסני חשמל" when the store name is Hebrew.
+_HE_PREFIX_BEFORE_LATIN = re.compile(r"(?<![\w-])([ובלמהכש]{1,2})(?=[A-Za-z0-9])")
+
+
+def tf(key, lang, **kw):
+    """Translated string with values filled in (the `tf` Jinja global)."""
+    s = _t(key, lang).format(**kw)
+    return _HE_PREFIX_BEFORE_LATIN.sub(r"\1-", s) if lang == "he" else s
+
+
 @app.context_processor
 def inject_globals():
     lang = current_lang()
@@ -672,7 +683,7 @@ def inject_globals():
         lang=lang,
         rtl=(lang == "he"),
         t=lambda key: _t(key, lang),
-        tf=lambda key, **kw: _t(key, lang).format(**kw),
+        tf=lambda key, **kw: tf(key, lang, **kw),
         pick=lambda row, field: pick(row, field, lang),
         cat_label=lambda slug: cat_label(slug, lang),
         categories=CATEGORIES,

@@ -848,3 +848,14 @@ def test_public_dates_are_localised(client):
     assert not re.search(r"נבדק ב-\d{4}-\d\d-\d\d", he)
     en = client.get("/catalog?lang=en").get_data(as_text=True)
     assert re.search(r"Price checked \d{1,2} [A-Z][a-z]+ \d{4}", en)
+
+
+@pytest.mark.parametrize("store,expect", [
+    ("KSP", "לפרטי המוצר ב-KSP"),
+    ("Machsanei Chashmal", "לפרטי המוצר ב-Machsanei Chashmal"),
+    ("מחסני חשמל", "לפרטי המוצר במחסני חשמל"),
+])
+def test_hebrew_prefix_takes_maqaf_before_latin_store(app_module, store, expect):
+    """"בMachsanei" is wrong Hebrew typography; a Hebrew store name stays joined."""
+    assert app_module.tf("view_at_store", "he", store=store) == expect
+    assert app_module.tf("view_at_store", "en", store="KSP").endswith("at KSP")
