@@ -451,6 +451,21 @@ def _m018_registry_items_catalog_snapshot(db):
     """)
 
 
+def _m020_model_he(db):
+    """Hebrew description line (`model_he`) for catalog items and the registry items
+    copied from them — the model line carries facts guests need ("not sterling",
+    "programmable, 3 heat settings"), so Hebrew pages shouldn't show it only in English.
+    Filled from the seed by seed_sync (an _ADOPT_FIELDS field) and copied onto
+    registry items here and by refresh_registry_links()."""
+    _add_column(db, "catalog_items", "model_he TEXT DEFAULT ''")
+    _add_column(db, "registry_items", "model_he TEXT DEFAULT ''")
+    db.execute("""
+        UPDATE registry_items SET
+          model_he = COALESCE((SELECT model_he FROM catalog_items WHERE catalog_items.id = registry_items.catalog_id), '')
+        WHERE catalog_id IS NOT NULL
+    """)
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -473,6 +488,7 @@ _ADOPT_FIELDS = {
     "price_checked_at": "",
     "price_source": "",
     "model": "",
+    "model_he": "",
     "availability": "unknown",
     "notes": "",
     "notes_he": "",
@@ -540,14 +556,14 @@ def seed_sync(db, seed_items, dry_run=False):
             db.execute(
                 "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store,"
                 " url, sort, seed_key, kind, featured, starter_group, price_status,"
-                " price_checked_at, price_source, model, variant, availability, notes, notes_he, active)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                " price_checked_at, price_source, model, model_he, variant, availability, notes, notes_he, active)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (it["name"], it.get("name_he", ""), it.get("brand", ""),
                  it.get("category", "home"), it.get("price_nis", 0), it.get("store", ""),
                  it.get("url", ""), i, key, it.get("kind", "product"),
                  1 if it.get("featured") else 0, it.get("starter_group", ""),
                  it.get("price_status", "estimate"), it.get("price_checked_at", ""),
-                 it.get("price_source", ""), it.get("model", ""), it.get("variant", ""),
+                 it.get("price_source", ""), it.get("model", ""), it.get("model_he", ""), it.get("variant", ""),
                  it.get("availability", "unknown"), it.get("notes", ""), it.get("notes_he", ""),
                  0 if it.get("active") is False else 1))
     return counters
@@ -590,10 +606,10 @@ def refresh_registry_links(db, dry_run=False):
     claim's `price_snapshot_minor`/`amount_minor` is the guest's committed
     amount and is left alone. Returns (registry_item_id, field, old, new)."""
     diffs = []
-    fields = ("url", "image", "store", "brand", "model", "availability", "notes", "notes_he")
+    fields = ("url", "image", "store", "brand", "model", "model_he", "availability", "notes", "notes_he")
     rows = db.execute(
         "SELECT ri.*, c.url AS c_url, c.image AS c_image, c.store AS c_store,"
-        " c.brand AS c_brand, c.model AS c_model, c.availability AS c_availability,"
+        " c.brand AS c_brand, c.model AS c_model, c.model_he AS c_model_he, c.availability AS c_availability,"
         " c.notes AS c_notes, c.notes_he AS c_notes_he FROM registry_items ri"
         " JOIN catalog_items c ON c.id = ri.catalog_id"
         " WHERE ri.archived=0").fetchall()
@@ -659,6 +675,7 @@ MIGRATIONS = [
     _m017_account_deletion_index,
     _m018_registry_items_catalog_snapshot,
     _m019_claim_reminders,
+    _m020_model_he,
 ]
 
 

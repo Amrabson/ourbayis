@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-09-28 (Hebrew description lines — model_he)
+- Hebrew pages showed each gift's description line only in English, including facts a guest
+  needs ("(not sterling)", "plated with 925 silver (not solid silver)", "price is for two sets").
+  New `model_he` on catalog_items + registry_items (migration 20, backfills registry copies),
+  filled for all 57 active seed items that have a `model` (brand/model names kept in Latin, as
+  sold in Israeli stores; units as ל׳ / ס״מ / ק״ג / וואט). Cards use `pick(item, 'model')`.
+- Plumbing: seed_sync INSERT + `_ADOPT_FIELDS`, refresh_registry_links, the catalog→registry copy,
+  and a "Description line (HE)" field in /admin/catalog.
+- **Live DB:** restarting the app runs migration 20 and the startup seed-sync, which fills
+  `model_he` in the catalog (only where empty — admin edits are kept). Then copy it onto gifts
+  already on registries: `python manage.py refresh-registry-links` (dry run) → `--apply`.
+- 3 tests (Hebrew/English card lines, every seed model has Hebrew, live-DB fill path) — 149 tests.
+
 ## 2026-09-28 (couple + guest pages review, rendered via tools/render_private.py)
 - **Paid-twice risk:** a guest's page for a cash gift kept showing "Amount to send" and the PayPal
   button after the couple had confirmed receiving it (or it was cancelled). Pay buttons now show

@@ -14,7 +14,8 @@
         <label>Name (EN) *<input name="name" required maxlength="200" value="{{ row['name'] if row else '' }}"></label>
         <label dir="rtl">Name (HE)<input name="name_he" maxlength="200" value="{{ row['name_he'] if row else '' }}"></label>
         <label>Brand<input name="brand" maxlength="80" placeholder="e.g. Tefal, Vardinon…" value="{{ row['brand'] if row else '' }}"></label>
-        <label>Model<input name="model" maxlength="120" value="{{ row['model'] if row else '' }}"></label>
+        <label>Model / description line (EN)<input name="model" maxlength="120" value="{{ row['model'] if row else '' }}"></label>
+        <label dir="rtl">Description line (HE) — keep model names in Latin<input name="model_he" maxlength="160" value="{{ row['model_he'] if row and 'model_he' in row.keys() else '' }}"></label>
         <label>Variant<input name="variant" maxlength="120" value="{{ row['variant'] if row else '' }}"></label>
         <label>Category
           <select name="category">

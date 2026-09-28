@@ -457,12 +457,12 @@ def _insert_registry_item_from_catalog(db, reg_id, c):
     db.execute(
         "INSERT INTO registry_items (registry_id, catalog_id, name, name_he, brand,"
         " category, price_nis, store, url, image, kind, price_status, price_checked_at,"
-        " model, availability, notes, notes_he)"
-        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+        " model, model_he, availability, notes, notes_he)"
+        " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
         (reg_id, c["id"], c["name"], c["name_he"], c["brand"], c["category"],
          c["price_nis"], c["store"], c["url"], c["image"], _c("kind", "product"),
          _c("price_status", "estimate"), _c("price_checked_at"),
-         _c("model"), _c("availability", "unknown"), _c("notes"), _c("notes_he")))
+         _c("model"), _c("model_he"), _c("availability", "unknown"), _c("notes"), _c("notes_he")))
 
 
 def _apply_pending_add(db, reg_id, catalog_ids):
@@ -2415,7 +2415,7 @@ def _catalog_form_values(f):
             (f.get("price_checked_at") or "").strip()[:20], (f.get("price_source") or "").strip()[:200],
             f.get("availability") if f.get("availability") in CATALOG_AVAILABILITY else "unknown",
             (f.get("notes") or "").strip()[:1000], (f.get("notes_he") or "").strip()[:1000],
-            f.get("starter_group") or "")
+            f.get("starter_group") or "", (f.get("model_he") or "").strip()[:160])
     if not vals[0]:
         errors.append("Name is required")
     return vals, errors
@@ -2442,7 +2442,7 @@ def admin_catalog_edit(item_id=None):
                 "UPDATE catalog_items SET name=?, name_he=?, brand=?, category=?, price_nis=?,"
                 " store=?, url=?, image=?, active=?, featured=?, sort=?, kind=?, model=?, variant=?,"
                 " image_credit=?, price_status=?, price_checked_at=?, price_source=?, availability=?,"
-                " notes=?, notes_he=?, starter_group=?, updated_at=? WHERE id=?",
+                " notes=?, notes_he=?, starter_group=?, model_he=?, updated_at=? WHERE id=?",
                 vals + (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), item_id))
             if n_registry_refs:
                 flash("Changes here don't rewrite gifts already copied to registries — "
@@ -2452,8 +2452,8 @@ def admin_catalog_edit(item_id=None):
             db.execute(
                 "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store, url,"
                 " image, active, featured, sort, kind, model, variant, image_credit, price_status,"
-                " price_checked_at, price_source, availability, notes, notes_he, starter_group, seed_key)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals + (None,))
+                " price_checked_at, price_source, availability, notes, notes_he, starter_group, model_he, seed_key)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals + (None,))
             return redirect(url_for("admin_catalog"))
     return render_template("admin_catalog_form.html", row=row, n_registry_refs=n_registry_refs)
 

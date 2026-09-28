@@ -39,7 +39,7 @@
   <p class="gift-sub">{% if _brand %}<span class="item-brand">{{ _brand }}</span>{% endif %}{% if _brand and _store %} · {% endif %}{% if _store %}<span class="bdi">{{ _store }}</span>{% endif %}</p>
   {%- endif -%}
   {%- if show_model and 'model' in item.keys() and item['model'] -%}
-  <p class="gift-model bdi">{{ item['model'] }}</p>
+  <p class="gift-model bdi">{{ pick(item, 'model') }}</p>
   {%- endif -%}
   {%- set _ps = item['price_status'] if 'price_status' in item.keys() else '' -%}
   {%- set _av = item['availability'] if 'availability' in item.keys() else '' -%}

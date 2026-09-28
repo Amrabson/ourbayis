@@ -887,3 +887,40 @@ def test_items_page_status_line_does_not_repeat_itself(client, app_module):
     text = re.sub(r"<[^>]+>", " ", page)
     assert not re.search(r"checked \d{4}-\d\d-\d\d", text)
     assert "IKEA · IKEA" not in text and "Vardinon · Vardinon" not in text
+
+
+def test_hebrew_description_line_on_cards(client, app_module):
+    """The model line carries facts like "not sterling" — Hebrew pages show it in Hebrew."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["shabbos-candlesticks"])
+    item = next(iter(items.values()))
+    assert "לא כסף סטרלינג" in item["model_he"]           # copied onto the registry item
+    he = client.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
+    en = client.get(f"/r/{reg['slug']}?lang=en").get_data(as_text=True)
+    assert "לא כסף סטרלינג" in he and "(not sterling)" not in he
+    assert "(not sterling)" in en
+
+
+def test_every_seed_description_line_has_hebrew():
+    import json
+    items = json.load(open(os.path.join(BASE, "seed_catalog.json"), encoding="utf-8"))["items"]
+    missing = [it["seed_key"] for it in items
+               if it.get("model") and it.get("active", True) is not False and not it.get("model_he")]
+    assert not missing, missing
+
+
+def test_live_db_gets_model_he_from_ordinary_seed_sync(client, app_module):
+    """On an existing install model_he starts empty; the usual `seed-sync` + `refresh-registry-links`
+    fill it (catalog, then registry copies) without any forced overwrite."""
+    import json
+    import ob_db
+    seed = json.load(open(os.path.join(BASE, "seed_catalog.json"), encoding="utf-8"))["items"]
+    _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        cid = db.execute("SELECT id FROM catalog_items WHERE seed_key='stand-mixer'").fetchone()[0]
+        db.execute("UPDATE catalog_items SET model_he='' WHERE id=?", (cid,))
+        db.execute("UPDATE registry_items SET model_he='' WHERE catalog_id=?", (cid,))
+        ob_db.seed_sync(db, seed)
+        assert "קערת נירוסטה" in db.execute("SELECT model_he FROM catalog_items WHERE id=?", (cid,)).fetchone()[0]
+        ob_db.refresh_registry_links(db)
+        assert "קערת נירוסטה" in db.execute("SELECT model_he FROM registry_items").fetchone()[0]

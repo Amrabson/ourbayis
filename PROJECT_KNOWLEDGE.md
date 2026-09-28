@@ -220,6 +220,11 @@ Gift grid: auto-fill ≥240px, 2 columns ≤520px, 1 column ≤430px. Prices/URL
 - Registry items carry `model`/`availability`/`notes*` copied from the catalog (migration 18).
   `refresh-registry-links` refreshes url/image/store/brand/model/notes unless overridden, and
   `availability` always. It never touches price/qty/priority/note or any claim amount.
+- `model_he` (migration 20) is the Hebrew description line, shown via `pick(item, 'model')`.
+  Keep brand/model names in Latin and translate only the descriptors/caveats. It's an
+  `_ADOPT_FIELDS` field, so the startup seed-sync fills it on a live DB where it's still empty;
+  `refresh-registry-links --apply` then copies it to registry items. A test requires every
+  active seed item with a `model` to have `model_he`.
 - `featured_items(db, limit)` orders unavailable and url-less items last. `sample_registry(db)` builds
   the one sample fixture from it (synthetic states, no pay links, negative ids); `/sample` renders
   `registry.html` with `is_sample=True`; the homepage preview uses the same fixture.
