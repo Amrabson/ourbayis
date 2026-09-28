@@ -32,7 +32,7 @@
       <div class="names">{{ pick(reg, 'couple_names') }}</div>
       <div class="tagline">{{ t('print_insert_tagline') }}</div>
       <img src="{{ url_for('dashboard_qr') }}" alt="QR">
-      <div class="url">{{ ext_url('registry', slug=reg['slug']) }}</div>
+      <div class="url">{{ registry_share_url(reg['slug']) }}</div>
     </div>
     {% endfor %}
   </div>

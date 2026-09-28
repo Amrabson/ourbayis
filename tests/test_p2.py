@@ -924,3 +924,22 @@ def test_live_db_gets_model_he_from_ordinary_seed_sync(client, app_module):
         assert "קערת נירוסטה" in db.execute("SELECT model_he FROM catalog_items WHERE id=?", (cid,)).fetchone()[0]
         ob_db.refresh_registry_links(db)
         assert "קערת נירוסטה" in db.execute("SELECT model_he FROM registry_items").fetchone()[0]
+
+
+def test_share_link_and_preview_follow_the_couples_language(client, app_module):
+    """A couple using the site in Hebrew shares a Hebrew link (WhatsApp, copy, QR); the
+    link preview says what the page is for instead of just "Registry for …"."""
+    reg, _ = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    slug = reg["slug"]
+    en = client.get("/dashboard?lang=en").get_data(as_text=True)
+    assert f'data-copy="http://localhost/r/{slug}"' in en
+    he = client.get("/dashboard?lang=he").get_data(as_text=True)
+    assert f'data-copy="http://localhost/r/{slug}?lang=he"' in he
+    assert f"/r/{slug}%3Flang%3Dhe" in he                       # WhatsApp share text
+    with app_module.app.test_request_context("/?lang=he"):                  # what the QR encodes
+        assert app_module.registry_share_url(slug).endswith(f"/r/{slug}?lang=he")
+    page = app_module.app.test_client().get(f"/r/{slug}?lang=he").get_data(as_text=True)
+    desc = re.search(r'<meta property="og:description" content="([^"]*)"', page).group(1)
+    assert "מקימים בית חדש" in desc and "Sarah &amp; Dovid" in desc
+    page = app_module.app.test_client().get(f"/r/{slug}?lang=en").get_data(as_text=True)
+    assert "See the gifts they&#39;d love and reserve one." in page

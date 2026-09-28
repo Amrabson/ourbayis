@@ -265,6 +265,13 @@ def ext_url(endpoint, **kw):
     return url_for(endpoint, _external=True, **kw)
 
 
+def registry_share_url(slug):
+    """The registry link a couple (or a guest) shares — in the language they're using, so a
+    Hebrew-speaking couple's WhatsApp preview, QR code and landing page are Hebrew too
+    (guests can still switch). Jinja global."""
+    return ext_url("registry", slug=slug, **({"lang": "he"} if current_lang() == "he" else {}))
+
+
 def current_user():
     uid = session.get("uid")
     if not uid:
@@ -684,6 +691,7 @@ def inject_globals():
         rtl=(lang == "he"),
         t=lambda key: _t(key, lang),
         tf=lambda key, **kw: tf(key, lang, **kw),
+        registry_share_url=registry_share_url,
         pick=lambda row, field: pick(row, field, lang),
         cat_label=lambda slug: cat_label(slug, lang),
         categories=CATEGORIES,
@@ -1546,7 +1554,7 @@ def dashboard_qr():
     if not reg:
         abort(404)
     import segno
-    qr = segno.make(ext_url("registry", slug=reg["slug"]), error="m")
+    qr = segno.make(registry_share_url(reg["slug"]), error="m")
     buf = io.BytesIO()
     qr.save(buf, kind="svg", scale=6, border=2, dark="#223354")
     resp = app.response_class(buf.getvalue(), mimetype="image/svg+xml")

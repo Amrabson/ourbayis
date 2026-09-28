@@ -43,11 +43,11 @@
     <h2>{{ t('dash_share') }}</h2>
     <p class="hint">{{ t('dash_share_hint') }}</p>
     <div class="share-link-row">
-      <code class="share-url">{{ ext_url('registry', slug=reg['slug']) }}</code>
-      <button class="btn btn-ghost" data-copy="{{ ext_url('registry', slug=reg['slug']) }}"
+      <code class="share-url">{{ registry_share_url(reg['slug']) }}</code>
+      <button class="btn btn-ghost" data-copy="{{ registry_share_url(reg['slug']) }}"
               data-copied-label="{{ t('copied') }}" data-share-beacon="{{ url_for('dashboard_shared') }}">{{ t('copy_link') }}</button>
       <a class="btn btn-wa" target="_blank" rel="noopener" data-share-beacon="{{ url_for('dashboard_shared') }}"
-         href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ ext_url('registry', slug=reg['slug'])) | urlencode }}">
+         href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ registry_share_url(reg['slug'])) | urlencode }}">
         <svg class="ic"><use href="#i-wa"/></svg> {{ t('share_whatsapp') }}</a>
     </div>
     <div class="qr-box">

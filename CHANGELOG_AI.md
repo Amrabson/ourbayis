@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-09-28 (share links + link previews)
+- Text scan of every public page in EN+HE (44 pages): clean — only brand names are Latin on HE pages.
+- Registry link previews (WhatsApp/Facebook/og:description + meta description) said only
+  "Registry for Sarah & Dovid". Now "Wedding · 15 December 2026 — Sarah & Dovid are setting up their
+  new home. See the gifts they'd love and reserve one." (HE: "…מקימים בית חדש. צפו במתנות שהם
+  ישמחו לקבל ושריינו אחת."); event/date only when set. Key `reg_meta_desc`.
+- The link a couple shares (copy button, WhatsApp, QR code, print card) and the registry page's own
+  share buttons now carry `?lang=he` when the person is using the site in Hebrew — the WhatsApp
+  preview and the page guests land on are Hebrew. English stays the bare URL. Guests can still
+  switch. One helper, `registry_share_url(slug)` (Jinja global, also used by /dashboard/qr.svg).
+- Test — 150 tests.
+
 ## 2026-09-28 (Hebrew description lines — model_he)
 - Hebrew pages showed each gift's description line only in English, including facts a guest
   needs ("(not sterling)", "plated with 925 silver (not solid silver)", "price is for two sets").

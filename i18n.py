@@ -46,6 +46,7 @@ T_EN = {
 
     # Find
     "find_title": "Find a registry",
+    "reg_meta_desc": "{names} are setting up their new home. See the gifts they'd love and reserve one.",
     "find_results_h": "Registries found",
     "find_sub": "Search by the couple's name (English or Hebrew).",
     "find_placeholder": "e.g. Cohen, Sarah & Dovid…",
@@ -710,6 +711,7 @@ T_HE = {
     "how_money_t": "מי משלם למי?",
 
     "find_title": "חיפוש רשימה",
+    "reg_meta_desc": "{names} מקימים בית חדש. צפו במתנות שהם ישמחו לקבל ושריינו אחת.",
     "find_results_h": "רשימות שנמצאו",
     "find_sub": "חפשו לפי שם הזוג (אנגלית או עברית).",
     "find_placeholder": "לדוגמה: כהן, שרה ודוד…",

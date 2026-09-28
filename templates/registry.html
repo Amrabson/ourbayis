@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "_cards.html" import gift_card, price_line, gift_facts with context %}
 {% block title %}{% if pick(reg, 'couple_names') %}{{ pick(reg, 'couple_names') }} · {% endif %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
-{% block meta_desc %}{{ t('reg_for') }} {{ pick(reg, 'couple_names') }}{% endblock %}
+{% block meta_desc %}{% if reg['event_date'] %}{{ t('event_' ~ reg['event_type']) }} · {{ fmt_date(reg['event_date']) }} — {% endif %}{{ tf('reg_meta_desc', names=pick(reg, 'couple_names')) }}{% endblock %}
 {% block content %}
 
 <section class="reg-hero glass">
@@ -148,9 +148,9 @@
   {% else %}
   <div class="share-row">
     <a class="btn btn-wa" target="_blank" rel="noopener"
-       href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ ext_url('registry', slug=reg['slug'])) | urlencode }}">
+       href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ registry_share_url(reg['slug'])) | urlencode }}">
       <svg class="ic"><use href="#i-wa"/></svg> {{ t('share_whatsapp') }}</a>
-    <button class="btn btn-ghost" data-copy="{{ ext_url('registry', slug=reg['slug']) }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
+    <button class="btn btn-ghost" data-copy="{{ registry_share_url(reg['slug']) }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
   </div>
   <p class="hint viral-note"><a href="{{ url_for('index') }}">{{ t('reg_make_your_own') }}</a></p>
   {% endif %}
