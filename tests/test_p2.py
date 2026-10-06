@@ -1011,3 +1011,24 @@ def test_backup_keeps_newest_n_and_never_touches_hand_made_snapshots(app_module,
                        cwd=BASE, env=env, capture_output=True, text=True)
     assert r.returncode == 0 and "Removed" not in r.stdout    # --keep 0: nothing removed
     assert "ourbayis-2026-01-04-120000.db" in {p.name for p in folder.iterdir()}
+
+
+@pytest.mark.parametrize("lang,key,n,expect", [
+    ("en", "result_count", 1, "1 gift"), ("en", "result_count", 3, "3 gifts"),
+    ("he", "result_count", 1, "מתנה אחת"), ("he", "result_count", 3, "3 מתנות"),
+    ("en", "reg_countdown", 1, "Tomorrow!"), ("en", "reg_countdown", 2, "2 days to go!"),
+    ("he", "reg_countdown", 1, "מחר!"), ("he", "reg_countdown", 2, "עוד יומיים!"),
+    ("he", "reg_countdown", 9, "עוד 9 ימים!"),
+    ("en", "items_needs_link", 1, "1 needs a store link or payment method"),
+])
+def test_counts_read_naturally_at_one_and_two(app_module, lang, key, n, expect):
+    """Was "1 gifts", "1 days to go!", "עוד 1 ימים!"."""
+    assert app_module.tf(key, lang, n=n) == expect
+
+
+def test_every_singular_form_has_a_base_key():
+    import i18n
+    for table in (i18n.T_EN, i18n.T_HE):
+        for k in table:
+            if k.endswith(("_one", "_two")) and k[:-4] in i18n.T_EN:
+                assert "{n}" in i18n.T_EN[k[:-4]], k

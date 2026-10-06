@@ -31,7 +31,7 @@ import ob_db
 import ob_mail
 import ob_money
 import ob_security
-from i18n import CATEGORIES, EVENT_TYPES, T_EN, cat_label, format_date, t as _t
+from i18n import CATEGORIES, EVENT_TYPES, T_EN, cat_label, format_date, t as _t, t_count
 
 BASE = Path(__file__).resolve().parent
 ob_security.load_env_file(ob_security.env_file_path(BASE))  # instance/ob.env, before any env read
@@ -660,7 +660,7 @@ _HE_PREFIX_BEFORE_LATIN = re.compile(r"(?<![\w-])([ובלמהכש]{1,2})(?=[A-Za
 
 def tf(key, lang, **kw):
     """Translated string with values filled in (the `tf` Jinja global)."""
-    s = _t(key, lang).format(**kw)
+    s = (t_count(key, kw["n"], lang) if isinstance(kw.get("n"), int) else _t(key, lang)).format(**kw)
     return _HE_PREFIX_BEFORE_LATIN.sub(r"\1-", s) if lang == "he" else s
 
 
@@ -1850,7 +1850,7 @@ def items_starter():
                 added += 1
             if added:
                 _maybe_track_first_gifts(db, reg["id"])
-        flash(_t("starter_added", current_lang()).format(n=added), "ok")
+        flash(tf("starter_added", current_lang(), n=added), "ok")
         return redirect(url_for("items_manage") + "#mine")
     groups = {g: db.execute(
         "SELECT * FROM catalog_items WHERE active=1 AND starter_group=? ORDER BY sort", (g,)).fetchall()

@@ -45,7 +45,10 @@
           if (dlg) grid.appendChild(dlg);
         });
       }
-      if (regCount) regCount.textContent = (regCount.getAttribute("data-label") || "").replace("{n}", shown) || (shown + " / " + cards.length);
+      if (regCount) {
+        var label = (shown === 1 && regCount.getAttribute("data-label-one")) || regCount.getAttribute("data-label") || "";
+        regCount.textContent = label.replace("{n}", shown) || (shown + " / " + cards.length);
+      }
     }
     if (chips) chips.addEventListener("click", function (e) {
       var chip = e.target.closest(".chip");

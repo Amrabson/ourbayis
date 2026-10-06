@@ -46,6 +46,11 @@ T_EN = {
 
     # Find
     "find_title": "Find a registry",
+    "reg_countdown_one": "Tomorrow!",
+    "starter_added_one": "1 essential added to your list!",
+    "items_needs_link_one": "1 needs a store link or payment method",
+    "result_count_one": "1 gift",
+    "archived_claim_history_one": "1 past reservation",
     "claim_name_required": "Please add your name so the couple knows who the gift is from — then try again.",
     "reg_meta_desc": "{names} are setting up their new home. See the gifts they'd love and reserve one.",
     "find_results_h": "Registries found",
@@ -712,6 +717,13 @@ T_HE = {
     "how_money_t": "מי משלם למי?",
 
     "find_title": "חיפוש רשימה",
+    "reg_countdown_one": "מחר!",
+    "reg_countdown_two": "עוד יומיים!",
+    "starter_added_one": "פריט בסיס אחד נוסף לרשימה!",
+    "items_needs_link_one": "מתנה אחת צריכה קישור לחנות או אמצעי תשלום",
+    "result_count_one": "מתנה אחת",
+    "result_count_two": "2 מתנות",
+    "archived_claim_history_one": "שריון קודם אחד",
     "claim_name_required": "נא להוסיף את השם שלכם כדי שהזוג ידע ממי המתנה — ואז לנסות שוב.",
     "reg_meta_desc": "{names} מקימים בית חדש. צפו במתנות שהם ישמחו לקבל ושריינו אחת.",
     "find_results_h": "רשימות שנמצאו",
@@ -1379,6 +1391,16 @@ def t(key, lang="en"):
         if val:
             return val
     return T_EN.get(key, key)
+
+
+def t_count(key, n, lang="en"):
+    """`key` for a count n: `<key>_one` when n == 1 and `<key>_two` when n == 2 (Hebrew dual,
+    e.g. "יומיים"), if that form exists in this language; otherwise `key` itself."""
+    table = T_HE if lang == "he" else T_EN
+    for suffix, match in (("_one", 1), ("_two", 2)):
+        if n == match and table.get(key + suffix):
+            return table[key + suffix]
+    return t(key, lang)
 
 
 def cat_label(slug, lang="en"):

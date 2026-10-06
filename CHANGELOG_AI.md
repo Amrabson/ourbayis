@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-06 (counts that read naturally)
+- "1 gifts" (registry/catalog filter count), "1 days to go!" / "עוד 1 ימים!", "1 need a store link",
+  "1 essentials added", "1 past reservation(s)". New `i18n.t_count`: `<key>_one` / `<key>_two` forms
+  per language, used by `tf()` whenever `n=` is passed. Now "Tomorrow!" / "מחר!", "עוד יומיים!",
+  "1 gift" / "מתנה אחת", etc. The JS-filled registry count uses `data-label-one`.
+- 11 tests — 168 tests.
+
 ## 2026-09-28 (`manage.py check` catches quiet config mistakes)
 - New WARNING lines (exit code unchanged): email off; `OB_BASE_URL` missing / not https / https
   without `OB_ENV=production` or `OB_SECURE_COOKIES` (cookies not Secure); `OB_NOTIFY_EMAIL` missing
