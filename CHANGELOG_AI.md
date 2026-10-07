@@ -6,6 +6,9 @@
 - The "can't go below" error/hint at 1 read "1 of these are already reserved…"; now singular in both
   languages. The two `qty_below_committed` flashes go through `tf()`.
 - 5 tests — 173 tests.
+- `tools/export_static.py` strips CSRF tokens (meta + hidden inputs) from the static copy: a new
+  token on every run rewrote ~55 docs/ files per export and buried real changes in the diff. Repeat
+  exports are now a no-op.
 
 ## 2026-10-06 (counts that read naturally)
 - "1 gifts" (registry/catalog filter count), "1 days to go!" / "עוד 1 ימים!", "1 need a store link",

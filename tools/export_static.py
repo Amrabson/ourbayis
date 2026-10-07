@@ -112,6 +112,9 @@ def rewrite(html, out_dir, lang, go_map):
     html = re.sub(r'<link rel="(canonical|alternate)"[^>]*>\n?', "", html)
     html = re.sub(r'<meta property="og:image"[^>]*>\n?', "", html)
     html = html.replace("http://localhost", "")
+    # a static copy can't submit anything, and a fresh token per run rewrote every page on each export
+    html = re.sub(r'<meta name="csrf-token"[^>]*>\n?', "", html)
+    html = re.sub(r'\s*<input type="hidden" name="csrf_token"[^>]*>', "", html)
     # currency toggle is meaningless without a server
     html = re.sub(r'<a class="lang-toggle cur-toggle"[^>]*>.*?</a>\s*', "", html, flags=re.S)
     html = re.sub(r'<form class="cur-form".*?</form>\s*', "", html, flags=re.S)
