@@ -81,7 +81,7 @@
             {% if st.state == 'received' %}<span class="badge badge-ok">{{ t('status_received_short') }}</span>
             {% elif st.state == 'reported' %}<span class="badge badge-ok">{{ t('status_reported_short') }}</span>
             {% elif st.state == 'reserved' %}<span class="badge badge-plain">{{ t('status_reserved_short') }}</span>
-            {% elif st.state == 'partial' %}<span class="badge badge-plain">{{ tf('qty_available', left=st.left, qty=st.qty) }}</span>
+            {% elif st.state == 'partial' %}<span class="badge badge-plain">{{ tf('qty_available', left=st.left, qty=st.qty, n=st.left) }}</span>
             {% else %}<span class="badge badge-gold">{{ t('status_open_short') }}</span>{% endif %}
           </span>
           {{ price_line(item, cls='preview-price') }}

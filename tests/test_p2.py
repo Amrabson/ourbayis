@@ -1020,6 +1020,9 @@ def test_backup_keeps_newest_n_and_never_touches_hand_made_snapshots(app_module,
     ("he", "reg_countdown", 1, "מחר!"), ("he", "reg_countdown", 2, "עוד יומיים!"),
     ("he", "reg_countdown", 9, "עוד 9 ימים!"),
     ("en", "items_needs_link", 1, "1 needs a store link or payment method"),
+    ("he", "qty_reserved", 1, "1 שוריין"), ("he", "qty_reserved", 2, "2 שוריינו"),
+    ("he", "qty_received", 1, "1 התקבל"),
+    ("en", "item_edit_committed_hint", 1, "1 already reserved or confirmed by a guest — the quantity can't go below 1."),
 ])
 def test_counts_read_naturally_at_one_and_two(app_module, lang, key, n, expect):
     """Was "1 gifts", "1 days to go!", "עוד 1 ימים!"."""
@@ -1031,4 +1034,10 @@ def test_every_singular_form_has_a_base_key():
     for table in (i18n.T_EN, i18n.T_HE):
         for k in table:
             if k.endswith(("_one", "_two")) and k[:-4] in i18n.T_EN:
-                assert "{n}" in i18n.T_EN[k[:-4]], k
+                assert "{n}" in i18n.T_EN[k[:-4]] or "{left}" in i18n.T_EN[k[:-4]], k
+
+
+def test_one_gift_left_reads_singular_in_hebrew(app_module):
+    assert app_module.tf("qty_available", "he", left=1, qty=3, n=1) == "1 מתוך 3 עדיין פנוי"
+    assert app_module.tf("qty_available", "he", left=2, qty=3, n=2) == "2 מתוך 3 עדיין פנויים"
+    assert app_module.tf("qty_available", "en", left=1, qty=3, n=1) == "1 of 3 still available"

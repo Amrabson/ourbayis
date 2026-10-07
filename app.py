@@ -1886,7 +1886,7 @@ def items_update(item_id):
             qty = 1
         committed = item_claim_counts(reg["id"]).get(item_id, 0)
         if qty < committed:
-            flash(_t("qty_below_committed", lang).format(n=committed), "err")
+            flash(tf("qty_below_committed", lang, n=committed), "err")
             return redirect(here)
         db.execute("UPDATE registry_items SET qty_wanted=?, priority=? WHERE id=?",
                    (qty, 1 if request.form.get("priority") else 0, item_id))
@@ -1953,7 +1953,7 @@ def item_edit(item_id):
         with ob_db.write_txn(db):
             committed = item_claim_counts(reg["id"]).get(item_id, 0)
             if qty < committed:
-                flash(_t("qty_below_committed", lang).format(n=committed), "err")
+                flash(tf("qty_below_committed", lang, n=committed), "err")
                 return _again()
             db.execute(
                 "UPDATE registry_items SET name=?, name_he=?, brand=?, price_nis=?, url=?, store=?,"

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-07 (quantity lines at 1)
+- Hebrew quantity lines said "1 שוריינו" / "1 התקבלו" / "1 מתוך 3 עדיין פנויים"; now "1 שוריין",
+  "1 התקבל", "1 מתוך 3 עדיין פנוי" (`qty_*_one`; `qty_available` gets `n=left`).
+- The "can't go below" error/hint at 1 read "1 of these are already reserved…"; now singular in both
+  languages. The two `qty_below_committed` flashes go through `tf()`.
+- 5 tests — 173 tests.
+
 ## 2026-10-06 (counts that read naturally)
 - "1 gifts" (registry/catalog filter count), "1 days to go!" / "עוד 1 ימים!", "1 need a store link",
   "1 essentials added", "1 past reservation(s)". New `i18n.t_count`: `<key>_one` / `<key>_two` forms

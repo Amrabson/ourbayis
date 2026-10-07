@@ -71,7 +71,7 @@
 {# Quantity breakdown for multi-quantity items: "1 of 2 still available · 1 reserved" #}
 {% macro qty_line(st) -%}
   {%- if st.qty > 1 -%}
-  <p class="gift-qty bdi">{{ tf('qty_available', left=st.left, qty=st.qty) }}
+  <p class="gift-qty bdi">{{ tf('qty_available', left=st.left, qty=st.qty, n=st.left) }}
     {%- set _parts = [] -%}
     {%- if st.reserved %}{% set _ = _parts.append(tf('qty_reserved', n=st.reserved)) %}{% endif -%}
     {%- if st.reported %}{% set _ = _parts.append(tf('qty_reported', n=st.reported)) %}{% endif -%}
