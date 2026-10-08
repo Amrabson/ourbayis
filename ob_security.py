@@ -83,6 +83,9 @@ def same_origin_referrer():
     if parsed.netloc != request.host:
         return None
     path = parsed.path or "/"
+    if path.startswith("//") or "\\" in path:
+        # "https://site//evil.com" (e.g. a 404 page) would redirect to protocol-relative //evil.com
+        path = "/" + path.replace("\\", "/").lstrip("/")
     if parsed.query:
         path += "?" + parsed.query
     return path

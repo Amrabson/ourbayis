@@ -1181,3 +1181,24 @@ def test_add_gifts_search_with_no_match_offers_a_custom_gift(client, app_module)
     html = client.get("/registry/items", query_string={"q": "kettle"}).get_data(as_text=True)
     assert '<a href="#custom">' not in html and 'value="trampoline"' not in html
     assert 'action="/registry/items#add-more"' in html          # results open where they are
+
+
+def test_english_button_works_on_a_page_opened_as_lang_he(client):
+    """Reported: the English button didn't switch back. /lang/en redirected to the referrer
+    /catalog?...&lang=he, whose ?lang=he set Hebrew again."""
+    ref = "http://localhost/catalog?q=kettle&cat=judaica&lang=he"
+    client.get("/catalog?q=kettle&cat=judaica&lang=he")
+    r = client.get("/lang/en", headers={"Referer": ref})
+    assert r.headers["Location"] == "/catalog?q=kettle&cat=judaica&lang=en"
+    html = client.get(r.headers["Location"]).get_data(as_text=True)
+    assert 'lang="en"' in html
+    assert 'lang="en"' in client.get("/").get_data(as_text=True)           # and it sticks
+    r = client.get("/lang/he", headers={"Referer": "http://localhost/about"})
+    assert r.headers["Location"] == "/about"                               # no lang param: untouched
+
+
+def test_lang_switch_never_redirects_off_site(client):
+    for ref in ("http://localhost//evil.example/x", "http://localhost/\\evil.example"):
+        loc = client.get("/lang/en", headers={"Referer": ref}).headers["Location"]
+        assert not loc.startswith("//") and "\\" not in loc, loc
+    assert client.get("/lang/en", headers={"Referer": "https://evil.example/"}).headers["Location"] == "/"

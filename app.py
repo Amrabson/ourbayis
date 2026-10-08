@@ -18,7 +18,7 @@ import sqlite3
 import unicodedata
 from datetime import date, datetime, timedelta, timezone
 from functools import wraps
-from urllib.parse import urlencode
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from pathlib import Path
 
 from flask import (Flask, abort, flash, g, redirect, render_template,
@@ -833,9 +833,17 @@ def sample():
 
 @app.route("/lang/<code>")
 def set_lang(code):
+    back = ob_security.same_origin_referrer() or url_for("index")
     if code in ("en", "he"):
         session["lang"] = code
-    return redirect(ob_security.same_origin_referrer() or url_for("index"))
+        # a page reached as ?lang=he (Hebrew share links, hreflang URLs, Hebrew searches) would
+        # switch straight back to Hebrew on return — so the button seemed to do nothing
+        parts = urlsplit(back)
+        query = parse_qsl(parts.query, keep_blank_values=True)
+        if any(k == "lang" for k, _ in query):
+            back = urlunsplit(("", "", parts.path,
+                               urlencode([(k, code if k == "lang" else v) for k, v in query]), ""))
+    return redirect(back)
 
 
 @app.route("/currency", defaults={"code": None})

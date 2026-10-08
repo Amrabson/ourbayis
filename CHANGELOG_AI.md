@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-08 (the English button works everywhere)
+- Reported by the owner: the "English" button didn't switch back. `/lang/en` redirected to the
+  referring page, and when that page had been opened as `?lang=he` (Hebrew share links, hreflang
+  URLs, Hebrew searches/filters) the `?lang=he` set Hebrew again. `/lang/<code>` now rewrites a `lang`
+  parameter in the return URL to the chosen language.
+- `same_origin_referrer()` could return `//evil.example/…` for a referrer like
+  `https://site//evil.example` (e.g. a 404 page), a protocol-relative open redirect; leading
+  slashes/backslashes are now collapsed.
+- 2 tests — 203 tests.
+
 ## 2026-10-08 (searches that find nothing)
 - /catalog with no results only said "try a different search". Now: if a category/price/kind filter
   is what emptied it, a link to the N results for the same words without filters; and always a line
