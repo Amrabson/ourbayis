@@ -1076,3 +1076,21 @@ def test_guest_page_says_where_to_send_a_store_gift(client, app_module):
     assert "Tell guests where to send store gifts" not in client.get("/dashboard").get_data(as_text=True)
     he = guest.get(f"/g/{tok}?lang=he").get_data(as_text=True)
     assert "לאן לשלוח" in he and 'aria-current="step"' in he and "קניתם / שלחתם" in he
+
+
+@pytest.mark.parametrize("status,to_buy", [("reserved", True), ("reported", False), ("received", False)])
+def test_guest_page_only_says_buy_while_there_is_something_to_buy(client, app_module, status, to_buy):
+    """A guest whose gift the couple already confirmed was still told "Next step: buy it" with a
+    big store button and "out of stock" tags."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"])
+    item = next(iter(items.values()))
+    tok = _claim(app_module, reg["slug"], item["id"])
+    db = _db()
+    db.execute("UPDATE registry_items SET availability='unavailable' WHERE id=?", (item["id"],))
+    db.execute("UPDATE claims SET status=?", (status,))
+    db.commit(); db.close()
+    html = app_module.app.test_client().get(f"/g/{tok}").get_data(as_text=True)
+    assert ("Next step: buy it" in html) is to_buy
+    assert ("store-cta" in html) is to_buy
+    assert ("badge-warn" in html) is to_buy
+    assert ("Where to send it" in html) is to_buy

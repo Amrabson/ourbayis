@@ -31,7 +31,7 @@
 {%- endmacro %}
 
 {# brand · store line, model line, and the two status tags #}
-{% macro gift_facts(item, show_model=True) -%}
+{% macro gift_facts(item, show_model=True, show_tags=True) -%}
   {%- set _brand = item['brand'] if 'brand' in item.keys() else '' -%}
   {%- set _store = item['store'] if 'store' in item.keys() else '' -%}
   {%- if _store and _brand and _store | lower == _brand | lower %}{% set _store = '' %}{% endif -%}
@@ -43,7 +43,7 @@
   {%- endif -%}
   {%- set _ps = item['price_status'] if 'price_status' in item.keys() else '' -%}
   {%- set _av = item['availability'] if 'availability' in item.keys() else '' -%}
-  {%- if (_ps and item['price_nis']) or _av == 'unavailable' -%}
+  {%- if show_tags and ((_ps and item['price_nis']) or _av == 'unavailable') -%}
   <p class="gift-tags">
     {%- if _ps == 'verified' and item['price_checked_at'] -%}
       <span class="badge badge-plain">{{ tf('price_checked_tag', date=fmt_date(item['price_checked_at'])) }}</span>

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-08 (guest page after the gift is bought)
+- After a guest reported a store gift as bought — or the couple confirmed it — the guest page still
+  said "Next step: buy it from the store…" with the big "Buy it at KSP" button, plus price-checked /
+  "Out of stock at last check" tags. Those (and the delivery box) now show only while there's still
+  something to buy (store gift, reserved/expired); afterwards the item keeps a plain "View product
+  details" link. `gift_facts(..., show_tags=)` added.
+- The "≈ amounts in USD are estimates" small print showed on pages with no ≈ amount (finished gifts,
+  cash gifts without pay buttons); now only next to a price or pay amount.
+- 3 tests — 178 tests.
+
 ## 2026-10-08 (guest page: where to send it)
 - The guest page told a store-gift guest to "have it delivered to the couple" but never said where:
   the couple's delivery note was an unlabeled grey line under the exchange-rate small print, and when
