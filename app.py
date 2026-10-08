@@ -215,6 +215,28 @@ def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, **kw):
     send_mail(owner["email"], _t(key + "_subj", lang).format(**kw), body)
 
 
+def notify_guest(db, claim, key):
+    """`<key>_subj` / `<key>_body` to the guest who made `claim`, if they left an email — in the
+    language they reserved in (both languages for claims from before that was recorded).
+    Returns True when a message was queued."""
+    if not claim["guest_email"]:
+        return False
+    reg = db.execute("SELECT * FROM registries WHERE id=?", (claim["registry_id"],)).fetchone()
+    item = (db.execute("SELECT name, name_he FROM registry_items WHERE id=?", (claim["item_id"],)).fetchone()
+            if claim["item_id"] else None)
+    langs = [claim["lang"]] if claim["lang"] in ("en", "he") else ["en", "he"]
+    parts = []
+    for lang in langs:
+        he = lang == "he"
+        kw = dict(couple=(reg["couple_names_he"] if he and reg["couple_names_he"] else reg["couple_names"]) or _t("the_couple", lang),
+                  title=reg["title_he"] if he and reg["title_he"] else reg["title"],
+                  item=((item["name_he"] if he and item["name_he"] else item["name"]) if item else _t("gift_cash", lang)),
+                  link=ext_url("registry", slug=reg["slug"]) + ("?lang=he" if he else ""))
+        parts.append((_t(key + "_subj", lang).format(**kw), _t(key + "_body", lang).format(**kw)))
+    send_mail(claim["guest_email"], parts[0][0], "\n\n— — —\n\n".join(b for _, b in parts))
+    return True
+
+
 # ---------------------------------------------------------------- database
 def get_db():
     if "db" not in g:
@@ -1162,13 +1184,13 @@ def claim_item(slug, item_id):
                     "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message,"
                     " qty, kind, status, amount_minor, currency, price_snapshot_minor,"
                     " price_snapshot_currency, token_hash, token_created_at, idempotency_key,"
-                    " expires_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    " expires_at, lang) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                     (reg["id"], item_id, name,
                      _guest_email(),
                      (request.form.get("message") or "").strip()[:1000], qty,
                      "cash" if give_cash else "item", "reserved", amount_minor, currency,
                      price_minor, "ILS", token_hash, datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
-                     form_key or None, expires_at))
+                     form_key or None, expires_at, lang))
             except sqlite3.IntegrityError:
                 # duplicate form_key = a repeated POST (double-click/retry). If
                 # this session made the original request, it remembered the raw
@@ -1244,11 +1266,11 @@ def cash_gift(slug):
                 cur = db.execute(
                     "INSERT INTO claims (registry_id, item_id, guest_name, guest_email, message,"
                     " qty, kind, status, amount_minor, currency, token_hash, token_created_at,"
-                    " idempotency_key) VALUES (?, NULL, ?, ?, ?, 1, 'cash', 'reported', ?, ?, ?, ?, ?)",
+                    " idempotency_key, lang) VALUES (?, NULL, ?, ?, ?, 1, 'cash', 'reported', ?, ?, ?, ?, ?, ?)",
                     (reg["id"], name, _guest_email(),
                      (request.form.get("message") or "").strip()[:1000], amount_minor, currency,
                      ob_security.hash_token(token), datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
-                     form_key or None))
+                     form_key or None, lang))
             except sqlite3.IntegrityError:
                 remembered = (session.get("claim_tokens") or {}).get(form_key) if form_key else None
                 if remembered:
@@ -2047,6 +2069,10 @@ def claim_confirm(claim_id):
             _log_claim_event(db, claim_id, "received", "owner",
                              "late" if c["status"] == "expired" else "")
             track("receipt_confirmed")
+            told = notify_guest(db, c, "mail_guest_received")
+            lang = current_lang()
+            flash(tf("claim_confirmed_told", lang, name=c["guest_name"]) if told
+                  else _t("claim_confirmed_ok", lang), "ok")
     return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
 
 
@@ -2066,6 +2092,11 @@ def claim_cancel(claim_id):
             db.execute("UPDATE claims SET status='cancelled', cancelled_by='owner', cancelled_at=? WHERE id=?",
                       (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), claim_id))
             _log_claim_event(db, claim_id, "cancelled", "owner")
+            # without this a guest who still meant to buy it would — and the couple gets two
+            told = notify_guest(db, c, "mail_guest_released")
+            lang = current_lang()
+            flash(tf("claim_released_told", lang, name=c["guest_name"]) if told
+                  else _t("claim_released_ok", lang), "ok")
     return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
 
 

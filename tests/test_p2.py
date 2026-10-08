@@ -393,7 +393,8 @@ def test_remind_claims_is_bounded_and_idempotent(client, app_module, tmp_path):
                                     cwd=BASE, env=env, capture_output=True, text=True)
     assert "0 reminder(s) would be queued" in run("--dry-run").stdout  # too fresh
     with app_module.app.app_context():
-        app_module.get_db().execute("UPDATE claims SET created_at = datetime('now', '-6 days')")
+        # lang='' = a claim from before claims.lang existed: reminded in both languages
+        app_module.get_db().execute("UPDATE claims SET created_at = datetime('now', '-6 days'), lang=''")
     assert "Queued 1 reminder(s)" in run().stdout
     assert "Queued 0 reminder(s)" in run().stdout  # never twice
     with app_module.app.app_context():
@@ -1221,3 +1222,61 @@ def test_a_chosen_language_beats_the_browser(app_module):
     c.get("/lang/en", headers=he)
     assert 'lang="en"' in c.get("/", headers=he).get_data(as_text=True)
     assert 'lang="en"' in c.get("/?lang=en", headers=he).get_data(as_text=True)
+
+
+def _owner_post(client, path):
+    tok = get_csrf(client.get("/dashboard").get_data(as_text=True))
+    return client.post(path, data=dict(csrf_token=tok), follow_redirects=True).get_data(as_text=True)
+
+
+def test_guest_hears_when_the_couple_confirms_or_releases(client, app_module):
+    """Guests were never told: an overseas relative never learned the gift arrived, and a guest
+    whose reservation the couple released could still go and buy it."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle", "stand-mixer"])
+    kettle, mixer = items.values()
+    _claim(app_module, reg["slug"], kettle["id"], name="Aunt Sarah", guest_email="sarah@example.com")
+    he_guest = app_module.app.test_client()
+    he_guest.get("/?lang=he")
+    html = he_guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    he_guest.post(f"/r/{reg['slug']}/claim/{mixer['id']}", data=dict(
+        csrf_token=get_csrf(html), form_key=get_form_key(html), guest_name="Dodah Rivka",
+        guest_email="rivka@example.com", give="buy"))
+    db = _db()
+    ids = {r["guest_name"]: r["id"] for r in db.execute("SELECT id, guest_name FROM claims")}
+    assert dict(db.execute("SELECT guest_name, lang FROM claims").fetchall()) == {"Aunt Sarah": "en", "Dodah Rivka": "he"}
+
+    page = _owner_post(client, f"/claim/{ids['Aunt Sarah']}/confirm")
+    assert "we emailed Aunt Sarah that it arrived" in page
+    subj, body = db.execute("SELECT subject, body FROM mail_outbox WHERE to_addr='sarah@example.com'"
+                            " AND subject LIKE 'Your gift arrived%'").fetchone()
+    assert "Sarah &amp; Dovid" not in body and "Sarah & Dovid confirmed that your gift (Electric kettle) arrived" in body
+
+    page = _owner_post(client, f"/claim/{ids['Dodah Rivka']}/cancel")
+    assert "Dodah Rivka" in page and "so they don" in page
+    subj, body = db.execute("SELECT subject, body FROM mail_outbox WHERE to_addr='rivka@example.com'"
+                            " AND subject LIKE 'השריון%'").fetchone()
+    assert "אין צורך לקנות" in body and "?lang=he" in body and "— — —" not in body     # Hebrew only
+    db.close()
+
+
+def test_confirming_a_claim_without_an_email_still_says_done(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"])
+    _claim(app_module, reg["slug"], next(iter(items.values()))["id"], name="Cousin")
+    cid = _db().execute("SELECT id FROM claims").fetchone()[0]
+    assert "Marked as received." in _owner_post(client, f"/claim/{cid}/confirm")
+    assert _db().execute("SELECT COUNT(*) FROM mail_outbox WHERE subject LIKE 'Your gift arrived%'").fetchone()[0] == 0
+
+
+def test_reminder_goes_out_in_the_guests_language(client, app_module):
+    import subprocess
+    import sys
+    reg, items = _couple_with_catalog_items(client, app_module, ["towel-set"])
+    _claim(app_module, reg["slug"], next(iter(items.values()))["id"], guest_email="g@example.com")
+    with app_module.app.app_context():
+        app_module.get_db().execute("UPDATE claims SET created_at = datetime('now', '-6 days'), lang='he'")
+    env = {**os.environ, "OB_BASE_URL": "https://ourbayis.example", "PYTHONIOENCODING": "utf-8"}
+    subprocess.run([sys.executable, os.path.join(BASE, "manage.py"), "remind-claims"], cwd=BASE, env=env,
+                   capture_output=True, text=True)
+    subj, body = _db().execute("SELECT subject, body FROM mail_outbox WHERE to_addr='g@example.com'"
+                              " ORDER BY id DESC").fetchone()
+    assert subj.startswith("תזכורת") and "שלום" in body and "Hi," not in body and "?lang=he" in body

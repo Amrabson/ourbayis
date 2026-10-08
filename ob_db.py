@@ -478,6 +478,12 @@ def _m022_user_lang(db):
     _add_column(db, "users", "lang TEXT DEFAULT ''")
 
 
+def _m023_claim_lang(db):
+    """The language the guest reserved in, so mail about their gift (received, released by the
+    couple, reminders) reaches them in it. '' = before this existed: English + Hebrew."""
+    _add_column(db, "claims", "lang TEXT DEFAULT ''")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -690,6 +696,7 @@ MIGRATIONS = [
     _m020_model_he,
     _m021_mail_reply_to,
     _m022_user_lang,
+    _m023_claim_lang,
 ]
 
 

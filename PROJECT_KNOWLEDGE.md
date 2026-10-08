@@ -53,7 +53,9 @@ Flask 3 + SQLite, server-rendered Jinja2, no build step. Same architecture as Ba
 ## Data model (schema v3, see ob_db.py MIGRATIONS + SPEC_V3.md)
 `users` (couples, `session_ver` for logout-everywhere, `lang` [m22] — stamped at signup/login and
 whenever they pass `?lang=`; `notify_owner()` sends every gift email to the couple in it, with the
-registry title/item name in that language and a dashboard link) → `registries` (1 per user, unique `slug`,
+registry title/item name in that language and a dashboard link; `claims.lang` [m23] is the guest's
+language at reservation — `notify_guest()` emails them when the couple confirms receipt or releases
+the reservation, and `remind-claims` uses it; '' (older claims) → both languages) → `registries` (1 per user, unique `slug`,
 bilingual fields `*_he`, `paypal_url`/`stripe_url`/`bit_url`, `visibility` draft|unlisted|public,
 `display_currency`, `delivery_note*`) → `registry_items` (copied from `catalog_items` or custom;
 `qty_wanted`, `priority`, `archived` — set instead of deleted once an item has claims) → `claims`

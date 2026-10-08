@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-08 (guests hear back)
+- When the couple confirmed a gift arrived, the guest was never told — the overseas relative never
+  learned it got there. When the couple released a reservation, the guest wasn't told either and
+  could still buy it (a duplicate). Both now email the guest if they left an address, in the
+  language they reserved in (new `claims.lang`, migration 23). "Released" says they don't need to
+  buy it and links back to the registry.
+- The couple's confirm / release buttons gave no feedback; now a toast: "Marked as received — we
+  emailed Aunt Sarah that it arrived" / "Reservation released — we emailed … so they don't buy it".
+- `remind-claims` writes in the guest's language (both only for claims from before m23); the Hebrew
+  link carries `?lang=he`.
+- 3 tests — 212 tests.
+
 ## 2026-10-08 (first visit follows the browser's language)
 - Everyone started in English unless the link said `?lang=he` — so an Israeli relative opening the
   couple's plain link on a Hebrew phone got English. With no choice made yet, `current_lang()` now
