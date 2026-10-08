@@ -8,4 +8,4 @@ backups/
 .pytest_cache/
 .env
 instance/
-static/_preview_tmp/
+_preview_tmp/

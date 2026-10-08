@@ -130,6 +130,15 @@ def refresh_rates():
 
 
 @app.before_request
+def remember_owner_lang():
+    """Emails to a couple go out in the language they use the site in — not the language of
+    the guest whose action triggered them."""
+    lang = request.args.get("lang")
+    if lang in ("en", "he") and session.get("uid"):
+        get_db().execute("UPDATE users SET lang=? WHERE id=? AND lang IS NOT ?", (lang, session["uid"], lang))
+
+
+@app.before_request
 def check_host():
     if ALLOWED_HOSTS and request.host.split(":")[0] not in ALLOWED_HOSTS:
         abort(400)
@@ -185,6 +194,24 @@ def send_mail(to, subject, body, reply_to=""):
     return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH, reply_to=reply_to)
 
 
+def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, **kw):
+    """`<key>_subj` / `<key>_body` to the registry owner, in the owner's language (users.lang;
+    falls back to the current reader's), with the registry title / item name in that language
+    and a link to the dashboard."""
+    owner = db.execute("SELECT email, lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()
+    if not owner or not owner["email"]:
+        return
+    lang = owner["lang"] if owner["lang"] in ("en", "he") else fallback_lang
+    he = lang == "he"
+    kw.setdefault("title", (reg["title_he"] if he and reg["title_he"] else reg["title"]))
+    if item is not None:
+        name = item["name_he"] if he and item["name_he"] else item["name"]
+        kw["item"] = f"{name} ×{qty}" if qty > 1 else name
+    body = (_t(key + "_body", lang).format(**kw) + "\n\n"
+            + _t("mail_owner_footer", lang).format(link=ext_url("dashboard")))
+    send_mail(owner["email"], _t(key + "_subj", lang).format(**kw), body)
+
+
 # ---------------------------------------------------------------- database
 def get_db():
     if "db" not in g:
@@ -217,6 +244,14 @@ def init_db():
 
 
 # ---------------------------------------------------------------- helpers
+def _fresh_session(*keep):
+    """session.clear() for login/signup/logout (no fixation, no leftovers) — but the reader's
+    language survives, or a Hebrew couple lands on an English dashboard right after logging in."""
+    saved = {k: session[k] for k in ("lang",) + keep if k in session}
+    session.clear()
+    session.update(saved)
+
+
 def current_lang():
     lang = request.args.get("lang")
     if lang in ("en", "he"):
@@ -1124,12 +1159,8 @@ def claim_item(slug, item_id):
 
     _remember_claim_token(form_key, result["token"])
     reg, item = result["reg"], result["item"]
-    owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
-    if owner and owner["email"]:
-        kind_txt = "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item"
-        send_mail(owner["email"], _t(kind_txt + "_subj", lang).format(title=reg["title"]),
-                  _t(kind_txt + "_body", lang).format(name=result["name"], item=item["name"],
-                                                       qty=result["qty"]))
+    notify_owner(db, reg, "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item", lang,
+                 item=item, qty=result["qty"], name=result["name"])
     if _guest_email():
         send_mail(_guest_email(),
                   _t("mail_guest_manage_subj", lang),
@@ -1201,11 +1232,10 @@ def cash_gift(slug):
     except _Abort as ab:
         return ab.response or redirect(url_for("registry", slug=slug))
     _remember_claim_token(form_key, token)
-    owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
-    if owner and owner["email"]:
-        send_mail(owner["email"], _t("mail_cash_subj", lang).format(title=reg["title"]),
-                  _t("mail_cash_body", lang).format(
-                      name=name, amount=ob_money.fmt_minor(amount_minor, currency, lang)))
+    _owner_lang = db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()
+    _ol = _owner_lang["lang"] if _owner_lang and _owner_lang["lang"] in ("en", "he") else lang
+    notify_owner(db, reg, "mail_cash", lang, name=name,
+                 amount=ob_money.fmt_minor(amount_minor, currency, _ol))
     if _guest_email():
         send_mail(_guest_email(),
                   _t("mail_guest_manage_subj", lang),
@@ -1274,10 +1304,7 @@ def guest_report(token):
                    (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), late, claim["id"]))
         _log_claim_event(db, claim["id"], "reported", "guest", "late" if late else "")
         reg = db.execute("SELECT * FROM registries WHERE id=?", (claim["registry_id"],)).fetchone()
-    owner = db.execute("SELECT email FROM users WHERE id=?", (reg["user_id"],)).fetchone()
-    if owner and owner["email"]:
-        send_mail(owner["email"], _t("mail_reported_subj", lang).format(name=claim["guest_name"]),
-                  _t("mail_reported_body", lang).format(name=claim["guest_name"]))
+    notify_owner(db, reg, "mail_reported", lang, name=claim["guest_name"])
     track("guest_report", owner_uid=reg["user_id"])
     flash(_t("guest_report_done", lang), "ok")
     return redirect(url_for("guest_manage", token=token))
@@ -1329,12 +1356,10 @@ def signup():
                 cur = db.execute(
                     "INSERT INTO users (email, pw_hash, name) VALUES (?,?,?)",
                     (email, generate_password_hash(pw), name))
-                pending_add = session.get("pending_add")  # survives session.clear() below
-                session.clear()
+                _fresh_session("pending_add")
                 session["uid"] = cur.lastrowid
                 session["sv"] = 1
-                if pending_add:
-                    session["pending_add"] = pending_add
+                db.execute("UPDATE users SET lang=? WHERE id=?", (current_lang(), cur.lastrowid))
                 track("signup")
                 return redirect(url_for("registry_new"))
             except sqlite3.IntegrityError:
@@ -1354,9 +1379,10 @@ def login():
         row = get_db().execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         if row and check_password_hash(row["pw_hash"], pw):
             nxt = ob_security.safe_next(request.form.get("next") or request.args.get("next", ""))
-            session.clear()
+            _fresh_session()
             session["uid"] = row["id"]
             session["sv"] = row["session_ver"]
+            get_db().execute("UPDATE users SET lang=? WHERE id=?", (current_lang(), row["id"]))
             return redirect(nxt or url_for("dashboard"))
         flash(_t("login_error", current_lang()), "err")
     return render_template("login.html", next=request.args.get("next", ""))
@@ -1364,7 +1390,7 @@ def login():
 
 @app.route("/logout", methods=["POST"])
 def logout():
-    session.clear()
+    _fresh_session()
     return redirect(url_for("index"))
 
 
@@ -2098,7 +2124,7 @@ def account_delete():
     with ob_db.write_txn(db):
         db.execute("DELETE FROM mail_outbox WHERE to_addr=?", (user["email"],))
         db.execute("DELETE FROM users WHERE id=?", (user["id"],))
-    session.clear()
+    _fresh_session()
     flash(_t("account_deleted", lang), "ok")
     return redirect(url_for("index"))
 

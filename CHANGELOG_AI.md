@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-08 (couple's emails in the couple's language; language survives login)
+- Gift emails to the couple ("someone reserved…", "reports sending…", "cash gift reported") were
+  written in the *guest's* browsing language, with the English registry title and item name — a
+  Hebrew-speaking couple got English mail whenever an English-speaking guest acted. New `users.lang`
+  (migration 22), stamped at signup/login and on any `?lang=` switch while logged in;
+  `notify_owner()` uses it (falls back to the reader's language when unknown).
+- Those emails said "Log in to confirm" with nothing to click and "Kettle x1"; now they end with a
+  dashboard link, and the quantity only appears when it's more than 1 ("×2").
+- Logging in, signing up, logging out or deleting the account cleared the whole session, language
+  included — a Hebrew user landed on an English dashboard right after login. `_fresh_session()` keeps it.
+- 2 tests — 180 tests.
+
 ## 2026-10-08 (guest page after the gift is bought)
 - After a guest reported a store gift as bought — or the couple confirmed it — the guest page still
   said "Next step: buy it from the store…" with the big "Buy it at KSP" button, plus price-checked /

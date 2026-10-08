@@ -472,6 +472,12 @@ def _m021_mail_reply_to(db):
     _add_column(db, "mail_outbox", "reply_to TEXT DEFAULT ''")
 
 
+def _m022_user_lang(db):
+    """The couple's site language, so gift emails reach them in it (not in the language of
+    the guest who triggered them). '' = unknown: falls back to the reader's language."""
+    _add_column(db, "users", "lang TEXT DEFAULT ''")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -683,6 +689,7 @@ MIGRATIONS = [
     _m019_claim_reminders,
     _m020_model_he,
     _m021_mail_reply_to,
+    _m022_user_lang,
 ]
 
 

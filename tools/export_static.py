@@ -136,7 +136,7 @@ def main():
     if out.exists():
         shutil.rmtree(out)
     out.mkdir(parents=True)
-    shutil.copytree(BASE / "static", out / "static")
+    shutil.copytree(BASE / "static", out / "static", ignore=shutil.ignore_patterns("_preview_tmp"))
     (out / ".nojekyll").write_text("")
     (out / "demo.js").write_text(
         "document.addEventListener('submit',function(e){e.preventDefault();"

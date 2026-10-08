@@ -1094,3 +1094,33 @@ def test_guest_page_only_says_buy_while_there_is_something_to_buy(client, app_mo
     assert ("store-cta" in html) is to_buy
     assert ("badge-warn" in html) is to_buy
     assert ("Where to send it" in html) is to_buy
+
+
+def test_couple_gets_gift_emails_in_their_own_language(client, app_module):
+    """An English-speaking guest's reservation emailed a Hebrew-speaking couple in English, with
+    the English title, "x1", and no link to act on."""
+    client.get("/?lang=he")
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"])
+    db = _db()
+    assert db.execute("SELECT lang FROM users").fetchone()[0] == "he"
+    db.execute("UPDATE registries SET title_he='הבית שלנו' WHERE id=?", (reg["id"],))
+    db.commit()
+    _claim(app_module, reg["slug"], next(iter(items.values()))["id"], name="Aunt Sarah")   # English guest
+    subj, body = db.execute("SELECT subject, body FROM mail_outbox WHERE to_addr='a@b.com'").fetchone()
+    db.close()
+    assert subj == "מזל טוב! מישהו שריין מתנה — הבית שלנו"
+    assert body.startswith("Aunt Sarah שריין/ה: ") and "x1" not in body and "×" not in body
+    assert "/dashboard" in body.splitlines()[-1]
+    client.get("/dashboard?lang=en")                           # switching language is remembered
+    assert _db().execute("SELECT lang FROM users").fetchone()[0] == "en"
+
+
+def test_login_and_logout_keep_the_language(client):
+    signup(client)
+    client.get("/?lang=he")
+    client.post("/logout", data=dict(csrf_token=get_csrf(client.get("/dashboard").get_data(as_text=True))))
+    assert 'lang="he"' in client.get("/").get_data(as_text=True)
+    tok = get_csrf(client.get("/login").get_data(as_text=True))
+    r = client.post("/login", data=dict(csrf_token=tok, email="a@b.com", password="password1"),
+                    follow_redirects=True)
+    assert 'lang="he"' in r.get_data(as_text=True)
