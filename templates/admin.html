@@ -36,7 +36,9 @@
       <strong><a href="{{ url_for('admin_lead', lead_id=l['id']) }}">{{ l['name'] }}</a></strong> · {{ l['bundle_slug'] }} · <span class="badge badge-{{ 'gold' if l['status'] == 'new' else 'plain' }}">{{ l['status'] }}</span>
       <p class="gift-msg">
         {% if l['whatsapp'] %}<a href="https://wa.me/{{ l['whatsapp'] | wa_number }}" target="_blank" rel="noopener">WhatsApp {{ l['whatsapp'] }}</a> · {% endif %}
-        {{ l['email'] }} · arrives {{ l['arrival'] or '?' }} · {{ l['city'] }}
+        {%- set _days = l['arrival'] | days_until %}
+        {{ l['email'] }} · arrives {{ l['arrival'] or '?' }}{% if _days is not none and _days >= 0 and l['status'] not in lead_closed %}
+        {% if _days < 21 %}<strong class="warn-note">(in {{ _days }} days)</strong>{% else %}(in {{ _days }} days){% endif %}{% endif %} · {{ l['city'] }}
         {% if l['next_action_date'] %} · {% if _due %}<strong class="warn-note">due: {{ l['next_action'] or 'follow up' }} ({{ l['next_action_date'] }})</strong>{% else %}next: {{ l['next_action'] }} ({{ l['next_action_date'] }}){% endif %}{% endif %}</p>
       {% if l['notes'] %}<p class="gift-msg" dir="auto">“{{ l['notes'] }}”</p>{% endif %}
       <p class="gift-msg">{{ l['created_at'] }}</p>

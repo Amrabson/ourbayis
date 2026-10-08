@@ -6,7 +6,9 @@
   we'll say honestly what can still be ready; the owner's lead email subject starts "[RUSH]" and the
   arrival line shows the days left. Past dates aren't flagged (they may already be here).
 - The package value was stored as sent; now only an active bundle slug, otherwise "custom".
-- 7 tests — 231 tests.
+- /admin lead rows show "(in N days)" after the arrival date for open leads, highlighted under 3 weeks
+  (`days_until` filter).
+- 8 tests — 232 tests.
 
 ## 2026-10-08 (Shana Rishonah budget bands)
 - The request form's budget options stopped at "₪10,000+", while The Full Nest starts at ₪17,900 —

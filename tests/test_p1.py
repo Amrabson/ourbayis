@@ -427,3 +427,18 @@ def test_admin_leads_flag_due_followups_and_fix_whatsapp_links(client, app_modul
     # only closed leads are dimmed
     assert re.search(r'class="gift-row\s+is-due"', html)
     assert re.search(r'class="gift-row is-thanked\s*"', html)
+
+
+def test_admin_lead_list_shows_days_until_arrival(client, app_module):
+    from datetime import date, timedelta
+    import sqlite3
+    db = sqlite3.connect(os.environ["OB_DB_PATH"])
+    db.execute("INSERT INTO shana_requests (name, email, arrival) VALUES ('Soon', 's@x.com', ?)",
+               ((date.today() + timedelta(days=9)).isoformat(),))
+    db.execute("INSERT INTO shana_requests (name, email, arrival) VALUES ('Later', 'l@x.com', ?)",
+               ((date.today() + timedelta(days=60)).isoformat(),))
+    db.commit(); db.close()
+    admin_login(client)
+    html = client.get("/admin").get_data(as_text=True)
+    assert '<strong class="warn-note">(in 9 days)</strong>' in html and "(in 60 days)" in html
+    assert app_module.days_until("not a date") is None

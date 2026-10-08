@@ -322,6 +322,17 @@ def wa_number(raw):
 app.jinja_env.filters["wa_number"] = wa_number
 
 
+def days_until(iso):
+    """Whole days from today to a YYYY-MM-DD date (negative = past); None if it isn't one."""
+    try:
+        return (datetime.strptime((iso or "")[:10], "%Y-%m-%d").date() - date.today()).days
+    except ValueError:
+        return None
+
+
+app.jinja_env.filters["days_until"] = days_until
+
+
 def ext_url(endpoint, **kw):
     """External URL for emails/sitemap/robots/share links — uses OB_BASE_URL
     when set (so it's correct behind a proxy without OB_TRUST_PROXY), else
