@@ -130,7 +130,7 @@
     </div>
     {% endif %}
 
-    <p class="guest-back"><a href="{{ url_for('registry', slug=reg['slug']) }}">{{ t('guest_choose_another') if claim['status'] in ('cancelled', 'expired') else t('guest_back_to_registry') }}</a></p>
+    <p class="back-to-list"><a href="{{ url_for('registry', slug=reg['slug']) }}">{{ t('guest_choose_another') if claim['status'] in ('cancelled', 'expired') else t('guest_back_to_registry') }}</a></p>
 
     {% if claim['status'] != 'reserved' %}{{ save_link_panel() }}{% endif %}
   </div>
