@@ -124,7 +124,7 @@
         {% if gft['amount_minor'] is not none %}<p class="gift-msg">{{ fmt_money(gft['amount_minor'], gft['currency']) }}</p>
         {% elif gft['amount'] %}<p class="gift-msg">{{ gft['amount'] }} <span class="hint">({{ t('claim_legacy_note') }})</span></p>{% endif %}
         {% if gft['message'] %}<p class="gift-msg" dir="auto">“{{ gft['message'] }}”</p>{% endif %}
-        {% if gft['guest_email'] %}<p class="gift-msg">{{ gft['guest_email'] }}</p>{% endif %}
+        {% if gft['guest_email'] %}<p class="gift-msg"><a class="bdi" href="mailto:{{ gft['guest_email'] }}">{{ gft['guest_email'] }}</a></p>{% endif %}
         {% if gft['item_availability'] == 'unavailable' and gft['status'] != 'received' %}<p class="gift-msg warn-note">{{ t('availability_unavailable_tag') }} — {{ t('dash_unavailable_hint') }}</p>{% endif %}
         {% if gft['kind'] == 'cash' and gft['item_url'] %}
         <a class="btn btn-gold btn-sm order-link" href="{{ gft['item_url'] }}" target="_blank" rel="noopener">
@@ -144,6 +144,10 @@
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="btn btn-danger btn-sm" type="submit" data-confirm="{{ t('dash_release_confirm') }}">{{ t('dash_release') }}</button>
         </form>
+        {% endif %}
+        {% if gft['guest_email'] and not gft['thanked'] and gft['status'] in ('reported', 'received') %}
+        {%- set _gift = t('dash_thank_item_cash') if gft['kind'] == 'cash' else ((gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) or t('dash_thank_item_cash')) -%}
+        <a class="btn btn-ghost btn-sm" href="mailto:{{ gft['guest_email'] }}?subject={{ tf('dash_thank_mail_subj', item=_gift) | urlencode }}&amp;body={{ tf('dash_thank_mail_body', name=gft['guest_name'], item=_gift, couple=pick(reg, 'couple_names') or '') | urlencode }}">{{ t('dash_thank_write') }}</a>
         {% endif %}
         {% if gft['thanked'] or gft['status'] in ('reported', 'received') %}
         <form method="post" action="{{ url_for('claim_thanked', claim_id=gft['id']) }}">

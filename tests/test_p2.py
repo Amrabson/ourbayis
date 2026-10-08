@@ -1280,3 +1280,18 @@ def test_reminder_goes_out_in_the_guests_language(client, app_module):
     subj, body = _db().execute("SELECT subject, body FROM mail_outbox WHERE to_addr='g@example.com'"
                               " ORDER BY id DESC").fetchone()
     assert subj.startswith("תזכורת") and "שלום" in body and "Hi," not in body and "?lang=he" in body
+
+
+def test_dashboard_offers_a_ready_thank_you_email(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"])
+    _claim(app_module, reg["slug"], next(iter(items.values()))["id"], name="Aunt Sarah",
+           guest_email="sarah@example.com")
+    assert "Write a thank-you" not in client.get("/dashboard").get_data(as_text=True)   # only reserved
+    db = _db(); db.execute("UPDATE claims SET status='received'"); db.commit(); db.close()
+    html = client.get("/dashboard").get_data(as_text=True)
+    m = re.search(r'href="mailto:sarah@example.com\?subject=([^&"]+)&amp;body=([^"]+)"', html)
+    assert m and "Write a thank-you" in html
+    from urllib.parse import unquote
+    assert unquote(m.group(1)) == "Thank you for Electric kettle!"
+    assert unquote(m.group(2)).startswith("Dear Aunt Sarah,\n\nThank you so much for Electric kettle")
+    assert unquote(m.group(2)).endswith("Sarah & Dovid")

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08 (one-tap thank-you email)
+- The dashboard showed a guest's email as plain text. It's now a mailto link, and gifts that are
+  on the way / received (and not yet marked thanked) get a "Write a thank-you" button that opens the
+  couple's mail app with the subject ("Thank you for Electric kettle!") and an opening paragraph
+  signed with their names, in the couple's language. Nothing is sent by the site.
+- 1 test — 213 tests.
+
 ## 2026-10-08 (guests hear back)
 - When the couple confirmed a gift arrived, the guest was never told — the overseas relative never
   learned it got there. When the couple released a reservation, the guest wasn't told either and
