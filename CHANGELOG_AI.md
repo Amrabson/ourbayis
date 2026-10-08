@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08 (registry when everything is taken)
+- A fully reserved registry just showed a list of "reserved" cards; a guest had to scroll it all to
+  find out there was nothing left. Now a note at the top of the list says every gift is spoken for,
+  with "You can still send the couple a cash gift →" opening the cash dialog when the couple has a
+  payment link.
+- 1 test — 214 tests.
+
 ## 2026-10-08 (one-tap thank-you email)
 - The dashboard showed a guest's email as plain text. It's now a mailto link, and gifts that are
   on the way / received (and not yet marked thanked) get a "Write a thank-you" button that opens the

@@ -60,6 +60,9 @@
 
   {% if not items %}
     <p class="empty-note">{{ t('reg_empty') }}</p>
+  {% elif total and done >= total %}
+    {# every gift is spoken for: say so up front instead of letting guests scroll a list of "reserved" #}
+    <p class="empty-note all-taken">{{ t('reg_all_taken') }}{% if pay_links %} <a href="#" data-modal="cash-modal">{{ t('reg_all_taken_cash') }}</a>{% endif %}</p>
   {% endif %}
 
   {% set cats_present = items | map(attribute='category') | unique | list %}

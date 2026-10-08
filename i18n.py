@@ -114,6 +114,8 @@ T_EN = {
     "reg_for": "Registry for",
     "reg_countdown": "{n} days to go!",
     "reg_empty": "The couple hasn't added gifts yet — check back soon!",
+    "reg_all_taken": "Every gift on this list is already spoken for — thank you all!",
+    "reg_all_taken_cash": "You can still send the couple a cash gift →",
 
     # Auth
     "signup_title": "Start your registry",
@@ -818,6 +820,8 @@ T_HE = {
     "reg_for": "רשימה עבור",
     "reg_countdown": "עוד {n} ימים!",
     "reg_empty": "הזוג עדיין לא הוסיף מתנות — חזרו לבדוק בקרוב!",
+    "reg_all_taken": "כל המתנות ברשימה כבר נלקחו — תודה לכולם!",
+    "reg_all_taken_cash": "עדיין אפשר לשלוח לזוג מתנה כספית ←",
 
     "signup_title": "פתיחת רשימה",
     "signup_sub": "חינם, שתי דקות, וכל רשימת המתנות שלכם בקישור אחד לשיתוף.",

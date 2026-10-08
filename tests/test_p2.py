@@ -1295,3 +1295,12 @@ def test_dashboard_offers_a_ready_thank_you_email(client, app_module):
     assert unquote(m.group(1)) == "Thank you for Electric kettle!"
     assert unquote(m.group(2)).startswith("Dear Aunt Sarah,\n\nThank you so much for Electric kettle")
     assert unquote(m.group(2)).endswith("Sarah & Dovid")
+
+
+def test_registry_says_when_every_gift_is_taken(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"], pay=True)
+    guest = app_module.app.test_client()
+    assert "already spoken for" not in guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    _claim(app_module, reg["slug"], next(iter(items.values()))["id"])
+    html = guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    assert "already spoken for" in html and 'data-modal="cash-modal">You can still send' in html
