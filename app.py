@@ -156,6 +156,8 @@ def set_security_headers(resp):
     elif request.endpoint == "static" and request.args.get("v") and resp.status_code == 200:
         # versioned URL (see static_cache_bust) — a new file gets a new URL, so cache for good
         resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    if resp.mimetype == "text/html":
+        resp.vary.add("Accept-Language")     # current_lang() falls back to it on a first visit
     return resp
 
 
@@ -258,7 +260,13 @@ def current_lang():
     if lang in ("en", "he"):
         session["lang"] = lang
         return lang
-    return session.get("lang", "en")
+    if "lang" in session:
+        return session["lang"]
+    # first visit, no choice made yet: a phone set to Hebrew (an Israeli relative opening the
+    # couple's link) gets Hebrew. Not stored, so the first tap on the language button decides.
+    # Crawlers send no Accept-Language and keep getting English at the x-default URL.
+    best = request.accept_languages.best_match(["en", "he", "iw"])
+    return "he" if best in ("he", "iw") else "en"
 
 
 def slugify(text):

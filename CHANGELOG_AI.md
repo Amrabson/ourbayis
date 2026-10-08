@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-08 (first visit follows the browser's language)
+- Everyone started in English unless the link said `?lang=he` — so an Israeli relative opening the
+  couple's plain link on a Hebrew phone got English. With no choice made yet, `current_lang()` now
+  falls back to `Accept-Language` (he/iw → Hebrew). It isn't stored: the first tap on the language
+  button (or a `?lang=` link) decides from then on. Crawlers send no Accept-Language and still get
+  English at the x-default URLs; HTML responses carry `Vary: Accept-Language`.
+- 6 tests — 209 tests.
+
 ## 2026-10-08 (the English button works everywhere)
 - Reported by the owner: the "English" button didn't switch back. `/lang/en` redirected to the
   referring page, and when that page had been opened as `?lang=he` (Hebrew share links, hreflang

@@ -1202,3 +1202,22 @@ def test_lang_switch_never_redirects_off_site(client):
         loc = client.get("/lang/en", headers={"Referer": ref}).headers["Location"]
         assert not loc.startswith("//") and "\\" not in loc, loc
     assert client.get("/lang/en", headers={"Referer": "https://evil.example/"}).headers["Location"] == "/"
+
+
+@pytest.mark.parametrize("accept,expect", [
+    ("he-IL,he;q=0.9,en-US;q=0.8", "he"), ("iw", "he"), ("en-US,en;q=0.9,he;q=0.8", "en"),
+    ("fr-FR", "en"), (None, "en"),
+])
+def test_first_visit_follows_the_browser_language(app_module, accept, expect):
+    c = app_module.app.test_client()
+    r = c.get("/", headers={"Accept-Language": accept} if accept else {})
+    assert f'lang="{expect}"' in r.get_data(as_text=True)
+    assert "Accept-Language" in r.headers.get("Vary", "")
+
+
+def test_a_chosen_language_beats_the_browser(app_module):
+    c = app_module.app.test_client()
+    he = {"Accept-Language": "he-IL"}
+    c.get("/lang/en", headers=he)
+    assert 'lang="en"' in c.get("/", headers=he).get_data(as_text=True)
+    assert 'lang="en"' in c.get("/?lang=en", headers=he).get_data(as_text=True)
