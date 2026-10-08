@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-08 (guest page: way back, and who cancelled)
+- The guest's private page had no link back to the registry — someone who wanted to give a second
+  gift, or whose reservation was released, had nowhere to go. Now "See the rest of the list →"
+  (or "Choose another gift →" once cancelled/expired).
+- A cancelled reservation only said "This reservation was cancelled." Now it says whether the guest
+  cancelled it or the couple released it ("…so you don't need to buy or send it").
+- 1 test — 215 tests.
+
 ## 2026-10-08 (registry when everything is taken)
 - A fully reserved registry just showed a list of "reserved" cards; a guest had to scroll it all to
   find out there was nothing left. Now a note at the top of the list says every gift is spoken for,

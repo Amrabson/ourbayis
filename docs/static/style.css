@@ -961,6 +961,7 @@ dialog:focus-visible { outline: none; }
 
 /* -------- guest page -------- */
 .next-step { margin: 10px 0 6px; }
+.guest-back { margin: 18px 0 6px; font-weight: 600; }
 .store-cta { margin-bottom: 8px; }
 .delivery-box { margin: 12px 0; padding: 10px 14px; border: 1px solid var(--line); border-inline-start: 3px solid var(--gold); border-radius: 8px; background: var(--paper-deep); }
 .delivery-box h3 { margin: 0 0 4px; font-size: 1rem; font-weight: 700; font-family: inherit; color: var(--navy); }

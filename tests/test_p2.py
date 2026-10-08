@@ -1306,3 +1306,16 @@ def test_registry_says_when_every_gift_is_taken(client, app_module):
     assert "already spoken for" in html and 'data-modal="cash-modal">You can still send' in html
     dash = client.get("/dashboard").get_data(as_text=True)
     assert "nothing left to choose" in dash and 'href="/registry/items#add-more"' in dash
+
+
+def test_guest_page_says_who_cancelled_and_links_back(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"])
+    tok = _claim(app_module, reg["slug"], next(iter(items.values()))["id"])
+    guest = app_module.app.test_client()
+    html = guest.get(f"/g/{tok}").get_data(as_text=True)
+    assert f'<a href="/r/{reg["slug"]}">See the rest of the list' in html
+    db = _db(); db.execute("UPDATE claims SET status='cancelled', cancelled_by='owner'"); db.commit()
+    html = guest.get(f"/g/{tok}").get_data(as_text=True)
+    assert "The couple released this reservation" in html and "Choose another gift" in html
+    db.execute("UPDATE claims SET cancelled_by='guest'"); db.commit(); db.close()
+    assert "You cancelled this reservation" in guest.get(f"/g/{tok}").get_data(as_text=True)
