@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-08 (delivery note example)
+- The delivery-note box (now shown to guests as "Where to send it") was an empty 2-line box with no
+  hint of what to write. It gets an example placeholder in both languages (address with apartment,
+  a phone number for the courier, or where to send things the couple will bring) and 3 rows.
+
 ## 2026-10-08 (find a couple by name, in any order)
 - /find matched the typed text as one block, so "Sarah Dovid" or "Dovid and Sarah" found nothing for
   "Sarah & Dovid Cohen". Now every name typed must appear somewhere in the names/title, in any order;

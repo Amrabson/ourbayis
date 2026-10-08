@@ -77,11 +77,11 @@
         <label>{{ t('pref_arrival_date') }}<input name="arrival_date" type="date" value="{{ prefs.get('arrival_date', '') }}"></label>
       </div>
       <label>{{ t('pref_items_needed') }}<textarea name="items_needed" rows="2" maxlength="300" placeholder="{{ t('pref_items_needed_ph') }}">{{ prefs.get('items_needed', '') }}</textarea></label>
-      <label id="delivery">{{ t('r_delivery_note') }}<textarea name="delivery_note" rows="2" maxlength="1000">{{ val('delivery_note') }}</textarea></label>
+      <label id="delivery">{{ t('r_delivery_note') }}<textarea name="delivery_note" rows="3" maxlength="1000" placeholder="{{ t('r_delivery_note_ph') }}">{{ val('delivery_note') }}</textarea></label>
       <p class="hint">{{ t('r_delivery_note_hint') }}</p>
       <details class="he-fields" {% if val('delivery_note_he') %}open{% endif %}>
         <summary>{{ t('r_hebrew_details') }}</summary>
-        <label dir="rtl">{{ t('r_delivery_note_he') }}<textarea name="delivery_note_he" rows="2" maxlength="1000">{{ val('delivery_note_he') }}</textarea></label>
+        <label dir="rtl">{{ t('r_delivery_note_he') }}<textarea name="delivery_note_he" rows="3" maxlength="1000" placeholder="{{ t('r_delivery_note_ph_he') }}">{{ val('delivery_note_he') }}</textarea></label>
       </details>
 
       <h2 class="sub-title">{{ t('rform_step_payment') }}</h2>
