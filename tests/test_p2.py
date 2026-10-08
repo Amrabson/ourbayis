@@ -1148,3 +1148,15 @@ def test_catalog_search_stays_precise():
     assert r"%100\%\_off%" in params and "ESCAPE" in sql   # LIKE wildcards are literal
     assert ob_search.search_clause("   ") == ("", [])
     assert len(ob_search.search_clause(" ".join(["word"] * 50))[1]) <= 8 * 20
+
+
+@pytest.mark.parametrize("q,first,later", [
+    ("plates", "Dinnerware set", "Shabbos hot plate"),        # not the hot plates first
+    ("sheets", "Sheet sets", "cookie sheets"),
+    ("towels", "Towel set", "Kitchen towels"),
+])
+def test_catalog_search_puts_the_obvious_match_first(client, q, first, later):
+    html = client.get("/catalog", query_string={"q": q}).get_data(as_text=True)
+    assert html.index(first) < html.index(later)
+    by_price = client.get("/catalog", query_string={"q": q, "sort": "price_asc"}).get_data(as_text=True)
+    assert first in by_price                                   # an explicit sort still wins

@@ -84,6 +84,40 @@ def word_variants(word):
     return out
 
 
+def strong_variants(word):
+    """The word as typed plus the catalog words it stands for — not the bare plural stem, which is
+    what makes "plates" also hit "hot plate"."""
+    w = word.lower()
+    vs = [w] + list(SYNONYMS.get(w, ()))
+    for s in _singular(w):
+        vs += [x for x in SYNONYMS.get(s, ()) if x != s]
+    return list(dict.fromkeys(vs))
+
+
+def rank_expr(q, fields=("name", "name_he")):
+    """(SQL expression, params) to ORDER BY ahead of the normal order. Per typed word: 0 when a name
+    starts with it in any spelling ("Sheet sets" for "sheets"), 1 when a name contains it or a
+    synonym ("Dinnerware" for "plates"), 2 otherwise (a stem inside a name, or the model line)."""
+    words = [w for w in re.split(r"[\s,/]+", (q or "").strip().lower()) if len(w) > 1][:8]
+    if not words:
+        return "", []        # never "0": a bare integer in ORDER BY means "column 0"
+    phrase = " ".join(words)
+    terms = [phrase] if len(words) > 1 and phrase in SYNONYMS else words
+    parts, params = [], []
+    for strong, every in ((strong_variants(t), word_variants(t)) for t in terms):
+        starts, anywhere = [], []
+        for v in every:                       # "Sheet sets", "Towel set", "Dinnerware…" open with it
+            for f in fields:
+                starts.append(f"{f} LIKE ? ESCAPE '\\'")
+                params.append(_like(v)[1:])
+        for v in strong:
+            for f in fields:
+                anywhere.append(f"{f} LIKE ? ESCAPE '\\'")
+                params.append(_like(v))
+        parts.append(f"(CASE WHEN {' OR '.join(starts)} THEN 0 WHEN {' OR '.join(anywhere)} THEN 1 ELSE 2 END)")
+    return "(" + " + ".join(parts) + ")", params
+
+
 def _like(v):
     return "%" + v.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
 

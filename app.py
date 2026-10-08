@@ -931,8 +931,10 @@ def catalog_page():
     total = db.execute(f"SELECT COUNT(*) FROM ({sql})", params).fetchone()[0]
     pages = max(1, (total + CATALOG_PAGE_SIZE - 1) // CATALOG_PAGE_SIZE)
     page = min(page, pages)
-    items = db.execute(sql + f" ORDER BY {order} LIMIT ? OFFSET ?",
-                       params + [CATALOG_PAGE_SIZE, (page - 1) * CATALOG_PAGE_SIZE]).fetchall()
+    # a search in the default order puts direct name matches first ("plates" → dinnerware, then hot plates)
+    rank, rank_params = ob_search.rank_expr(q) if q and not sort else ("", [])
+    items = db.execute(sql + f" ORDER BY {rank + ', ' if rank else ''}{order} LIMIT ? OFFSET ?",
+                       params + rank_params + [CATALOG_PAGE_SIZE, (page - 1) * CATALOG_PAGE_SIZE]).fetchall()
     have = set()
     reg = user_registry()
     if reg:

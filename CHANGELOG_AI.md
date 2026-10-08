@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08 (search results in a sensible order)
+- Search results kept the catalog's category order, so "plates" listed the Shabbos hot plates before
+  the dinnerware and "sheets" put cookie sheets first. In the default sort, /catalog now ranks names
+  that start with the word (any spelling) first, then names containing it or a synonym, then the rest
+  (`ob_search.rank_expr`). Explicit price/name sorts are unchanged.
+- 3 tests — 199 tests.
+
 ## 2026-10-08 (catalog search that finds things)
 - Search was one substring match on name/brand, so "shabbat", "plata", "hotplate", "פלטה",
   "refrigerator", "silverware", "becher", "candle sticks", "crock pot" found nothing, and "sheets" /
