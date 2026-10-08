@@ -2223,6 +2223,17 @@ def shana():
         if not name or not has_contact:
             flash(_t("shana_contact_required", lang) if name else _t("form_error", lang), "err")
         else:
+            bundle = db.execute("SELECT slug, tier FROM bundles WHERE slug=? AND active=1",
+                                (f.get("bundle") or "",)).fetchone()
+            bundle_slug = bundle["slug"] if bundle else "custom"
+            lead_weeks = PACKAGE_TIERS.get(bundle["tier"] if bundle else "basic", PACKAGE_TIERS["basic"])["lead_weeks"]
+            try:
+                arrival = datetime.strptime((f.get("arrival") or "").strip(), "%Y-%m-%d").date()
+                days_left = (arrival - datetime.now(timezone.utc).date()).days
+            except ValueError:
+                days_left = None
+            # sooner than the package's planning lead time (a past date may just mean "already here")
+            rush = days_left is not None and 0 <= days_left < lead_weeks * 7
             db.execute(
                 "INSERT INTO shana_requests (name, email, whatsapp, arrival, city, neighborhood,"
                 " furnishing, budget, bundle_slug, notes) VALUES (?,?,?,?,?,?,?,?,?,?)",
@@ -2233,19 +2244,24 @@ def shana():
                  f.get("furnishing") if f.get("furnishing") in
                      ("unknown", "empty", "partly", "furnished") else "unknown",
                  f.get("budget") if f.get("budget") in SHANA_BUDGETS else "",
-                 (f.get("bundle") or "custom")[:60],
+                 bundle_slug,
                  (f.get("notes") or "").strip()[:2000]))
             send_mail(
                 NOTIFY_EMAIL,
-                f"New shana rishonah lead: {name} ({f.get('bundle', 'custom')})",
+                f"{'[RUSH] ' if rush else ''}New shana rishonah lead: {name} ({bundle_slug})",
                 f"Name: {name}\nWhatsApp: {f.get('whatsapp', '')}\nEmail: {email}\n"
-                f"Arrival: {f.get('arrival', '')}\nCity: {f.get('city', '')}\n"
+                f"Arrival: {f.get('arrival', '')}"
+                + (f" — {days_left} days away (package lead time {lead_weeks} weeks)" if rush else "")
+                + f"\nCity: {f.get('city', '')}\n"
                 f"Neighborhood: {f.get('neighborhood', '')}\nFurnishing: {f.get('furnishing', '')}\n"
-                f"Budget: {budget_label(f.get('budget'))}\nBundle: {f.get('bundle', '')}\n"
+                f"Budget: {budget_label(f.get('budget'))}\nBundle: {bundle_slug}\n"
                 f"Notes: {f.get('notes', '')}\n\nAdmin: {ext_url('admin_home')}",
                 reply_to=email)
             track("concierge_inquiry")
             flash(_t("sr_done_t", lang) + " " + _t("sr_done_b", lang), "ok")
+            if rush:
+                flash(tf("sr_rush_note_today" if days_left == 0 else "sr_rush_note", lang,
+                         n=days_left, weeks=lead_weeks), "ok")
             return redirect(url_for("shana"))
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
     # a rejected POST re-renders with what was typed (up to 2000 chars of notes) instead of blanking it

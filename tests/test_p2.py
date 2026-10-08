@@ -1348,3 +1348,24 @@ def test_shana_budget_bands_cover_the_top_package_and_are_validated(client, app_
     body = _db().execute("SELECT body FROM mail_outbox WHERE subject LIKE '%shana%' ORDER BY id").fetchone()[0]
     assert "Budget: ₪20,000+" in body
     assert app_module.budget_label("10000_plus") == "₪10,000+"         # old leads keep a label
+
+
+@pytest.mark.parametrize("bundle,days,rush", [
+    ("full-nest", 20, True), ("full-nest", 50, False), ("landing-basics", 25, False),
+    ("landing-basics", 10, True), ("custom", 1, True), ("full-nest", -5, False), ("bogus", 10, True),
+])
+def test_shana_request_flags_a_tight_arrival(client, app_module, monkeypatch, bundle, days, rush):
+    from datetime import date, timedelta
+    monkeypatch.setattr(app_module, "NOTIFY_EMAIL", "owner@example.com")
+    page = client.get("/shana-rishonah").get_data(as_text=True)
+    r = client.post("/shana-rishonah", follow_redirects=True, data=dict(
+        csrf_token=get_csrf(page), form_key=get_form_key(page), name="Lead", email="lead@example.com",
+        bundle=bundle, arrival=(date.today() + timedelta(days=days)).isoformat()))
+    html = r.get_data(as_text=True)
+    assert ("usually needs" in html) is rush
+    db = _db()
+    subj = db.execute("SELECT subject FROM mail_outbox WHERE to_addr='owner@example.com'").fetchone()[0]
+    assert subj.startswith("[RUSH]") is rush
+    assert db.execute("SELECT bundle_slug FROM shana_requests").fetchone()[0] == (
+        "custom" if bundle == "bogus" else bundle)
+    db.close()

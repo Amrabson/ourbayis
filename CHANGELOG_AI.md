@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-08 (Shana request: tight arrival dates)
+- A request whose arrival is sooner than the package's lead time (3 weeks; 6 for The Full Nest)
+  went through silently. Now the person sees, after "thank you", that their arrival is N days away and
+  we'll say honestly what can still be ready; the owner's lead email subject starts "[RUSH]" and the
+  arrival line shows the days left. Past dates aren't flagged (they may already be here).
+- The package value was stored as sent; now only an active bundle slug, otherwise "custom".
+- 7 tests — 231 tests.
+
 ## 2026-10-08 (Shana Rishonah budget bands)
 - The request form's budget options stopped at "₪10,000+", while The Full Nest starts at ₪17,900 —
   the most valuable leads all landed in one vague bucket. Now …6,000–10,000 · 10,000–20,000 ·
