@@ -1319,3 +1319,18 @@ def test_guest_page_says_who_cancelled_and_links_back(client, app_module):
     assert "The couple released this reservation" in html and "Choose another gift" in html
     db.execute("UPDATE claims SET cancelled_by='guest'"); db.commit(); db.close()
     assert "You cancelled this reservation" in guest.get(f"/g/{tok}").get_data(as_text=True)
+
+
+@pytest.mark.parametrize("q,found", [
+    ("Sarah Dovid", True), ("dovid and sarah", True), ("Cohen", True), ("Sarah Levi", False),
+    ("שרה ודוד", True), ("דוד", True), ("100%", False), ("Sarah & Dovid Cohen wedding", True),
+])
+def test_find_a_couple_matches_names_in_any_order(app_module, q, found):
+    """"Sarah Dovid" found nothing for "Sarah & Dovid Cohen" — the whole phrase had to appear."""
+    c = app_module.app.test_client()
+    signup(c, email="sd@example.com")
+    tok = get_csrf(c.get("/registry/new").get_data(as_text=True))
+    c.post("/registry/new", data=dict(csrf_token=tok, title="Our Home", couple_names="Sarah & Dovid Cohen",
+                                      couple_names_he="שרה & דוד כהן", event_type="wedding", visibility="public"))
+    html = app_module.app.test_client().get("/find", query_string={"q": q}).get_data(as_text=True)
+    assert ("Sarah &amp; Dovid Cohen" in html) is found

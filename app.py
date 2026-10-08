@@ -1038,17 +1038,28 @@ def go_item(item_id):
     return redirect(row["url"], code=302)
 
 
+_FIND_SKIP_WORDS = {"and", "the", "family", "wedding", "registry", "mr", "mrs", "ms", "את", "של", "חתונה"}
+_HE_LETTER = re.compile(r"[א-ת]")
+
+
 @app.route("/find")
 def find():
     q = (request.args.get("q") or "").strip()
     results = None
     if q:
-        like = f"%{q}%"
-        results = get_db().execute(
-            "SELECT * FROM registries WHERE visibility='public' AND"
-            " (couple_names LIKE ? OR couple_names_he LIKE ? OR title LIKE ? OR title_he LIKE ?)"
-            " ORDER BY created_at DESC LIMIT 40",
-            (like, like, like, like)).fetchall()
+        # every name typed must appear, in any order: "Sarah Dovid" finds "Sarah & Dovid",
+        # "Dovid and Sarah" too, and "שרה ודוד" finds "שרה ודוד" or "שרה & דוד"
+        words = [w for w in re.split(r"[\s,&+/]+", q) if w.lower() not in _FIND_SKIP_WORDS and len(w) > 1]
+        sql, params = "SELECT * FROM registries WHERE visibility='public'", []
+        for w in (words or [q])[:6]:
+            alts = [w] + ([w[1:]] if len(w) > 2 and w[0] == "ו" and _HE_LETTER.match(w[1]) else [])
+            ors = []
+            for a in alts:
+                for f in ("couple_names", "couple_names_he", "title", "title_he"):
+                    ors.append(f"{f} LIKE ? ESCAPE '\\'")
+                    params.append("%" + a.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%")
+            sql += " AND (" + " OR ".join(ors) + ")"
+        results = get_db().execute(sql + " ORDER BY created_at DESC LIMIT 40", params).fetchall()
     return render_template("find.html", q=q, results=results)
 
 

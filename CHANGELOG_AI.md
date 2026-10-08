@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-08 (find a couple by name, in any order)
+- /find matched the typed text as one block, so "Sarah Dovid" or "Dovid and Sarah" found nothing for
+  "Sarah & Dovid Cohen". Now every name typed must appear somewhere in the names/title, in any order;
+  filler words (and, the, family, wedding, registry, את, של, חתונה…) are ignored, a Hebrew ו prefix
+  is optional (שרה ודוד finds שרה & דוד), and `%`/`_` are literal.
+- 8 tests — 223 tests.
+
 ## 2026-10-08 (guest page: way back, and who cancelled)
 - The guest's private page had no link back to the registry — someone who wanted to give a second
   gift, or whose reservation was released, had nowhere to go. Now "See the rest of the list →"
