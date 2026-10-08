@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-08 (guest page: where to send it)
+- The guest page told a store-gift guest to "have it delivered to the couple" but never said where:
+  the couple's delivery note was an unlabeled grey line under the exchange-rate small print, and when
+  there was none the guest got nothing. Now a "Where to send it" / "לאן לשלוח" box sits right under the
+  store button (while the gift is reserved), with the note or, if missing, "ask them (or their family)
+  where to send it before you order".
+- New dashboard checklist step "Tell guests where to send store gifts" → registry form `#delivery`;
+  done when a delivery note exists or every gift is cash-only.
+- Guest-page progress steps were the couple-side status labels ("Guest reports sending/buying",
+  wrapping to 3 lines on a phone); now "Reserved · You bought / sent it · The couple got it" (HE
+  "שוריין · קניתם / שלחתם · הזוג קיבל") with `aria-current="step"`.
+- 1 test — 175 tests.
+
 ## 2026-10-08 (English text on Hebrew pages, and the reverse)
 - Text typed by couples/guests took the page's direction, so an English welcome message on the Hebrew
   registry showed as `".Thank you for helping us set up our first home"` (quotes and period flipped);

@@ -1453,6 +1453,9 @@ def _dashboard_checklist(db, reg, n_items, n_usable, gifts):
         ("details", bool(reg["title"] and reg["couple_names"])),
         ("gifts", n_usable >= 5),
         ("payment", has_pay_link or n_cash_only == 0),
+        # guests who buy from a store are told to "have it delivered" — they need an address
+        ("delivery", bool(reg["delivery_note"] or reg["delivery_note_he"])
+                     or (n_items > 0 and n_items == n_cash_only)),
         ("visibility", bool(prefs.get("visibility_reviewed_at"))),
         ("previewed", bool(prefs.get("previewed_at"))),
         ("shared", (reg["views"] or 0) > 0 or bool(prefs.get("shared_at"))),

@@ -172,7 +172,9 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   (url/image/store/brand/name) records it in `registry_items.overrides` so `refresh-registry-links`
   never clobbers it later.
 - **Dashboard checklist**: computed live from registry state each request (details filled / ≥5
-  usable gifts / a payment link if any gift has no store url / visibility reviewed [stamped in
+  usable gifts / a payment link if any gift has no store url / a delivery note unless every gift is
+  cash-only (guest page shows it in a "Where to send it" box, or a fallback asking them to check with
+  the couple) / visibility reviewed [stamped in
   `preferences_json.visibility_reviewed_at` whenever the registry form is saved] / previewed
   [`?preview=1` by the owner stamps `previewed_at`] / shared [`views>0` or a
   `POST /dashboard/shared` beacon the share buttons fire, stamping `shared_at`]). Disappears once

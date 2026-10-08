@@ -1058,3 +1058,21 @@ def test_couple_and_guest_text_keeps_its_own_direction(client, app_module):
     dash = client.get("/dashboard?lang=he").get_data(as_text=True)
     assert '<p class="gift-msg" dir="auto">“Mazel tov!”</p>' in dash
     assert "<bdi>Sarah K.</bdi>" in dash
+
+
+def test_guest_page_says_where_to_send_a_store_gift(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"])
+    item_id = next(iter(items.values()))["id"]
+    tok = _claim(app_module, reg["slug"], item_id)
+    guest = app_module.app.test_client()
+    html = guest.get(f"/g/{tok}").get_data(as_text=True)
+    assert "Where to send it" in html and "added delivery details yet" in html
+    assert "Tell guests where to send store gifts" in client.get("/dashboard").get_data(as_text=True)
+    db = _db()
+    db.execute("UPDATE registries SET delivery_note=? WHERE id=?", ("Rechov Yafo 1, Yerushalayim", reg["id"]))
+    db.commit(); db.close()
+    html = guest.get(f"/g/{tok}").get_data(as_text=True)
+    assert '<p dir="auto">Rechov Yafo 1, Yerushalayim</p>' in html and "added delivery details yet" not in html
+    assert "Tell guests where to send store gifts" not in client.get("/dashboard").get_data(as_text=True)
+    he = guest.get(f"/g/{tok}?lang=he").get_data(as_text=True)
+    assert "לאן לשלוח" in he and 'aria-current="step"' in he and "קניתם / שלחתם" in he

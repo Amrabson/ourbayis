@@ -27,6 +27,7 @@
         {% if not done %}
           {% if key == 'gifts' %}<a href="{{ url_for('items_manage') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
           {% elif key == 'payment' %}<a href="{{ url_for('registry_edit') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
+          {% elif key == 'delivery' %}<a href="{{ url_for('registry_edit', _anchor='delivery') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
           {% elif key == 'visibility' %}<a href="{{ url_for('registry_edit') }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
           {% elif key == 'previewed' %}<a href="{{ url_for('registry', slug=reg['slug'], preview=1) }}" class="checklist-cta">{{ t('dash_checklist_go') }}</a>
           {% elif key == 'shared' %}<a href="#dash-share" class="checklist-cta">{{ t('dash_checklist_go') }}</a>

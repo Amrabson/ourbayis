@@ -960,6 +960,9 @@ dialog:focus-visible { outline: none; }
 /* -------- guest page -------- */
 .next-step { margin: 10px 0 6px; }
 .store-cta { margin-bottom: 8px; }
+.delivery-box { margin: 12px 0; padding: 10px 14px; border: 1px solid var(--line); border-inline-start: 3px solid var(--gold); border-radius: 8px; background: var(--paper-deep); }
+.delivery-box h3 { margin: 0 0 4px; font-size: 1rem; font-weight: 700; font-family: inherit; color: var(--navy); }
+.delivery-box p { margin: 0; white-space: pre-line; }
 
 /* -------- shana packages -------- */
 .bundle-facts { list-style: none; margin: 8px 0 4px; padding: 10px 0 0; border-top: 1px solid var(--line); display: grid; gap: 6px; font-size: .92rem; }
