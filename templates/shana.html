@@ -103,11 +103,9 @@
         <label>{{ t('sr_budget') }}
           <select name="budget">
             <option value="">—</option>
-            <option value="under_3000" {% if form.get('budget') == 'under_3000' %}selected{% endif %}>{{ t('budget_under_3000') }}</option>
-            <option value="3000_6000" {% if form.get('budget') == '3000_6000' %}selected{% endif %}>{{ t('budget_3000_6000') }}</option>
-            <option value="6000_10000" {% if form.get('budget') == '6000_10000' %}selected{% endif %}>{{ t('budget_6000_10000') }}</option>
-            <option value="10000_plus" {% if form.get('budget') == '10000_plus' %}selected{% endif %}>{{ t('budget_10000_plus') }}</option>
-            <option value="not_sure" {% if form.get('budget') == 'not_sure' %}selected{% endif %}>{{ t('budget_not_sure') }}</option>
+            {% for b in shana_budgets %}
+            <option value="{{ b }}" {% if form.get('budget') == b %}selected{% endif %}>{{ t('budget_' ~ b) }}</option>
+            {% endfor %}
           </select>
         </label>
       </div>

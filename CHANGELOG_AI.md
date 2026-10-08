@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-08 (Shana Rishonah budget bands)
+- The request form's budget options stopped at "₪10,000+", while The Full Nest starts at ₪17,900 —
+  the most valuable leads all landed in one vague bucket. Now …6,000–10,000 · 10,000–20,000 ·
+  20,000+ (`SHANA_BUDGETS`). The stored value was free text from the browser; now only these keys
+  (anything else → empty). The lead email and admin lead page show the label ("₪20,000+"), not the
+  key; old "10000_plus" leads keep their label.
+- 1 test — 224 tests.
+
 ## 2026-10-08 (delivery note example)
 - The delivery-note box (now shown to guests as "Where to send it") was an empty 2-line box with no
   hint of what to write. It gets an example placeholder in both languages (address with apartment,

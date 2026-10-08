@@ -2232,7 +2232,7 @@ def shana():
                  (f.get("neighborhood") or "").strip()[:120],
                  f.get("furnishing") if f.get("furnishing") in
                      ("unknown", "empty", "partly", "furnished") else "unknown",
-                 (f.get("budget") or "").strip()[:40],
+                 f.get("budget") if f.get("budget") in SHANA_BUDGETS else "",
                  (f.get("bundle") or "custom")[:60],
                  (f.get("notes") or "").strip()[:2000]))
             send_mail(
@@ -2241,7 +2241,7 @@ def shana():
                 f"Name: {name}\nWhatsApp: {f.get('whatsapp', '')}\nEmail: {email}\n"
                 f"Arrival: {f.get('arrival', '')}\nCity: {f.get('city', '')}\n"
                 f"Neighborhood: {f.get('neighborhood', '')}\nFurnishing: {f.get('furnishing', '')}\n"
-                f"Budget: {f.get('budget', '')}\nBundle: {f.get('bundle', '')}\n"
+                f"Budget: {budget_label(f.get('budget'))}\nBundle: {f.get('bundle', '')}\n"
                 f"Notes: {f.get('notes', '')}\n\nAdmin: {ext_url('admin_home')}",
                 reply_to=email)
             track("concierge_inquiry")
@@ -2250,6 +2250,7 @@ def shana():
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
     # a rejected POST re-renders with what was typed (up to 2000 chars of notes) instead of blanking it
     return render_template("shana.html", bundles=bundles, package_tiers=PACKAGE_TIERS,
+                           shana_budgets=SHANA_BUDGETS,
                            form=request.form if request.method == "POST" else {})
 
 
@@ -2258,6 +2259,17 @@ def shana():
 # terms that differ between tiers and must stay consistent between the cards,
 # the shared terms panel and the lead-time guidance. Values map to i18n keys
 # pkg_delivery_<delivery>, pkg_setup_yes/no, pkg_appliances_<appliances>,
+# Shana Rishonah budget bands, in order. Bands reach past the top package's starting price
+# (The Full Nest, from ₪17,900) so those leads don't all land in one "10,000+" bucket.
+# "10000_plus" is the pre-2026-10 top band: no longer offered, still labelled for old leads.
+SHANA_BUDGETS = ("under_3000", "3000_6000", "6000_10000", "10000_20000", "20000_plus", "not_sure")
+
+
+def budget_label(key):
+    """English label for a stored budget key (admin + lead email); the raw value if unknown."""
+    return _t("budget_" + key, "en") if key in SHANA_BUDGETS + ("10000_plus",) else (key or "—")
+
+
 # pkg_lead_weeks. Owner decision 2026-09-22: Full Nest's price includes standard
 # installation of the washer/fridge/microwave (existing hookups); other
 # installation, and new plumbing/electrical work, is quoted per item.
@@ -2393,7 +2405,7 @@ def admin_lead(lead_id):
         quote = json.loads(lead["quote_json"] or "{}")
     except (ValueError, TypeError):
         quote = {}
-    return render_template("admin_lead.html", lead=lead, dupes=dupes, quote=quote,
+    return render_template("admin_lead.html", lead=lead, dupes=dupes, quote=quote, budget_label=budget_label,
                            statuses=LEAD_STATUSES)
 
 

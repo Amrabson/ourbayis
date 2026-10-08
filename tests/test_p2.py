@@ -1334,3 +1334,17 @@ def test_find_a_couple_matches_names_in_any_order(app_module, q, found):
                                       couple_names_he="שרה & דוד כהן", event_type="wedding", visibility="public"))
     html = app_module.app.test_client().get("/find", query_string={"q": q}).get_data(as_text=True)
     assert ("Sarah &amp; Dovid Cohen" in html) is found
+
+
+def test_shana_budget_bands_cover_the_top_package_and_are_validated(client, app_module, monkeypatch):
+    monkeypatch.setattr(app_module, "NOTIFY_EMAIL", "owner@example.com")
+    html = client.get("/shana-rishonah").get_data(as_text=True)
+    assert 'value="20000_plus"' in html and 'value="10000_20000"' in html and 'value="10000_plus"' not in html
+    for budget, stored in (("20000_plus", "20000_plus"), ("<script>", "")):
+        page = client.get("/shana-rishonah").get_data(as_text=True)
+        client.post("/shana-rishonah", data=dict(csrf_token=get_csrf(page), form_key=get_form_key(page),
+                                                 name="Lead", email="lead@example.com", budget=budget))
+        assert _db().execute("SELECT budget FROM shana_requests ORDER BY id DESC").fetchone()[0] == stored
+    body = _db().execute("SELECT body FROM mail_outbox WHERE subject LIKE '%shana%' ORDER BY id").fetchone()[0]
+    assert "Budget: ₪20,000+" in body
+    assert app_module.budget_label("10000_plus") == "₪10,000+"         # old leads keep a label
