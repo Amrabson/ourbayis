@@ -18,6 +18,10 @@ Flask 3 + SQLite, server-rendered Jinja2, no build step. Same architecture as Ba
   timeout), `MIGRATIONS` list + `migrate(db)` (tracked in `schema_migrations`, each migration
   idempotent via `has_column`/`IF NOT EXISTS`), `write_txn(db)` (BEGIN IMMEDIATE + bounded retry
   on SQLITE_BUSY, reentrant-safe so a route can call `track()` from inside its own txn), `backup()`.
+- `ob_search.py` — `search_clause(q)` for the catalog and the couple's add-gifts list: every typed
+  word must match name/name_he/brand in some spelling (plural folding EN/HE, `SYNONYMS` such as
+  shabbat→shabbos, plata→platta, refrigerator→fridge, פלטה→פלטת) or the model line as typed;
+  LIKE wildcards escaped, ≤8 words. Add new everyday words to `SYNONYMS` when a search comes up empty.
 - `ob_security.py` — `env_bool`, `safe_next` (open-redirect guard for login `next`),
   `same_origin_referrer` (for `/lang`, `/currency`), `validate_url`, `classify_pay_url` (exact-host
   allowlist for PayPal/Stripe/Bit/PayBox, raises `ValueError('pay_url_bad...')`), token helpers,

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-08 (catalog search that finds things)
+- Search was one substring match on name/brand, so "shabbat", "plata", "hotplate", "פלטה",
+  "refrigerator", "silverware", "becher", "candle sticks", "crock pot" found nothing, and "sheets" /
+  "towels" / "knives" missed the sheet, towel and knife sets. New `ob_search.py`: every word must
+  match, plurals folded in English and Hebrew, a synonym table maps everyday words and
+  transliterations to the catalog's wording, the model line matches the word as typed (so
+  "Hidurit PS4" works without "glass" hitting every "ceramic glass"). Used by /catalog and the
+  couple's add-gifts list. `%`/`_` in a query are now literal.
+- 16 tests — 196 tests.
+
 ## 2026-10-08 (couple's emails in the couple's language; language survives login)
 - Gift emails to the couple ("someone reserved…", "reports sending…", "cash gift reported") were
   written in the *guest's* browsing language, with the English registry title and item name — a

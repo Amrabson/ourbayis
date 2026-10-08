@@ -1124,3 +1124,27 @@ def test_login_and_logout_keep_the_language(client):
     r = client.post("/login", data=dict(csrf_token=tok, email="a@b.com", password="password1"),
                     follow_redirects=True)
     assert 'lang="he"' in r.get_data(as_text=True)
+
+
+@pytest.mark.parametrize("q,expect", [
+    ("shabbat candlesticks", "Shabbos candlesticks"), ("plata", "Shabbos hot plate (platta)"),
+    ("hotplate", "Shabbos hot plate (platta)"), ("פלטה", "Shabbos hot plate (platta)"),
+    ("sheets", "Sheet sets (x2)"), ("towels", "Towel set"), ("knives", "Knife set with block"),
+    ("refrigerator", "Fridge — large family size"), ("silverware", "Cutlery sets — milchig &amp; fleishig"),
+    ("becher", "Kiddush cup (silver plated)"), ("candle sticks", "Shabbos candlesticks"),
+    ("crock pot", "Slow cooker (for cholent!)"), ("חנוכיה", "Menorah (Chanukah)"),
+    ("KitchenAid", "Stand mixer"), ("Hidurit PS4", "Shabbos hot plate (platta)"),
+])
+def test_catalog_search_forgives_spelling_plurals_and_synonyms(client, q, expect):
+    """All of these found nothing (or only "cookie sheets") with a plain substring match."""
+    html = client.get("/catalog", query_string={"q": q}).get_data(as_text=True)
+    assert f'<h3 dir="auto">{expect}</h3>' in html
+
+
+def test_catalog_search_stays_precise():
+    import ob_search
+    assert "מגב" not in ob_search.word_variants("מגבות")          # towels must not hit the squeegee
+    sql, params = ob_search.search_clause("100%_off")
+    assert r"%100\%\_off%" in params and "ESCAPE" in sql   # LIKE wildcards are literal
+    assert ob_search.search_clause("   ") == ("", [])
+    assert len(ob_search.search_clause(" ".join(["word"] * 50))[1]) <= 8 * 20

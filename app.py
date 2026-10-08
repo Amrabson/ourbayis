@@ -30,6 +30,7 @@ import guides as ob_guides
 import ob_db
 import ob_mail
 import ob_money
+import ob_search
 import ob_security
 from i18n import CATEGORIES, EVENT_TYPES, T_EN, cat_label, format_date, t as _t, t_count
 
@@ -907,8 +908,9 @@ def catalog_page():
         sql += " AND category=?"
         params.append(cat)
     if q:
-        sql += " AND (name LIKE ? OR name_he LIKE ? OR brand LIKE ?)"
-        params += [f"%{q}%", f"%{q}%", f"%{q}%"]
+        clause, qparams = ob_search.search_clause(q)
+        sql += clause
+        params += qparams
     if price in CATALOG_PRICE_BANDS:
         lo, hi = CATALOG_PRICE_BANDS[price]
         sql += " AND price_nis >= ?"
@@ -1741,8 +1743,9 @@ def items_manage():
         sql += " AND category=?"
         params.append(cat)
     if q:
-        sql += " AND (name LIKE ? OR name_he LIKE ?)"
-        params += [f"%{q}%", f"%{q}%"]
+        clause, qparams = ob_search.search_clause(q)
+        sql += clause
+        params += qparams
     catalog = db.execute(sql + " ORDER BY category, sort", params).fetchall()
     mine = db.execute(
         "SELECT * FROM registry_items WHERE registry_id=? AND archived=0"
