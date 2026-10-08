@@ -210,7 +210,9 @@ image; `<img>` errors fall back to the illustration via app.js. All JS lives in 
 (CSP `script-src 'self'`): modal open/close/focus-return, `data-copy` with prompt fallback,
 `data-autosubmit`, `data-confirm`, `data-print`, `data-share-beacon`, category chip filter.
 Gift grid: auto-fill ≥240px, 2 columns ≤520px, 1 column ≤430px. Prices/URLs/emails wrapped in
-`.bdi`/`<bdi>` for Hebrew. Header shows a currency toggle only when `OB_RATES` configures a second currency.
+`.bdi`/`<bdi>` for Hebrew. Text people type (registry title/message/city, item names, guest names and
+messages, delivery note, lead notes) is either `dir="auto"` (whole block, quotes included) or `<bdi>`
+(inline), so an English line on a Hebrew page — or the reverse — keeps its own punctuation order. Header shows a currency toggle only when `OB_RATES` configures a second currency.
 
 ## Shared gift presentation (review pass 2026-09-17)
 - `templates/_cards.html` — the only place a gift card / price line / facts block / status label is

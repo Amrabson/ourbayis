@@ -93,7 +93,7 @@
       {%- if mode in ('registry', 'sample') and item['priority'] -%}
       <span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>
       {%- endif -%}
-      <h3>{{ pick(item, 'name') }}</h3>
+      <h3 dir="auto">{{ pick(item, 'name') }}</h3>
       {{ price_line(item) }}
       {{ gift_facts(item) }}
       {%- if st %}{{ qty_line(st) }}{% endif -%}

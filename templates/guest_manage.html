@@ -48,7 +48,7 @@
 <div class="wrap section narrow">
   <div class="glass glass-panel">
     <h1 class="section-title">{{ t('guest_manage_title') }}</h1>
-    <p class="page-sub">{{ pick(reg, 'title') }} — {{ pick(reg, 'couple_names') }}</p>
+    <p class="page-sub"><bdi>{{ pick(reg, 'title') }}</bdi> — <bdi>{{ pick(reg, 'couple_names') }}</bdi></p>
 
     {% set _steps = ['reserved', 'reported', 'received'] %}
     {% set _status_for_stepper = 'reserved' if claim['status'] == 'expired' else claim['status'] %}
@@ -84,7 +84,7 @@
     {% if claim['status'] == 'reserved' and claim['kind'] == 'cash' %}{{ save_link_panel() }}{% endif %}
 
     {% if item %}
-    <h2 class="sub-title">{{ pick(item, 'name') }}{% if claim['qty'] > 1 %} ×{{ claim['qty'] }}{% endif %}</h2>
+    <h2 class="sub-title"><bdi>{{ pick(item, 'name') }}</bdi>{% if claim['qty'] > 1 %} ×{{ claim['qty'] }}{% endif %}</h2>
     {% if claim['kind'] != 'cash' %}{{ price_line(item) }}{% endif %}
     {{ gift_facts(item) }}
     {% if item['url'] and claim['kind'] != 'cash' %}
@@ -101,7 +101,7 @@
 
     {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
     {% if reg['delivery_note'] or reg['delivery_note_he'] %}
-    <p class="hint">{{ pick(reg, 'delivery_note') }}</p>
+    <p class="hint" dir="auto">{{ pick(reg, 'delivery_note') }}</p>
     {% endif %}
 
     {% if claim['expires_at'] and claim['status'] == 'reserved' %}

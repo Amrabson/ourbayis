@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-08 (English text on Hebrew pages, and the reverse)
+- Text typed by couples/guests took the page's direction, so an English welcome message on the Hebrew
+  registry showed as `".Thank you for helping us set up our first home"` (quotes and period flipped);
+  the same for English guest messages on a Hebrew dashboard, and Hebrew ones on an English page.
+  Now `dir="auto"` on registry h1/message, gift-card and items-page h3, dashboard/admin/lead messages,
+  delivery note, print-card names; `<bdi>` around city, guest names, the catalog search echo and the
+  guest page's title/names/item name.
+- 1 test — 174 tests.
+
 ## 2026-10-07 (quantity lines at 1)
 - Hebrew quantity lines said "1 שוריינו" / "1 התקבלו" / "1 מתוך 3 עדיין פנויים"; now "1 שוריין",
   "1 התקבל", "1 מתוך 3 עדיין פנוי" (`qty_*_one`; `qty_available` gets `n=left`).

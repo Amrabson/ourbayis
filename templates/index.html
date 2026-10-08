@@ -69,7 +69,7 @@
       <div class="preview-head">
         <span class="sample-flag">{{ t('sample_label') }}</span>
         <strong class="preview-title">{{ pick(sample_reg, 'title') }}</strong>
-        <span class="preview-sub">{{ pick(sample_reg, 'couple_names') }} · {{ sample_reg['city'] }}</span>
+        <span class="preview-sub"><bdi>{{ pick(sample_reg, 'couple_names') }}</bdi> · <bdi>{{ sample_reg['city'] }}</bdi></span>
       </div>
       <ul class="preview-list">
         {% for item in sample_items %}

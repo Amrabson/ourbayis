@@ -38,7 +38,7 @@
         {% if l['whatsapp'] %}<a href="https://wa.me/{{ l['whatsapp'] | wa_number }}" target="_blank" rel="noopener">WhatsApp {{ l['whatsapp'] }}</a> · {% endif %}
         {{ l['email'] }} · arrives {{ l['arrival'] or '?' }} · {{ l['city'] }}
         {% if l['next_action_date'] %} · {% if _due %}<strong class="warn-note">due: {{ l['next_action'] or 'follow up' }} ({{ l['next_action_date'] }})</strong>{% else %}next: {{ l['next_action'] }} ({{ l['next_action_date'] }}){% endif %}{% endif %}</p>
-      {% if l['notes'] %}<p class="gift-msg">“{{ l['notes'] }}”</p>{% endif %}
+      {% if l['notes'] %}<p class="gift-msg" dir="auto">“{{ l['notes'] }}”</p>{% endif %}
       <p class="gift-msg">{{ l['created_at'] }}</p>
     </div>
     <form method="post" action="{{ url_for('admin_lead_status', lead_id=l['id']) }}">

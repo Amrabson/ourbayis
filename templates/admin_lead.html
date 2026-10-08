@@ -13,7 +13,7 @@
     <p class="gift-meta">Arrival: {{ lead['arrival'] or '—' }} · City: {{ lead['city'] or '—' }} ·
       Neighborhood: {{ lead['neighborhood'] or '—' }} · Furnishing: {{ lead['furnishing'] }} ·
       Budget: {{ lead['budget'] or '—' }} · Bundle: {{ lead['bundle_slug'] or 'custom' }}</p>
-    {% if lead['notes'] %}<p class="gift-msg">“{{ lead['notes'] }}”</p>{% endif %}
+    {% if lead['notes'] %}<p class="gift-msg" dir="auto">“{{ lead['notes'] }}”</p>{% endif %}
     <p class="hint">Created {{ lead['created_at'] }}</p>
   </div>
 

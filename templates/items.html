@@ -75,7 +75,7 @@
     <div class="catalog-card">
       {{ gift_media(c, small=True) }}
       <div class="catalog-body">
-        <h3>{{ pick(c, 'name') }}</h3>
+        <h3 dir="auto">{{ pick(c, 'name') }}</h3>
         <p class="gift-meta bdi">{% if c['price_nis'] %}<strong>₪{{ '{:,}'.format(c['price_nis']) }}</strong>{% endif %}{% if c['brand'] %} · {{ c['brand'] }}{% endif %}{% if c['store'] and c['store'] != c['brand'] %} · {{ c['store'] }}{% endif %}
         {% if c['availability'] == 'unavailable' %} · <span class="warn-note">{{ t('availability_unavailable_tag') }}</span>{% endif %}</p>
       </div>

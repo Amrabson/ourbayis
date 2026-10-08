@@ -76,20 +76,20 @@
     {% if queues['awaiting_confirm'] %}
     <div class="queue-card">
       <h3>{{ t('dash_queue_awaiting') }}</h3>
-      <ul>{% for g in queues['awaiting_confirm'] %}<li><a href="#claim-{{ g['id'] }}">{{ g['guest_name'] }}</a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
+      <ul>{% for g in queues['awaiting_confirm'] %}<li><a href="#claim-{{ g['id'] }}"><bdi>{{ g['guest_name'] }}</bdi></a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
     </div>
     {% endif %}
     {% if queues['waiting'] %}
     <div class="queue-card">
       <h3>{{ t('dash_queue_waiting') }}</h3>
-      <ul>{% for g in queues['waiting'] %}<li><a href="#claim-{{ g['id'] }}">{{ g['guest_name'] }}</a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or '—' }}
+      <ul>{% for g in queues['waiting'] %}<li><a href="#claim-{{ g['id'] }}"><bdi>{{ g['guest_name'] }}</bdi></a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or '—' }}
         {% if g['expires_at'] %}<span class="hint">({{ t('dash_queue_expires') }} {{ fmt_date(g['expires_at']) }})</span>{% endif %}</li>{% endfor %}</ul>
     </div>
     {% endif %}
     {% if queues['unthanked'] %}
     <div class="queue-card">
       <h3>{{ t('dash_queue_unthanked') }}</h3>
-      <ul>{% for g in queues['unthanked'] %}<li><a href="#claim-{{ g['id'] }}">{{ g['guest_name'] }}</a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
+      <ul>{% for g in queues['unthanked'] %}<li><a href="#claim-{{ g['id'] }}"><bdi>{{ g['guest_name'] }}</bdi></a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
     </div>
     {% endif %}
   </div>
@@ -116,13 +116,13 @@
     {% for gft in gifts %}
     <div class="gift-row {% if gft['thanked'] %}is-thanked{% endif %} {% if gft['status'] in ('cancelled', 'expired') %}is-closed{% endif %}" id="claim-{{ gft['id'] }}">
       <div>
-        <strong>{{ gft['guest_name'] }}</strong>
+        <strong><bdi>{{ gft['guest_name'] }}</bdi></strong>
         — {% if gft['kind'] == 'cash' %}{{ t('gift_cash') }}{% if gft['item_name'] %}: {{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) }}{% endif %}{% else %}{{ (gft['item_name_he'] if rtl and gft['item_name_he'] else gft['item_name']) or '—' }}{% if gft['qty'] > 1 %} ×{{ gft['qty'] }}{% endif %}{% endif %}
         <span class="badge badge-plain">{{ t('claim_status_' ~ gft['status']) }}</span>
         {% if gft['legacy'] %}<span class="hint">({{ t('claim_legacy_note') }})</span>{% endif %}
         {% if gft['amount_minor'] is not none %}<p class="gift-msg">{{ fmt_money(gft['amount_minor'], gft['currency']) }}</p>
         {% elif gft['amount'] %}<p class="gift-msg">{{ gft['amount'] }} <span class="hint">({{ t('claim_legacy_note') }})</span></p>{% endif %}
-        {% if gft['message'] %}<p class="gift-msg">“{{ gft['message'] }}”</p>{% endif %}
+        {% if gft['message'] %}<p class="gift-msg" dir="auto">“{{ gft['message'] }}”</p>{% endif %}
         {% if gft['guest_email'] %}<p class="gift-msg">{{ gft['guest_email'] }}</p>{% endif %}
         {% if gft['item_availability'] == 'unavailable' and gft['status'] != 'received' %}<p class="gift-msg warn-note">{{ t('availability_unavailable_tag') }} — {{ t('dash_unavailable_hint') }}</p>{% endif %}
         {% if gft['kind'] == 'cash' and gft['item_url'] %}

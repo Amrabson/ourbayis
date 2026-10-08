@@ -7,11 +7,11 @@
 <section class="reg-hero glass">
   <div class="wrap">
     {% if is_sample %}<span class="sample-flag sample-flag-dark">{{ t('sample_label') }}</span>{% endif %}
-    <p class="reg-eyebrow">{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · <time datetime="{{ reg['event_date'] }}">{{ fmt_date(reg['event_date']) }}</time>{% endif %}{% if reg['city'] %} · {{ reg['city'] }}{% endif %}</p>
-    <h1>{{ pick(reg, 'title') }}</h1>
+    <p class="reg-eyebrow">{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · <time datetime="{{ reg['event_date'] }}">{{ fmt_date(reg['event_date']) }}</time>{% endif %}{% if reg['city'] %} · <bdi>{{ reg['city'] }}</bdi>{% endif %}</p>
+    <h1 dir="auto">{{ pick(reg, 'title') }}</h1>
     {% if pick(reg, 'couple_names') %}<p class="reg-couple bdi">{{ pick(reg, 'couple_names') }}</p>{% endif %}
     {% if days_to_go %}<p class="reg-countdown">✦ {{ tf('reg_countdown', n=days_to_go) }} ✦</p>{% endif %}
-    {% if pick(reg, 'message') %}<p class="reg-message">“{{ pick(reg, 'message') }}”</p>{% endif %}
+    {% if pick(reg, 'message') %}<p class="reg-message" dir="auto">“{{ pick(reg, 'message') }}”</p>{% endif %}
     {% if total %}
     <div class="progress" role="img" aria-label="{{ tf('reg_progress', claimed=done, total=total) }}"><div class="progress-fill" style="width: {{ (100 * done // total) if total else 0 }}%"></div></div>
     <p class="progress-label">{{ tf('reg_progress', claimed=done, total=total) }}</p>

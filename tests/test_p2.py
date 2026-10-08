@@ -605,7 +605,7 @@ def test_dashboard_treats_lapsed_reservation_as_expired(client, app_module):
     db.commit()
     html = client.get("/dashboard").get_data(as_text=True)
     assert html.index("Active Guest") < html.rindex("Lapsed Guest")      # closed rows sort last
-    assert re.search(r'class="gift-row\s+is-closed"[^>]*>\s*<div>\s*<strong>Lapsed Guest', html)
+    assert re.search(r'class="gift-row\s+is-closed"[^>]*>\s*<div>\s*<strong><bdi>Lapsed Guest', html)
     assert re.search(r'<strong>1</strong><span>[^<]*</span></div>\s*<div class="stat-card"><strong>0', html)
     # a late arrival can still be confirmed as received
     cid = db.execute("SELECT id FROM claims WHERE guest_name='Lapsed Guest'").fetchone()[0]
@@ -1041,3 +1041,20 @@ def test_one_gift_left_reads_singular_in_hebrew(app_module):
     assert app_module.tf("qty_available", "he", left=1, qty=3, n=1) == "1 מתוך 3 עדיין פנוי"
     assert app_module.tf("qty_available", "he", left=2, qty=3, n=2) == "2 מתוך 3 עדיין פנויים"
     assert app_module.tf("qty_available", "en", left=1, qty=3, n=1) == "1 of 3 still available"
+
+
+def test_couple_and_guest_text_keeps_its_own_direction(client, app_module):
+    """An English welcome message on the Hebrew page read ".Thank you…home" with the quotes flipped;
+    same for an English guest message on a Hebrew dashboard."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"])
+    db = _db()
+    db.execute("UPDATE registries SET message=?, city=? WHERE id=?", ("Thank you!", "Yerushalayim", reg["id"]))
+    db.commit(); db.close()
+    _claim(app_module, reg["slug"], next(iter(items.values()))["id"], name="Sarah K.", message="Mazel tov!")
+    html = app_module.app.test_client().get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
+    assert '<p class="reg-message" dir="auto">' in html and '<h1 dir="auto">' in html
+    assert "<bdi>Yerushalayim</bdi>" in html
+    assert '<h3 dir="auto">' in html
+    dash = client.get("/dashboard?lang=he").get_data(as_text=True)
+    assert '<p class="gift-msg" dir="auto">“Mazel tov!”</p>' in dash
+    assert "<bdi>Sarah K.</bdi>" in dash

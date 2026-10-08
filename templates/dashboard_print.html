@@ -29,7 +29,7 @@
   <div class="insert-page">
     {% for _ in range(2) %}
     <div class="insert-card">
-      <div class="names">{{ pick(reg, 'couple_names') }}</div>
+      <div class="names" dir="auto">{{ pick(reg, 'couple_names') }}</div>
       <div class="tagline">{{ t('print_insert_tagline') }}</div>
       <img src="{{ url_for('dashboard_qr') }}" alt="QR">
       <div class="url">{{ registry_share_url(reg['slug']) }}</div>

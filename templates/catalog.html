@@ -41,7 +41,7 @@
     <p class="filter-summary" aria-live="polite">
       <strong>{{ tf('result_count', n=total) }}</strong>
       {% if cat or q or price or kind %}
-        · {% if cat %}{{ cat_label(cat) }}{% endif %}{% if q %} “{{ q }}”{% endif %}{% if price %} · {{ t('price_band_' ~ price) }}{% endif %}{% if kind %} · {{ t('filter_kind_' ~ kind) }}{% endif %}
+        · {% if cat %}{{ cat_label(cat) }}{% endif %}{% if q %} “<bdi>{{ q }}</bdi>”{% endif %}{% if price %} · {{ t('price_band_' ~ price) }}{% endif %}{% if kind %} · {{ t('filter_kind_' ~ kind) }}{% endif %}
         — <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a>
       {% endif %}
     </p>
