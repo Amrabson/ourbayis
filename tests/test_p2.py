@@ -1304,3 +1304,5 @@ def test_registry_says_when_every_gift_is_taken(client, app_module):
     _claim(app_module, reg["slug"], next(iter(items.values()))["id"])
     html = guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
     assert "already spoken for" in html and 'data-modal="cash-modal">You can still send' in html
+    dash = client.get("/dashboard").get_data(as_text=True)
+    assert "nothing left to choose" in dash and 'href="/registry/items#add-more"' in dash

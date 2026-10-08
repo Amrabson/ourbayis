@@ -102,6 +102,9 @@
     <div class="stat-card"><strong>{{ stats['cash'] }}</strong><span>{{ t('dash_stats_cash') }}</span></div>
     <div class="stat-card"><strong>{{ stats['views'] }}</strong><span>{{ t('dash_stats_views') }}</span></div>
   </div>
+  {% if stats['all_taken'] %}
+  <p class="notice-panel">{{ t('dash_all_taken') }} <a href="{{ url_for('items_manage', _anchor='add-more') }}">{{ t('items_add_more') }} →</a></p>
+  {% endif %}
 
   <h2 class="sub-title">{{ t('dash_gifts') }}</h2>
   {% if totals %}

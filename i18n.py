@@ -115,6 +115,7 @@ T_EN = {
     "reg_countdown": "{n} days to go!",
     "reg_empty": "The couple hasn't added gifts yet — check back soon!",
     "reg_all_taken": "Every gift on this list is already spoken for — thank you all!",
+    "dash_all_taken": "Every gift on your list is spoken for — guests who open it now have nothing left to choose.",
     "reg_all_taken_cash": "You can still send the couple a cash gift →",
 
     # Auth
@@ -821,6 +822,7 @@ T_HE = {
     "reg_countdown": "עוד {n} ימים!",
     "reg_empty": "הזוג עדיין לא הוסיף מתנות — חזרו לבדוק בקרוב!",
     "reg_all_taken": "כל המתנות ברשימה כבר נלקחו — תודה לכולם!",
+    "dash_all_taken": "כל המתנות ברשימה שלכם כבר נלקחו — לאורחים שנכנסים עכשיו אין מה לבחור.",
     "reg_all_taken_cash": "עדיין אפשר לשלוח לזוג מתנה כספית ←",
 
     "signup_title": "פתיחת רשימה",

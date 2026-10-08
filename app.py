@@ -1568,7 +1568,11 @@ def dashboard():
         live = [gft for gft in gifts if gft["status"] in ("reserved", "reported", "received")]
         n_claimed = len({gft["item_id"] for gft in live if gft["item_id"] is not None})
         n_cash = sum(1 for gft in live if gft["kind"] == "cash")
-        stats = dict(items=n_items, claimed=n_claimed, cash=n_cash,
+        committed = item_claim_counts(reg["id"])
+        all_taken = n_items > 0 and all(
+            committed.get(r["id"], 0) >= r["qty_wanted"] for r in db.execute(
+                "SELECT id, qty_wanted FROM registry_items WHERE registry_id=? AND archived=0", (reg["id"],)))
+        stats = dict(items=n_items, claimed=n_claimed, cash=n_cash, all_taken=all_taken,
                      views=reg["views"] if "views" in reg.keys() else 0)
         totals = {}
         for gft in gifts:

@@ -5,6 +5,8 @@
   find out there was nothing left. Now a note at the top of the list says every gift is spoken for,
   with "You can still send the couple a cash gift →" opening the cash dialog when the couple has a
   payment link.
+- The couple's dashboard says the same ("guests who open it now have nothing left to choose")
+  with a link to add more gifts.
 - 1 test — 214 tests.
 
 ## 2026-10-08 (one-tap thank-you email)
