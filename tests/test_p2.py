@@ -1160,3 +1160,24 @@ def test_catalog_search_puts_the_obvious_match_first(client, q, first, later):
     assert html.index(first) < html.index(later)
     by_price = client.get("/catalog", query_string={"q": q, "sort": "price_asc"}).get_data(as_text=True)
     assert first in by_price                                   # an explicit sort still wins
+
+
+def test_empty_catalog_search_offers_a_way_forward(client):
+    html = client.get("/catalog", query_string={"q": "kettle", "cat": "judaica"}).get_data(as_text=True)
+    assert "See all 2 results for “kettle”" in html and 'href="/catalog?q=kettle"' in html
+    html = client.get("/catalog", query_string={"q": "trampoline"}).get_data(as_text=True)
+    assert "Couples can add any gift from any store" in html and 'href="/signup"' in html
+    assert "See all" not in html
+    html = client.get("/catalog", query_string={"q": "<b>x</b>", "cat": "judaica"}).get_data(as_text=True)
+    assert "<b>x</b>" not in html                                  # the query is escaped
+    he = client.get("/catalog", query_string={"q": "trampoline", "lang": "he"}).get_data(as_text=True)
+    assert "כל מתנה מכל חנות" in he
+
+
+def test_add_gifts_search_with_no_match_offers_a_custom_gift(client, app_module):
+    _couple_with_catalog_items(client, app_module, [])
+    html = client.get("/registry/items", query_string={"q": "trampoline"}).get_data(as_text=True)
+    assert '<a href="#custom">' in html and 'value="trampoline"' in html   # custom form pre-filled
+    html = client.get("/registry/items", query_string={"q": "kettle"}).get_data(as_text=True)
+    assert '<a href="#custom">' not in html and 'value="trampoline"' not in html
+    assert 'action="/registry/items#add-more"' in html          # results open where they are

@@ -285,6 +285,8 @@ img, svg { vertical-align: middle; }
 
 .share-row { display: flex; gap: 12px; margin-top: 34px; flex-wrap: wrap; }
 .empty-note { color: var(--ink-soft); background: var(--paper-deep); padding: 18px 22px; border-radius: var(--radius-sm); border: 1px solid var(--line); }
+.empty-note p { margin: 0 0 8px; }
+.empty-note p:last-child { margin-bottom: 0; }
 
 /* ---------------- modal ---------------- */
 .modal {

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-08 (searches that find nothing)
+- /catalog with no results only said "try a different search". Now: if a category/price/kind filter
+  is what emptied it, a link to the N results for the same words without filters; and always a line
+  that couples can add any gift from any store, linking to the add-gift form (or signup).
+- The couple's add-gifts list showed a blank grid for a search with no match. Now an empty note with
+  "Add it as your own gift, from any store ↓" → `#custom`, whose name field is pre-filled with the
+  search. The search form opens results at `#add-more` instead of the top of the page.
+- 2 tests — 201 tests.
+
 ## 2026-10-08 (search results in a sensible order)
 - Search results kept the catalog's category order, so "plates" listed the Shabbos hot plates before
   the dinnerware and "sheets" put cookie sheets first. In the default sort, /catalog now ranks names

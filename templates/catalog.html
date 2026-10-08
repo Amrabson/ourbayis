@@ -50,7 +50,15 @@
   {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
   <p class="hint catalog-legend">{{ t('catalog_legend') }} {{ t('affiliate_note') }}</p>
   {% if not items %}
-    <p class="empty-note">{{ t('catalog_none') }} <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a></p>
+    <div class="empty-note">
+      {% if unfiltered %}
+      <p>{{ t('catalog_none_filtered') }} <a class="filter-reset" href="{{ url_for('catalog_page', q=q) }}">{{ tf('catalog_all_matches', n=unfiltered, q=q) }}</a></p>
+      {% else %}
+      <p>{{ t('catalog_none') }} <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a></p>
+      {% endif %}
+      <p class="hint">{{ t('catalog_none_custom') }}
+        <a href="{{ url_for('items_manage', _anchor='custom') if has_reg else url_for('signup') }}">{{ t('catalog_none_custom_cta') if has_reg else t('catalog_none_custom_cta_new') }}</a></p>
+    </div>
   {% endif %}
 
   <h2 class="sr-only">{{ t('catalog_items_h') }}</h2>

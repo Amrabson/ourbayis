@@ -943,7 +943,14 @@ def catalog_page():
             " AND catalog_id IS NOT NULL", (reg["id"],))}
     filters = dict(cat=cat or None, q=q or None, price=price or None, kind=kind or None,
                    sort=sort or None)
+    # nothing found because of a filter on top of the search: offer the matches without it
+    unfiltered = 0
+    if q and not total and (cat or price or kind):
+        clause, qparams = ob_search.search_clause(q)
+        unfiltered = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1" + clause,
+                                qparams).fetchone()[0]
     return render_template("catalog.html", items=items, cat=cat, q=q, price=price, kind=kind,
+                           unfiltered=unfiltered,
                            sort=sort, page=page, pages=pages, total=total, filters=filters,
                            price_bands=CATALOG_PRICE_BANDS, have=have, has_reg=bool(reg))
 

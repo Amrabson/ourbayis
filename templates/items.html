@@ -59,7 +59,7 @@
   {% endif %}
 
   <h2 class="sub-title" id="add-more">{{ t('items_catalog') }}</h2>
-  <form class="filter-row" method="get" action="{{ url_for('items_manage') }}">
+  <form class="filter-row" method="get" action="{{ url_for('items_manage', _anchor='add-more') }}">
     <select name="cat" data-autosubmit aria-label="{{ t('all_cats') }}">
       <option value="">{{ t('all_cats') }}</option>
       {% for slug, (icon, en, he) in categories.items() %}
@@ -70,6 +70,12 @@
     <button class="btn btn-ghost" type="submit" aria-label="{{ t('find_btn') }}"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
   </form>
 
+  {% if not catalog %}
+  <div class="empty-note">
+    <p>{{ t('catalog_none') }} <a class="filter-reset" href="{{ url_for('items_manage', _anchor='add-more') }}">{{ t('filter_reset') }}</a></p>
+    <p><a href="#custom">{{ t('items_none_custom') }}</a></p>
+  </div>
+  {% endif %}
   <div class="catalog-grid">
     {% for c in catalog %}
     <div class="catalog-card">
@@ -92,12 +98,12 @@
     {% endfor %}
   </div>
 
-  <h2 class="sub-title">{{ t('items_custom') }}</h2>
+  <h2 class="sub-title" id="custom">{{ t('items_custom') }}</h2>
   <div class="form-panel">
     <form method="post" action="{{ url_for('items_add') }}" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-2col">
-        <label>{{ t('custom_name') }} *<input name="name" required maxlength="200"></label>
+        <label>{{ t('custom_name') }} *<input name="name" required maxlength="200" value="{{ q if q and not catalog else '' }}"></label>
         <label dir="rtl">{{ t('custom_name_he') }}<input name="name_he" maxlength="200"></label>
         <label>{{ t('custom_url') }}<input name="url" maxlength="500" placeholder="https://…"></label>
         <label>{{ t('custom_store') }}<input name="store" maxlength="120"></label>
