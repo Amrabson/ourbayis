@@ -442,3 +442,24 @@ def test_admin_lead_list_shows_days_until_arrival(client, app_module):
     html = client.get("/admin").get_data(as_text=True)
     assert '<strong class="warn-note">(in 9 days)</strong>' in html and "(in 60 days)" in html
     assert app_module.days_until("not a date") is None
+
+
+def test_admin_lead_has_a_first_reply_in_the_leads_language(client, app_module):
+    from urllib.parse import unquote
+    guest = app_module.app.test_client()
+    page = guest.get("/shana-rishonah?lang=he").get_data(as_text=True)
+    guest.post("/shana-rishonah", data=dict(csrf_token=get_csrf(page), form_key=get_form_key(page),
+               name="Rivka Levi", whatsapp="+972 50-123-4567", email="rivka@example.com",
+               bundle="full-nest", arrival="2027-01-10", city="Yerushalayim"))
+    import sqlite3
+    db = sqlite3.connect(os.environ["OB_DB_PATH"])
+    lead_id, lang = db.execute("SELECT id, lang FROM shana_requests").fetchone()
+    db.close()
+    assert lang == "he"
+    admin_login(client)
+    html = client.get(f"/admin/lead/{lead_id}").get_data(as_text=True)
+    m = re.search(r'href="https://wa.me/972501234567\?text=([^"]+)"', html)
+    assert m, "WhatsApp reply link"
+    text = unquote(m.group(1))
+    assert text.startswith("שלום Rivka, כאן OurBayis") and "10 בינואר 2027" in text and "Yerushalayim" in text
+    assert 'href="mailto:rivka@example.com?subject=' in html

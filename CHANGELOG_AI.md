@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-09 (one-tap first reply to a lead)
+- /admin/lead/<id> had a bare WhatsApp link. Now "Reply on WhatsApp" / "Reply by email" open a first
+  message prefilled in the lead's own language (new `shana_requests.lang`, migration 24) with their
+  first name, package, formatted arrival date and city, asking for a short chat and repeating that
+  nothing is ordered or paid before they accept a written quote. The page notes which language they
+  wrote in.
+- 1 test — 233 tests.
+
 ## 2026-10-08 (Shana request: tight arrival dates)
 - A request whose arrival is sooner than the package's lead time (3 weeks; 6 for The Full Nest)
   went through silently. Now the person sees, after "thank you", that their arrival is N days away and

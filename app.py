@@ -2247,7 +2247,7 @@ def shana():
             rush = days_left is not None and 0 <= days_left < lead_weeks * 7
             db.execute(
                 "INSERT INTO shana_requests (name, email, whatsapp, arrival, city, neighborhood,"
-                " furnishing, budget, bundle_slug, notes) VALUES (?,?,?,?,?,?,?,?,?,?)",
+                " furnishing, budget, bundle_slug, notes, lang) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
                 (name, email, (f.get("whatsapp") or "").strip()[:40],
                  (f.get("arrival") or "").strip()[:40],
                  (f.get("city") or "").strip()[:120],
@@ -2256,7 +2256,7 @@ def shana():
                      ("unknown", "empty", "partly", "furnished") else "unknown",
                  f.get("budget") if f.get("budget") in SHANA_BUDGETS else "",
                  bundle_slug,
-                 (f.get("notes") or "").strip()[:2000]))
+                 (f.get("notes") or "").strip()[:2000], lang))
             send_mail(
                 NOTIFY_EMAIL,
                 f"{'[RUSH] ' if rush else ''}New shana rishonah lead: {name} ({bundle_slug})",
@@ -2433,7 +2433,22 @@ def admin_lead(lead_id):
     except (ValueError, TypeError):
         quote = {}
     return render_template("admin_lead.html", lead=lead, dupes=dupes, quote=quote, budget_label=budget_label,
-                           statuses=LEAD_STATUSES)
+                           statuses=LEAD_STATUSES, reply=_lead_first_reply(db, lead))
+
+
+def _lead_first_reply(db, lead):
+    """(subject, text) for the owner's first message to a lead — in the language they wrote in,
+    naming their package, arrival date and city so it doesn't read like a form letter."""
+    lang = lead["lang"] if lead["lang"] in ("en", "he") else "en"
+    b = db.execute("SELECT name, name_he FROM bundles WHERE slug=?", (lead["bundle_slug"] or "",)).fetchone()
+    details = [(b["name_he"] if lang == "he" and b["name_he"] else b["name"]) if b else _t("lead_reply_custom", lang)]
+    if lead["arrival"]:
+        details.append(tf("lead_reply_arrival", lang, date=format_date(lead["arrival"], lang)))
+    if lead["city"]:
+        details.append(lead["city"])
+    text = tf("lead_reply_body", lang, name=(lead["name"] or "").split(" ")[0] or lead["name"],
+              details=", ".join(details))
+    return _t("lead_reply_subj", lang), text
 
 
 @app.route("/admin/lead/<int:lead_id>/update", methods=["POST"])

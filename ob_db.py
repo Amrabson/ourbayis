@@ -484,6 +484,12 @@ def _m023_claim_lang(db):
     _add_column(db, "claims", "lang TEXT DEFAULT ''")
 
 
+def _m024_lead_lang(db):
+    """The language a Shana Rishonah request was sent in, so the owner's first reply
+    (prefilled WhatsApp / email on /admin/lead/<id>) is written in it."""
+    _add_column(db, "shana_requests", "lang TEXT DEFAULT ''")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -697,6 +703,7 @@ MIGRATIONS = [
     _m021_mail_reply_to,
     _m022_user_lang,
     _m023_claim_lang,
+    _m024_lead_lang,
 ]
 
 

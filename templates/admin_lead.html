@@ -14,7 +14,12 @@
       Neighborhood: {{ lead['neighborhood'] or '—' }} · Furnishing: {{ lead['furnishing'] }} ·
       Budget: {{ budget_label(lead['budget']) }} · Bundle: {{ lead['bundle_slug'] or 'custom' }}</p>
     {% if lead['notes'] %}<p class="gift-msg" dir="auto">“{{ lead['notes'] }}”</p>{% endif %}
-    <p class="hint">Created {{ lead['created_at'] }}</p>
+    <p class="hint">Created {{ lead['created_at'] }}{% if lead['lang'] %} · wrote in {{ 'Hebrew' if lead['lang'] == 'he' else 'English' }}{% endif %}</p>
+    <div class="dash-actions">
+      {% if lead['whatsapp'] %}<a class="btn btn-primary btn-sm" href="https://wa.me/{{ lead['whatsapp'] | wa_number }}?text={{ reply[1] | urlencode }}" target="_blank" rel="noopener">Reply on WhatsApp</a>{% endif %}
+      {% if lead['email'] %}<a class="btn btn-ghost btn-sm" href="mailto:{{ lead['email'] }}?subject={{ reply[0] | urlencode }}&amp;body={{ reply[1] | urlencode }}">Reply by email</a>{% endif %}
+    </div>
+    <p class="hint">Opens a first message in their language with their package, date and city filled in — edit before sending.</p>
   </div>
 
   {% if dupes %}
