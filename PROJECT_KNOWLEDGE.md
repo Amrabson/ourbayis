@@ -199,7 +199,9 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   (own data only, no `pw_hash`/`token_hash`) and account deletion (current-password confirm,
   cascades registry→items→claims via `ON DELETE CASCADE`, purges the user's `mail_outbox` rows,
   leaves `funnel_events` alone since those carry no PII).
-- **Concierge admin** (`/admin/lead/<id>`): internal notes, next action + date, a dedup hint (other
+- **Concierge admin** (`/admin/lead/<id>`): prefilled first reply (WhatsApp `?text=` / mailto) in the
+  lead's language (`shana_requests.lang`, m24; `_lead_first_reply`); [RUSH] lead emails and "(in N days)"
+  on /admin when arrival is inside the package lead time; internal notes, next action + date, a dedup hint (other
   leads sharing the same email/whatsapp), and a cost-breakdown editor
   (goods/delivery/assembly/labour/contingency/quoted_price) stored in `shana_requests.quote_json`
   with `total_cost`/`profit`/`margin_pct` computed server-side on every save.
