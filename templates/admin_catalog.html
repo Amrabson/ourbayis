@@ -16,6 +16,7 @@
     <a class="stat-card" href="{{ url_for('admin_catalog', missing_url=1) }}"><strong>{{ queue_counts['missing_url'] }}</strong><span>missing store link</span></a>
     <a class="stat-card" href="{{ url_for('admin_catalog', missing_image=1) }}"><strong>{{ queue_counts['missing_image'] }}</strong><span>missing image</span></a>
     <a class="stat-card" href="{{ url_for('admin_catalog', price_status='estimate') }}"><strong>{{ queue_counts['unverified'] }}</strong><span>unverified price</span></a>
+    <a class="stat-card {% if queue_counts['stale'] %}stat-warn{% endif %}" href="{{ url_for('admin_catalog', stale=1) }}"><strong>{{ queue_counts['stale'] }}</strong><span>price not re-checked in {{ recheck_days }}+ days</span></a>
   </div>
 
   <form class="filter-row" method="get" action="{{ url_for('admin_catalog') }}">
@@ -34,6 +35,7 @@
     </select>
     <label class="check-label"><input type="checkbox" name="missing_url" value="1" {% if missing_url %}checked{% endif %} data-autosubmit> missing store link</label>
     <label class="check-label"><input type="checkbox" name="missing_image" value="1" {% if missing_image %}checked{% endif %} data-autosubmit> missing image</label>
+    <label class="check-label"><input type="checkbox" name="stale" value="1" {% if stale %}checked{% endif %} data-autosubmit> price due for re-check</label>
     <label class="check-label"><input type="checkbox" name="inactive" value="1" {% if show_inactive %}checked{% endif %} data-autosubmit> include retired</label>
     <button class="btn btn-ghost" type="submit" aria-label="Search"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg></button>
   </form>

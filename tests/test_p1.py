@@ -463,3 +463,15 @@ def test_admin_lead_has_a_first_reply_in_the_leads_language(client, app_module):
     text = unquote(m.group(1))
     assert text.startswith("שלום Rivka, כאן OurBayis") and "10 בינואר 2027" in text and "Yerushalayim" in text
     assert 'href="mailto:rivka@example.com?subject=' in html
+
+
+def test_admin_catalog_queues_prices_due_for_a_recheck(client, app_module):
+    import sqlite3
+    db = sqlite3.connect(os.environ["OB_DB_PATH"])
+    db.execute("UPDATE catalog_items SET price_status='verified', price_checked_at=date('now')")
+    db.execute("UPDATE catalog_items SET price_checked_at='2026-01-01' WHERE seed_key='electric-kettle'")
+    db.commit(); db.close()
+    admin_login(client)
+    html = client.get("/admin/catalog?stale=1").get_data(as_text=True)
+    assert "price not re-checked in 30+ days" in html
+    assert "Electric kettle" in html and "Stand mixer" not in html

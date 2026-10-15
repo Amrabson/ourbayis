@@ -57,6 +57,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
+- [ ] **Re-check prices monthly.** `/admin/catalog?stale=1` lists verified prices older than 30 days
+  (57 as of 2026-10-16); `manage.py check` prints the count.
 - [ ] **Real store links.** 57 of 120 active items (45 of the 47 starter-pack items) have verified store links
   in `seed_catalog.json`; 3 combo items were retired and split on 2026-09-25. On the live DB run the three commands at the end
   of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. The other 63

@@ -253,6 +253,13 @@ def _config_warnings(db, problems):
             if age_days > 7:
                 warnings.append(f"instance/rates.json is {int(age_days)} days old — is the daily "
                                 "`fetch-rates` task still running?")
+    # guests see "Price checked <date>" on these; a month-old check is due for another look
+    stale = db.execute(
+        "SELECT COUNT(*) FROM catalog_items WHERE active=1 AND price_status='verified' AND"
+        " (price_checked_at IS NULL OR price_checked_at='' OR"
+        " date(substr(price_checked_at, 1, 10)) < date('now', '-30 days'))").fetchone()[0]
+    if stale:
+        warnings.append(f"{stale} catalog price(s) not re-checked in 30+ days — /admin/catalog?stale=1")
     return warnings
 
 

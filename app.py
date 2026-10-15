@@ -2495,6 +2495,12 @@ def admin_msg_resolve(msg_id):
     return redirect(url_for("admin_home"))
 
 
+# a "Price checked <date>" tag older than this is due for a re-check (admin queue + manage.py check)
+PRICE_RECHECK_DAYS = 30
+STALE_PRICE_SQL = ("price_status='verified' AND (price_checked_at IS NULL OR price_checked_at=''"
+                   f" OR date(substr(price_checked_at, 1, 10)) < date('now', '-{PRICE_RECHECK_DAYS} days'))")
+
+
 @app.route("/admin/catalog")
 @admin_required
 def admin_catalog():
@@ -2505,6 +2511,7 @@ def admin_catalog():
     missing_image = request.args.get("missing_image")
     price_status = request.args.get("price_status", "")
     show_inactive = request.args.get("inactive")
+    stale = request.args.get("stale")
     sql = "SELECT * FROM catalog_items WHERE 1=1"
     params = []
     if not show_inactive:
@@ -2519,6 +2526,8 @@ def admin_catalog():
         sql += " AND url=''"
     if missing_image:
         sql += " AND image=''"
+    if stale:
+        sql += " AND " + STALE_PRICE_SQL
     if price_status in ("verified", "estimate", "unknown"):
         sql += " AND price_status=?"
         params.append(price_status)
@@ -2528,9 +2537,11 @@ def admin_catalog():
         missing_image=db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND image=''").fetchone()[0],
         unverified=db.execute(
             "SELECT COUNT(*) FROM catalog_items WHERE active=1 AND price_status!='verified'").fetchone()[0],
+        stale=db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND " + STALE_PRICE_SQL).fetchone()[0],
     )
     return render_template("admin_catalog.html", rows=rows, q=q, cat=cat, price_status=price_status,
-                           missing_url=missing_url, missing_image=missing_image,
+                           missing_url=missing_url, missing_image=missing_image, stale=stale,
+                           recheck_days=PRICE_RECHECK_DAYS,
                            show_inactive=show_inactive, queue_counts=queue_counts)
 
 

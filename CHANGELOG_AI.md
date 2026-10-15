@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-16 (prices due for a re-check)
+- Guests see "Price checked <date>" on every verified item, but nothing told the owner when those
+  checks got old. /admin/catalog gets a "price not re-checked in 30+ days" queue card and filter
+  (`?stale=1`, `PRICE_RECHECK_DAYS`), and `manage.py check` warns with the count (57 on the local DB
+  today — the September checks).
+- 1 test — 234 tests.
+
 ## 2026-10-09 (one-tap first reply to a lead)
 - /admin/lead/<id> had a bare WhatsApp link. Now "Reply on WhatsApp" / "Reply by email" open a first
   message prefilled in the lead's own language (new `shana_requests.lang`, migration 24) with their
