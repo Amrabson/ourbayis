@@ -40,7 +40,7 @@ DB_PATH =Path(os.environ.get("OB_DB_PATH") or (BASE / "ourbayis.db"))
 
 BRAND = "OurBayis"
 BRAND_HE = "OurBayis"
-ILS_PER_USD = float(os.environ.get("OB_ILS_PER_USD", "3.7"))
+ILS_PER_USD = float(os.environ.get("OB_ILS_PER_USD", "3.1"))
 CONTACT_WHATSAPP = os.environ.get("OB_WHATSAPP", "")  # e.g. 972501234567
 BASE_URL = os.environ.get("OB_BASE_URL", "").rstrip("/")
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("OB_ALLOWED_HOSTS", "").split(",") if h.strip()]
@@ -1837,10 +1837,29 @@ def items_manage():
     claimed = {k: v["committed"] for k, v in breakdown.items()}
     n_committed = sum(1 for m in mine if claimed.get(m["id"]))
     n_needs_link = sum(1 for m in mine if not m["url"] and not reg_pay_links(reg))
+    price_news = _catalog_price_news(db, mine)
     return render_template("items.html", reg=reg, catalog=catalog, mine=mine, archived=archived,
                            archived_claim_counts=archived_claim_counts,
                            have=have_catalog_ids, claimed=claimed, breakdown=breakdown, cat=cat, q=q,
-                           n_committed=n_committed, n_needs_link=n_needs_link)
+                           n_committed=n_committed, n_needs_link=n_needs_link, price_news=price_news)
+
+
+def _catalog_price_news(db, items):
+    """{registry_item_id: catalog row} for items whose catalog product (same link) has a newer
+    checked price than the one on the couple's list. The registry price is the couple's
+    snapshot and refresh-registry-links leaves it alone, so the items page offers it instead.
+    Skipped when the couple typed their own price (`price_nis` in overrides)."""
+    news = {}
+    for m in items:
+        if not m["catalog_id"] or "price_nis" in (m["overrides"] or "").split(","):
+            continue
+        c = db.execute("SELECT id, url, price_nis, price_status, price_checked_at FROM catalog_items"
+                       " WHERE id=? AND active=1", (m["catalog_id"],)).fetchone()
+        if (c and c["price_status"] == "verified" and c["price_nis"] and c["url"]
+                and c["url"] == m["url"] and c["price_nis"] != m["price_nis"]
+                and (c["price_checked_at"] or "") > (m["price_checked_at"] or "")):
+            news[m["id"]] = c
+    return news
 
 
 @app.route("/registry/items/add", methods=["POST"])
@@ -1982,6 +2001,14 @@ def items_update(item_id):
     # same write lock as the guest claim route, so a reservation landing at this
     # moment can't slip past the quantity check or collide with the delete
     with ob_db.write_txn(db):
+        if request.form.get("use_catalog_price"):
+            # the price is re-read from the catalog here, never taken from the form
+            c = _catalog_price_news(db, [item]).get(item_id)
+            if c:
+                db.execute("UPDATE registry_items SET price_nis=?, price_status=?, price_checked_at=?"
+                           " WHERE id=?", (c["price_nis"], c["price_status"], c["price_checked_at"], item_id))
+                flash(_t("price_news_done", lang), "ok")
+            return redirect(here)
         if request.form.get("delete"):
             has_claims = db.execute("SELECT 1 FROM claims WHERE item_id=? LIMIT 1", (item_id,)).fetchone()
             if has_claims:
@@ -2003,7 +2030,7 @@ def items_update(item_id):
     return redirect(here)
 
 
-_OVERRIDABLE_FIELDS = ("url", "image", "store", "brand", "name")
+_OVERRIDABLE_FIELDS = ("url", "image", "store", "brand", "name", "price_nis")
 
 
 @app.route("/registry/items/<int:item_id>/edit", methods=["GET", "POST"])
@@ -2052,7 +2079,7 @@ def item_edit(item_id):
             qty = 1
         store = (f.get("store") or "").strip()[:120]
         brand = (f.get("brand") or "").strip()[:80]
-        new_vals = dict(name=name, url=url, store=store, brand=brand,
+        new_vals = dict(name=name, url=url, store=store, brand=brand, price_nis=price,
                         image=(f.get("image") or item["image"] or ""))
         overrides = set(x for x in (item["overrides"] or "").split(",") if x)
         for field in _OVERRIDABLE_FIELDS:

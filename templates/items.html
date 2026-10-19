@@ -43,6 +43,11 @@
         {% if m['price_status'] == 'verified' and m['price_checked_at'] %} · <span class="hint">{{ tf('price_checked', date=fmt_date(m['price_checked_at'])) }}</span>
         {% elif m['price_status'] == 'estimate' %} · <span class="hint">{{ t('price_estimate') }}</span>{% endif %}
         </span>
+        {% set pn = price_news.get(m['id']) %}
+        {% if pn %}
+        <span class="price-news"><span class="bdi">{{ tf('price_news', price='{:,}'.format(pn['price_nis']), date=fmt_date(pn['price_checked_at'])) }}</span>
+          <button class="btn btn-ghost btn-sm" type="submit" name="use_catalog_price" value="1" formnovalidate>{{ t('price_news_use') }}</button></span>
+        {% endif %}
       </div>
       <label class="mine-qty">{{ t('qty') }}
         <input name="qty_wanted" type="number" min="{{ [1, st.committed] | max }}" max="99" value="{{ m['qty_wanted'] }}"></label>

@@ -47,7 +47,7 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   dialog all pick them up automatically and fall back to the drawing on error.
 - [ ] **Exchange rate.** Run `python manage.py fetch-rates` once and schedule it daily (DEPLOY_AI.md);
   it writes `instance/rates.json` (ECB reference rates via frankfurter.app, USD/GBP/EUR/CAD/AUD/ZAR)
-  and the running app picks it up without a reload. Until that runs, the built-in USD 3.7 fallback
+  and the running app picks it up without a reload. Until that runs, the built-in USD 3.1 fallback
   shows with no date. `OB_RATES` env still overrides everything if you prefer a fixed rate.
 - [ ] **Backup retention.** Privacy copy no longer promises a period. Since 2026-09-28 `manage.py backup`
   keeps the newest 14 automatic copies in `backups/` (`--keep N` to change; hand-named snapshots are never
@@ -57,11 +57,15 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Re-check prices monthly.** `/admin/catalog?stale=1` lists verified prices older than 30 days
-  (57 as of 2026-10-16); `manage.py check` prints the count.
-- [ ] **Real store links.** 57 of 120 active items (45 of the 47 starter-pack items) have verified store links
+- [ ] **Re-check prices monthly.** `/admin/catalog?stale=1` lists verified prices older than 30 days;
+  `manage.py check` prints the count. All 67 linked items were re-checked 2026-10-19 (next due ~2026-11-18) —
+  KSP's own item feed (`/m_action/api/item/<id>`, `price` = regular price, `addToCart` 0 = "not available
+  now", `isLastItem` = last unit) read from inside a browser tab on ksp.co.il is the fast way; go slowly
+  (KSP starts answering with an HTML page after ~40 quick requests — stop and wait, don't push past it).
+  **Live DB:** apply that re-check with the commands in the 2026-10-19 CHANGELOG entry.
+- [ ] **Real store links.** 67 of 120 active items (45 of the 47 starter-pack items) have verified store links
   in `seed_catalog.json`; 3 combo items were retired and split on 2026-09-25. On the live DB run the three commands at the end
-  of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. The other 63
+  of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. The other 53
   active items still have no URL: use `/admin/catalog` (filter "missing store link") or extend
   `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.

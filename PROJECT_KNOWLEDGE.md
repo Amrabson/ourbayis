@@ -119,7 +119,7 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   `OB_RATES`/`OB_RATES_DATE` (optional JSON override, e.g. `{"USD":3.7,"GBP":4.75}`). Normal source is
   `instance/rates.json`, written by `manage.py fetch-rates` (ECB reference rates via frankfurter.app,
   ILS per unit, USD/GBP/EUR/CAD/AUD/ZAR) and hot-reloaded by `ob_money.ensure_fresh()` in a
-  `before_request` hook when the file's mtime changes; fallback is `{"USD": 3.7}` with no date. Rates
+  `before_request` hook when the file's mtime changes; fallback is `{"USD": 3.1}` (ECB, Oct 2026) with no date. Rates
   drive the header currency toggle, the short `estimate_label()` "≈ $59" on cards and the one-per-page
   `estimate_note()` footnote — ILS is always the reference; `OB_ILS_PER_USD`/`usd()` are legacy), `OB_WHATSAPP`; email (optional): `OB_SMTP_HOST/PORT/USER/PASS`
   + `OB_NOTIFY_EMAIL` (+ optional `OB_MAIL_FROM_NAME`; port 465 = implicit TLS, else STARTTLS) —
@@ -163,8 +163,12 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
 - **`manage.py refresh-registry-links`**: for `registry_items` with a `catalog_id`, copies
   url/image/store/brand from the current catalog row onto the registry item, for whichever of
   those fields is NOT in the item's `overrides` (comma list, set by `/registry/items/<id>/edit`
-  whenever the couple manually changes a normally-inherited field). Never touches name/price/qty/
-  priority/note or any claim. Dry run by default.
+  whenever the couple manually changes a normally-inherited field, price included). Price follows
+  only when the refresh swaps the item's `url` (the old product sold out and the catalog row points at
+  a new one) and `price_nis` isn't overridden — then price_nis/price_status/price_checked_at come too;
+  a price move on the same product keeps the couple's snapshot. Never touches name/qty/priority/note
+  or any claim. Dry run by default. Same-product price moves are offered to the couple instead:
+  `_catalog_price_news()` drives a "Store price now ₪… / Use it" line on /registry/items.
 
 ## Key flows added in v3 phase 3
 - **Pending add while logged out**: `/registry/items/add` is no longer `@login_required` — if
@@ -239,7 +243,7 @@ messages, delivery note, lead notes) is either `dir="auto"` (whole block, quotes
   `state` ∈ open|partial|reserved|reported|received and `left`. Templates never compute status themselves.
 - Registry items carry `model`/`availability`/`notes*` copied from the catalog (migration 18).
   `refresh-registry-links` refreshes url/image/store/brand/model/notes unless overridden, and
-  `availability` always. It never touches price/qty/priority/note or any claim amount.
+  `availability` always; price only when it swaps the product (see above). Never qty/priority/note or any claim amount.
 - `model_he` (migration 20) is the Hebrew description line, shown via `pick(item, 'model')`.
   Keep brand/model names in Latin and translate only the descriptors/caveats. It's an
   `_ADOPT_FIELDS` field, so the startup seed-sync fills it on a live DB where it's still empty;

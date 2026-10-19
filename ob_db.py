@@ -626,21 +626,29 @@ def refresh_registry_links(db, dry_run=False):
     the catalog (catalog_id set), for any of those fields the couple has NOT
     overridden (registry_items.overrides is a comma list). `availability` is
     always taken from the catalog (it describes the store, not the couple's
-    wish). Never touches name/price/qty/priority/note or any claim — a
-    claim's `price_snapshot_minor`/`amount_minor` is the guest's committed
-    amount and is left alone. Returns (registry_item_id, field, old, new)."""
+    wish). The registry price is the couple's snapshot and does not follow
+    catalog price moves — except when the refresh swaps the link to a
+    different product (the old one sold out), where the old price would
+    describe nothing: then price_nis/price_status/price_checked_at come along,
+    unless the couple set their own price (`price_nis` in overrides). Never
+    touches name/qty/priority/note or any claim — a claim's
+    `price_snapshot_minor`/`amount_minor` is the guest's committed amount and
+    is left alone. Returns (registry_item_id, field, old, new)."""
     diffs = []
     fields = ("url", "image", "store", "brand", "model", "model_he", "availability", "notes", "notes_he")
+    price_fields = ("price_nis", "price_status", "price_checked_at")
     rows = db.execute(
         "SELECT ri.*, c.url AS c_url, c.image AS c_image, c.store AS c_store,"
         " c.brand AS c_brand, c.model AS c_model, c.model_he AS c_model_he, c.availability AS c_availability,"
-        " c.notes AS c_notes, c.notes_he AS c_notes_he FROM registry_items ri"
+        " c.notes AS c_notes, c.notes_he AS c_notes_he, c.price_nis AS c_price_nis,"
+        " c.price_status AS c_price_status, c.price_checked_at AS c_price_checked_at FROM registry_items ri"
         " JOIN catalog_items c ON c.id = ri.catalog_id"
         " WHERE ri.archived=0").fetchall()
     for row in rows:
         overrides = set(f for f in (row["overrides"] or "").split(",") if f)
         sets, params = [], []
-        for field in fields:
+        product_swapped = ("url" not in overrides and row["c_url"] and (row["url"] or "") != row["c_url"])
+        for field in fields + (price_fields if product_swapped and "price_nis" not in overrides else ()):
             if field in overrides and field != "availability":
                 continue
             old_val = row[field]

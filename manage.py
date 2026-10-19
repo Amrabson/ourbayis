@@ -246,7 +246,7 @@ def _config_warnings(db, problems):
     if not os.environ.get("OB_RATES"):
         rates_file = BASE / "instance" / "rates.json"
         if not rates_file.exists():
-            warnings.append("no exchange rates yet — the ≈ $ estimates use the built-in 3.7; run "
+            warnings.append("no exchange rates yet — the ≈ $ estimates use the built-in 3.1; run "
                             "`python manage.py fetch-rates` and schedule it daily")
         else:
             age_days = (datetime.now().timestamp() - rates_file.stat().st_mtime) / 86400

@@ -840,6 +840,7 @@ dialog:focus-visible { outline: none; }
 .starter-card .gift-meta { margin: 4px 0 0; }
 .starter-card .mine-qty { margin-top: 8px; }
 
+.price-news { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; font-size: .9rem; color: var(--gold); font-weight: 600; }
 .items-status-row { display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .warn-note { color: var(--danger); font-style: normal; font-weight: 600; }
 .idea-note { margin: 8px 0 0; }

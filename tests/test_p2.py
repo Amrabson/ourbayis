@@ -42,6 +42,13 @@ def _couple_with_catalog_items(client, app_module, keys, pay=False):
     return reg, items
 
 
+def _items_by_seed_key(items):
+    db = _db()
+    keys = {r["id"]: r["seed_key"] for r in db.execute("SELECT id, seed_key FROM catalog_items")}
+    db.close()
+    return {keys[cid]: row for cid, row in items.items()}
+
+
 def _claim(app_module, slug, item_id, name="Guest", **extra):
     guest = app_module.app.test_client()
     html = guest.get(f"/r/{slug}").get_data(as_text=True)
@@ -111,26 +118,35 @@ def test_partial_quantity_breakdown(client, app_module):
 
 # ------------------------------------------------------------------ stock warning across surfaces
 def test_stock_warning_follows_item_to_every_surface(client, app_module):
-    """The catalog flags the Crock-Pot as out of stock at last check; the
-    homepage strip, the registry card, the claim dialog and the sample must say
-    the same thing instead of silently dropping it."""
+    """When the catalog flags an item as out of stock at last check (here the slow
+    cooker, a featured item), the homepage strip, the registry card, the claim
+    dialog and the sample must say the same thing instead of silently dropping it."""
     tag = "Out of stock at last check"
+    _mark_slow_cooker_sold_out(app_module)
     assert tag in client.get("/catalog?cat=appliances").get_data(as_text=True)
     home = client.get("/").get_data(as_text=True)
     assert tag in home
     reg, items = _couple_with_catalog_items(client, app_module, ["slow-cooker-for-cholent"])
     item = list(items.values())[0]
-    assert item["availability"] == "unavailable" and item["model"].startswith("Crock-Pot")
+    assert item["availability"] == "unavailable" and item["model"].startswith("Gold Line")
     page = client.get(f"/r/{reg['slug']}").get_data(as_text=True)
     assert page.count(tag) >= 2  # card + dialog
-    assert "View product details at Hakol LaBait" in page  # pre-reservation link reads as viewing
+    assert "View product details at KSP" in page  # pre-reservation link reads as viewing
     assert 'aria-label="Close"' not in client.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
     assert 'aria-label="סגירה"' in client.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
     items_page = client.get("/registry/items?lang=en").get_data(as_text=True)
     assert tag in items_page
 
 
+def _mark_slow_cooker_sold_out(app_module):
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        db.execute("UPDATE catalog_items SET availability='unavailable' WHERE seed_key='slow-cooker-for-cholent'")
+        assert db.execute("SELECT featured FROM catalog_items WHERE seed_key='slow-cooker-for-cholent'").fetchone()[0]
+
+
 def test_featured_strip_prefers_available_items(client, app_module):
+    _mark_slow_cooker_sold_out(app_module)
     with app_module.app.app_context():
         rows = app_module.featured_items(app_module.get_db(), limit=8)
     avail = [r["availability"] for r in rows]
@@ -160,6 +176,74 @@ def test_refresh_links_updates_availability_but_never_claim_amounts(client, app_
     assert after_item["url"] == "https://example.com/mine"
     assert after_item["price_nis"] == 2290  # registry price is the couple's snapshot
     assert tuple(after_claim) == tuple(before)  # the guest's committed amount is untouched
+
+
+def test_refresh_links_brings_the_price_only_when_the_product_is_swapped(client, app_module):
+    """A sold-out product replaced in the catalog: the registry item gets the new product's price
+    and check date with its link. A price move on the same product keeps the couple's snapshot, and
+    a price the couple typed themselves (price_nis in overrides) is never replaced."""
+    reg, items = _couple_with_catalog_items(
+        client, app_module, ["shabbos-hot-plate-platta", "microwave", "toaster-oven"], pay=True)
+    by_key = _items_by_seed_key(items)
+    swapped, same, own = (by_key[k] for k in ("shabbos-hot-plate-platta", "microwave", "toaster-oven"))
+    _claim(app_module, reg["slug"], swapped["id"], give="cash")
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        before_claim = tuple(db.execute("SELECT amount_minor, price_snapshot_minor FROM claims").fetchone())
+        db.execute("UPDATE catalog_items SET url='https://ksp.co.il/web/item/1', price_nis=99,"
+                   " price_checked_at='2027-01-02' WHERE id=?", (swapped["catalog_id"],))
+        db.execute("UPDATE catalog_items SET price_nis=price_nis+40, price_checked_at='2027-01-02'"
+                   " WHERE id=?", (same["catalog_id"],))
+        db.execute("UPDATE catalog_items SET url='https://ksp.co.il/web/item/2', price_nis=1"
+                   " WHERE id=?", (own["catalog_id"],))
+        db.execute("UPDATE registry_items SET price_nis=200, overrides='price_nis' WHERE id=?", (own["id"],))
+        app_module.ob_db.refresh_registry_links(db)
+        row = {r["id"]: r for r in db.execute("SELECT * FROM registry_items")}
+        after_claim = tuple(db.execute("SELECT amount_minor, price_snapshot_minor FROM claims").fetchone())
+    assert row[swapped["id"]]["url"].endswith("/item/1")
+    assert row[swapped["id"]]["price_nis"] == 99 and row[swapped["id"]]["price_checked_at"] == "2027-01-02"
+    assert row[same["id"]]["price_nis"] == same["price_nis"]  # same product: the couple's snapshot
+    assert row[same["id"]]["price_checked_at"] == same["price_checked_at"]
+    assert row[own["id"]]["url"].endswith("/item/2") and row[own["id"]]["price_nis"] == 200
+    assert after_claim == before_claim  # the guest's committed amount never moves
+
+
+def test_items_page_offers_the_newer_store_price(client, app_module):
+    """Same product, newer checked price: the couple's list says so and 'Use it' applies the
+    catalog's price (never one from the form). Nothing is offered once the couple typed their own."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["microwave", "toaster-oven"])
+    by_key = _items_by_seed_key(items)
+    mw, toaster = by_key["microwave"], by_key["toaster-oven"]
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        db.execute("UPDATE catalog_items SET price_nis=price_nis-50, price_checked_at='2099-01-01'"
+                   " WHERE id IN (?, ?)", (mw["catalog_id"], toaster["catalog_id"]))
+        db.execute("UPDATE registry_items SET price_nis=300, overrides='price_nis' WHERE id=?", (toaster["id"],))
+    page = client.get("/registry/items?lang=en").get_data(as_text=True)
+    new_price = mw["price_nis"] - 50
+    assert page.count('name="use_catalog_price"') == 1
+    assert f"Store price now ₪{new_price:,} (checked 1 January 2099)" in page
+    assert "המחיר בחנות עכשיו" in client.get("/registry/items?lang=he").get_data(as_text=True)
+    client.post(f"/registry/items/{mw['id']}/update", data={
+        "csrf_token": get_csrf(page), "use_catalog_price": "1", "price_nis": "1", "qty_wanted": "1"})
+    with app_module.app.app_context():
+        got = app_module.get_db().execute("SELECT price_nis, price_checked_at FROM registry_items WHERE id=?",
+                                          (mw["id"],)).fetchone()
+    assert tuple(got) == (new_price, "2099-01-01")
+    assert 'name="use_catalog_price"' not in client.get("/registry/items").get_data(as_text=True)
+
+
+def test_item_edit_price_change_is_recorded_as_override(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["microwave"])
+    item = _items_by_seed_key(items)["microwave"]
+    page = client.get(f"/registry/items/{item['id']}/edit").get_data(as_text=True)
+    client.post(f"/registry/items/{item['id']}/edit", data={
+        "csrf_token": get_csrf(page), "name": item["name"], "price_nis": "399",
+        "url": item["url"], "store": item["store"], "brand": item["brand"] or "", "qty_wanted": "1"})
+    with app_module.app.app_context():
+        got = app_module.get_db().execute("SELECT price_nis, overrides FROM registry_items WHERE id=?",
+                                          (item["id"],)).fetchone()
+    assert got["price_nis"] == 399 and "price_nis" in got["overrides"].split(",")
 
 
 def test_migration_18_backfills_snapshot_registry_items(tmp_path, monkeypatch):
@@ -352,7 +436,7 @@ def test_rates_file_is_hot_reloaded_and_env_wins(tmp_path, monkeypatch):
     monkeypatch.setattr(ob_money, "RATES_FILE", str(tmp_path / "rates.json"))
     monkeypatch.setattr(ob_money, "_rates_mtime", object())  # force a re-read from the new path
     ob_money.ensure_fresh()
-    assert ob_money.RATES == {"USD": 3.7} and ob_money.RATES_DATE == ""
+    assert ob_money.RATES == ob_money._DEFAULT_RATES and ob_money.RATES_DATE == ""
     (tmp_path / "rates.json").write_text(_json.dumps(
         {"rates": {"USD": 3.1, "GBP": 4.1}, "date": "2026-09-17", "source": "test"}), encoding="utf-8")
     ob_money.ensure_fresh()
@@ -363,7 +447,7 @@ def test_rates_file_is_hot_reloaded_and_env_wins(tmp_path, monkeypatch):
     (tmp_path / "rates.json").write_text("{not json", encoding="utf-8")
     monkeypatch.setattr(ob_money, "_rates_mtime", object())  # mtime can tie within the same second
     ob_money.ensure_fresh()
-    assert ob_money.RATES == {"USD": 3.7}  # falls back to the default, never crashes
+    assert ob_money.RATES == ob_money._DEFAULT_RATES  # falls back to the default, never crashes
     monkeypatch.setenv("OB_RATES", '{"USD": 9.9}')
     importlib.reload(ob_money)
     assert ob_money.RATES == {"USD": 9.9}
@@ -1134,7 +1218,7 @@ def test_login_and_logout_keep_the_language(client):
     ("refrigerator", "Fridge — large family size"), ("silverware", "Cutlery sets — milchig &amp; fleishig"),
     ("becher", "Kiddush cup (silver plated)"), ("candle sticks", "Shabbos candlesticks"),
     ("crock pot", "Slow cooker (for cholent!)"), ("חנוכיה", "Menorah (Chanukah)"),
-    ("KitchenAid", "Stand mixer"), ("Hidurit PS4", "Shabbos hot plate (platta)"),
+    ("KitchenAid", "Stand mixer"), ("Gold Line ATL-480", "Shabbos hot plate (platta)"),
 ])
 def test_catalog_search_forgives_spelling_plurals_and_synonyms(client, q, expect):
     """All of these found nothing (or only "cookie sheets") with a plain substring match."""

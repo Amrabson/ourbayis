@@ -1,5 +1,49 @@
 # Changelog
 
+## 2026-10-19 (prices re-checked online; sold-out items replaced; 10 new real listings)
+- **Every linked item re-checked today** (57 → all `price_checked_at` 2026-10-19). KSP prices read from
+  KSP's own item feed inside a ksp.co.il browser tab (`/m_action/api/item/<id>`: `price` is the regular
+  price in the purchase block; `addToCart: 0` shows on the page as "לא זמין כרגע"; `isLastItem` = last
+  unit). Other stores read on the product page.
+- **Price moves (same product):** Shabbos urn 60-cup ₪499 → ₪462 · microwave ₪460 → ₪475 · washing
+  machine ₪1,865 → ₪1,861 · dishwasher ₪1,372 → ₪1,271 · oven ₪2,466 → ₪2,299 · robot vacuum ₪779 → ₪775 ·
+  Home Center folding table ₪99.90 sale ended → ₪128 online (₪179 in branches). Unchanged: the other 29
+  KSP items, Payngo stand mixer ₪2,290, Hakol LaBait dinnerware ₪199, Vardinon towels ₪199.90, all six
+  Heichal Menachem Judaica items.
+- **Out of stock → nearest in-stock product** (same item name; notes say what changed): Shabbos platta
+  Hidurit PS4 ₪305 → Gold Line ATL-480 glass 4-pot ₪144 (last unit; notes name two in-stock fallbacks) ·
+  large platta Gold Line ATL-500 → Hyundai HAP-600 6-pot ₪114 (notes explain why the bigger plain platta
+  costs less than the glass one) · 40-cup urn stainless → black ₪416 (last unit) · toaster oven Gold Line
+  40 L → Hyundai HATO-300B 30 L ₪229 · immersion blender Bosch ErgoMixx → CleverMixx MSM2610B ₪189 ·
+  summer duvet Vardinon Tani → Arige Gad cotton piqué ₪59 · bath mat / shower shelf → other colour, same
+  price · ceramic pan Ninja → Lock & Lock Stone ₪179 · glass dishes Ibili ₪199 → UNIQOOK ×3 with lids ₪75 ·
+  blue cutting board Berox → Su Chef 30×40 ₪59 · slow cooker Crock-Pot (still out of stock at Hakol
+  LaBait) → Gold Line ATL-066 6.5 L ₪129 at KSP, so a featured item is buyable again.
+- **10 estimate-only items now have a real KSP listing:** sandwich press ₪119 · space heater Smartmi 1S
+  ₪199 · milk frother Hemilton ₪119 · blender Hyundai 1.5 L ₪159 · waffle maker Gold Line ₪113 · freezer
+  Galanz 97 L ₪799 · dehumidifier Arrow 12 L ₪698 · knife sharpener Arcosteel ₪59 · Shabbos lamp
+  KosherLamp ₪149 · wine glasses Crystal Bohemia 2×6 ₪178. 67 of 120 active items are now linked.
+  Left unlinked on purpose: combo items (iron & board, towels & mitts…), a measuring set that was the
+  last unit, no airpot/garlic press match.
+- **refresh-registry-links now brings the price when it swaps the product.** It copied a new link onto
+  registry items but kept the old price, so a couple with the old ₪305 platta would have shown a link to
+  the ₪144 one at ₪305. When the refresh changes an item's `url` (not overridden), `price_nis`,
+  `price_status` and `price_checked_at` come along — unless `price_nis` is in the item's `overrides`,
+  which /registry/items/<id>/edit now records when the couple changes the price. A price move on the
+  same product still keeps the couple's snapshot; claims are never touched.
+- **…and the couple hears about same-product price moves.** /registry/items now says "Store price now
+  ₪462 (checked 19 October 2026)" under an item whose catalog product (same link) has a newer checked
+  price, with a "Use it" button (`use_catalog_price` on the item's update form; the price is re-read
+  from the catalog, never taken from the form). Not shown when the couple set their own price.
+- Tests that used the seed's sold-out Crock-Pot as their example now mark the slow cooker sold out
+  themselves (no seed item is out of stock any more).
+- **Exchange rates:** fetched today (USD 3.108). The built-in fallback used before the first
+  `fetch-rates` run was USD 3.7 — ~16% off, so $ estimates would read low; now 3.1.
+- **Live DB** (dry run first, then add `--apply`; checked on a copy of the local DB):
+  `python manage.py seed-sync --fields url,store,brand,model,model_he,price_nis,kind,price_status,price_checked_at,price_source,availability,notes,notes_he`
+  then `python manage.py refresh-registry-links` (and `--apply`).
+- 3 tests — 239 tests.
+
 ## 2026-10-19 (starter picker you can see the sum of; no retyping your names)
 - /registry/items/starter: the only "Add selected" button sat below ~47 cards, with no hint of how
   much had been picked. It now lives in a sticky bar at the bottom with a live "6 gifts selected ·

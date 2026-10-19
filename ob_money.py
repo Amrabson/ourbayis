@@ -80,13 +80,13 @@ def parse_legacy_amount(text):
 # Exchange rates: ILS per one unit of each currency. Resolution order:
 #   1. OB_RATES / OB_RATES_DATE env (explicit, wins)
 #   2. instance/rates.json written by `manage.py fetch-rates` (daily scheduled task)
-#   3. built-in fallback {"USD": 3.7} with no date (the rate note then says "approx." only)
+#   3. built-in fallback {"USD": 3.1} (ECB, October 2026) with no date (the rate note then says "approx." only)
 # The file is re-read whenever its mtime changes (see ensure_fresh), so a running
 # web app picks up a fresh fetch without a reload. Estimates stay labelled as
 # approximate — what a guest pays is always the store's / provider's own rate.
 RATES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "instance", "rates.json")
 RATES_SOURCE = ""
-_DEFAULT_RATES = {"USD": 3.7}
+_DEFAULT_RATES = {"USD": 3.1}
 _rates_mtime = None
 
 
