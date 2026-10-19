@@ -137,8 +137,8 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
   real brand is known, 'idea' for generic items), `featured` (promotional placement — homepage +
   `/registry/items/starter`'s old one-click no longer uses this), `starter_group`
   ('first_week'|'kitchen'|'shabbos'|'bedbath'|'appliances', used by the grouped starter-pack
-  picker), and `price_status`/`price_checked_at`/`price_source` ('verified' for the 55 items
-  CHANGELOG_AI.md's v1.7–v2.3 entries confirmed against real Israeli listings; 'estimate' otherwise).
+  picker), and `price_status`/`price_checked_at`/`price_source` ('verified' for 100 of the 120 active items,
+  each confirmed against a real Israeli store listing — see the 2026-10-19/20 CHANGELOG_AI.md entries; 'estimate' otherwise).
 - **Seed sync** (`ob_db.seed_sync()`, called automatically on every app import, and via
   `manage.py seed-sync`): matches by `seed_key`. A DB row with that `seed_key` is left untouched.
   A legacy row (no `seed_key`, `NULL`) matched by exact `name` gets its `seed_key` set and ONLY

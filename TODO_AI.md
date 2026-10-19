@@ -58,15 +58,15 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 
 ## Owner launch checklist (do these before going live)
 - [ ] **Re-check prices monthly.** `/admin/catalog?stale=1` lists verified prices older than 30 days;
-  `manage.py check` prints the count. All 67 linked items were re-checked 2026-10-19 (next due ~2026-11-18) —
+  `manage.py check` prints the count. All 100 linked items were re-checked (67 on 2026-10-19, the 33 newest on 2026-10-20; next due ~2026-11-18) —
   KSP's own item feed (`/m_action/api/item/<id>`, `price` = regular price, `addToCart` 0 = "not available
   now", `isLastItem` = last unit) read from inside a browser tab on ksp.co.il is the fast way; go slowly
   (KSP starts answering with an HTML page after ~40 quick requests — stop and wait, don't push past it).
   **Live DB:** apply that re-check with the commands in the 2026-10-19 CHANGELOG entry.
-- [ ] **Real store links.** 67 of 120 active items (45 of the 47 starter-pack items) have verified store links
+- [ ] **Real store links.** 100 of 120 active items (45 of the 47 starter-pack items) have verified store links
   in `seed_catalog.json`; 3 combo items were retired and split on 2026-09-25. On the live DB run the three commands at the end
-  of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. The other 53
-  active items still have no URL: use `/admin/catalog` (filter "missing store link") or extend
+  of the 2026-09-25 "combo items split" CHANGELOG entry, then `refresh-registry-links --apply`. For the 2026-10-20 batch of 33 new links see that CHANGELOG entry. The other 20
+  active items still have no URL (combos, no single matching product, or no in-stock listing found — list in that entry): use `/admin/catalog` (filter "missing store link") or extend
   `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.
 - [ ] **Images** — only add a product photo URL you have the right to use (the store's own listing

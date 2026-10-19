@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-10-20 (33 more estimate-only items now have a real, in-stock store listing)
+- **100 of 120 active catalog items are now linked** (was 67). Seed-only change: `seed_catalog.json` edited by
+  script (format preserved), no code touched. Each new item: `price_status` verified, `price_checked_at`
+  2026-10-20, `availability` in_stock, `kind` product, EN+HE `model`/`notes`.
+- **Heichal Menachem (8, Judaica; price read as `מחיר: X ₪` on each product page):** menorah ₪255 (nickel-plated,
+  product 2408) · mezuzah cases ₪125 (₪25 × 5, product 1876) · bentchers ₪160 (₪8 × 20, product 5205, Chabad
+  nusach) · guest kiddush cups ₪102 (₪17 × 6, product 772272) · 925-silver kiddush cup ₪439 (product 2100) ·
+  esrog box ₪179 (product 5182) · Shas, Oz Vehadar 20 vols ₪2,660 sale price (regular ₪2,800, product 1652) ·
+  set of 5 machzorim ₪900 (product 4029).
+- **KSP (23; item feed: `price` = regular price, `addToCart` 1 and `isLastItem` false for every pick):** baking
+  pans ₪85 · colander ₪49 · measuring set ₪49 · deep pans (loaf/kugel) ₪67 · salad bowl ₪68 · stainless dish
+  rack ₪99 · glassware ₪86 · serving set ₪89 · glass serving bowl ₪139 · cake stand set ₪78 · pitcher ₪89 ·
+  bone-china dinner sets (fleishig Quadro ₪319, milchig Lilly ₪279) · 2 viscoelastic pillows ₪758 (₪379 × 2) ·
+  3-seat sofa-bed ₪1,083 · coffee table ₪479 · washable rug ₪269 · curtains ₪218 (₪109 × 2 sets) · bookcase
+  ₪699 · step stool ₪49 · extendable dining set + 4 chairs ₪1,449 · two Shabbos tablecloths ₪198 (₪99 × 2) ·
+  jacquard tablecloth 350 cm + 12 napkins ₪239.
+- **Home Center (2, product `.js` feed):** 3×3 m folding sukkah ₪400 (₪399.90; schach bought separately) · two
+  folding guest beds ₪800 (₪399.90 sale price each, regular ₪549).
+- **Multiples** ("₪X × N") are stated in `price_source` and `notes`; `price_nis` is the total. Where the match
+  differs from the item name, `notes` says so (the "embroidered" tablecloth is jacquard-woven; the "premium"
+  porcelain items now point at mid-priced bone-china sets of 6 instead of the old ₪2,900 estimate).
+- **Still unlinked (20), on purpose:** combo items (kitchen towels & mitts, laundry hamper & drying rack, iron
+  & ironing board, hangers & organizers, tool kit & first-aid kit, garlic press & peelers, rolling pin &
+  pastry tools, placemats & napkins, entryway mirror & shelf, sponja set — Home Center's 7-piece kit has no
+  bucket) · no matching in-stock single product found: spice rack *with spices*, hot-water pump pot,
+  sterling-silver candlesticks, engraved challah knife, seder plate (Heichal's was out of stock), chumashim &
+  siddurim set (several books, not one product), floor lamp (only a last unit or smart lamps), storage boxes
+  & organizers, bathrobe set (needs two sizes), quilted bedspread.
+- KSP answered two item-feed calls with an HTML page after ~35 quick calls; I paused about a minute and it
+  answered normally again (calls kept ≥4 s apart afterwards).
+- **Live DB** (dry run first, then add `--apply`; run `seed-sync` before `refresh-registry-links`):
+  `python manage.py seed-sync --fields url,store,brand,model,model_he,price_nis,kind,price_status,price_checked_at,price_source,availability,notes,notes_he`
+  then `python manage.py refresh-registry-links` (and `--apply`).
+
 ## 2026-10-19 (prices re-checked online; sold-out items replaced; 10 new real listings)
 - **Every linked item re-checked today** (57 → all `price_checked_at` 2026-10-19). KSP prices read from
   KSP's own item feed inside a ksp.co.il browser tab (`/m_action/api/item/<id>`: `price` is the regular
