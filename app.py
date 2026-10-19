@@ -1661,7 +1661,11 @@ def registry_new():
         return redirect(url_for("registry_edit"))
     if request.method == "POST":
         return _save_registry(None)
-    return render_template("registry_form.html", reg=None, prefs={})
+    # the name they gave at signup is almost always who the registry is for —
+    # start "Your names" with it rather than asking twice
+    user = current_user()
+    start = {"couple_names": user["name"]} if user and user["name"] else None
+    return render_template("registry_form.html", reg=None, form=start, prefs={})
 
 
 @app.route("/registry/edit", methods=["GET", "POST"])

@@ -19,6 +19,7 @@ class _Audit(HTMLParser):
         self.unlabeled = []
         self.heads = []
         self.unnamed = []
+        self.nested_labels = 0
         self._in_label = 0
         self._cur = None
 
@@ -27,6 +28,8 @@ class _Audit(HTMLParser):
         if "id" in a:
             self.ids[a["id"]] += 1
         if tag == "label":
+            if self._in_label:
+                self.nested_labels += 1  # a <label> inside a <label> is invalid HTML
             self._in_label += 1
             if a.get("for"):
                 self.labels_for.add(a["for"])
@@ -64,6 +67,7 @@ def _check(path, resp):
     assert not [k for k, v in p.ids.items() if v > 1], path
     assert not [f for f in p.unlabeled if f[2] not in p.labels_for], (path, p.unlabeled)
     assert not p.unnamed, (path, p.unnamed)
+    assert not p.nested_labels, path
 
 
 def test_logged_in_pages_markup(client, app_module):

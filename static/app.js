@@ -229,6 +229,48 @@
     if (b) setTimeout(function () { b.disabled = true; b.setAttribute("data-auto-disabled", ""); }, 0);
   });
 
+  // starter-pack picker: live "N gifts selected · ₪total" beside the sticky submit, and a
+  // "Select all" / "Clear" toggle per group (the form works the same without any of this)
+  document.addEventListener("DOMContentLoaded", function () {
+    var form = document.getElementById("starter-form");
+    var tally = document.getElementById("starter-tally");
+    if (!form || !tally) return;
+    function boxes(scope) {
+      return Array.prototype.slice.call(scope.querySelectorAll("input[type=checkbox][data-price]:not(:disabled)"));
+    }
+    function update() {
+      var n = 0, total = 0;
+      boxes(form).forEach(function (cb) {
+        if (!cb.checked) return;
+        var qtyInput = form.querySelector("input[name='qty_" + cb.name.slice(4) + "']");
+        var qty = Math.max(1, Math.min(99, parseInt(qtyInput && qtyInput.value, 10) || 1));
+        n += 1;
+        total += (parseInt(cb.getAttribute("data-price"), 10) || 0) * qty;
+      });
+      var tpl = n === 0 ? tally.getAttribute("data-none") : tally.getAttribute(n === 1 ? "data-one" : "data-many");
+      tally.textContent = tpl.replace("{n}", n).replace("{total}", "₪" + total.toLocaleString("en-US"));
+      form.querySelectorAll("[data-starter-all]").forEach(function (btn) {
+        var group = boxes(btn.closest(".starter-group"));
+        var all = group.length > 0 && group.every(function (cb) { return cb.checked; });
+        btn.textContent = btn.getAttribute(all ? "data-label-none" : "data-label-all");
+        btn.hidden = group.length === 0;
+      });
+    }
+    form.addEventListener("change", update);
+    form.addEventListener("input", function (e) { if (e.target.type === "number") update(); });
+    form.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-starter-all]");
+      if (!btn) return;
+      var group = boxes(btn.closest(".starter-group"));
+      var all = group.every(function (cb) { return cb.checked; });
+      group.forEach(function (cb) { cb.checked = !all; });
+      update();
+    });
+    update();
+    // the browser may restore checked boxes when coming Back to the page
+    window.addEventListener("pageshow", update);
+  });
+
   // coming Back to a page from the back/forward cache would otherwise leave its buttons dead
   window.addEventListener("pageshow", function (e) {
     if (!e.persisted) return;

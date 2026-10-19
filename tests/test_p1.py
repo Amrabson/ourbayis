@@ -122,6 +122,32 @@ def test_starter_post_adds_only_selected(client, app_module):
         assert qty == 2
 
 
+def test_starter_page_prices_and_tally(client, app_module):
+    """Prices read ₪1,865 (not ₪1865) and the sticky bar carries the tally templates and
+    each checkbox its price, so app.js can show 'N gifts selected · ₪total'."""
+    signup(client)
+    create_registry(client)
+    with app_module.app.app_context():
+        big = app_module.get_db().execute(
+            "SELECT * FROM catalog_items WHERE active=1 AND starter_group IS NOT NULL AND starter_group != '' "
+            "AND price_nis >= 1000 ORDER BY id LIMIT 1").fetchone()
+    for lang in ("en", "he"):
+        html = client.get(f"/registry/items/starter?lang={lang}").get_data(as_text=True)
+        assert "₪{:,}".format(big["price_nis"]) in html
+        assert 'id="starter-tally"' in html and "data-starter-all" in html
+        assert f'name="add_{big["id"]}" value="1" data-price="{big["price_nis"]}"' in html
+    assert "נבחרו {n} מתנות" in html
+
+
+def test_new_registry_form_starts_with_signup_name(client):
+    signup(client, name="Rivka & Yosef")
+    html = client.get("/registry/new").get_data(as_text=True)
+    names = re.search(r'<input name="couple_names"[^>]*>', html).group(0)
+    title = re.search(r'<input name="title"[^>]*>', html).group(0)
+    assert 'value="Rivka &amp; Yosef"' in names
+    assert 'value=""' in title  # the title is still theirs to write
+
+
 def test_item_edit_qty_below_committed_rejected(client, app_module):
     signup(client)
     create_registry(client)

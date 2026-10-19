@@ -818,11 +818,24 @@ dialog:focus-visible { outline: none; }
 
 .starter-group { margin-bottom: 28px; }
 .starter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
-.starter-card { display: block; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.starter-group-head .btn[hidden] { display: none; }
+.starter-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.starter-card { display: block; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; transition: border-color .15s, box-shadow .15s; }
 .starter-card:hover { border-color: var(--gold-bright); }
 .starter-card:has(input:checked) { border-color: var(--gold-bright); box-shadow: 0 0 0 3px var(--gold-soft); }
-.starter-card.is-added { opacity: .6; cursor: default; }
-.starter-card-top { display: flex; gap: 10px; align-items: flex-start; }
+.starter-card.is-added { opacity: .6; }
+.starter-card-top { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+.starter-card.is-added .starter-card-top { cursor: default; }
+.starter-card-top strong, .starter-card-top .gift-meta { display: block; }
+/* the submit stays in reach while scrolling a 40-item list */
+.starter-bar {
+  position: sticky; bottom: 0; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  margin: 8px -14px 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+  background: var(--paper); border-top: 1px solid var(--line); box-shadow: 0 -8px 18px rgba(34, 51, 84, .06);
+}
+.starter-tally { flex: 1 1 100%; font-weight: 600; color: var(--ink-soft); }
+.starter-tally:empty { display: none; }
+@media (min-width: 640px) { .starter-tally { flex: 1 1 auto; } }
 .starter-card-top input { margin-top: 5px; width: 18px; height: 18px; flex: none; }
 .starter-card .gift-meta { margin: 4px 0 0; }
 .starter-card .mine-qty { margin-top: 8px; }

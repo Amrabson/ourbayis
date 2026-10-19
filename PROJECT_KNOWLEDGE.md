@@ -176,7 +176,10 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
 - **Starter pack picker** (`/registry/items/starter`, GET shows groups + checkboxes, POST adds only
   what was checked, at the chosen qty): replaces the old "add all 8 featured items" one-click —
   `featured` is promotional homepage placement, not a curated starter list. Groups come straight
-  from `catalog_items.starter_group`.
+  from `catalog_items.starter_group`. The submit sits in a sticky `.starter-bar`; app.js (`#starter-form`)
+  fills `#starter-tally` from each checkbox's `data-price` × its `qty_<id>` and drives the per-group
+  `[data-starter-all]` Select all / Clear buttons (rendered `hidden`, shown by JS).
+- `/registry/new` GET passes `form={"couple_names": users.name}` so the signup name is prefilled.
 - **Item edit** (`/registry/items/<id>/edit`): full field edit; changing a normally-inherited field
   (url/image/store/brand/name) records it in `registry_items.overrides` so `refresh-registry-links`
   never clobbers it later.

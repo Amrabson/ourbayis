@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-19 (starter picker you can see the sum of; no retyping your names)
+- /registry/items/starter: the only "Add selected" button sat below ~47 cards, with no hint of how
+  much had been picked. It now lives in a sticky bar at the bottom with a live "6 gifts selected ·
+  ₪1,632" (price × qty, `starter_tally*` EN/HE). Each group gets a "Select all" / "Clear" toggle,
+  hidden once every item in it is already on the list. Without JS the bar is just the sticky submit.
+- Prices there read ₪1,865 (were ₪1865, unlike every other page).
+- Each card was a `<label>` holding a second `<label>` (qty) — invalid HTML; now a `<div>` with the
+  checkbox label and the qty label side by side. test_a11y's audit now fails on nested labels.
+- /registry/new starts "Your names" with the name given at signup (the title stays blank).
+- 2 tests — 236 tests.
+
 ## 2026-10-16 (prices due for a re-check)
 - Guests see "Price checked <date>" on every verified item, but nothing told the owner when those
   checks got old. /admin/catalog gets a "price not re-checked in 30+ days" queue card and filter
