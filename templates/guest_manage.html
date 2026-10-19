@@ -3,7 +3,9 @@
 {% block title %}{{ t('guest_manage_title') }} — {{ brand }}{% endblock %}
 {% macro save_link_panel() %}
     <div class="notice-panel notice-stack save-link-panel">
-      <p><strong>{{ t('guest_save_link_hint') }}</strong></p>
+      {# with mail on, a guest who gave an address got this link by email when they reserved #}
+      {% set _emailed = can_email and claim['guest_email'] %}
+      <p><strong>{% if _emailed %}{{ tf('guest_link_emailed', email=claim['guest_email']) }}{% else %}{{ t('guest_save_link_hint') }}{% endif %}</strong></p>
       <div class="share-link-row">
         <code class="share-url bdi">{{ ext_url('guest_manage', token=token) }}</code>
         <button class="btn btn-ghost" data-copy="{{ ext_url('guest_manage', token=token) }}" data-copied-label="{{ t('copied') }}">{{ t('copy_link') }}</button>
@@ -14,7 +16,7 @@
         <label class="sr-only" for="email-link">{{ t('guest_email_link_label') }}</label>
         <input id="email-link" name="email" type="email" required maxlength="200" autocomplete="email"
                placeholder="{{ t('guest_email_link_label') }}" value="{{ claim['guest_email'] }}">
-        <button class="btn btn-primary" type="submit">{{ t('guest_email_link_btn') }}</button>
+        <button class="btn {{ 'btn-ghost' if _emailed else 'btn-primary' }}" type="submit">{{ t('guest_email_link_again') if _emailed else t('guest_email_link_btn') }}</button>
       </form>
       {% endif %}
     </div>
@@ -48,7 +50,8 @@
 <div class="wrap section narrow">
   <div class="glass glass-panel">
     <h1 class="section-title">{{ t('guest_manage_title') }}</h1>
-    <p class="page-sub"><bdi>{{ pick(reg, 'title') }}</bdi> — <bdi>{{ pick(reg, 'couple_names') }}</bdi></p>
+    {% set _names = pick(reg, 'couple_names') %}
+    <p class="page-sub"><bdi>{{ pick(reg, 'title') }}</bdi>{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %} — <bdi>{{ _names }}</bdi>{% endif %}</p>
 
     {% set _steps = ['reserved', 'reported', 'received'] %}
     {% set _status_for_stepper = 'reserved' if claim['status'] == 'expired' else claim['status'] %}
@@ -71,6 +74,7 @@
         <p>{% if claim['kind'] == 'cash' and pay_links %}{{ t('guest_reserved_note_cash') }}{% elif item and item['url'] and claim['kind'] != 'cash' %}{{ t('guest_reserved_note_buy') }}{% else %}{{ t('guest_reserved_note') }}{% endif %}</p>
       {% elif claim['status'] == 'reported' %}
         <p>{{ t('guest_reported_note') }}</p>
+        {% if claim['report_note'] %}<p>{{ t('guest_report_note_yours') }} <span dir="auto">“{{ claim['report_note'] }}”</span></p>{% endif %}
       {% elif claim['status'] == 'received' %}
         <p>{{ t('guest_received_note') }}</p>
       {% elif claim['status'] == 'cancelled' %}
@@ -119,8 +123,11 @@
 
     {% if claim['status'] in ('reserved', 'expired') %}
     <div class="dash-actions">
-      <form method="post" action="{{ url_for('guest_report', token=token) }}">
+      <form class="report-form" method="post" action="{{ url_for('guest_report', token=token) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>{{ t('guest_report_note_label') }}
+          <textarea name="report_note" rows="2" maxlength="500" dir="auto"
+                    placeholder="{{ t('guest_report_note_ph_cash' if claim['kind'] == 'cash' else 'guest_report_note_ph_item') }}"></textarea></label>
         <button class="btn btn-primary" type="submit">{{ t('guest_report_btn') }}</button>
       </form>
       <form method="post" action="{{ url_for('guest_cancel', token=token) }}">

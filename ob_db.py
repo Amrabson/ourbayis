@@ -490,6 +490,12 @@ def _m024_lead_lang(db):
     _add_column(db, "shana_requests", "lang TEXT DEFAULT ''")
 
 
+def _m025_claim_report_note(db):
+    """What the guest tells the couple when they mark a gift bought/sent ("arriving Thursday,
+    order no. 12345") — shown on the dashboard and in the couple's email."""
+    _add_column(db, "claims", "report_note TEXT DEFAULT ''")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -712,6 +718,7 @@ MIGRATIONS = [
     _m022_user_lang,
     _m023_claim_lang,
     _m024_lead_lang,
+    _m025_claim_report_note,
 ]
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-20 (guests can tell the couple when it's coming)
+- "I've bought/sent it" on the guest page was a bare button, and the couple's email said only "Aunt
+  Miriam reports having sent/bought your gift" — not which one. The button now sits under an optional
+  "Anything the couple should know?" box (placeholder: "Ordered from KSP — arriving Thursday, order no.
+  12345", or "Sent by PayPal today" for cash). Stored in `claims.report_note` (migration 25, one line,
+  ≤500 chars). The couple's email subject is "Aunt Miriam says your gift is on its way: Stand mixer",
+  the body quotes the note; the dashboard shows "Their update: …"; the guest sees their note quoted back.
+- With email on, a guest who typed their address at reservation already got the manage link by email,
+  but the page still said "Save this link — it's the only way…" and offered to email it as if nothing
+  was sent. It now says "We emailed this link to …" with "Email it again".
+- Page title and guest-page subtitle no longer repeat the names when the registry title already
+  contains them ("Rivka & Yosef · Rivka & Yosef's registry" → "Rivka & Yosef's registry").
+- 3 tests — 242 tests.
+
 ## 2026-10-20 (33 more estimate-only items now have a real, in-stock store listing)
 - **100 of 120 active catalog items are now linked** (was 67). Seed-only change: `seed_catalog.json` edited by
   script (format preserved), no code touched. Each new item: `price_status` verified, `price_checked_at`

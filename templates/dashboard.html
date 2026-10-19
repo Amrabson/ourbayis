@@ -127,6 +127,7 @@
         {% if gft['amount_minor'] is not none %}<p class="gift-msg">{{ fmt_money(gft['amount_minor'], gft['currency']) }}</p>
         {% elif gft['amount'] %}<p class="gift-msg">{{ gft['amount'] }} <span class="hint">({{ t('claim_legacy_note') }})</span></p>{% endif %}
         {% if gft['message'] %}<p class="gift-msg" dir="auto">“{{ gft['message'] }}”</p>{% endif %}
+        {% if gft['report_note'] %}<p class="gift-msg report-note"><strong>{{ t('dash_report_note') }}</strong> <span dir="auto">{{ gft['report_note'] }}</span></p>{% endif %}
         {% if gft['guest_email'] %}<p class="gift-msg"><a class="bdi" href="mailto:{{ gft['guest_email'] }}">{{ gft['guest_email'] }}</a></p>{% endif %}
         {% if gft['item_availability'] == 'unavailable' and gft['status'] != 'received' %}<p class="gift-msg warn-note">{{ t('availability_unavailable_tag') }} — {{ t('dash_unavailable_hint') }}</p>{% endif %}
         {% if gft['kind'] == 'cash' and gft['item_url'] %}

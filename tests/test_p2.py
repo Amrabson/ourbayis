@@ -1453,3 +1453,61 @@ def test_shana_request_flags_a_tight_arrival(client, app_module, monkeypatch, bu
     assert db.execute("SELECT bundle_slug FROM shana_requests").fetchone()[0] == (
         "custom" if bundle == "bogus" else bundle)
     db.close()
+
+
+# ------------------------------------------------------------------ guest's "it's on its way" note (2026-10-20)
+def test_guest_report_note_reaches_the_couple(client, app_module):
+    """The guest can say when/how it's coming; the couple's email names the gift and quotes the note,
+    and the dashboard shows it. Without a note the email still names the gift."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer", "microwave"], pay=True)
+    by_key = _items_by_seed_key(items)
+    t1 = _claim(app_module, reg["slug"], by_key["stand-mixer"]["id"], name="Aunt Miriam")
+    t2 = _claim(app_module, reg["slug"], by_key["microwave"]["id"], name="Uncle Avi")
+    g = app_module.app.test_client()
+    html = g.get(f"/g/{t1}").get_data(as_text=True)
+    assert 'name="report_note"' in html and "arriving Thursday" in html  # store-gift placeholder
+    g.post(f"/g/{t1}/report", data=dict(csrf_token=get_csrf(html),
+                                        report_note="  Ordered from Payngo —\n arriving Thursday, order 12345 "))
+    html2 = g.get(f"/g/{t2}").get_data(as_text=True)
+    g.post(f"/g/{t2}/report", data=dict(csrf_token=get_csrf(html2)))
+    db = _db()
+    note = db.execute("SELECT report_note FROM claims WHERE guest_name='Aunt Miriam'").fetchone()[0]
+    mails = db.execute("SELECT subject, body FROM mail_outbox WHERE to_addr='a@b.com'"
+                       " AND subject LIKE '%on its way%' ORDER BY id").fetchall()
+    db.close()
+    assert note == "Ordered from Payngo — arriving Thursday, order 12345"  # one line, trimmed
+    assert mails[0][0] == "Aunt Miriam says your gift is on its way: Stand mixer"
+    assert 'Their note: "Ordered from Payngo — arriving Thursday, order 12345"' in mails[0][1]
+    assert mails[1][0] == "Uncle Avi says your gift is on its way: Microwave" and "Their note" not in mails[1][1]
+    assert "Your note to the couple:" in g.get(f"/g/{t1}").get_data(as_text=True)
+    dash = client.get("/dashboard").get_data(as_text=True)
+    assert "Their update:" in dash and "order 12345" in dash
+    assert "העדכון שלהם:" in client.get("/dashboard?lang=he").get_data(as_text=True)
+
+
+def test_guest_page_says_the_link_was_emailed(client, app_module, monkeypatch):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    item = list(items.values())[0]
+    with_mail = _claim(app_module, reg["slug"], item["id"], guest_email="miriam@example.com")
+    g = app_module.app.test_client()
+    assert "Save this link" in g.get(f"/g/{with_mail}").get_data(as_text=True)  # mail off: nothing was sent
+    monkeypatch.setattr(app_module.ob_mail, "configured", lambda: True)
+    html = g.get(f"/g/{with_mail}").get_data(as_text=True)
+    assert "We emailed this link to miriam@example.com" in html and "Email it again" in html
+    assert "Save this link" not in html
+
+
+def test_registry_title_does_not_repeat_the_names(client, app_module):
+    signup(client)
+    tok = get_csrf(client.get("/registry/new").get_data(as_text=True))
+    client.post("/registry/new", data=dict(csrf_token=tok, title="Rivka & Yosef's registry",
+                                           couple_names="Rivka & Yosef", event_type="wedding",
+                                           visibility="public"))
+    slug = _db().execute("SELECT slug FROM registries").fetchone()[0]
+    html = client.get(f"/r/{slug}").get_data(as_text=True)
+    assert "<title>Rivka &amp; Yosef&#39;s registry — OurBayis</title>" in html
+    add_item(client)
+    item_id = _db().execute("SELECT id FROM registry_items").fetchone()[0]
+    token = _claim(app_module, slug, item_id)
+    sub = re.search(r'<p class="page-sub">(.*?)</p>', app_module.app.test_client().get(f"/g/{token}").get_data(as_text=True)).group(1)
+    assert sub == "<bdi>Rivka &amp; Yosef&#39;s registry</bdi>"

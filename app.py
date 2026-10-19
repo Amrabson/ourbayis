@@ -1371,11 +1371,19 @@ def guest_report(token):
             flash(_t("guest_action_invalid", lang), "err")
             return redirect(url_for("guest_manage", token=token))
         late = 1 if claim["status"] == "expired" else 0
-        db.execute("UPDATE claims SET status='reported', reported_at=?, late=? WHERE id=?",
-                   (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), late, claim["id"]))
+        note = " ".join((request.form.get("report_note") or "").split())[:500]
+        db.execute("UPDATE claims SET status='reported', reported_at=?, late=?, report_note=? WHERE id=?",
+                   (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), late, note,
+                    claim["id"]))
         _log_claim_event(db, claim["id"], "reported", "guest", "late" if late else "")
         reg = db.execute("SELECT * FROM registries WHERE id=?", (claim["registry_id"],)).fetchone()
-    notify_owner(db, reg, "mail_reported", lang, name=claim["guest_name"])
+        item = (db.execute("SELECT * FROM registry_items WHERE id=?", (claim["item_id"],)).fetchone()
+                if claim["item_id"] else None)
+    owner_lang = (db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone() or {"lang": ""})["lang"]
+    owner_lang = owner_lang if owner_lang in ("en", "he") else lang
+    extra = {} if item else {"item": _t("gift_cash", owner_lang)}
+    notify_owner(db, reg, "mail_reported", lang, item=item, qty=claim["qty"] or 1, name=claim["guest_name"],
+                 note=_t("mail_reported_note", owner_lang).format(note=note) if note else "", **extra)
     track("guest_report", owner_uid=reg["user_id"])
     flash(_t("guest_report_done", lang), "ok")
     return redirect(url_for("guest_manage", token=token))
