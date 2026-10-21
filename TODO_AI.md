@@ -85,9 +85,12 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] **Pricing verification** — done 2026-09-25: "verified" now only on items with a store
   link checked on the product page (57). The July Zap-range items without a product were
   downgraded to estimates. Re-check prices before launch if more than ~2 months pass.
-- [ ] **Legal review of privacy/terms** — `privacy.html` is now bilingual with no bracketed notes, but it
-  is a description of current behaviour, not reviewed legal text. There is no separate terms page yet —
-  decide whether one is needed before launch.
+- [ ] **Review the Terms of use draft (launch blocker)** — `/terms` (templates/terms.html + the `terms_*`
+  strings in i18n.py, EN+HE) was drafted 2026-10-22 in the privacy page's plain style. Until you set
+  `TERMS_REVIEWED = True` (and `TERMS_UPDATED` to the review date) at the top of i18n.py, the page shows
+  "Draft — these terms are being reviewed before the site launches" and `manage.py check` warns. Signup now
+  says "By creating an account you accept the Terms of use and the privacy notice", so edit freely before
+  launch. Neither page is reviewed legal text; get a lawyer's eye on both if you can.
 - [ ] **PythonAnywhere scheduled tasks** — see DEPLOY_AI.md "Scheduled tasks" for the exact
   commands (`send-mail`, `expire-claims`, `backup`, `seed-sync --apply` after a `seed_catalog.json`
   edit).

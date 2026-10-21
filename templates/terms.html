@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ t('nav_terms') }} — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section narrow prose">
+  <h1 class="section-title">{{ t('nav_terms') }}</h1>
+  <p class="page-sub">{{ t('terms_intro') }}</p>
+  {% if not terms_reviewed %}<p class="notice-panel terms-draft">{{ t('terms_draft_note') }}</p>{% endif %}
+  {% for key in ['what', 'buy', 'cash', 'prices', 'reserve', 'couples', 'accounts', 'links', 'shana', 'site'] %}
+  <h2 class="sub-title">{{ t('terms_' ~ key ~ '_t') }}</h2>
+  <p>{{ t('terms_' ~ key ~ '_b') }}</p>
+  {% endfor %}
+  <p>{{ t('terms_contact_b') }} <a href="{{ url_for('contact') }}">{{ t('contact_page_link') }}</a>.</p>
+  <p class="hint">{{ tf('terms_updated', date=fmt_date(terms_updated)) }}</p>
+</div>
+{% endblock %}

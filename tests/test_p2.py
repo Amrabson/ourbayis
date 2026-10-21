@@ -1637,3 +1637,34 @@ def test_admin_lists_leads_by_package_name_and_budget(client, app_module):
     lead_id = _db().execute("SELECT id FROM shana_requests WHERE name='Levi'").fetchone()[0]
     assert "Package: Landing Basics" in client.get(f"/admin/lead/{lead_id}").get_data(as_text=True)
     assert "₪2,290" in client.get("/admin/catalog?q=stand").get_data(as_text=True)
+
+
+# ------------------------------------------------------------------ Terms of use (draft, 2026-10-22)
+def test_terms_page_is_bilingual_linked_and_marked_draft_until_reviewed(client, app_module, monkeypatch):
+    import i18n
+    keys = ["what", "buy", "cash", "prices", "reserve", "couples", "accounts", "links", "shana", "site"]
+    for k in keys:
+        for part in ("_t", "_b"):
+            assert i18n.T_EN.get("terms_" + k + part) and i18n.T_HE.get("terms_" + k + part), k
+    en = client.get("/terms").get_data(as_text=True)
+    he = client.get("/terms?lang=he").get_data(as_text=True)
+    assert "<h1 class=\"section-title\">Terms of use</h1>" in en and "תנאי שימוש" in he
+    assert "Draft — these terms are being reviewed" in en and "טיוטה —" in he
+    assert "never receives, holds, converts or refunds money" in en
+    assert "held for 14 days" in en
+    blob = " ".join(v for k, v in i18n.T_EN.items() if k.startswith("terms_")).lower()
+    assert "shabbat" not in blob and "guarantee" not in blob
+    monkeypatch.setattr(i18n, "TERMS_REVIEWED", True)
+    assert "Draft — these terms" not in client.get("/terms").get_data(as_text=True)
+    assert 'href="/terms"' in client.get("/").get_data(as_text=True)          # footer
+    signup = client.get("/signup?lang=en").get_data(as_text=True)
+    assert 'By creating an account you accept the <a href="/terms">Terms of use</a>' in signup
+    assert "/terms</loc>" in client.get("/sitemap.xml").get_data(as_text=True)
+
+
+def test_privacy_says_registries_start_unlisted(client):
+    page = client.get("/privacy").get_data(as_text=True)
+    assert "New registries start as “Unlisted”" in page and "start as drafts" not in page
+    signup(client)
+    html = client.get("/registry/new").get_data(as_text=True)
+    assert re.search(r'name="visibility" value="unlisted"[^>]*checked', html)

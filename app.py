@@ -28,6 +28,7 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import guides as ob_guides
+import i18n as i18n_mod
 import ob_db
 import ob_mail
 import ob_money
@@ -133,7 +134,7 @@ def gzip_response(resp):
 
 # ---------------------------------------------------------------- security
 PUBLIC_VIEW_ENDPOINTS = {"index", "catalog_page", "registry", "sample", "shana", "how", "about",
-                         "find", "advertise", "privacy", "contact", "guides", "guide"}
+                         "find", "advertise", "privacy", "terms", "contact", "guides", "guide"}
 
 
 @app.after_request
@@ -939,6 +940,12 @@ def about():
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
+
+
+@app.route("/terms")
+def terms():
+    return render_template("terms.html", terms_updated=i18n_mod.TERMS_UPDATED,
+                           terms_reviewed=i18n_mod.TERMS_REVIEWED)
 
 
 @app.route("/guides")
@@ -3023,7 +3030,7 @@ def robots():
 @app.route("/sitemap.xml")
 def sitemap():
     pages = [ext_url(p) for p in
-             ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy",
+             ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy", "terms",
               "advertise", "guides")]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']

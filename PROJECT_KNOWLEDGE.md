@@ -292,6 +292,11 @@ messages, delivery note, lead notes) is either `dir="auto"` (whole block, quotes
   `applyRegistryView()`; cards expose `data-cat`/`data-price`/`data-available`.
 - `affiliate_note` i18n key: the only affiliate disclosure text — reuse it, don't write another.
 
+## Terms of use (2026-10-22)
+`/terms` → templates/terms.html, keys `terms_<section>_t/_b` (sections listed in the template). Draft
+until `i18n.TERMS_REVIEWED` is True (page notice + `manage.py check` warning); `i18n.TERMS_UPDATED` is
+the "Last updated" date. Keep its statements in step with the code (hold days, money flow, ads label).
+
 ## SEO / privacy facts (current)
 `canonical_url`/`alt_urls`/`noindex` come from the context processor: canonical = path only (+`?lang=he`
 for the Hebrew variant), hreflang en/he/x-default, `noindex` for admin/dashboard/account/edit/`/g/` pages,

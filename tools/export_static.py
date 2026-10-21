@@ -43,6 +43,7 @@ PAGES = {  # url -> output dir (relative)
     "/shana-rishonah": "shana-rishonah",
     "/find": "find",
     "/privacy": "privacy",
+    "/terms": "terms",
     "/contact": "contact",
     "/sample": "sample",
     "/advertise": "advertise",

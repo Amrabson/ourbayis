@@ -13,6 +13,8 @@
       <label>{{ t('password') }} *<input name="password" type="password" required minlength="8" autocomplete="new-password"></label>
       <label>{{ t('password2') }} *<input name="password2" type="password" required minlength="8" autocomplete="new-password"></label>
       <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('signup_btn') }}</button>
+      <p class="hint signup-terms">{{ t('signup_terms_pre') }} <a href="{{ url_for('terms') }}">{{ t('nav_terms') }}</a>
+        {{ t('signup_terms_mid') }} <a href="{{ url_for('privacy') }}">{{ t('signup_privacy_link') }}</a>{{ t('signup_terms_post') }}</p>
     </form>
     <p class="auth-alt">{{ t('have_account') }} <a href="{{ url_for('login') }}">{{ t('login_btn') }}</a></p>
   </div>

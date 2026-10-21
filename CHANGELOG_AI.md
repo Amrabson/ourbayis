@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-22 (Terms of use — draft for the owner's review)
+- New `/terms` page (EN/HE, privacy-page style, 10 short sections): what OurBayis is; store purchases are
+  with the store; cash gifts go to the couple's own link and we never touch money; what "price checked"
+  and the ≈ amounts mean, Shabbos/kashrus details as the store lists them; reservations (14-day hold,
+  cancel/release); couples' responsibilities and when we may remove a registry/item; accounts; affiliate
+  links and "Sponsored" ads; the Shana Rishonah service (inquiry, written quote before payment); the site
+  as-is. Every statement checked against the code (14 days, "Sponsored", export/delete on /account).
+- **Marked for review:** `i18n.TERMS_REVIEWED = False` shows a "Draft — being reviewed before launch"
+  notice on the page and makes `manage.py check` warn; `TERMS_UPDATED` drives "Last updated …".
+- Footer link, sitemap, page-view counter, static export and screenshots tool include /terms. Signup
+  shows "By creating an account you accept the Terms of use and the privacy notice."
+- Privacy fix: it said "New registries start as drafts only you can see" — they start **unlisted** (the
+  form's default, as the homepage FAQ says). Now correct in EN/HE. "Write to us through the Contact" →
+  "… the contact page" (EN) on both pages.
+- 2 tests — 251 tests.
+
 ## 2026-10-22 (fifth guide; admin shows package names)
 - New guide `building-your-registry` — "How to build a registry when you're moving to Israel" (EN/HE):
   start with the first month, spread prices so every guest can give, think about where guests are

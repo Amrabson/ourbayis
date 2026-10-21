@@ -243,6 +243,10 @@ def _config_warnings(db, problems):
     failed = db.execute("SELECT COUNT(*) FROM mail_outbox WHERE status='failed'").fetchone()[0]
     if failed:
         warnings.append(f"{failed} email(s) failed for good — see /admin/outbox (Retry is there)")
+    import i18n
+    if not i18n.TERMS_REVIEWED:
+        warnings.append("the Terms of use page (/terms) is still a draft: review templates/terms.html + the "
+                        "terms_* strings in i18n.py, then set TERMS_REVIEWED = True there")
     if not os.environ.get("OB_RATES"):
         rates_file = BASE / "instance" / "rates.json"
         if not rates_file.exists():
