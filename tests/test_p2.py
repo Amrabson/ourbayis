@@ -1511,3 +1511,45 @@ def test_registry_title_does_not_repeat_the_names(client, app_module):
     token = _claim(app_module, slug, item_id)
     sub = re.search(r'<p class="page-sub">(.*?)</p>', app_module.app.test_client().get(f"/g/{token}").get_data(as_text=True)).group(1)
     assert sub == "<bdi>Rivka &amp; Yosef&#39;s registry</bdi>"
+
+
+# ------------------------------------------------------------------ cash amount optional; gzip (2026-10-22)
+def test_cash_gift_amount_is_really_optional(client, app_module):
+    """The label said "Amount (optional)" but the field was required, and a blank amount would have
+    been stored as 0 ("₪0" on the dashboard). Blank now stores no amount and the email says so."""
+    reg, _items = _couple_with_catalog_items(client, app_module, [], pay=True)
+    g = app_module.app.test_client()
+    html = g.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    amount_input = re.search(r'<input name="amount"[^>]*>', html).group(0)
+    assert "required" not in amount_input
+    r = g.post(f"/r/{reg['slug']}/cash", data=dict(csrf_token=get_csrf(html), form_key=get_form_key(html),
+                                                   guest_name="Cousin Dov", amount="", currency="ILS"))
+    assert r.status_code == 302
+    page = g.get(r.headers["Location"]).get_data(as_text=True)
+    assert "what the couple listed" not in page and "approximate estimates" not in page
+    assert "own page decides the currency and any fees.</p>" in page
+    db = _db()
+    amount = db.execute("SELECT amount_minor FROM claims WHERE guest_name='Cousin Dov'").fetchone()[0]
+    body = db.execute("SELECT body FROM mail_outbox WHERE to_addr='a@b.com' AND subject LIKE '%cash gift%'"
+                      ).fetchone()[0]
+    db.close()
+    assert amount is None
+    assert "Cousin Dov reports having sent you a cash gift (they didn't say how much)." in body
+    dash = client.get("/dashboard").get_data(as_text=True)
+    assert "Cousin Dov" in dash and "₪0" not in dash
+
+
+def test_pages_are_gzipped_except_where_input_is_echoed(client, app_module):
+    import gzip as _gzip
+    reg, _items = _couple_with_catalog_items(client, app_module, ["stand-mixer", "microwave"], pay=True)
+    g = app_module.app.test_client()
+    plain = g.get(f"/r/{reg['slug']}")
+    zipped = g.get(f"/r/{reg['slug']}?lang=he", headers={"Accept-Encoding": "gzip, deflate, br"})
+    assert "Content-Encoding" not in plain.headers  # client didn't ask
+    assert zipped.headers["Content-Encoding"] == "gzip"
+    assert {"Accept-Encoding", "Accept-Language"} <= set(zipped.vary)
+    assert "<html" in _gzip.decompress(zipped.get_data()).decode("utf-8")
+    assert int(zipped.headers["Content-Length"]) == len(zipped.get_data())
+    # BREACH guard: a page echoing ?q= next to a CSRF token is never compressed
+    for url in ("/catalog?q=kettle", "/find?q=sarah", f"/r/{reg['slug']}?x=1"):
+        assert "Content-Encoding" not in g.get(url, headers={"Accept-Encoding": "gzip"}).headers, url

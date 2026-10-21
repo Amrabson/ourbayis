@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-22 (pages 10× lighter; cash amount really optional)
+- **gzip.** Nothing was compressed: the registry page is ~100 KB of HTML for 23 gifts (one claim dialog
+  per gift), slow on a phone abroad. `gzip_response` (stdlib `gzip`, registered first so it runs last)
+  compresses text responses for browsers that accept it — 100 KB → 11 KB measured in the browser.
+  **BREACH guard:** only successful GETs whose query string holds nothing but `lang`/`preview` are
+  compressed, because pages that echo `?q=`/filters also carry the CSRF token. Search/filter pages
+  stay uncompressed. `Vary: Accept-Encoding` is added.
+- **Cash gift amount.** The general cash form said "Amount (optional) *" and required it; a blank amount
+  would have been stored as 0 ("₪0"). Now optional for real: blank or 0 stores no amount, the couple's
+  email says "sent you a cash gift (they didn't say how much)", and the guest page drops the "amount
+  shown here is what the couple listed" sentence and the $ footnote when they don't apply.
+- 2 tests — 244 tests.
+
 ## 2026-10-20 (guests can tell the couple when it's coming)
 - "I've bought/sent it" on the guest page was a bare button, and the couple's email said only "Aunt
   Miriam reports having sent/bought your gift" — not which one. The button now sits under an optional

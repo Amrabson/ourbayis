@@ -86,6 +86,11 @@ cancel — `/release` is kept as an alias route to the same handler, thanked).
 - Language: `current_lang()` = `?lang=` (stored) → `session['lang']` → browser `Accept-Language` (he/iw → Hebrew; not stored; HTML responses send `Vary: Accept-Language`) → English. `/lang/<code>` and `/currency/<code>` redirect to `ob_security.same_origin_referrer()` (never the raw `Referer`), and `/lang/<code>` rewrites a `lang=` param in that URL to the chosen language; `pick(row, field)` prefers `field_he` in Hebrew.
 - i18n rule: **write "Shabbos" not "Shabbat"** in English content (same audience convention as BashertBench).
 
+## Compression (2026-10-22)
+`gzip_response` after_request: text mimetypes, GET 2xx only, and only when every query key is in
+`GZIP_SAFE_ARGS` (`lang`, `preview`) — the BREACH guard, since search/filter pages echo input next to
+the CSRF token. Keep it the first-registered after_request hook (Flask runs hooks in reverse).
+
 ## Auth & admin
 - Couples: email+password (werkzeug hashes), session `uid` + `sv` (must match `users.session_ver`
   or the session is treated as logged out — bumped by password reset/change and by any payment-link

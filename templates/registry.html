@@ -175,7 +175,7 @@
       <label>{{ t('cash_name') }} *<input name="guest_name" required maxlength="120" autocomplete="name"></label>
       <label>{{ t('cash_email') }}<input name="guest_email" type="email" maxlength="200" autocomplete="email"></label>
       <div class="form-2col">
-        <label>{{ t('cash_amount') }} *<input name="amount" type="number" min="0" step="0.01" required inputmode="decimal"></label>
+        <label>{{ t('cash_amount') }}<input name="amount" type="number" min="0" step="0.01" inputmode="decimal"></label>
         <label>{{ t('cash_currency') }}
           <select name="currency">
             {% for c in currencies %}<option value="{{ c }}" {% if c == reg['display_currency'] %}selected{% endif %}>{{ c }}</option>{% endfor %}

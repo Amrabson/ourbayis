@@ -9,6 +9,7 @@ Phase 1 (v3 P0): see SPEC_V3.md. Database, security, mail and money live in
 the small ob_*.py helper modules; this file stays the routes file.
 """
 import csv
+import gzip
 import io
 import json
 import os
@@ -99,6 +100,35 @@ NOINDEX_ENDPOINTS = {
     "account_export", "account_delete", "admin_home", "admin_login",
     "reset_password", "forgot", "signup", "login",
 }
+
+
+# ---------------------------------------------------------------- compression
+# Registered before every other after_request hook, so Flask runs it last (hooks run in reverse).
+GZIP_MIMETYPES = {"text/html", "text/css", "text/plain", "text/csv", "text/javascript",
+                  "application/javascript", "application/json", "application/xml", "image/svg+xml"}
+# BREACH: compressing a page that holds a secret (the CSRF token) next to text an attacker can
+# choose lets them guess the secret from response sizes. Only pages whose query string carries
+# nothing but these (never echoed) keys are compressed; search/filter pages (?q=, ?cat=) are not.
+GZIP_SAFE_ARGS = {"lang", "preview"}
+
+
+@app.after_request
+def gzip_response(resp):
+    """gzip text responses for browsers that accept it: the registry page carries one claim dialog
+    per gift (~100 KB for 23 gifts -> ~10 KB). PythonAnywhere serves Flask output uncompressed."""
+    if (request.method != "GET" or not 200 <= resp.status_code < 300 or resp.direct_passthrough
+            or resp.is_streamed or "Content-Encoding" in resp.headers
+            or resp.mimetype not in GZIP_MIMETYPES
+            or not set(request.args) <= GZIP_SAFE_ARGS
+            or "gzip" not in (request.headers.get("Accept-Encoding") or "").lower()):
+        return resp
+    data = resp.get_data()
+    if len(data) < 1024:
+        return resp
+    resp.set_data(gzip.compress(data, compresslevel=6))
+    resp.headers["Content-Encoding"] = "gzip"
+    resp.vary.add("Accept-Encoding")
+    return resp
 
 
 # ---------------------------------------------------------------- security
@@ -1276,7 +1306,8 @@ def cash_gift(slug):
         flash(_t("claim_name_required", lang), "err")
         return redirect(url_for("registry", slug=slug))
     try:
-        amount_minor = ob_money.to_minor(request.form.get("amount") or "0", currency)
+        # optional: blank (or 0) stores no amount, so the couple never sees "₪0"
+        amount_minor = ob_money.to_minor(request.form.get("amount") or "0", currency) or None
     except ValueError:
         flash(_t("form_error", lang), "err")
         return redirect(url_for("registry", slug=slug))
@@ -1306,7 +1337,8 @@ def cash_gift(slug):
     _owner_lang = db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()
     _ol = _owner_lang["lang"] if _owner_lang and _owner_lang["lang"] in ("en", "he") else lang
     notify_owner(db, reg, "mail_cash", lang, name=name,
-                 amount=ob_money.fmt_minor(amount_minor, currency, _ol))
+                 amount=(ob_money.fmt_minor(amount_minor, currency, _ol) if amount_minor is not None
+                         else _t("mail_cash_no_amount", _ol)))
     if _guest_email():
         send_mail(_guest_email(),
                   _t("mail_guest_manage_subj", lang),

@@ -40,7 +40,8 @@
         </a>
         {% endfor %}
       </div>
-      <p class="hint">{{ t('guest_pay_hint') }} {{ t('guest_pay_provider_hint') }}</p>
+      {# "the amount shown is what the couple listed" only fits money for a listed gift #}
+      <p class="hint">{{ t('guest_pay_hint') }} {{ t('guest_pay_provider_hint') if claim['item_id'] and claim['amount_minor'] is not none else t('guest_pay_provider_hint_short') }}</p>
     </div>
     {% elif claim['amount_minor'] is not none %}
     <p class="gift-meta bdi"><strong>{{ fmt_money(claim['amount_minor'], claim['currency']) }}</strong></p>
@@ -115,7 +116,7 @@
     {% endif %}
     {% if claim['status'] == 'reserved' and claim['kind'] != 'cash' %}{{ save_link_panel() }}{% endif %}
 
-    {% set _n = estimate_note() if _to_buy or (claim['kind'] == 'cash' and pay_links and claim['status'] in ('reserved', 'reported')) else '' %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+    {% set _n = estimate_note() if _to_buy or (claim['kind'] == 'cash' and pay_links and claim['status'] in ('reserved', 'reported') and claim['amount_minor'] is not none and claim['currency'] == 'ILS') else '' %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
     {% if claim['expires_at'] and claim['status'] == 'reserved' %}
     <p class="hint">{{ tf('guest_expires_on', date=fmt_date(claim['expires_at'])) }}</p>
