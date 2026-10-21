@@ -343,6 +343,90 @@ GUIDES = [
         ],
         "cta": "shana",
     },
+    {
+        "slug": "building-your-registry",
+        "icon": "i-star",
+        "updated": "2026-10-22",
+        "title": "How to build a registry when you're moving to Israel",
+        "title_he": "איך בונים רשימת מתנות כשעוברים לגור בישראל",
+        "summary": "Your guests are in three countries and your apartment is still empty. A practical way "
+                   "to choose what goes on the list, so it fits both the home and the people giving.",
+        "summary_he": "האורחים שלכם בשלוש מדינות והדירה עדיין ריקה. דרך מעשית לבחור מה נכנס לרשימה, "
+                      "כך שתתאים גם לבית וגם לאנשים שנותנים.",
+        "sections": [
+            {
+                "h": "Start with the first month",
+                "h_he": "מתחילים מהחודש הראשון",
+                "p": ["Before anything decorative, list what you will reach for in the first weeks: a "
+                      "kettle, something to cook in, plates and cutlery for milchig and fleishig, sheets "
+                      "that fit the bed, towels, and what you need for Shabbos — a platta, an urn, "
+                      "candlesticks.",
+                      "Check the apartment first. A furnished rental may already have a fridge, a washing "
+                      "machine and beds, and Israeli bed sizes are not the ones you know from abroad — "
+                      "measure the mattress before anyone buys linen for it."],
+                "p_he": ["לפני כל דבר נוי, רשמו את מה שתושיטו אליו יד בשבועות הראשונים: קומקום, משהו "
+                         "לבשל בו, צלחות וסכו״ם לחלבי ולבשרי, מצעים שמתאימים למיטה, מגבות, ומה שצריך "
+                         "לשבת — פלטה, מיחם, פמוטים.",
+                         "קודם בודקים את הדירה. בדירה מרוהטת אולי כבר יש מקרר, מכונת כביסה ומיטות, "
+                         "ומידות המיטות בישראל שונות ממה שמכירים בחו״ל — מודדים את המזרן לפני שמישהו "
+                         "קונה לו מצעים."],
+            },
+            {
+                "h": "Give every guest something to choose",
+                "h_he": "שלכל אורח יהיה מה לבחור",
+                "p": ["A list made only of big appliances leaves most guests with nothing in their range, "
+                      "and a list of small things leaves the people who want to give something "
+                      "substantial without a way to do it. Aim for a spread:"],
+                "p_he": ["רשימה שכולה מוצרי חשמל גדולים משאירה את רוב האורחים בלי משהו בטווח שלהם, "
+                         "ורשימה של דברים קטנים משאירה את מי שרוצה לתת משהו משמעותי בלי דרך לעשות "
+                         "את זה. כדאי לפזר:"],
+                "list": ["small gifts under about ₪150 — kitchen tools, towels, a challah cover",
+                         "a middle band of ₪150–₪600 — a platta, an urn, dinnerware, a good pot set",
+                         "a few large items — a fridge, a washing machine, a couch — for parents or "
+                         "close family",
+                         "a quantity above one where you really need several — two sheet sets, four towels"],
+                "list_he": ["מתנות קטנות עד כ-₪150 — כלי מטבח, מגבות, כיסוי חלה",
+                            "טווח ביניים של ₪150–₪600 — פלטה, מיחם, סט צלחות, סט סירים טוב",
+                            "כמה פריטים גדולים — מקרר, מכונת כביסה, ספה — להורים או "
+                            "למשפחה קרובה",
+                            "כמות גדולה מאחת כשבאמת צריך כמה — שני סטים של מצעים, ארבע מגבות"],
+            },
+            {
+                "h": "Think about where your guests are",
+                "h_he": "לחשוב איפה האורחים נמצאים",
+                "p": ["Relatives abroad usually find it easiest to order from an Israeli store that "
+                      "delivers here, or to send money through your payment link and let you buy. "
+                      "Guests in Israel may prefer Bit or PayBox. Adding each link you have gives every "
+                      "guest a familiar way to give.",
+                      "Write a delivery note: your address, a phone number for the courier, or where to "
+                      "send things if you have not moved in yet. Guests see it only after they reserve "
+                      "a gift, on their private page — it is never shown on the public list."],
+                "p_he": ["לקרובים בחו״ל בדרך כלל הכי קל להזמין מחנות ישראלית שמשלחת לכאן, או לשלוח "
+                         "כסף דרך קישור התשלום שלכם ולתת לכם לקנות. אורחים בארץ אולי יעדיפו Bit או "
+                         "PayBox. כשמוסיפים כל קישור שיש לכם, לכל אורח יש דרך מוכרת לתת.",
+                         "כתבו הערת משלוח: הכתובת שלכם, טלפון לשליח, או לאן לשלוח אם עוד לא נכנסתם "
+                         "לדירה. האורחים רואים אותה רק אחרי ששריינו מתנה, בעמוד הפרטי שלהם — היא אף פעם "
+                         "לא מוצגת ברשימה הציבורית."],
+            },
+            {
+                "h": "Share it early and keep it current",
+                "h_he": "לשתף מוקדם ולעדכן",
+                "p": ["Put the link on the invitation or send it with the first WhatsApp message about "
+                      "the wedding — guests who plan ahead like to give early. Mark the few things you "
+                      "want most so they show first.",
+                      "Come back to it as gifts arrive: confirm what reached you, write your thank-yous "
+                      "while you still remember who sent what, and add a few more items if the list runs "
+                      "out — the last guests to look should still find something to give."],
+                "p_he": ["שימו את הקישור על ההזמנה או שלחו אותו עם הודעת הוואטסאפ הראשונה על החתונה — "
+                         "אורחים שמתכננים מראש אוהבים לתת מוקדם. סמנו את הדברים הבודדים שהכי חשובים "
+                         "לכם, כדי שיופיעו ראשונים.",
+                         "חזרו לרשימה כשמתנות מגיעות: אשרו מה הגיע, כתבו תודות כל עוד אתם זוכרים מי "
+                         "שלח מה, והוסיפו עוד כמה פריטים אם הרשימה נגמרת — גם האורחים האחרונים שנכנסים "
+                         "צריכים למצוא מה לתת."],
+            },
+        ],
+        "cta": "start",
+    },
 ]
 
 BY_SLUG = {g["slug"]: g for g in GUIDES}

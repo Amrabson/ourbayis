@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-22 (fifth guide; admin shows package names)
+- New guide `building-your-registry` — "How to build a registry when you're moving to Israel" (EN/HE):
+  start with the first month, spread prices so every guest can give, think about where guests are
+  (Israeli-store links / payment links, delivery note seen only after reserving), share early and keep
+  it current. Describes only features the site has (no group gifting); CTA "start". In the index,
+  sitemap and docs/ export.
+- Admin: the leads list showed the package slug ("landing-basics"); now "Landing Basics · ₪3,000–6,000"
+  (`bundle_label`, `budget_label` are Jinja globals), "Custom / not sure" for the open choice; the lead
+  page says "Package: …". Catalog and bundle admin prices get thousands separators.
+- A scan of every public page in Hebrew found no English leaking outside brand/model names.
+- 1 test — 249 tests.
+
 ## 2026-10-22 (review of the 33 new listings; jump to the gift list)
 - Reviewed the 2026-10-20 batch (33 items linked by a Sonnet session): no rule breaks (Hebrew twins,
   "Shabbos", claim-free), notes are honest. Four names promised more than the linked product and are

@@ -2401,6 +2401,15 @@ def budget_label(key):
     return _t("budget_" + key, "en") if key in SHANA_BUDGETS + ("10000_plus",) else (key or "—")
 
 
+def bundle_label(slug):
+    """A lead's package by its English name (admin); "custom" = the "not sure yet" choice."""
+    row = get_db().execute("SELECT name FROM bundles WHERE slug=?", (slug or "",)).fetchone()
+    return row["name"] if row else "Custom / not sure"
+
+
+app.jinja_env.globals.update(budget_label=budget_label, bundle_label=bundle_label)
+
+
 # pkg_lead_weeks. Owner decision 2026-09-22: Full Nest's price includes standard
 # installation of the washer/fridge/microwave (existing hookups); other
 # installation, and new plumbing/electrical work, is quoted per item.

@@ -44,7 +44,7 @@
   <div class="gift-row {% if not r['active'] %}is-thanked{% endif %}">
     <div>
       <strong>{% if r['brand'] %}{{ r['brand'] }} — {% endif %}{{ r['name'] }}</strong> <span dir="rtl">{{ r['name_he'] }}</span>
-      <p class="gift-msg">{{ r['category'] }} · ₪{{ r['price_nis'] }} · {{ r['store'] or 'no store' }} ·
+      <p class="gift-msg">{{ r['category'] }} · ₪{{ '{:,}'.format(r['price_nis'] or 0) }} · {{ r['store'] or 'no store' }} ·
         {% if r['url'] %}<a href="{{ r['url'] }}" target="_blank" rel="noopener">link</a>{% else %}<em class="claimed-note">missing store link</em>{% endif %}
         · {{ r['price_status'] }}{% if r['price_checked_at'] %} ({{ r['price_checked_at'] }}){% endif %}
         {% if r['starter_group'] %} · {{ r['starter_group'] }}{% endif %}

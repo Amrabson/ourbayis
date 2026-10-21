@@ -1619,3 +1619,21 @@ def test_catalog_names_match_the_linked_product():
             notes = (it.get("notes") or "").lower()
             assert not ("embroider" in name and "not embroider" in notes), it["seed_key"]
             assert "premium" not in name or it["price_nis"] >= 250, it["seed_key"]
+
+
+def test_admin_lists_leads_by_package_name_and_budget(client, app_module):
+    from test_p1 import admin_login
+    g = app_module.app.test_client()
+    h = g.get("/shana-rishonah").get_data(as_text=True)
+    g.post("/shana-rishonah", data=dict(csrf_token=get_csrf(h), name="Levi", email="levi@example.com",
+                                        bundle="landing-basics", budget="3000_6000"))
+    h = g.get("/shana-rishonah").get_data(as_text=True)
+    g.post("/shana-rishonah", data=dict(csrf_token=get_csrf(h), name="Chana", email="chana@example.com",
+                                        bundle="custom"))
+    admin_login(client)
+    home = client.get("/admin").get_data(as_text=True)
+    assert "Landing Basics · ₪3,000–6,000" in home and "Custom / not sure" in home
+    assert "· landing-basics ·" not in home
+    lead_id = _db().execute("SELECT id FROM shana_requests WHERE name='Levi'").fetchone()[0]
+    assert "Package: Landing Basics" in client.get(f"/admin/lead/{lead_id}").get_data(as_text=True)
+    assert "₪2,290" in client.get("/admin/catalog?q=stand").get_data(as_text=True)
