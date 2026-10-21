@@ -211,6 +211,9 @@ the CSRF token. Keep it the first-registered after_request hook (Flask runs hook
   (own data only, no `pw_hash`/`token_hash`) and account deletion (current-password confirm,
   cascades registry→items→claims via `ON DELETE CASCADE`, purges the user's `mail_outbox` rows,
   leaves `funnel_events` alone since those carry no PII).
+- **Shana offer on the dashboard** (`_shana_offer`): shown while `preferences_json.arrival_date` is in the
+  future, `furnished` isn't "furnished", and no `shana_requests` row has the couple's email; the request
+  form is prefilled for signed-in couples (`_shana_prefill`).
 - **Concierge admin** (`/admin/lead/<id>`): prefilled first reply (WhatsApp `?text=` / mailto) in the
   lead's language (`shana_requests.lang`, m24; `_lead_first_reply`); [RUSH] lead emails and "(in N days)"
   on /admin when arrival is inside the package lead time; internal notes, next action + date, a dedup hint (other

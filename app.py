@@ -1648,7 +1648,40 @@ def dashboard():
             unthanked=[g for g in gifts if g["status"] == "received" and not g["thanked"]],
         )
     return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats, totals=totals,
-                           checklist=checklist, queues=queues)
+                           checklist=checklist, queues=queues,
+                           shana_arrival=_shana_offer(get_db(), current_user(), reg) if reg else None)
+
+
+def _shana_offer(db, user, reg):
+    """The couple's arrival date (ISO) when it is still ahead, the apartment isn't marked fully
+    furnished and they haven't sent a Shana Rishonah request yet — the dashboard then mentions the
+    setup service once, quietly. None otherwise."""
+    prefs = _prefs(reg)
+    if prefs.get("furnished") == "furnished":
+        return None
+    try:
+        arrival = date.fromisoformat((prefs.get("arrival_date") or "")[:10])
+    except ValueError:
+        return None
+    if arrival < datetime.now(timezone.utc).date():
+        return None
+    if user and user["email"] and db.execute(
+            "SELECT 1 FROM shana_requests WHERE lower(email)=lower(?) LIMIT 1", (user["email"],)).fetchone():
+        return None
+    return arrival.isoformat()
+
+
+def _shana_prefill():
+    """A signed-in couple's request form starts with what their registry already knows."""
+    user = current_user()
+    reg = user_registry() if user else None
+    if not reg:
+        return {}
+    prefs = _prefs(reg)
+    furnishing = prefs.get("furnished")
+    return {"name": user["name"] or reg["couple_names"], "email": user["email"],
+            "arrival": (prefs.get("arrival_date") or "")[:10], "city": reg["city"] or "",
+            "furnishing": furnishing if furnishing in ("empty", "partly", "furnished") else ""}
 
 
 @app.route("/dashboard/shared", methods=["POST"])
@@ -2349,7 +2382,7 @@ def shana():
     # a rejected POST re-renders with what was typed (up to 2000 chars of notes) instead of blanking it
     return render_template("shana.html", bundles=bundles, package_tiers=PACKAGE_TIERS,
                            shana_budgets=SHANA_BUDGETS,
-                           form=request.form if request.method == "POST" else {})
+                           form=request.form if request.method == "POST" else _shana_prefill())
 
 
 # Shana Rishonah package definition, per tier (review 2026-09-15). The goods

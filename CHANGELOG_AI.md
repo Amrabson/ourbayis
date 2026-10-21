@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-22 (the setup service meets the couples who need it)
+- Couples on the registry are the Shana Rishonah service's best leads, and many fill in an arrival date,
+  city and furnishing status — but the dashboard never mentioned the service, and the request form made
+  them type it all again. Now the dashboard shows one quiet panel ("Landing before the gifts do? … See
+  setup packages →") while the arrival date is still ahead, the apartment isn't marked fully furnished,
+  and no request with their email exists yet (`_shana_offer`). For a signed-in couple, /shana-rishonah
+  starts filled in with their name, email, arrival date, city and furnishing (`_shana_prefill`).
+- 2 tests — 246 tests.
+
 ## 2026-10-22 (pages 10× lighter; cash amount really optional)
 - **gzip.** Nothing was compressed: the registry page is ~100 KB of HTML for 23 gifts (one claim dialog
   per gift), slow on a phone abroad. `gzip_response` (stdlib `gzip`, registered first so it runs last)

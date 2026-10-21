@@ -72,6 +72,14 @@
     <a class="btn btn-ghost" href="{{ url_for('dashboard_claims_csv') }}">{{ t('dash_export_csv') }}</a>
   </div>
 
+  {% if shana_arrival %}
+  <div class="notice-panel notice-stack shana-offer">
+    <p><strong>{{ t('dash_shana_title') }}</strong></p>
+    <p>{{ tf('dash_shana_body', date=fmt_date(shana_arrival)) }}</p>
+    <p><a class="btn btn-gold btn-sm" href="{{ url_for('shana', _anchor='request') }}">{{ t('dash_shana_cta') }} {{ '←' if rtl else '→' }}</a></p>
+  </div>
+  {% endif %}
+
   {% if queues %}
   <div class="action-queues">
     {% if queues['awaiting_confirm'] %}

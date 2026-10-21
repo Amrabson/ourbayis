@@ -325,6 +325,11 @@ T_EN = {
     "guest_report_note_ph_cash": "e.g. Sent by PayPal today",
     "guest_report_note_yours": "Your note to the couple:",
     "dash_report_note": "Their update:",
+    "dash_shana_title": "Landing before the gifts do?",
+    "dash_shana_body": ("You arrive {date}. Our Shana Rishonah setup service can have the basics ordered and "
+                        "delivered to your apartment before you land. The request form already has your "
+                        "arrival date and city — no payment until you accept a written quote."),
+    "dash_shana_cta": "See setup packages",
     "mail_cash_subj": "Mazel tov! A cash gift was reported — {title}",
     "mail_cash_no_amount": "a cash gift (they didn't say how much)",
     "mail_cash_body": "{name} reports having sent you {amount}. This is a self-report, not a payment confirmation — please check your account.",
@@ -1057,6 +1062,11 @@ T_HE = {
     "guest_report_note_ph_cash": "לדוגמה: נשלח היום ב-PayPal",
     "guest_report_note_yours": "ההודעה שלכם לזוג:",
     "dash_report_note": "העדכון שלהם:",
+    "dash_shana_title": "נוחתים לפני שהמתנות מגיעות?",
+    "dash_shana_body": ("אתם מגיעים ב-{date}. שירות שנה ראשונה שלנו יכול להזמין ולהביא לדירה שלכם "
+                        "את הדברים הבסיסיים לפני שתנחתו. בטופס הבקשה כבר מופיעים "
+                        "תאריך ההגעה והעיר שלכם — בלי תשלום עד שתאשרו הצעת מחיר בכתב."),
+    "dash_shana_cta": "לחבילות ההקמה",
     "mail_cash_subj": "מזל טוב! דווח על מתנת כסף — {title}",
     "mail_cash_no_amount": "מתנת כסף (בלי לציין סכום)",
     "mail_cash_body": "{name} מדווח/ת ששלח/ה לכם {amount}. זהו דיווח עצמי, לא אישור תשלום — בדקו בחשבון שלכם.",

@@ -1553,3 +1553,44 @@ def test_pages_are_gzipped_except_where_input_is_echoed(client, app_module):
     # BREACH guard: a page echoing ?q= next to a CSRF token is never compressed
     for url in ("/catalog?q=kettle", "/find?q=sarah", f"/r/{reg['slug']}?x=1"):
         assert "Content-Encoding" not in g.get(url, headers={"Accept-Encoding": "gzip"}).headers, url
+
+
+# ------------------------------------------------------------------ Shana Rishonah from the dashboard (2026-10-22)
+def _set_prefs(**prefs):
+    import json as _json
+    db = _db()
+    cur = _json.loads(db.execute("SELECT preferences_json FROM registries").fetchone()[0] or "{}")
+    cur.update(prefs)
+    db.execute("UPDATE registries SET preferences_json=?, city='Beit Shemesh'", (_json.dumps(cur),))
+    db.commit()
+    db.close()
+
+
+def test_dashboard_mentions_shana_for_an_upcoming_arrival_and_prefills_the_form(client, app_module):
+    from datetime import date as _date, timedelta as _td
+    _couple_with_catalog_items(client, app_module, [])
+    assert "Landing before the gifts do?" not in client.get("/dashboard").get_data(as_text=True)  # no date
+    soon = (_date.today() + _td(days=40)).isoformat()
+    _set_prefs(arrival_date=soon, furnished="empty")
+    dash = client.get("/dashboard").get_data(as_text=True)
+    assert "Landing before the gifts do?" in dash and 'href="/shana-rishonah#request"' in dash
+    assert "נוחתים לפני שהמתנות מגיעות?" in client.get("/dashboard?lang=he").get_data(as_text=True)
+    form = client.get("/shana-rishonah").get_data(as_text=True)
+    assert 'name="arrival" type="date" value="%s"' % soon in form
+    assert 'value="Beit Shemesh"' in form and 'value="a@b.com"' in form and 'value="Test User"' in form
+    assert '<option value="empty" selected>' in form
+    # a logged-out visitor gets an empty form
+    assert 'value="Beit Shemesh"' not in app_module.app.test_client().get("/shana-rishonah").get_data(as_text=True)
+    # once they've sent a request, the dashboard stops mentioning it
+    client.post("/shana-rishonah", data=dict(csrf_token=get_csrf(form), name="Test User", email="a@b.com",
+                                             arrival=soon, bundle="custom"))
+    assert "Landing before the gifts do?" not in client.get("/dashboard").get_data(as_text=True)
+
+
+def test_dashboard_skips_shana_when_furnished_or_already_arrived(client, app_module):
+    from datetime import date as _date, timedelta as _td
+    _couple_with_catalog_items(client, app_module, [])
+    _set_prefs(arrival_date=(_date.today() + _td(days=40)).isoformat(), furnished="furnished")
+    assert "Landing before the gifts do?" not in client.get("/dashboard").get_data(as_text=True)
+    _set_prefs(arrival_date=(_date.today() - _td(days=3)).isoformat(), furnished="empty")
+    assert "Landing before the gifts do?" not in client.get("/dashboard").get_data(as_text=True)
