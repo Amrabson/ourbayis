@@ -381,7 +381,7 @@ textarea { resize: vertical; }
 .gift-row.is-thanked { opacity: .62; }
 .gift-row.is-closed { opacity: .55; background: transparent; }
 .gift-row.is-due { border-inline-start: 4px solid var(--gold); }
-.gift-row, .mine-row, #mine, #add-more { scroll-margin-top: 90px; }  /* land below the sticky header after an action */
+.gift-row, .mine-row, #mine, #add-more, #gifts { scroll-margin-top: 90px; }  /* land below the sticky header after an action */
 .mine-title { margin-top: 1.2em; }
 .gift-row:target, .mine-row:target { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
 .gift-msg { color: var(--ink-soft); font-size: .9rem; margin: 3px 0 0; }
@@ -843,6 +843,8 @@ dialog:focus-visible { outline: none; }
 .starter-card .gift-meta { margin: 4px 0 0; }
 .starter-card .mine-qty { margin-top: 8px; }
 
+.reg-jump { display: inline-block; margin-top: 12px; color: var(--gold-bright); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.reg-jump:hover, .reg-jump:focus-visible { color: #fff; }
 .price-news { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 6px; font-size: .9rem; color: var(--gold); font-weight: 600; }
 .items-status-row { display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .warn-note { color: var(--danger); font-style: normal; font-weight: 600; }

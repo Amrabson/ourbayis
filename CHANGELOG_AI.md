@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-22 (review of the 33 new listings; jump to the gift list)
+- Reviewed the 2026-10-20 batch (33 items linked by a Sonnet session): no rule breaks (Hebrew twins,
+  "Shabbos", claim-free), notes are honest. Four names promised more than the linked product and are
+  renamed (old names kept in `legacy_names`): "Porcelain dinnerware — premium fleishig/milchig" (a
+  ₪279–319 bone-china set) → "Bone china dinnerware — fleishig/milchig"; "Shabbos tablecloth —
+  embroidered premium" (jacquard, per its own note) → "Shabbos tablecloth — jacquard, large (350 cm)";
+  "Pop-up sukkah" (a folding frame) → "Folding sukkah (3×3 m)". Hebrew names to match. A test keeps
+  "embroidered"/"premium" names honest. **Live DB:** `python manage.py seed-sync --fields name,name_he`
+  (dry run, then `--apply`). Couples' existing registry items keep their copied name.
+- Registry hero: "See the gift list ↓" under the progress bar — on a phone the list starts ~1.5 screens
+  down, below the cash card. `#gifts` joins the sticky-header `scroll-margin-top` rule.
+- docs/ static export regenerated (was last rebuilt 2026-10-08: old prices, names and copy).
+- 2 tests — 248 tests.
+
 ## 2026-10-22 (the setup service meets the couples who need it)
 - Couples on the registry are the Shana Rishonah service's best leads, and many fill in an arrival date,
   city and furnishing status — but the dashboard never mentioned the service, and the request form made

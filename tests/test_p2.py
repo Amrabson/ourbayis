@@ -1594,3 +1594,28 @@ def test_dashboard_skips_shana_when_furnished_or_already_arrived(client, app_mod
     assert "Landing before the gifts do?" not in client.get("/dashboard").get_data(as_text=True)
     _set_prefs(arrival_date=(_date.today() - _td(days=3)).isoformat(), furnished="empty")
     assert "Landing before the gifts do?" not in client.get("/dashboard").get_data(as_text=True)
+
+
+# ------------------------------------------------------------------ 2026-10-22 review pass
+def test_registry_hero_links_down_to_the_gift_list(client, app_module):
+    reg, _items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
+    g = app_module.app.test_client()
+    html = g.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    assert '<a class="reg-jump" href="#gifts">See the gift list ↓</a>' in html and 'id="gifts"' in html
+    assert "לרשימת המתנות ↓" in g.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
+
+
+def test_catalog_names_match_the_linked_product():
+    """A ₪279 bone-china set was named "premium porcelain", a jacquard cloth "embroidered", a folding
+    frame "pop-up". Names that promise a grade or a technique must not outrun the product."""
+    import json
+    items = json.load(open(os.path.join(BASE, "seed_catalog.json"), encoding="utf-8"))["items"]
+    by_key = {i["seed_key"]: i for i in items}
+    assert by_key["porcelain-dinnerware-premium-fleishig"]["name"] == "Bone china dinnerware — fleishig"
+    assert "Porcelain dinnerware — premium fleishig" in by_key["porcelain-dinnerware-premium-fleishig"]["legacy_names"]
+    for it in items:
+        if it.get("url") and it.get("active", True):
+            name = it["name"].lower()
+            notes = (it.get("notes") or "").lower()
+            assert not ("embroider" in name and "not embroider" in notes), it["seed_key"]
+            assert "premium" not in name or it["price_nis"] >= 250, it["seed_key"]

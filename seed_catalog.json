@@ -1815,8 +1815,8 @@
       "notes_he": "תנור בנוי שמופיע ב-KSP עם מצב שבת — כדאי לבדוק בעצמכם את ההכשר של הדגם. דורש נישה לתנור בנוי והתקנה על ידי חשמלאי/מתקין."
     },
     {
-      "name": "Porcelain dinnerware — premium fleishig",
-      "name_he": "סט פורצלן פרימיום — בשרי",
+      "name": "Bone china dinnerware — fleishig",
+      "name_he": "סט בון צ'יינה — בשרי",
       "category": "dining",
       "price_nis": 319,
       "store": "KSP",
@@ -1833,11 +1833,14 @@
       "model_he": "Food Appeal דגם Quadro — סט כלי אוכל 18 חלקים מפורצלן ניו בון צ׳יינה ל-6 סועדים, לבן, צורה מרובעת",
       "availability": "in_stock",
       "notes": "A bone-china set for six; for twelve settings buy two. Pick a clearly different pattern for the milchig set so the two are easy to tell apart.",
-      "notes_he": "סט פורצלן ניו בון צ׳יינה לשישה סועדים; ל-12 סועדים קונים שניים. כדאי לבחור דגם שונה בבירור לסט החלבי כדי שיהיה קל להבדיל."
+      "notes_he": "סט פורצלן ניו בון צ׳יינה לשישה סועדים; ל-12 סועדים קונים שניים. כדאי לבחור דגם שונה בבירור לסט החלבי כדי שיהיה קל להבדיל.",
+      "legacy_names": [
+        "Porcelain dinnerware — premium fleishig"
+      ]
     },
     {
-      "name": "Porcelain dinnerware — premium milchig",
-      "name_he": "סט פורצלן פרימיום — חלבי",
+      "name": "Bone china dinnerware — milchig",
+      "name_he": "סט בון צ'יינה — חלבי",
       "category": "dining",
       "price_nis": 279,
       "store": "KSP",
@@ -1854,7 +1857,10 @@
       "model_he": "Food Appeal דגם Lilly — סט כלי אוכל 18 חלקים מפורצלן ניו בון צ׳יינה ל-6 סועדים, לבן, קצה גלי",
       "availability": "in_stock",
       "notes": "A bone-china set for six; for twelve settings buy two. Pick a clearly different pattern for the fleishig set so the two are easy to tell apart.",
-      "notes_he": "סט פורצלן ניו בון צ׳יינה לשישה סועדים; ל-12 סועדים קונים שניים. כדאי לבחור דגם שונה בבירור לסט הבשרי כדי שיהיה קל להבדיל."
+      "notes_he": "סט פורצלן ניו בון צ׳יינה לשישה סועדים; ל-12 סועדים קונים שניים. כדאי לבחור דגם שונה בבירור לסט הבשרי כדי שיהיה קל להבדיל.",
+      "legacy_names": [
+        "Porcelain dinnerware — premium milchig"
+      ]
     },
     {
       "name": "Wine glasses (12)",
@@ -1956,8 +1962,8 @@
       "price_source": ""
     },
     {
-      "name": "Shabbos tablecloth — embroidered premium",
-      "name_he": "מפת שבת רקומה — פרימיום",
+      "name": "Shabbos tablecloth — jacquard, large (350 cm)",
+      "name_he": "מפת שבת ז'קארד — גדולה (350 ס״מ)",
       "category": "dining",
       "price_nis": 239,
       "store": "KSP",
@@ -1974,7 +1980,10 @@
       "model_he": "Food Appeal דגם Kathrin — מפת ג׳קארד 350 ס״מ עם 12 מפיות, קרם",
       "availability": "in_stock",
       "notes": "Jacquard-woven pattern, not embroidery. 350 cm long, for a large table.",
-      "notes_he": "דוגמת ג׳קארד אריגה, לא רקמה. אורך 350 ס״מ, לשולחן גדול."
+      "notes_he": "דוגמת ג׳קארד אריגה, לא רקמה. אורך 350 ס״מ, לשולחן גדול.",
+      "legacy_names": [
+        "Shabbos tablecloth — embroidered premium"
+      ]
     },
     {
       "name": "Sheet set — premium sateen",
@@ -2187,8 +2196,8 @@
       "notes_he": "דמוי עור עם ידית נשיאה. האתרוג עצמו לא כלול."
     },
     {
-      "name": "Pop-up sukkah",
-      "name_he": "סוכה מתקפלת",
+      "name": "Folding sukkah (3×3 m)",
+      "name_he": "סוכה מתקפלת (3×3 מ׳)",
       "category": "judaica",
       "price_nis": 400,
       "store": "Home Center",
@@ -2205,7 +2214,10 @@
       "model_he": "סוכות הדר — סוכה מתקפלת/מתכווננת 3×3 מ׳, שלד לבן צבוע בתנור עם מוטות מרובעים, בד אוקספורד, 2 חלונות ו-2 דלתות ברוכסן",
       "availability": "in_stock",
       "notes": "Frame and walls only — the schach roof is bought separately (Home Center lists schach mats).",
-      "notes_he": "שלד וקירות בלבד — הסכך נרכש בנפרד (בהום סנטר יש מחצלות סכך)."
+      "notes_he": "שלד וקירות בלבד — הסכך נרכש בנפרד (בהום סנטר יש מחצלות סכך).",
+      "legacy_names": [
+        "Pop-up sukkah"
+      ]
     },
     {
       "name": "Shas — full set",

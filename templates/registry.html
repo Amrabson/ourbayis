@@ -15,6 +15,8 @@
     {% if total %}
     <div class="progress" role="img" aria-label="{{ tf('reg_progress', claimed=done, total=total) }}"><div class="progress-fill" style="width: {{ (100 * done // total) if total else 0 }}%"></div></div>
     <p class="progress-label">{{ tf('reg_progress', claimed=done, total=total) }}</p>
+    {# on a phone the list starts ~1.5 screens down, below the cash card and notes #}
+    <a class="reg-jump" href="#gifts">{{ t('reg_jump') }} ↓</a>
     {% endif %}
   </div>
 </section>
@@ -54,7 +56,7 @@
   </div>
   {% endif %}
 
-  <h2 class="section-title">{{ t('reg_gifts') }}</h2>
+  <h2 class="section-title" id="gifts">{{ t('reg_gifts') }}</h2>
   <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}</p>
   {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 

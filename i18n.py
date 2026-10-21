@@ -330,6 +330,7 @@ T_EN = {
                         "delivered to your apartment before you land. The request form already has your "
                         "arrival date and city — no payment until you accept a written quote."),
     "dash_shana_cta": "See setup packages",
+    "reg_jump": "See the gift list",
     "mail_cash_subj": "Mazel tov! A cash gift was reported — {title}",
     "mail_cash_no_amount": "a cash gift (they didn't say how much)",
     "mail_cash_body": "{name} reports having sent you {amount}. This is a self-report, not a payment confirmation — please check your account.",
@@ -1067,6 +1068,7 @@ T_HE = {
                         "את הדברים הבסיסיים לפני שתנחתו. בטופס הבקשה כבר מופיעים "
                         "תאריך ההגעה והעיר שלכם — בלי תשלום עד שתאשרו הצעת מחיר בכתב."),
     "dash_shana_cta": "לחבילות ההקמה",
+    "reg_jump": "לרשימת המתנות",
     "mail_cash_subj": "מזל טוב! דווח על מתנת כסף — {title}",
     "mail_cash_no_amount": "מתנת כסף (בלי לציין סכום)",
     "mail_cash_body": "{name} מדווח/ת ששלח/ה לכם {amount}. זהו דיווח עצמי, לא אישור תשלום — בדקו בחשבון שלכם.",
