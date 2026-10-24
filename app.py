@@ -268,6 +268,38 @@ def notify_guest(db, claim, key):
     return True
 
 
+def send_guest_link(db, claim_id, token, to, lang):
+    """The guest's own confirmation: which gift and for whom, the next step that fits it (store, cash
+    amount, or buy-anywhere), how long it's held, and the private link — their only way back to it."""
+    c = db.execute("SELECT * FROM claims WHERE id=?", (claim_id,)).fetchone()
+    reg = db.execute("SELECT * FROM registries WHERE id=?", (c["registry_id"],)).fetchone()
+    item = (db.execute("SELECT * FROM registry_items WHERE id=?", (c["item_id"],)).fetchone()
+            if c["item_id"] else None)
+    he = lang == "he"
+    couple = (reg["couple_names_he"] if he and reg["couple_names_he"] else reg["couple_names"]) or _t("the_couple", lang)
+    if item is not None:
+        name = item["name_he"] if he and item["name_he"] else item["name"]
+        item_label = f"{name} ×{c['qty']}" if (c["qty"] or 1) > 1 else name
+    else:
+        item_label = _t("gift_cash", lang)
+    kw = dict(couple=couple, item=item_label, link=ext_url("guest_manage", token=token))
+    if c["status"] != "reserved":  # a general cash gift is recorded as already reported
+        body = _t("mail_guest_cash_body", lang).format(**kw)
+    else:
+        if c["kind"] == "cash":
+            amount = (ob_money.fmt_minor(c["amount_minor"], c["currency"] or "ILS", lang)
+                      if c["amount_minor"] is not None else _t("gift_cash", lang))
+            nxt = _t("mail_guest_next_cash", lang).format(amount=amount)
+        elif item is not None and item["url"]:
+            nxt = _t("mail_guest_next_store", lang).format(store=item["store"] or _t("the_store", lang))
+        else:
+            nxt = _t("mail_guest_next_plain", lang)
+        held = (_t("mail_guest_held", lang).format(date=format_date(c["expires_at"][:10], lang))
+                if c["expires_at"] else "")
+        body = _t("mail_guest_manage_body", lang).format(next=nxt, held=held, **kw)
+    send_mail(to, _t("mail_guest_manage_subj", lang).format(**kw), body)
+
+
 # ---------------------------------------------------------------- database
 def get_db():
     if "db" not in g:
@@ -1260,7 +1292,7 @@ def claim_item(slug, item_id):
                 flash(_t("claim_already", lang), "ok")
                 raise _Abort()
             _log_claim_event(db, cur.lastrowid, "reserved", "guest")
-            result.update(reg=dict(reg), item=dict(item), token=token, qty=qty,
+            result.update(claim_id=cur.lastrowid, reg=dict(reg), item=dict(item), token=token, qty=qty,
                           give_cash=give_cash, name=name)
     except _Abort as ab:
         return ab.response or redirect(url_for("registry", slug=slug))
@@ -1270,10 +1302,7 @@ def claim_item(slug, item_id):
     notify_owner(db, reg, "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item", lang,
                  item=item, qty=result["qty"], name=result["name"])
     if _guest_email():
-        send_mail(_guest_email(),
-                  _t("mail_guest_manage_subj", lang),
-                  _t("mail_guest_manage_body", lang).format(
-                      link=ext_url("guest_manage", token=result["token"])))
+        send_guest_link(db, result["claim_id"], result["token"], _guest_email(), lang)
     track("reservation", owner_uid=reg["user_id"])
     return redirect(url_for("guest_manage", token=result["token"]))
 
@@ -1347,9 +1376,7 @@ def cash_gift(slug):
                  amount=(ob_money.fmt_minor(amount_minor, currency, _ol) if amount_minor is not None
                          else _t("mail_cash_no_amount", _ol)))
     if _guest_email():
-        send_mail(_guest_email(),
-                  _t("mail_guest_manage_subj", lang),
-                  _t("mail_guest_manage_body", lang).format(link=ext_url("guest_manage", token=token)))
+        send_guest_link(db, cur.lastrowid, token, _guest_email(), lang)
     track("guest_report", owner_uid=reg["user_id"])
     return redirect(url_for("guest_manage", token=token))
 
@@ -1391,8 +1418,7 @@ def guest_email_link(token):
             abort(404)
         if not claim["guest_email"]:
             db.execute("UPDATE claims SET guest_email=? WHERE id=?", (email, claim["id"]))
-    send_mail(email, _t("mail_guest_manage_subj", lang),
-              _t("mail_guest_manage_body", lang).format(link=ext_url("guest_manage", token=token)))
+    send_guest_link(db, claim["id"], token, email, lang)
     flash(_t("guest_email_link_sent", lang), "ok")
     return redirect(url_for("guest_manage", token=token))
 

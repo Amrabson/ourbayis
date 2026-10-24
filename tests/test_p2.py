@@ -1668,3 +1668,54 @@ def test_privacy_says_registries_start_unlisted(client):
     signup(client)
     html = client.get("/registry/new").get_data(as_text=True)
     assert re.search(r'name="visibility" value="unlisted"[^>]*checked', html)
+
+
+# ------------------------------------------------------------------ guest confirmation email (2026-10-24)
+def _guest_mail(to):
+    db = _db()
+    row = db.execute("SELECT subject, body FROM mail_outbox WHERE to_addr=? ORDER BY id DESC", (to,)).fetchone()
+    db.close()
+    return row
+
+
+def test_guest_confirmation_says_which_gift_what_next_and_until_when(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer", "microwave"], pay=True)
+    by_key = _items_by_seed_key(items)
+    token = _claim(app_module, reg["slug"], by_key["stand-mixer"]["id"], guest_email="aunt@example.com")
+    subj, body = _guest_mail("aunt@example.com")
+    assert subj == "Your gift for Sarah & Dovid: Stand mixer"
+    assert "You reserved Stand mixer on Sarah & Dovid's registry." in body
+    assert "order it from Machsanei Chashmal" in body and "“I've bought/sent it”" in body
+    assert "We hold it for you until " in body and f"/g/{token}" in body
+    # cash for a listed gift: the amount to send, in the guest's language
+    g = app_module.app.test_client()
+    html = g.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
+    g.post(f"/r/{reg['slug']}/claim/{by_key['microwave']['id']}",
+           data=dict(csrf_token=get_csrf(html), form_key=get_form_key(html), guest_name="דודה",
+                     guest_email="doda@example.com", give="cash"))
+    subj, body = _guest_mail("doda@example.com")
+    assert subj.startswith("המתנה שלכם עבור Sarah & Dovid:")
+    assert "לשלוח לזוג ₪" in body and "״קניתי/שלחתי את זה״" in body
+
+
+def test_general_cash_gift_confirmation_and_resend(client, app_module, monkeypatch):
+    reg, _items = _couple_with_catalog_items(client, app_module, [], pay=True)
+    g = app_module.app.test_client()
+    html = g.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    r = g.post(f"/r/{reg['slug']}/cash", data=dict(csrf_token=get_csrf(html), form_key=get_form_key(html),
+                                                   guest_name="Cousin Dov", guest_email="dov@example.com",
+                                                   amount="180", currency="ILS"))
+    subj, body = _guest_mail("dov@example.com")
+    assert subj == "Your gift for Sarah & Dovid: Cash gift"
+    assert body.startswith("Thank you — Sarah & Dovid have been told about your cash gift.")
+    assert "We hold it for you" not in body  # nothing is held: it's already reported
+    # "Email it again" sends the same full confirmation
+    monkeypatch.setattr(app_module.ob_mail, "configured", lambda: True)
+    token = r.headers["Location"].rsplit("/", 1)[-1]
+    page = g.get(f"/g/{token}").get_data(as_text=True)
+    g.post(f"/g/{token}/email", data=dict(csrf_token=get_csrf(page), email="dov@example.com"))
+    db = _db()
+    n = db.execute("SELECT COUNT(*) FROM mail_outbox WHERE to_addr='dov@example.com'"
+                   " AND subject='Your gift for Sarah & Dovid: Cash gift'").fetchone()[0]
+    db.close()
+    assert n == 2

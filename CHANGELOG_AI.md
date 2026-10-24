@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-24 (the guest's confirmation email says what to do)
+- The email a guest gets after reserving (their only copy of the private link) was "Manage your gift /
+  You can manage your gift anytime here: <link>" — no gift, no couple, no next step. `send_guest_link()`
+  now writes it for all three senders (reserve, general cash gift, "Email it again"): subject "Your gift
+  for Sarah & Dovid: Stand mixer"; the next step that fits (order from <store> — the private page has the
+  link and where to send it / send the couple ₪X through their payment link / buy anywhere and ask the
+  couple where to send it), "We hold it for you until <date>", and the link with "keep this email". A
+  general cash gift (already reported) gets "Thank you — Sarah & Dovid have been told…". In the guest's
+  language, with the couple's Hebrew names in Hebrew.
+- Reminder emails quote the button exactly as the page labels it ("I've bought/sent it",
+  ״קניתי/שלחתי את זה״).
+- 2 tests — 253 tests.
+
 ## 2026-10-22 (Terms of use — draft for the owner's review)
 - New `/terms` page (EN/HE, privacy-page style, 10 short sections): what OurBayis is; store purchases are
   with the store; cash gifts go to the couple's own link and we never touch money; what "price checked"
