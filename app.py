@@ -2203,7 +2203,9 @@ def item_edit(item_id):
                 " kind=?, overrides=? WHERE id=?",
                 (name, (f.get("name_he") or "").strip()[:200], brand, price, url, store, qty,
                  1 if f.get("priority") else 0, (f.get("note") or "").strip()[:1000],
-                 (f.get("note_he") or "").strip()[:1000], (f.get("variant") or "").strip()[:120],
+                 # note_he left the form (the note is private); keep whatever an older form saved
+                 ((f.get("note_he") if "note_he" in f else item["note_he"]) or "").strip()[:1000],
+                 (f.get("variant") or "").strip()[:120],
                  f.get("kind") if f.get("kind") in ("product", "idea", "cash_need") else item["kind"],
                  ",".join(sorted(overrides)), item_id))
         flash(_t("item_updated", lang), "ok")

@@ -929,6 +929,8 @@ dialog:focus-visible { outline: none; }
 .gift-sub { margin: 0; color: var(--ink-soft); font-size: .86rem; }
 .gift-body > .gift-sub .item-brand { display: inline; font-size: .78rem; letter-spacing: .8px; }
 .gift-model { margin: 0; color: var(--ink-soft); font-size: .8rem; line-height: 1.35; }
+.gift-want { margin: 4px 0 0; font-size: .85rem; line-height: 1.35; color: var(--ink); }
+.gift-want strong { color: var(--gold); font-weight: 700; }
 .gift-tags { margin: 2px 0 0; display: flex; flex-wrap: wrap; gap: 5px; }
 .gift-tags .badge { text-transform: none; letter-spacing: .2px; font-size: .74rem; padding: 2px 9px; }
 .gift-card-link { text-decoration: none; color: inherit; }

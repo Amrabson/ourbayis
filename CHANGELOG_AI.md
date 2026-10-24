@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-24 (the couple's "grey, 160×200" reaches the guest)
+- A gift's **Variant** (item edit page) was saved but shown nowhere — a couple who typed "grey, 160×200"
+  could still get white 140×190. It's now labelled "Colour, size or model you want (guests see this)"
+  (placeholder "e.g. grey, 160×200") and shown as "They'd like: …" (״הם מבקשים:״) in `gift_facts` — so on the
+  registry card, the reserve dialog and the guest's page. Registry items only (catalog rows never carry
+  it; adding from the catalog doesn't copy one). `dir="auto"` for whichever language they typed.
+- The item **note** is private and never shown to guests, but its Hebrew twin sat under "Guests who switch
+  the site to Hebrew see these instead". The Hebrew note field is gone from the form (an existing
+  `note_he` is kept on save); the explanation is true again.
+- 1 test — 254 tests.
+
 ## 2026-10-24 (the guest's confirmation email says what to do)
 - The email a guest gets after reserving (their only copy of the private link) was "Manage your gift /
   You can manage your gift anytime here: <link>" — no gift, no couple, no next step. `send_guest_link()`

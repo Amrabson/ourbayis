@@ -41,6 +41,11 @@
   {%- if show_model and 'model' in item.keys() and item['model'] -%}
   <p class="gift-model bdi">{{ pick(item, 'model') }}</p>
   {%- endif -%}
+  {#- the couple's own colour/size/model request: registry items only, never catalog rows #}
+  {%- set _want = item['variant'] if 'variant' in item.keys() and 'registry_id' in item.keys() else '' -%}
+  {%- if _want -%}
+  <p class="gift-want"><strong>{{ t('item_want_label') }}</strong> <span dir="auto">{{ _want }}</span></p>
+  {%- endif -%}
   {%- set _ps = item['price_status'] if 'price_status' in item.keys() else '' -%}
   {%- set _av = item['availability'] if 'availability' in item.keys() else '' -%}
   {%- if show_tags and ((_ps and item['price_nis']) or _av == 'unavailable') -%}

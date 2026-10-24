@@ -260,6 +260,8 @@ messages, delivery note, lead notes) is either `dir="auto"` (whole block, quotes
 - `featured_items(db, limit)` orders unavailable and url-less items last. `sample_registry(db)` builds
   the one sample fixture from it (synthetic states, no pay links, negative ids); `/sample` renders
   `registry.html` with `is_sample=True`; the homepage preview uses the same fixture.
+- `registry_items.variant` is the couple's colour/size/model request, shown to guests as "They'd like:"
+  by `gift_facts` (only when the row has `registry_id`). `note`/`note_he` stay private to the couple.
 - `illustration_for(item)` picks an `ill-*` symbol from `_ILLUSTRATION_RULES` (keyword on name/seed_key)
   or the category drawing. No catalog row has a photo today.
 - Catalog: `CATALOG_PRICE_BANDS`, `CATALOG_SORTS`, `CATALOG_PAGE_SIZE=24`; filters live in the URL.

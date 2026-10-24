@@ -1719,3 +1719,29 @@ def test_general_cash_gift_confirmation_and_resend(client, app_module, monkeypat
                    " AND subject='Your gift for Sarah & Dovid: Cash gift'").fetchone()[0]
     db.close()
     assert n == 2
+
+
+# ------------------------------------------------------------------ the couple's colour/size request reaches guests (2026-10-24)
+def test_couple_variant_is_shown_to_guests_and_note_stays_private(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["sheet-sets-x2"])
+    item = _items_by_seed_key(items)["sheet-sets-x2"]
+    db = _db()
+    db.execute("UPDATE registry_items SET note_he='ישן' WHERE id=?", (item["id"],))
+    db.commit(); db.close()
+    page = client.get(f"/registry/items/{item['id']}/edit").get_data(as_text=True)
+    assert "guests see this" in page and 'name="note_he"' not in page
+    client.post(f"/registry/items/{item['id']}/edit", data={
+        "csrf_token": get_csrf(page), "name": item["name"], "price_nis": str(item["price_nis"]),
+        "url": item["url"], "store": item["store"], "brand": item["brand"] or "", "qty_wanted": "1",
+        "variant": "grey, 160×200", "note": "ask Ima about colour"})
+    g = app_module.app.test_client()
+    html = g.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    assert html.count("<strong>They&#39;d like:</strong> <span dir=\"auto\">grey, 160×200</span>") >= 2  # card + dialog
+    assert "ask Ima" not in html
+    assert "הם מבקשים:" in g.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
+    token = _claim(app_module, reg["slug"], item["id"])
+    assert "grey, 160×200" in g.get(f"/g/{token}").get_data(as_text=True)
+    assert "They&#39;d like" not in g.get("/catalog?cat=bedding").get_data(as_text=True)
+    db = _db()
+    assert db.execute("SELECT note_he FROM registry_items WHERE id=?", (item["id"],)).fetchone()[0] == "ישן"
+    db.close()
