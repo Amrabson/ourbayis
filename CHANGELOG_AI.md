@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-25 (guide search markup; couple sees their own request)
+- Guide pages: the Article JSON-LD gains `url`, `mainEntityOfPage`, `image` (og.png), `datePublished`
+  (a guide's optional `published`, else `updated`), `author` and a publisher logo, per Google's article
+  guidance; plus a `BreadcrumbList` (Guides › title), both in the page's language (`?lang=he` URLs).
+- /registry/items shows "They'd like: …" under an item with a variant, so the couple sees what guests see.
+- 2 tests — 257 tests.
+
 ## 2026-10-25 (19 new item drawings)
 - 41 of 120 catalog items showed only their category's drawing — a laundry hamper got the bed, a seder
   plate the candlesticks. 19 new line drawings in base.html's sprite (same 120×90 frame, 2.4 gold

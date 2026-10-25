@@ -1765,3 +1765,28 @@ def test_every_catalog_item_has_its_own_drawing(app_module):
     assert ill(item("Netilas yadayim washing cup")) == "netilas"   # not the washing machine
     assert ill(item("Laundry hamper & drying rack")) == "hamper"   # not the dish rack
     assert ill(item("Hangers & closet organizers")) == "hanger"    # not storage boxes
+
+
+def test_guide_structured_data_is_valid_article_and_breadcrumb(client):
+    import json
+    import guides as ob_guides
+    for lang in ("en", "he"):
+        html = client.get(f"/guides/{ob_guides.GUIDES[0]['slug']}?lang={lang}").get_data(as_text=True)
+        blocks = [json.loads(b) for b in re.findall(r'<script type="application/ld\+json">(.*?)</script>', html, re.S)]
+        art = next(b for b in blocks if b["@type"] == "Article")
+        crumbs = next(b for b in blocks if b["@type"] == "BreadcrumbList")
+        for key in ("headline", "url", "mainEntityOfPage", "image", "datePublished", "dateModified", "author"):
+            assert art.get(key), (lang, key)
+        assert art["inLanguage"] == lang and art["url"].endswith("?lang=he") == (lang == "he")
+        assert [i["position"] for i in crumbs["itemListElement"]] == [1, 2]
+        assert crumbs["itemListElement"][1]["item"] == art["url"]
+
+
+def test_couple_sees_their_own_request_on_the_gift_list(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["sheet-sets-x2"])
+    item = _items_by_seed_key(items)["sheet-sets-x2"]
+    db = _db()
+    db.execute("UPDATE registry_items SET variant='grey, 160×200' WHERE id=?", (item["id"],))
+    db.commit(); db.close()
+    page = client.get("/registry/items?lang=en").get_data(as_text=True)
+    assert "<strong>They&#39;d like:</strong> <span dir=\"auto\">grey, 160×200</span>" in page

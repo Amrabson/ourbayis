@@ -43,6 +43,7 @@
         {% if m['price_status'] == 'verified' and m['price_checked_at'] %} · <span class="hint">{{ tf('price_checked', date=fmt_date(m['price_checked_at'])) }}</span>
         {% elif m['price_status'] == 'estimate' %} · <span class="hint">{{ t('price_estimate') }}</span>{% endif %}
         </span>
+        {% if m['variant'] %}<span class="gift-want"><strong>{{ t('item_want_label') }}</strong> <span dir="auto">{{ m['variant'] }}</span></span>{% endif %}
         {% set pn = price_news.get(m['id']) %}
         {% if pn %}
         <span class="price-news"><span class="bdi">{{ tf('price_news', price='{:,}'.format(pn['price_nis']), date=fmt_date(pn['price_checked_at'])) }}</span>
