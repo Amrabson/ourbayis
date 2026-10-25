@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-25 (19 new item drawings)
+- 41 of 120 catalog items showed only their category's drawing — a laundry hamper got the bed, a seder
+  plate the candlesticks. 19 new line drawings in base.html's sprite (same 120×90 frame, 2.4 gold
+  stroke): bowls, bakeware, cutting board, measuring cup, spice rack, rolling pin, dish rack, cake stand,
+  havdalah set, netilas cup, seder plate, iron, laundry hamper, storage boxes, hanger, step stool,
+  toolbox, sandwich/waffle press, soda maker. New `_ILLUSTRATION_RULES` (EN + Hebrew keywords) sit before
+  the broad ones (netilas before "washing" machines, hamper before "drying rack", hanger before
+  "organizer"); garlic press → utensils, folding guest beds → bed. Every bedding item already had the
+  bed. Only "Placemats & napkins" keeps the dining drawing (plate and fork), on purpose.
+- A test fails if a rule names a symbol the sprite lacks or an active item falls back to a generic drawing.
+  docs/ export refreshed.
+- 1 test — 255 tests.
+
 ## 2026-10-24 (the couple's "grey, 160×200" reaches the guest)
 - A gift's **Variant** (item edit page) was saved but shown nowhere — a couple who typed "grey, 160×200"
   could still get white 140×190. It's now labelled "Colour, size or model you want (guests see this)"

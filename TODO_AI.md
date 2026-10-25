@@ -21,8 +21,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] `/guides` bilingual content section — 4 launch articles (2026-09-22). Next articles go in
   `guides.py`; keep them claim-free (the test enforces a banned-phrase list).
 - [x] Registry "available only" toggle + price sort (2026-09-22); server order is already most-wanted-first.
-- [ ] Item-specific illustrations cover ~27 shapes; extend `_ILLUSTRATION_RULES` when new seed items
-  don't match (they fall back to the category drawing, never to a wrong item).
+- [x] Item-specific illustrations: 46 shapes since 2026-10-25, every active catalog item matched (a test
+  enforces it). New seed items: add a rule (or a drawing) — the test names any that fall back.
 - [x] Per-page view counters (2026-09-22) — `view:<endpoint>` rows in the admin funnel table.
 - [x] Hebrew registry-form fields collapse into an "Add Hebrew" `<details>` (2026-09-22); same on the
   item edit page.

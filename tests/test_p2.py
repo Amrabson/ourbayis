@@ -821,7 +821,7 @@ def test_retired_seed_items_are_inactive_and_hidden(client, app_module):
 def test_illustrations_do_not_mislabel_kitchen_and_bath_items(app_module):
     ill = app_module.illustration_for
     item = lambda name, cat: {"name": name, "seed_key": "", "category": cat}  # noqa: E731
-    assert ill(item("Baking pans & cookie sheets", "kitchen")) == "kitchen"   # not a bed
+    assert ill(item("Baking pans & cookie sheets", "kitchen")) == "bakeware"  # not a bed
     assert ill(item("Non-slip bath mat", "bedding")) == "towel"
     assert ill(item("Shower shelf", "bedding")) == "towel"
     assert ill(item("Hot water pump pot (for Shabbos)", "dining")) == "urn"
@@ -1745,3 +1745,23 @@ def test_couple_variant_is_shown_to_guests_and_note_stays_private(client, app_mo
     db = _db()
     assert db.execute("SELECT note_he FROM registry_items WHERE id=?", (item["id"],)).fetchone()[0] == "ישן"
     db.close()
+
+
+def test_every_catalog_item_has_its_own_drawing(app_module):
+    """Each rule's symbol exists in base.html's sprite, and active catalog items only fall back to the
+    generic category drawing where that drawing already fits (2026-10-25: 19 drawings added)."""
+    import json
+    sprite = open(os.path.join(BASE, "templates", "base.html"), encoding="utf-8").read()
+    for _words, symbol in app_module._ILLUSTRATION_RULES:
+        assert f'id="ill-{symbol}"' in sprite, symbol
+    items = json.load(open(os.path.join(BASE, "seed_catalog.json"), encoding="utf-8"))["items"]
+    generic = {"kitchen", "appliances", "dining", "home", "judaica"}
+    allowed = {"placemats-napkins-set"}  # the dining drawing (plate and fork) is the right picture
+    left = [it["seed_key"] for it in items if it.get("active", True)
+            and app_module.illustration_for(it) in generic and it["seed_key"] not in allowed]
+    assert not left, left
+    ill = app_module.illustration_for
+    item = lambda name: {"name": name, "seed_key": "", "category": "kitchen"}  # noqa: E731
+    assert ill(item("Netilas yadayim washing cup")) == "netilas"   # not the washing machine
+    assert ill(item("Laundry hamper & drying rack")) == "hamper"   # not the dish rack
+    assert ill(item("Hangers & closet organizers")) == "hanger"    # not storage boxes
