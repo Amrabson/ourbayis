@@ -235,6 +235,9 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 `.invite-card` (keeps `<h1 dir="auto">`, `.reg-couple bdi`, `.reg-message` for tests); stamps =
 `.stamp.stamp-<state>` (`.stamp-inline` for static use); gift numbers = `gift_card(n=)` + `lot_no`.
 
+- Dashboard v4: `dashboard.html` wraps in `.home.dash-page`; floor plan via `_plan.html` with
+  `room_fills` from `_room_fills()` (`ROOM_FOR_CATEGORY`). Items page wraps in `.items-page`.
+
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =
 Fraunces / Frank Ruhl Libre, loaded via `{% block head_extra %}` on the homepage only). The floor plan is

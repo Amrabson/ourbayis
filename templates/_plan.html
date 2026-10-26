@@ -1,0 +1,63 @@
+{# The apartment drawing shared by the homepage hero and the couple's dashboard (viewBox 620x470).
+   `fills`: {room: {done, total, pct}} for kitchen / salon / bedroom / entry — each room then fills
+   from the floor up by the share of its gifts already given, with "3 of 8" under its name. #}
+{% macro plan_svg(label, fills=None) -%}
+{%- set rooms = {'salon': (30, 30, 320, 270, 155, 214), 'kitchen': (350, 30, 240, 190, 455, 150),
+                 'bedroom': (350, 220, 240, 210, 497, 248), 'entry': (170, 300, 180, 130, 262, 340)} -%}
+<svg class="plan-svg" viewBox="0 0 620 470" role="img" aria-label="{{ label }}">
+  {%- if fills %}
+  <g class="plan-fills">
+    {%- for room, (x, y, w, h, lx, ly) in rooms.items() %}{% set f = fills.get(room) %}{% if f and f.total %}
+    <rect x="{{ x }}" y="{{ y + h * (1 - f.pct) }}" width="{{ w }}" height="{{ h * f.pct }}"/>
+    {%- endif %}{% endfor %}
+  </g>
+  {%- endif %}
+  <g class="plan-walls">
+    <path d="M30 30H590V430H290M240 430H30V30"/>
+    <path d="M350 30V120M350 170V300M350 340V430"/>
+    <path d="M350 220H590"/>
+    <path d="M30 300H170M300 300H350"/>
+    <path d="M170 300V340M170 380V430"/>
+  </g>
+  <g class="plan-windows">
+    <rect x="80" y="25" width="130" height="10"/><rect x="420" y="25" width="110" height="10"/>
+    <rect x="585" y="270" width="10" height="110"/><rect x="25" y="120" width="10" height="110"/>
+  </g>
+  <g class="plan-doors">
+    <path d="M240 430V380A50 50 0 0 1 290 430"/>
+    <path d="M350 340H390A40 40 0 0 0 350 300"/>
+    <path d="M170 340H132A38 38 0 0 0 170 378"/>
+  </g>
+  <g class="plan-furniture">
+    <rect x="80" y="92" width="150" height="76" rx="6"/>
+    <rect x="62" y="120" width="12" height="20" rx="2"/><rect x="236" y="120" width="12" height="20" rx="2"/>
+    <rect x="238" y="40" width="94" height="18" rx="2"/>
+    <path d="M96 78h20v10H96zM146 78h20v10h-20zM196 78h20v10h-20zM96 172h20v10H96zM146 172h20v10h-20zM196 172h20v10h-20z"/>
+    <rect x="62" y="232" width="176" height="44" rx="7"/><path d="M62 246h176"/>
+    <path d="M362 42H578V206H548V72H362z"/>
+    <rect x="398" y="47" width="42" height="18" rx="4"/>
+    <circle cx="478" cy="56" r="6"/><circle cx="500" cy="56" r="6"/>
+    <rect x="436" y="262" width="122" height="142" rx="6"/>
+    <rect x="446" y="272" width="46" height="22" rx="5"/><rect x="502" y="272" width="46" height="22" rx="5"/>
+    <path d="M436 318h122"/>
+    <rect x="40" y="310" width="56" height="110" rx="14"/>
+    <circle cx="140" cy="326" r="10"/><ellipse cx="140" cy="404" rx="12" ry="16"/>
+    <rect x="236" y="396" width="58" height="24" rx="3" class="plan-mat"/>
+  </g>
+  <g class="plan-labels">
+    <text x="155" y="214">{{ t('plan_room_salon') }}</text>
+    <text x="455" y="150">{{ t('plan_room_kitchen') }}</text>
+    <text x="497" y="248">{{ t('plan_room_bedroom') }}</text>
+    <text x="118" y="368">{{ t('plan_room_bath') }}</text>
+    <text x="262" y="340">{{ t('plan_room_entry') }}</text>
+  </g>
+  {%- if fills %}
+  <g class="plan-counts">
+    {%- for room, (x, y, w, h, lx, ly) in rooms.items() %}{% set f = fills.get(room) %}{% if f and f.total %}
+    <text x="{{ lx }}" y="{{ ly + 22 }}">{{ tf('dash_room_fill', done=f.done, total=f.total) }}</text>
+    {%- endif %}{% endfor %}
+  </g>
+  {%- endif %}
+  <g class="plan-north" transform="translate(604 452)"><circle r="14"/><path d="M0-9L5 6 0 3-5 6z"/></g>
+</svg>
+{%- endmacro %}

@@ -2,7 +2,7 @@
 {% from "_cards.html" import gift_media with context %}
 {% block title %}{{ t('items_title') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section">
+<div class="wrap section items-page">
   <h1 class="section-title">{{ t('items_title') }}</h1>
   <p class="page-sub">{{ t('items_sub') }}</p>
 
@@ -28,6 +28,7 @@
     <form class="mine-row" id="item-{{ m['id'] }}" method="post" action="{{ url_for('items_update', item_id=m['id']) }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="mine-info">
+        <span class="lot-no">{{ tf('lot_no', n='%02d' % loop.index) }}</span>
         <strong>{{ pick(m, 'name') }}</strong>
         <span class="gift-meta bdi">{% if m['price_nis'] %}₪{{ '{:,}'.format(m['price_nis']) }}{% endif %}{% if m['store'] %} · {{ m['store'] }}{% endif %}
         {% if st.committed %}

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-26 (the couple's side in the v4 language)
+- **Dashboard**: a blueprint-paper head with the registry title set large, event · date · city and a
+  visibility chip (draft red / unlisted gold / public green), "Manage gifts" + link-arrows, and the
+  numbers as an editorial strip (the `.stat-card` markup is unchanged). Beside it **their apartment,
+  filling up**: the homepage floor plan (now the shared macro `templates/_plan.html` → `plan_svg(label,
+  fills)`) with each room filled from the floor by the share of its gifts already spoken for, labelled
+  "3 of 8 given". Rooms: kitchen = kitchen + appliances, salon = dining + judaica, bedroom = bedding,
+  entrance = home (`ROOM_FOR_CATEGORY`, `_room_fills`, units = qty). Below: "Needs you" (the three queues
+  as one ruled list) and the gift ledger (stamped status labels) in the main column; the checklist as a
+  dotted progress thread, the share panel as a navy ticket with the QR on a tear-off stub, and the setup
+  note in a sticky aside (first on phones). The dashboard plan doesn't replay the draw-in; only the
+  rooms fill.
+- **Manage gifts**: the list as a numbered ledger ("No. 01", serif names, ruled rows, quiet controls,
+  text-style Remove); the starter-pack invitation as a navy band; the catalog as a light ruled shelf
+  with outline Add buttons.
+- 1 test — 258 tests. Checked at 1280 (EN/HE) via tools/render_private.py and at 375 logged in (no overflow).
+
 ## 2026-10-26 (v4 design rolled out site-wide)
 - Owner approved the homepage direction; asked for the floor plan to put each gift where it lives
   (done in 196dc5b: meicham + platta on the kitchen counter, leichter on a dining sideboard, challah board

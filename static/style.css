@@ -1684,3 +1684,150 @@ html[dir="rtl"] .ticket-kicker { letter-spacing: .04em; font-size: .8rem; }
 html[dir="rtl"] .ticket-from { letter-spacing: .02em; font-size: .82rem; }
 html[dir="rtl"] .board-table td, html[dir="rtl"] .board-head { font-family: var(--font-body); }
 html[dir="rtl"] .board-table td { font-size: .95rem; }
+
+/* ---------- v4 couple's dashboard: their registry, their numbers, their apartment filling up ---------- */
+.dash-head {
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid-light) 1px, transparent 1px), linear-gradient(90deg, var(--grid-light) 1px, transparent 1px);
+  background-size: 28px 28px; border-bottom: 1px solid var(--line);
+  padding: clamp(32px, 5vw, 64px) 0 clamp(36px, 5vw, 64px);
+}
+.dash-head-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); gap: clamp(28px, 5vw, 64px); align-items: center; }
+.dash-title { font-size: clamp(2.3rem, 5vw, 4rem); line-height: .98; letter-spacing: -.03em; color: var(--navy); margin: 0 0 14px; }
+.dash-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 0; margin: 0 0 24px; color: var(--ink-soft); font-size: .95rem; }
+.dash-meta > span:not(:last-child)::after { content: "\00b7"; padding-inline: 10px; color: var(--gold-bright); }
+.dash-vis { font: 700 .68rem/1 var(--font-body); letter-spacing: .16em; text-transform: uppercase; padding: 5px 9px; border-radius: 999px; border: 1px solid currentColor; }
+.dash-vis-draft { color: var(--danger); }
+.dash-vis-unlisted { color: var(--gold); }
+.dash-vis-public { color: var(--green); }
+html[dir="rtl"] .dash-vis { letter-spacing: .02em; font-size: .8rem; }
+.dash-page .dash-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin: 0 0 clamp(26px, 4vw, 40px); }
+.dash-page .stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; margin: 0; }
+.dash-page .stat-card {
+  background: none; border: 0; border-radius: 0; box-shadow: none; padding: 0 16px; text-align: start;
+  border-inline-start: 1px solid rgba(135, 96, 34, .3); display: grid; gap: 4px;
+}
+.dash-page .stat-card:first-child { padding-inline-start: 0; border: 0; }
+.dash-page .stat-card strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.2rem, 4vw, 3.2rem); line-height: 1; color: var(--navy); }
+.dash-page .stat-card span { font-size: .82rem; color: var(--ink-soft); line-height: 1.3; }
+.dash-plan .plan-sheet { transform: rotate(.8deg); }
+html[dir="rtl"] .dash-plan .plan-sheet { transform: rotate(-.8deg); }
+.plan-fills rect { fill: rgba(201, 162, 74, .32); }
+.plan-counts text { font: 700 10px var(--font-body); fill: var(--navy); text-anchor: middle; letter-spacing: .04em; }
+@media (prefers-reduced-motion: no-preference) {
+  .plan-fills rect { transform-box: fill-box; transform-origin: bottom; animation: fill-up 1.2s cubic-bezier(.4, 0, .2, 1) .9s both; }
+}
+@keyframes fill-up { from { transform: scaleY(0); } }
+@media (max-width: 900px) { .dash-head-grid { grid-template-columns: 1fr; } }
+@media (max-width: 520px) {
+  .dash-page .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
+  .dash-page .stat-card:nth-child(3) { padding-inline-start: 0; border: 0; }
+}
+
+.dash-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: clamp(28px, 5vw, 64px); align-items: start; padding-block: clamp(36px, 5vw, 64px); }
+.dash-aside { display: grid; gap: 22px; position: sticky; top: 90px; }
+.dash-h2 { font-size: clamp(1.7rem, 3vw, 2.3rem); color: var(--navy); margin: 0 0 16px; }
+.needs-you { margin-bottom: clamp(32px, 5vw, 52px); }
+.dash-page .action-queues { display: grid; gap: 0; grid-template-columns: 1fr; }
+.dash-page .queue-card { background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 14px 0; box-shadow: none; }
+.dash-page .queue-card h3 { font: 700 .72rem/1.2 var(--font-body); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); margin: 0 0 8px; }
+html[dir="rtl"] .dash-page .queue-card h3 { letter-spacing: .02em; font-size: .82rem; }
+.dash-page .queue-card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.dash-page .queue-card a { font-weight: 700; color: var(--navy); }
+@media (max-width: 960px) {
+  .dash-body { grid-template-columns: 1fr; }
+  .dash-aside { position: static; order: -1; }
+}
+
+/* checklist: a dotted progress thread, remaining steps as ruled rows */
+.dash-page .checklist-panel { background: #fffdf8; border: 1px solid var(--line); border-radius: 6px; padding: 22px; box-shadow: none; }
+.dash-page .checklist-panel h2 { font-size: 1.35rem; margin: 0 0 12px; }
+.check-dots { list-style: none; display: flex; gap: 0; padding: 0; margin: 0 0 14px; position: relative; }
+.check-dots::before { content: ""; position: absolute; top: 6px; inset-inline: 6px; height: 2px; background: repeating-linear-gradient(90deg, var(--gold-bright) 0 6px, transparent 6px 11px); }
+.check-dots li { flex: 1; position: relative; height: 14px; }
+.check-dots li::before { content: ""; position: absolute; inset-inline-start: 0; top: 0; width: 14px; height: 14px; border-radius: 50%; background: #fffdf8; border: 2px solid var(--gold); box-sizing: border-box; }
+.check-dots li:last-child { flex: 0 0 14px; }
+.check-dots li.is-done::before { background: var(--green); border-color: var(--green); }
+.dash-page .checklist { list-style: none; margin: 0; padding: 0; }
+.dash-page .checklist li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: .95rem; }
+.dash-page .checklist-done-line { font-size: .82rem; }
+
+/* share: an invitation insert — the link on the ticket, the QR code on the tear-off stub */
+.dash-page .share-ticket { background: var(--navy); color: var(--paper); border: 0; border-radius: 10px; padding: 0; overflow: hidden; display: grid; }
+.share-ticket-main { padding: 22px; }
+.dash-page .share-ticket h2 { color: var(--gold-bright); font-size: 1.4rem; margin: 0 0 6px; }
+.dash-page .share-ticket .hint { color: rgba(250, 246, 236, .72); }
+.dash-page .share-ticket .share-link-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.dash-page .share-ticket .share-url { flex: 1 1 100%; background: rgba(255, 255, 255, .08); color: var(--paper); border: 1px solid rgba(255, 255, 255, .14); font-size: .78rem; overflow-wrap: anywhere; }
+.dash-page .share-ticket .btn-ghost { color: var(--paper); border-color: rgba(250, 246, 236, .45); }
+.share-ticket-stub.qr-box {
+  margin: 0; border-radius: 0; background: #fffdf8; color: var(--ink); border: 0; border-top: 2px dashed rgba(201, 162, 74, .7);
+  padding: 18px 22px; display: flex; gap: 14px; align-items: center; position: relative;
+}
+.share-ticket-stub.qr-box::before, .share-ticket-stub.qr-box::after {
+  content: ""; position: absolute; top: -12px; width: 22px; height: 22px; border-radius: 50%; background: var(--paper);
+}
+.share-ticket-stub.qr-box::before { left: -11px; }
+.share-ticket-stub.qr-box::after { right: -11px; }
+.share-ticket-stub img { flex: none; border: 1px solid var(--line); background: #fff; }
+
+/* the setup-service note, as a small navy card in the aside */
+.dash-page .shana-offer { background: var(--navy-deep); color: rgba(250, 246, 236, .85); border: 0; border-radius: 10px; }
+.dash-page .shana-offer strong { color: var(--paper); font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; }
+
+/* gifts and reservations: a ledger */
+.dash-gifts .gift-list { display: grid; gap: 0; border-bottom: 1px solid var(--line); }
+.dash-gifts .gift-row {
+  background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; box-shadow: none;
+  padding: 16px 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 20px; align-items: start;
+}
+.dash-gifts .gift-row strong bdi { font-family: var(--font-display); font-weight: 400; font-size: 1.15rem; color: var(--navy); }
+.dash-gifts .gift-row .badge-plain {
+  display: inline-block; margin-inline-start: 8px; padding: 4px 8px 3px; border: 1.5px solid currentColor; border-radius: 3px;
+  background: none; font: 700 .64rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--navy);
+  transform: rotate(-3deg); vertical-align: middle;
+}
+html[dir="rtl"] .dash-gifts .gift-row .badge-plain { transform: rotate(3deg); letter-spacing: .02em; font-size: .76rem; }
+.dash-gifts .gift-row.is-closed { opacity: .6; }
+.dash-gifts .gift-row.is-thanked strong bdi::after { content: " \2713"; color: var(--green); font-family: var(--font-body); font-size: .9rem; }
+.dash-gifts .mine-actions { justify-content: flex-end; }
+@media (max-width: 640px) { .dash-gifts .gift-row { grid-template-columns: 1fr; } .dash-gifts .mine-actions { justify-content: flex-start; } }
+
+/* dashboard fixes */
+.home .dash-body { padding-block: clamp(36px, 5vw, 64px); }
+.dash-page .share-ticket-stub .hint { color: var(--ink-soft); }
+.dash-page .share-ticket-stub .btn-ghost { color: var(--navy); border-color: var(--navy); }
+.dash-page .share-ticket-stub strong { color: var(--navy); }
+.dash-gifts .gift-row .badge-plain { transform: rotate(-1.5deg); }
+html[dir="rtl"] .dash-gifts .gift-row .badge-plain { transform: rotate(1.5deg); }
+
+/* ---------- v4 manage-gifts page: the list as a numbered ledger, the catalog as a light shelf ---------- */
+.items-page .section-title { font-size: clamp(2.3rem, 5vw, 3.6rem); }
+.items-page .starter-panel {
+  background: var(--navy); color: var(--paper); border: 0; border-radius: 10px; padding: 18px 22px;
+}
+.items-page .starter-panel p { color: rgba(250, 246, 236, .8); }
+.items-page .mine-title, .items-page .sub-title { font-size: clamp(1.6rem, 3vw, 2.2rem); }
+.items-page .mine-list { gap: 0; border-bottom: 1px solid var(--line); }
+.items-page .mine-row {
+  background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 14px 0; gap: 10px 18px;
+}
+.items-page .mine-info strong { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--navy); }
+.items-page .mine-info .lot-no { margin-bottom: 2px; }
+.items-page .mine-actions .btn { padding: 6px 12px; }
+.items-page .mine-actions .btn-danger { background: none; border-color: transparent; text-decoration: underline; text-underline-offset: 3px; }
+.items-page .mine-qty input { width: 64px; text-align: center; border-radius: 999px; }
+.items-page .catalog-grid { gap: 0 24px; }
+.items-page .catalog-card {
+  background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 12px 0;
+}
+.items-page .catalog-body h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.05rem; }
+.items-page .catalog-card .btn-primary { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+.items-page .catalog-card .btn-primary:hover { background: var(--navy); color: var(--paper); }
+.items-page .catalog-card .gift-ph-sm, .items-page .catalog-card .gift-ph { border-radius: 6px; }
+.items-page .form-panel { background: #fffdf8; border-radius: 3px; box-shadow: 0 30px 60px -40px rgba(22, 34, 60, .4); }
+
+/* the dashboard is visited often: its plan is simply there (only the rooms fill up) */
+.dash-plan .plan-walls path { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+.dash-plan .plan-windows, .dash-plan .plan-doors, .dash-plan .plan-furniture, .dash-plan .plan-labels,
+.dash-plan .plan-north { animation: none; opacity: 1; }

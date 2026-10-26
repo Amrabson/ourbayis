@@ -1790,3 +1790,25 @@ def test_couple_sees_their_own_request_on_the_gift_list(client, app_module):
     db.commit(); db.close()
     page = client.get("/registry/items?lang=en").get_data(as_text=True)
     assert "<strong>They&#39;d like:</strong> <span dir=\"auto\">grey, 160×200</span>" in page
+
+
+def test_dashboard_plan_fills_each_room_by_its_gifts(client, app_module):
+    """Kitchen = kitchen + appliances, salon = dining + judaica, bedroom = bedding, entry = home;
+    counted in units (qty), committed = reserved / on the way / received."""
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer", "towel-set", "shabbos-candlesticks"])
+    by_key = _items_by_seed_key(items)
+    db = _db()
+    db.execute("UPDATE registry_items SET qty_wanted=3 WHERE id=?", (by_key["towel-set"]["id"],))
+    db.commit(); db.close()
+    _claim(app_module, reg["slug"], by_key["stand-mixer"]["id"])
+    html = client.get("/dashboard?lang=en").get_data(as_text=True)
+    assert html.count('<g class="plan-fills">') == 1
+    counts = re.findall(r'<text x="\d+" y="\d+">([^<]+given)</text>', html)
+    assert "1 of 1 given" in counts          # kitchen: the stand mixer, reserved
+    assert "0 of 3 given" in counts          # bedroom: towels x3
+    assert "0 of 1 given" in counts          # salon: candlesticks
+    assert len(counts) == 3                  # the empty entrance gets no label
+    with app_module.app.app_context():
+        fills = app_module._room_fills(app_module.get_db(), app_module.get_db().execute(
+            "SELECT * FROM registries").fetchone(), {by_key["stand-mixer"]["id"]: 1})
+    assert fills["kitchen"] == {"done": 1, "total": 1, "pct": 1.0} and fills["entry"]["total"] == 0

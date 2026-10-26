@@ -1688,7 +1688,7 @@ def _dashboard_checklist(db, reg, n_items, n_usable, gifts):
 @login_required
 def dashboard():
     reg = user_registry()
-    gifts = stats = totals = checklist = queues = None
+    gifts = stats = totals = checklist = queues = room_fills = None
     if reg:
         db = get_db()
         now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
@@ -1727,14 +1727,34 @@ def dashboard():
                 cur = gft["currency"] or "ILS"
                 totals[cur] = totals.get(cur, 0) + gft["amount_minor"]
         checklist = _dashboard_checklist(db, reg, n_items, n_usable, gifts)
+        room_fills = _room_fills(db, reg, committed)
         queues = dict(
             awaiting_confirm=[g for g in gifts if g["status"] == "reported"],
             waiting=[g for g in gifts if g["status"] == "reserved"],
             unthanked=[g for g in gifts if g["status"] == "received" and not g["thanked"]],
         )
     return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats, totals=totals,
-                           checklist=checklist, queues=queues,
+                           checklist=checklist, queues=queues, room_fills=room_fills,
                            shana_arrival=_shana_offer(get_db(), current_user(), reg) if reg else None)
+
+
+# which room of the dashboard's floor plan each category's gifts live in
+ROOM_FOR_CATEGORY = {"kitchen": "kitchen", "appliances": "kitchen", "dining": "salon", "judaica": "salon",
+                     "bedding": "bedroom", "home": "entry"}
+
+
+def _room_fills(db, reg, committed):
+    """{room: {done, total, pct}} in gift units (qty), for the dashboard's apartment drawing:
+    how much of each room's list is already spoken for (reserved, on the way or received)."""
+    fills = {room: {"done": 0, "total": 0, "pct": 0.0} for room in set(ROOM_FOR_CATEGORY.values())}
+    for r in db.execute("SELECT id, category, qty_wanted FROM registry_items WHERE registry_id=? AND archived=0",
+                        (reg["id"],)):
+        f = fills[ROOM_FOR_CATEGORY.get(r["category"], "entry")]
+        f["total"] += r["qty_wanted"]
+        f["done"] += min(committed.get(r["id"], 0), r["qty_wanted"])
+    for f in fills.values():
+        f["pct"] = round(f["done"] / f["total"], 3) if f["total"] else 0.0
+    return fills
 
 
 def _shana_offer(db, user, reg):

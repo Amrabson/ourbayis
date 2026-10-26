@@ -331,6 +331,10 @@ T_EN = {
     "guest_report_note_ph_cash": "e.g. Sent by PayPal today",
     "guest_report_note_yours": "Your note to the couple:",
     "dash_report_note": "Their update:",
+    "dash_room_fill": "{done} of {total} given",
+    "dash_plan_caption": "Your apartment, filling up — each room by how much of its list is already given.",
+    "dash_needs_you": "Needs you",
+    "dash_share_stub": "Scan to open",
     "dash_shana_title": "Landing before the gifts do?",
     "dash_shana_body": ("You arrive {date}. Our Shana Rishonah setup service can have the basics ordered and "
                         "delivered to your apartment before you land. The request form already has your "
@@ -1154,6 +1158,10 @@ T_HE = {
     "guest_report_note_ph_cash": "לדוגמה: נשלח היום ב-PayPal",
     "guest_report_note_yours": "ההודעה שלכם לזוג:",
     "dash_report_note": "העדכון שלהם:",
+    "dash_room_fill": "{done} מתוך {total} ניתנו",
+    "dash_plan_caption": "הדירה שלכם מתמלאת — כל חדר לפי כמה מהרשימה שלו כבר ניתן.",
+    "dash_needs_you": "מחכה לכם",
+    "dash_share_stub": "סרקו לפתיחה",
     "dash_shana_title": "נוחתים לפני שהמתנות מגיעות?",
     "dash_shana_body": ("אתם מגיעים ב-{date}. שירות שנה ראשונה שלנו יכול להזמין ולהביא לדירה שלכם "
                         "את הדברים הבסיסיים לפני שתנחתו. בטופס הבקשה כבר מופיעים "
