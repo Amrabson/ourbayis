@@ -1,0 +1,14 @@
+{# 404 / error drawing: a room that was never built — two walls drawn, the rest only pencilled in,
+   and a north arrow that has lost its bearings. Decorative; the page text says what happened. #}
+<figure class="plan lost-plan" aria-hidden="true">
+  <div class="plan-sheet">
+    <svg class="plan-svg" viewBox="0 0 420 320">
+      <g class="plan-walls"><path d="M40 40H380M40 40V280H150"/></g>
+      <g class="lost-pencil"><path d="M380 40V280H200"/><path d="M150 280A50 50 0 0 1 200 280"/></g>
+      <g class="plan-windows"><rect x="140" y="35" width="140" height="10"/></g>
+      <text class="lost-q" x="210" y="190">?</text>
+      <g class="plan-labels"><text x="210" y="232">{{ t('notfound_room') }}</text></g>
+      <g class="plan-north lost-north" transform="translate(392 300) rotate(140)"><circle r="14"/><path d="M0-9L5 6 0 3-5 6z"/></g>
+    </svg>
+  </div>
+</figure>

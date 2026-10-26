@@ -1812,3 +1812,22 @@ def test_dashboard_plan_fills_each_room_by_its_gifts(client, app_module):
         fills = app_module._room_fills(app_module.get_db(), app_module.get_db().execute(
             "SELECT * FROM registries").fetchone(), {by_key["stand-mixer"]["id"]: 1})
     assert fills["kitchen"] == {"done": 1, "total": 1, "pct": 1.0} and fills["entry"]["total"] == 0
+
+
+def test_registry_form_is_four_numbered_sections_with_a_rail(client, app_module):
+    """Every rail link points at a section that exists; visibility is three stamps, the current one checked."""
+    signup(client)
+    html = client.get("/registry/new?lang=en").get_data(as_text=True)
+    rail = re.findall(r'<a href="#(rf-[a-z]+)" data-rail-link>', html)
+    assert rail == ["rf-details", "rf-prefs", "rf-payment", "rf-visibility"]
+    for sec in rail:
+        assert f'id="{sec}" data-rail-sec' in html
+    assert html.count('class="vis-stamp"') == 3
+    assert re.search(r'value="unlisted" checked', html)  # new registries default to unlisted
+
+
+def test_error_pages_draw_the_room_that_was_never_built(client):
+    html = client.get("/no-such-page?lang=en").get_data(as_text=True)
+    assert "Not on the plan" in html and 'class="plan lost-plan"' in html and "Room not found" in html
+    he = client.get("/no-such-page?lang=he").get_data(as_text=True)
+    assert "לא בתוכנית" in he and "החדר לא נמצא" in he

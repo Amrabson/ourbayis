@@ -1,31 +1,34 @@
 {% extends "base.html" %}
 {% block title %}{{ t('find_title') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section narrow">
-  <h1 class="section-title">{{ t('find_title') }}</h1>
-  <p class="page-sub">{{ t('find_sub') }}</p>
-  <form class="find-form" method="get" action="{{ url_for('find') }}">
-    <input type="search" name="q" value="{{ q }}" placeholder="{{ t('find_placeholder') }}" aria-label="{{ t('find_title') }}">
-    <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
-  </form>
+<div class="home sheet-page find-page">
+  <div class="sec-inner find-inner">
+    <p class="kicker">{{ t('how_guests') }}</p>
+    <h1 class="sheet-title">{{ t('find_title') }}</h1>
+    <p class="page-sub">{{ t('find_sub') }}</p>
+    <form class="find-form find-big" method="get" action="{{ url_for('find') }}">
+      <input type="search" name="q" value="{{ q }}" placeholder="{{ t('find_placeholder') }}" aria-label="{{ t('find_title') }}">
+      <button class="btn btn-primary btn-lg" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
+    </form>
 
-  {% if results is not none %}
-    {% if results %}
-    <h2 class="sr-only">{{ t('find_results_h') }}</h2>
-    <div class="find-results">
-      {% for r in results %}
-      <a class="card find-card" href="{{ url_for('registry', slug=r['slug']) }}">
-        <div>
-          <h3>{{ pick(r, 'couple_names') }}</h3>
-          <p class="gift-meta">{{ t('event_' ~ r['event_type']) }}{% if r['event_date'] %} · <time datetime="{{ r['event_date'] }}">{{ fmt_date(r['event_date']) }}</time>{% endif %}{% if r['city'] %} · {{ r['city'] }}{% endif %}</p>
-        </div>
-        <span class="btn btn-ghost">{{ t('find_view') }} →</span>
-      </a>
-      {% endfor %}
-    </div>
-    {% else %}
-    <p class="empty-note">{{ t('find_none') }}</p>
+    {% if results is not none %}
+      {% if results %}
+      <h2 class="sr-only">{{ t('find_results_h') }}</h2>
+      <div class="find-results">
+        {% for r in results %}
+        <a class="card find-card" href="{{ url_for('registry', slug=r['slug']) }}">
+          <div>
+            <h3>{{ pick(r, 'couple_names') }}</h3>
+            <p class="gift-meta">{{ t('event_' ~ r['event_type']) }}{% if r['event_date'] %} · <time datetime="{{ r['event_date'] }}">{{ fmt_date(r['event_date']) }}</time>{% endif %}{% if r['city'] %} · {{ r['city'] }}{% endif %}</p>
+          </div>
+          <span class="link-arrow">{{ t('find_view') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="empty-note">{{ t('find_none') }}</p>
+      {% endif %}
     {% endif %}
-  {% endif %}
+  </div>
 </div>
 {% endblock %}

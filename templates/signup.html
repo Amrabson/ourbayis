@@ -1,22 +1,39 @@
 {% extends "base.html" %}
 {% block title %}{{ t('signup_title') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section auth-wrap">
-  <div class="glass glass-panel">
-    <h1 class="section-title">{{ t('signup_title') }}</h1>
-    <p class="page-sub">{{ t('signup_sub') }}</p>
-    <form method="post" class="stack-form">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label>{{ t('your_name') }} *<input name="name" required maxlength="120" autocomplete="name" value="{{ request.form.get('name', '') }}"></label>
-      <label>{{ t('email') }} *<input name="email" type="email" required maxlength="200" autocomplete="email" value="{{ request.form.get('email', '') }}"></label>
-      <label>{{ t('password') }} *<input name="password" type="password" required minlength="8" autocomplete="new-password"></label>
-      <label>{{ t('password2') }} *<input name="password2" type="password" required minlength="8" autocomplete="new-password"></label>
-      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('signup_btn') }}</button>
-      <p class="hint signup-terms">{{ t('signup_terms_pre') }} <a href="{{ url_for('terms') }}">{{ t('nav_terms') }}</a>
-        {{ t('signup_terms_mid') }} <a href="{{ url_for('privacy') }}">{{ t('signup_privacy_link') }}</a>{{ t('signup_terms_post') }}</p>
-    </form>
-    <p class="auth-alt">{{ t('have_account') }} <a href="{{ url_for('login') }}">{{ t('login_btn') }}</a></p>
+<div class="home sheet-page">
+  <div class="sec-inner sheet-grid">
+    <div class="sheet">
+      <span class="stamp sheet-stamp">{{ t('trust1') }}</span>
+      <p class="kicker">{{ t('sheet_signup_kicker') }}</p>
+      <h1 class="sheet-title">{{ t('signup_title') }}</h1>
+      <p class="page-sub">{{ t('signup_sub') }}</p>
+      <form method="post" class="stack-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label>{{ t('your_name') }} *<input name="name" required maxlength="120" autocomplete="name" value="{{ request.form.get('name', '') }}"></label>
+        <label>{{ t('email') }} *<input name="email" type="email" required maxlength="200" autocomplete="email" value="{{ request.form.get('email', '') }}"></label>
+        <div class="form-2col">
+          <label>{{ t('password') }} *<input name="password" type="password" required minlength="8" autocomplete="new-password"></label>
+          <label>{{ t('password2') }} *<input name="password2" type="password" required minlength="8" autocomplete="new-password"></label>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('signup_btn') }}</button>
+        <p class="hint signup-terms">{{ t('signup_terms_pre') }} <a href="{{ url_for('terms') }}">{{ t('nav_terms') }}</a>
+          {{ t('signup_terms_mid') }} <a href="{{ url_for('privacy') }}">{{ t('signup_privacy_link') }}</a>{{ t('signup_terms_post') }}</p>
+      </form>
+      <p class="auth-alt sheet-stub">{{ t('have_account') }} <a href="{{ url_for('login') }}">{{ t('login_btn') }}</a></p>
+    </div>
+    <aside class="sheet-aside sheet-next">
+      <h2 class="sheet-aside-title">{{ t('sheet_signup_aside') }}</h2>
+      <ol class="next-steps">
+        {% for n in [1, 2, 3] %}
+        <li><span class="next-n">{{ '%02d' % n }}</span><strong>{{ t('step' ~ n ~ '_t') }}</strong><span>{{ t('step' ~ n ~ '_b') }}</span></li>
+        {% endfor %}
+      </ol>
+      <ul class="next-promises">
+        <li>{{ t('trust1') }}</li><li>{{ t('trust2') }}</li><li>{{ t('trust3') }}</li>
+      </ul>
+    </aside>
   </div>
 </div>
 {% endblock %}

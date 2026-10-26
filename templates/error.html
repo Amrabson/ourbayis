@@ -1,16 +1,22 @@
 {% extends "base.html" %}
 {% block title %}{{ t('err_' ~ code ~ '_t') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section narrow" style="text-align:center">
-  <h1 class="section-title">{{ t('err_' ~ code ~ '_t') }}</h1>
-  <p class="page-sub">{{ t('err_' ~ code ~ '_b') }}</p>
-  <div class="hero-ctas" style="justify-content:center">
-    <a class="btn btn-primary btn-lg" href="{{ url_for('index') }}">{{ t('back_home') }}</a>
-    <a class="btn btn-ghost btn-lg" href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }}</a>
+<div class="home sheet-page lost-page">
+  <div class="sec-inner lost-grid">
+    <div class="lost-copy">
+      <p class="kicker">{{ t('notfound_kicker') if code == 404 else tf('err_kicker', code=code) }}</p>
+      <h1 class="sheet-title">{{ t('err_' ~ code ~ '_t') }}</h1>
+      <p class="page-sub">{{ t('err_' ~ code ~ '_b') }}</p>
+      <form class="find-form err-find" method="get" action="{{ url_for('find') }}">
+        <input type="search" name="q" placeholder="{{ t('find_placeholder') }}" aria-label="{{ t('notfound_search_label') }}">
+        <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
+      </form>
+      <p class="lost-links">
+        <a class="link-arrow" href="{{ url_for('index') }}">{{ t('back_home') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>
+        <a class="link-arrow" href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>
+      </p>
+    </div>
+    {% include "_lost_room.html" %}
   </div>
-  <form class="find-form err-find" method="get" action="{{ url_for('find') }}">
-    <input type="search" name="q" placeholder="{{ t('find_placeholder') }}" aria-label="{{ t('notfound_search_label') }}">
-    <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>
-  </form>
 </div>
 {% endblock %}

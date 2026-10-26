@@ -1,16 +1,19 @@
 {% extends "base.html" %}
 {% block title %}{{ t('forgot_title') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section auth-wrap">
-  <div class="glass glass-panel">
-    <h1 class="section-title">{{ t('forgot_title') }}</h1>
-    <p class="page-sub">{{ t('forgot_sub') }}</p>
-    <form method="post" class="stack-form">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <label>{{ t('email') }}<input name="email" type="email" required maxlength="200" autocomplete="email"></label>
-      <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('forgot_btn') }}</button>
-    </form>
-    <p class="auth-alt"><a href="{{ url_for('login') }}">{{ t('login_btn') }}</a></p>
+<div class="home sheet-page">
+  <div class="sec-inner sheet-grid sheet-solo">
+    <div class="sheet">
+      <p class="kicker">{{ t('sheet_forgot_kicker') }}</p>
+      <h1 class="sheet-title">{{ t('forgot_title') }}</h1>
+      <p class="page-sub">{{ t('forgot_sub') }}</p>
+      <form method="post" class="stack-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label>{{ t('email') }}<input name="email" type="email" required maxlength="200" autocomplete="email"></label>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">{{ t('forgot_btn') }}</button>
+      </form>
+      <p class="auth-alt sheet-stub"><a href="{{ url_for('login') }}">{{ t('login_btn') }}</a></p>
+    </div>
   </div>
 </div>
 {% endblock %}

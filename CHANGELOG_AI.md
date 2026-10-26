@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-26 (the paperwork: every remaining form in the v4 language)
+- **`.sheet`**: forms are cream sheets taped to the blueprint grid (`.home.sheet-page`), with filled-underline
+  fields, a big serif title under a kicker, and a tear-off `.sheet-stub` (dashed rule + punched notches)
+  holding the "no account? / log in" line.
+- **Log in**: the sheet beside the apartment drawing ("Your apartment is right where you left it.").
+  **Sign up**: a "Free for couples" stamp on the sheet, and beside it "What happens next" (the three steps,
+  numbered) with the three promises. **Forgot / reset / contact**: single sheets ("Spare key", "Write to us").
+- **Registry setup form**: four numbered sections (01 Details … 04 Visibility) with a sticky side rail that
+  marks the section you're in (`[data-rail-link]` / `[data-rail-sec]`, IntersectionObserver in app.js; rail
+  hidden under 900px). Visibility is three rubber stamps; the chosen one is pressed down in its colour.
+- **Gift edit**: the gift's name as the title; fields in three groups (What it is / Where to buy it / How many).
+- **Starter packs**: one packing-list sheet per group (two columns), ink checkboxes, the picked line
+  highlighted, and the tally as a navy ticket bar with a gold "Add selected".
+- **Account**: two ruled rows, the delete row in red ink. **Find a registry**: one large field; results as
+  small double-ruled invitations. **404 / errors**: "Not on the plan" beside a room that was never built
+  (two walls drawn, the rest pencilled in, a north arrow that's lost its bearings — `_lost_room.html`).
+  The unused `templates/404.html` was removed (all errors render `error.html`).
+- 15 new EN/HE strings (`sheet_*`, `rform_kicker/rail`, `item_edit_what/where/how`, `notfound_kicker/room`,
+  `err_kicker`, `starter_kicker`). Checked at 1280 EN/HE and 375 (no horizontal scroll).
+
 ## 2026-10-26 (the couple's side in the v4 language)
 - **Dashboard**: a blueprint-paper head with the registry title set large, event · date · city and a
   visibility chip (draft red / unlisted gold / public green), "Manage gifts" + link-arrows, and the

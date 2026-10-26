@@ -312,6 +312,23 @@
     select(start > 0 ? start : 0, false);
   });
 
+  // registry setup form: the side rail marks the section you're filling in
+  document.addEventListener("DOMContentLoaded", function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll("[data-rail-link]"));
+    if (!links.length || !("IntersectionObserver" in window)) return;
+    var byId = {};
+    links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting || !byId[en.target.id]) return;
+        links.forEach(function (a) { a.classList.remove("is-active"); a.removeAttribute("aria-current"); });
+        byId[en.target.id].classList.add("is-active");
+        byId[en.target.id].setAttribute("aria-current", "location");
+      });
+    }, { rootMargin: "-25% 0px -65% 0px" });
+    document.querySelectorAll("[data-rail-sec]").forEach(function (sec) { io.observe(sec); });
+  });
+
   // coming Back to a page from the back/forward cache would otherwise leave its buttons dead
   window.addEventListener("pageshow", function (e) {
     if (!e.persisted) return;

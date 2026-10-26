@@ -844,6 +844,21 @@ T_EN = {
     "faq_a6": "No — it's a separate setup service, quoted individually per couple, for anyone arriving in Israel for a year or for good.",
     "home_cta_title": "Getting married? Making aliyah? Coming for the year?",
     "home_cta_body": "Create your free registry in a few minutes.",
+    "sheet_login_kicker": "Welcome home",
+    "sheet_login_aside": "Your apartment is right where you left it.",
+    "sheet_signup_kicker": "Step one",
+    "sheet_signup_aside": "What happens next",
+    "sheet_forgot_kicker": "Spare key",
+    "sheet_contact_kicker": "Write to us",
+    "rform_kicker": "Your registry",
+    "rform_rail": "On this form",
+    "item_edit_what": "What it is",
+    "item_edit_where": "Where to buy it",
+    "item_edit_how": "How many, and how much it matters",
+    "notfound_kicker": "Not on the plan",
+    "notfound_room": "Room not found",
+    "err_kicker": "Error {code}",
+    "starter_kicker": "Starter packs",
 }
 
 T_HE = {
@@ -1672,6 +1687,21 @@ T_HE = {
     "faq_a6": "לא — זהו שירות הקמה נפרד, עם הצעת מחיר אישית לכל זוג, לכל מי שמגיע לישראל לשנה או לתמיד.",
     "home_cta_title": "מתחתנים? עולים ארצה? באים לשנה?",
     "home_cta_body": "פתחו רשימה חינם בכמה דקות.",
+    "sheet_login_kicker": "ברוכים הבאים הביתה",
+    "sheet_login_aside": "הדירה שלכם מחכה בדיוק איפה שהשארתם אותה.",
+    "sheet_signup_kicker": "צעד ראשון",
+    "sheet_signup_aside": "מה קורה אחר כך",
+    "sheet_forgot_kicker": "מפתח רזרבי",
+    "sheet_contact_kicker": "כתבו לנו",
+    "rform_kicker": "הרשימה שלכם",
+    "rform_rail": "בטופס הזה",
+    "item_edit_what": "מה זה",
+    "item_edit_where": "איפה קונים",
+    "item_edit_how": "כמה, ועד כמה זה חשוב",
+    "notfound_kicker": "לא בתוכנית",
+    "notfound_room": "החדר לא נמצא",
+    "err_kicker": "שגיאה {code}",
+    "starter_kicker": "חבילות פתיחה",
 }
 
 # Catalog / item categories: slug -> (icon-id, EN label, HE label)

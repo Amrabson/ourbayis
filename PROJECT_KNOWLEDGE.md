@@ -237,6 +237,11 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 
 - Dashboard v4: `dashboard.html` wraps in `.home.dash-page`; floor plan via `_plan.html` with
   `room_fills` from `_room_fills()` (`ROOM_FOR_CATEGORY`). Items page wraps in `.items-page`.
+- Forms ("paperwork"): `.home.sheet-page` > `.sheet-grid` (`.sheet-solo`, `.sheet-wide`) > `.sheet`
+  (kicker, `.sheet-title`, `.sheet-stub`). Used by login/signup/forgot/reset/contact/account/item_edit;
+  registry_form adds `.form-rail` + `.rform-sec`; items_starter = one `.sheet` per group; error.html
+  includes `_lost_room.html`. Fields inside `.sheet` are filled underlines (scoped, so admin forms are
+  untouched).
 
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =
