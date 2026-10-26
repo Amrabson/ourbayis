@@ -1,5 +1,31 @@
 # Changelog
 
+## 2026-10-26 (v4 design rolled out site-wide)
+- Owner approved the homepage direction; asked for the floor plan to put each gift where it lives
+  (done in 196dc5b: meicham + platta on the kitchen counter, leichter on a dining sideboard, challah board
+  at the head of the table; `PLAN_PINS`).
+- **Site-wide layer** ("Design system v4" at the end of style.css): Fraunces / Frank Ruhl Libre are the
+  display face everywhere (base.html loads them; index's own font block removed); section titles lose the
+  gold underline; sentence-case nav; pill buttons; boxed `.cta-panel`s become typographic; chips match the
+  homepage's room pills. **Footer**: a "Build your *bayis* in Israel." sign-off with the start/dashboard
+  button on blueprint navy (not on the homepage, whose hero says it).
+- **Registry page = the invitation**: double-framed cream card on blueprint navy, italic title, couple names
+  only when the title doesn't contain them, the message as an italic quote, slim progress line. Cash card as
+  a navy envelope band. Gifts numbered "No. 01" (`gift_card(..., n=)`, i18n `lot_no`), and a rotated rubber
+  **stamp** (Received / On its way / Reserved) on gifts that are taken.
+- **Shana Rishonah**: arrivals-board hero, route thread, packages as **boarding passes** (ticket + perforated
+  price stub with punched notches; the middle tier ringed in gold), terms as an editorial list, the request
+  form on a taped sheet. `id="request"`, `#bundle-select` and `data-bundle` kept for the preselect script.
+- **How it works**: two route threads (couples, guests), the label legend as real stamps, numbered FAQ,
+  typographic close; the duplicated "Practical guides" link is gone.
+- **Catalog**: lighter cards — blueprint-paper media panels, outline "add" buttons. **Guides**: a ~68ch
+  reading column. **Guest page**: invitation paper frame (`gift-sheet`; the word "guest" stays out of that
+  page's HTML per test_claim_and_guest_manage).
+- Hebrew: no tracking on Hebrew labels; board rows use the body face. Checked at 1280 (EN/HE) and 375
+  (no horizontal overflow on /, /sample, /shana-rishonah, /how-it-works, /catalog). 257 tests pass.
+- Not restyled structurally yet: the couple's dashboard / items / starter pages (they inherit the type,
+  buttons and header/footer).
+
 ## 2026-10-26 (homepage redesign: "build your bayis", literally)
 - Owner asked for a site that doesn't look like the standard AI-made skeleton (hero + 3 step cards +
   product grid + 3 "why" cards + band + FAQ accordion + boxed CTA). The homepage is rebuilt around the

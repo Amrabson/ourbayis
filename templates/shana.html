@@ -3,71 +3,93 @@
 {% block title %}{{ t('shana_title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ t('shana_sub') }}{% endblock %}
 {% block content %}
-<section class="reg-hero shana-hero">
-  <div class="wrap">
-    <p class="reg-eyebrow">{{ t('shana_eyebrow') }}</p>
-    <h1>{{ t('shana_title') }}</h1>
-    <p class="reg-message">{{ t('shana_sub') }}</p>
+{% set arrow = '←' if rtl else '→' %}
+<div class="home shana-page">
+
+<section class="board-sec shana-top reveal">
+  <div class="sec-inner board-grid">
+    <div class="board-copy">
+      <p class="kicker kicker-light">{{ t('shana_eyebrow') }}</p>
+      <h1>{{ t('shana_title') }}</h1>
+      <p>{{ t('shana_sub') }}</p>
+      <a class="btn btn-gold btn-lg" href="#request">{{ t('shana_form_title') }} {{ arrow }}</a>
+    </div>
+    <figure class="board">
+      <div class="board-head"><span class="board-plane" aria-hidden="true">✈</span> {{ t('board_title') }} <span class="board-code">TLV</span></div>
+      <table class="board-table">
+        <thead><tr><th scope="col">{{ t('board_col_when') }}</th><th scope="col">{{ t('board_col_what') }}</th><th scope="col">{{ t('board_col_status') }}</th></tr></thead>
+        <tbody>
+          {% for n in [1, 2, 3, 4] %}
+          <tr style="--row: {{ n }}"><td>{{ t('board_r' ~ n ~ '_when') }}</td><td>{{ t('board_r' ~ n ~ '_what') }}</td><td><span class="board-status">{{ t('board_r' ~ n ~ '_status') }}</span></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <figcaption>{{ t('board_note') }}</figcaption>
+    </figure>
   </div>
 </section>
 
-<div class="wrap section">
-  <h2 class="section-title">{{ t('shana_how_t') }}</h2>
-  <div class="grid-3">
-    {% for n, icon in [(1, 'i-wa'), (2, 'i-check'), (3, 'i-house')] %}
-    <div class="card step-card">
-      <div class="step-num">{{ n }}</div>
-      <svg class="ic ic-lg"><use href="#{{ icon }}"/></svg>
-      <p>{{ t('shana_how' ~ n) }}</p>
+<section class="route-sec">
+  <div class="sec-inner">
+    <h2 class="sec-title">{{ t('shana_how_t') }}</h2>
+    <ol class="route route-3">
+      {% for n in [1, 2, 3] %}
+      <li class="route-stop"><span class="route-num" aria-hidden="true">0{{ n }}</span><p>{{ t('shana_how' ~ n) }}</p></li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+<section class="tickets-sec">
+  <div class="sec-inner">
+    <h2 class="sec-title">{{ t('shana_packages_t') }}</h2>
+    <p class="sec-sub tickets-sub">{{ t('shana_packages_sub') }}</p>
+    <div class="tickets">
+      {% for b in bundles %}
+      {% set tier = package_tiers.get(b['tier'], package_tiers['basic']) %}
+      {% set lines = pick(b, 'items_text').splitlines() | map('trim') | select | list %}
+      <article class="ticket bundle-card tier-{{ b['tier'] }}" id="pkg-{{ b['slug'] }}">
+        <div class="ticket-main">
+          <p class="ticket-kicker">{{ tf('lot_no', n='%02d' % loop.index) }} · TLV</p>
+          <h3>{{ pick(b, 'name') }}</h3>
+          <p class="bundle-desc">{{ pick(b, 'description') }}</p>
+          <ul class="bundle-facts">
+            <li><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('pkg_delivery_' ~ tier['delivery']) }}</li>
+            <li class="{{ '' if tier['setup'] else 'is-no' }}"><svg class="ic ic-sm"><use href="#{{ 'i-check' if tier['setup'] else 'i-plus' }}"/></svg> {{ t('pkg_setup_yes') if tier['setup'] else t('pkg_setup_no') }}</li>
+            <li class="{{ '' if tier['appliances'] == 'included' else 'is-no' }}"><svg class="ic ic-sm"><use href="#{{ 'i-check' if tier['appliances'] == 'included' else 'i-plus' }}"/></svg> {{ t('pkg_appliances_' ~ tier['appliances']) }}</li>
+            <li><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ tf('pkg_lead_weeks', n=tier['lead_weeks']) }}</li>
+          </ul>
+          <p class="bundle-top"><strong>{{ t('shana_includes') }}:</strong> {{ lines[:4] | join(' · ') }}{% if lines | length > 4 %} …{% endif %}</p>
+          {% if lines | length > 4 %}
+          <details class="bundle-details">
+            <summary>{{ tf('shana_full_list', n=lines | length) }}</summary>
+            <ul>{% for line in lines %}<li>{{ line }}</li>{% endfor %}</ul>
+          </details>
+          {% endif %}
+        </div>
+        <div class="ticket-stub">
+          <span class="ticket-from">{{ t('bundle_from') }}</span>
+          <strong class="ticket-price bdi">₪{{ '{:,}'.format(b['price_from']) }}</strong>
+          {% set _e = estimate_label(b['price_from']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}
+          <span class="ticket-note">{{ t('bundle_price_indicative') }}</span>
+          <a class="btn {{ 'btn-gold' if b['tier'] == 'standard' else 'btn-primary' }}" href="#request" data-bundle="{{ b['slug'] }}">{{ tf('shana_choose', name=pick(b, 'name')) }}</a>
+        </div>
+      </article>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
 
-  <h2 class="sub-title">{{ t('shana_packages_t') }}</h2>
-  <p class="page-sub">{{ t('shana_packages_sub') }}</p>
-
-  <div class="bundle-grid">
-    {% for b in bundles %}
-    {% set tier = package_tiers.get(b['tier'], package_tiers['basic']) %}
-    {% set lines = pick(b, 'items_text').splitlines() | map('trim') | select | list %}
-    <article class="bundle-card tier-{{ b['tier'] }}" id="pkg-{{ b['slug'] }}">
-      <h3>{{ pick(b, 'name') }}</h3>
-      <p class="bundle-price">{{ t('bundle_from') }} <strong class="bdi">₪{{ '{:,}'.format(b['price_from']) }}</strong>
-        {% set _e = estimate_label(b['price_from']) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}</p>
-      <p class="hint">{{ t('bundle_price_indicative') }}</p>
-      <p class="bundle-desc">{{ pick(b, 'description') }}</p>
-
-      <ul class="bundle-facts">
-        <li><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('pkg_delivery_' ~ tier['delivery']) }}</li>
-        <li class="{{ '' if tier['setup'] else 'is-no' }}"><svg class="ic ic-sm"><use href="#{{ 'i-check' if tier['setup'] else 'i-plus' }}"/></svg> {{ t('pkg_setup_yes') if tier['setup'] else t('pkg_setup_no') }}</li>
-        <li class="{{ '' if tier['appliances'] == 'included' else 'is-no' }}"><svg class="ic ic-sm"><use href="#{{ 'i-check' if tier['appliances'] == 'included' else 'i-plus' }}"/></svg> {{ t('pkg_appliances_' ~ tier['appliances']) }}</li>
-        <li><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ tf('pkg_lead_weeks', n=tier['lead_weeks']) }}</li>
-      </ul>
-
-      <p class="bundle-top"><strong>{{ t('shana_includes') }}:</strong> {{ lines[:4] | join(' · ') }}{% if lines | length > 4 %} …{% endif %}</p>
-      {% if lines | length > 4 %}
-      <details class="bundle-details">
-        <summary>{{ tf('shana_full_list', n=lines | length) }}</summary>
-        <ul>{% for line in lines %}<li>{{ line }}</li>{% endfor %}</ul>
-      </details>
-      {% endif %}
-      <a class="btn {{ 'btn-gold' if b['tier'] == 'standard' else 'btn-primary' }} btn-block" href="#request" data-bundle="{{ b['slug'] }}">{{ tf('shana_choose', name=pick(b, 'name')) }}</a>
-    </article>
-    {% endfor %}
-  </div>
-
-  {# Common terms — once, not repeated on every card #}
-  <div class="terms-panel" id="terms">
-    <h2 class="sub-title" style="margin-top:0">{{ t('shana_terms_t') }}</h2>
-    <dl class="terms-list">
-      <dt>{{ t('shana_term_delivery_t') }}</dt><dd>{{ t('shana_term_delivery_b') }}</dd>
-      <dt>{{ t('shana_term_install_t') }}</dt><dd>{{ t('shana_term_install_b') }}</dd>
-      <dt>{{ t('shana_optional_extras') }}</dt><dd>{{ t('shana_optional_extras_body') }}</dd>
-      <dt>{{ t('shana_not_included') }}</dt><dd>{{ t('shana_not_included_body') }}</dd>
-      <dt>{{ t('shana_term_timing_t') }}</dt><dd>{{ t('shana_term_timing_b') }}</dd>
-      <dt>{{ t('shana_term_quote_t') }}</dt><dd>{{ t('shana_term_quote_b') }}</dd>
-    </dl>
-  </div>
+    {# Common terms — once, not repeated on every ticket #}
+    <div class="terms-panel" id="terms">
+      <h2 class="sec-title">{{ t('shana_terms_t') }}</h2>
+      <dl class="terms-list">
+        <dt>{{ t('shana_term_delivery_t') }}</dt><dd>{{ t('shana_term_delivery_b') }}</dd>
+        <dt>{{ t('shana_term_install_t') }}</dt><dd>{{ t('shana_term_install_b') }}</dd>
+        <dt>{{ t('shana_optional_extras') }}</dt><dd>{{ t('shana_optional_extras_body') }}</dd>
+        <dt>{{ t('shana_not_included') }}</dt><dd>{{ t('shana_not_included_body') }}</dd>
+        <dt>{{ t('shana_term_timing_t') }}</dt><dd>{{ t('shana_term_timing_b') }}</dd>
+        <dt>{{ t('shana_term_quote_t') }}</dt><dd>{{ t('shana_term_quote_b') }}</dd>
+      </dl>
+    </div>
 
   <div class="form-panel" id="request">
     <h2 class="section-title">{{ t('shana_form_title') }}</h2>
@@ -114,5 +136,7 @@
       <button class="btn btn-primary btn-lg" type="submit">{{ t('sr_submit') }}</button>
     </form>
   </div>
+</div>
+</section>
 </div>
 {% endblock %}

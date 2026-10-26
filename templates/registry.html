@@ -4,12 +4,13 @@
 {% block meta_desc %}{% if reg['event_date'] %}{{ t('event_' ~ reg['event_type']) }} · {{ fmt_date(reg['event_date']) }} — {% endif %}{{ tf('reg_meta_desc', names=pick(reg, 'couple_names')) }}{% endblock %}
 {% block content %}
 
-<section class="reg-hero glass">
-  <div class="wrap">
+<section class="invite">
+  <div class="invite-card">
     {% if is_sample %}<span class="sample-flag sample-flag-dark">{{ t('sample_label') }}</span>{% endif %}
     <p class="reg-eyebrow">{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · <time datetime="{{ reg['event_date'] }}">{{ fmt_date(reg['event_date']) }}</time>{% endif %}{% if reg['city'] %} · <bdi>{{ reg['city'] }}</bdi>{% endif %}</p>
+    <span class="invite-rule" aria-hidden="true"></span>
     <h1 dir="auto">{{ pick(reg, 'title') }}</h1>
-    {% if pick(reg, 'couple_names') %}<p class="reg-couple bdi">{{ pick(reg, 'couple_names') }}</p>{% endif %}
+    {% set _names = pick(reg, 'couple_names') %}{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %}<p class="reg-couple bdi">{{ _names }}</p>{% endif %}
     {% if days_to_go %}<p class="reg-countdown">✦ {{ tf('reg_countdown', n=days_to_go) }} ✦</p>{% endif %}
     {% if pick(reg, 'message') %}<p class="reg-message" dir="auto">“{{ pick(reg, 'message') }}”</p>{% endif %}
     {% if total %}
@@ -56,7 +57,7 @@
   </div>
   {% endif %}
 
-  <h2 class="section-title" id="gifts">{{ t('reg_gifts') }}</h2>
+  <h2 class="section-title list-title" id="gifts">{{ t('reg_gifts') }}{% if items %} <span class="list-count">{{ items | length }}</span>{% endif %}</h2>
   <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}</p>
   {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
@@ -94,7 +95,7 @@
   <div class="gift-grid">
     {% for item in items %}
     {% set st = gift_status(item, breakdown) %}
-    {{ gift_card(item, mode=('sample' if is_sample else 'registry'), st=st, pay_links=pay_links) }}
+    {{ gift_card(item, mode=('sample' if is_sample else 'registry'), st=st, pay_links=pay_links, n=loop.index) }}
 
     {% if not is_sample and st.left > 0 and (item['url'] or pay_links) %}
     <dialog class="modal" id="claim-{{ item['id'] }}" aria-labelledby="claim-{{ item['id'] }}-title">
@@ -145,7 +146,7 @@
   </div>
 
   {% if is_sample %}
-  <div class="cta-panel" style="margin-top:40px">
+  <div class="cta-panel">
     <h2>{{ t('sample_cta_title') }}</h2>
     <p>{{ t('sample_cta_body') }}</p>
     <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>

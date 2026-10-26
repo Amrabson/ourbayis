@@ -1448,3 +1448,239 @@ html[dir="rtl"] .mega-em::after { bottom: .1em; }
   .plan-hero-inner { grid-template-columns: 1fr; }
   .plan-sheet, html[dir="rtl"] .plan-sheet { transform: none; }
 }
+
+/* =====================================================================================
+   Design system v4 (2026-10-26) — the homepage's language, site-wide. Loaded last so it
+   wins over the earlier v1–v3 layers without rewriting them.
+   ===================================================================================== */
+:root {
+  --font-display: "Fraunces", "Frank Ruhl Libre", Georgia, serif;
+  --grid-light: rgba(135, 96, 34, .075);
+  --grid-dark: rgba(201, 162, 74, .07);
+}
+html[dir="rtl"] { --font-display: "Frank Ruhl Libre", "Fraunces", Georgia, serif; }
+h1, h2, h3 { letter-spacing: -.012em; }
+.section-title { font-size: clamp(1.9rem, 3.6vw, 2.8rem); line-height: 1.04; }
+.sub-title { font-size: clamp(1.35rem, 2.2vw, 1.7rem); }
+.sub-title::after, .section-title::after { display: none; }
+.page-sub { font-size: 1.05rem; }
+
+/* header: wordmark in the display face, sentence-case nav with a gold hairline on hover */
+.brand-name { font-size: 1.6rem; letter-spacing: -.01em; }
+.brand-name em { font-style: italic; }
+html[dir="rtl"] .brand-name em { font-style: normal; }
+.main-nav a, .link-btn { text-transform: none; letter-spacing: 0; font-size: .95rem; }
+.main-nav a:not(.nav-cta) { border-bottom-width: 1.5px; }
+.main-nav a.nav-cta { border-radius: 999px; padding: 9px 18px; }
+
+/* footer: a sign-off line, then the links, on navy with the blueprint grid */
+.site-footer {
+  border-top: 0; margin-top: 0;
+  background-color: var(--navy-deep);
+  background-image: linear-gradient(var(--grid-dark) 1px, transparent 1px), linear-gradient(90deg, var(--grid-dark) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.footer-signoff {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 32px;
+  padding-top: clamp(48px, 7vw, 88px); padding-bottom: clamp(28px, 4vw, 44px);
+  border-bottom: 1px solid rgba(201, 162, 74, .3);
+}
+.footer-mega {
+  margin: 0; font-family: var(--font-display); color: var(--paper); line-height: .98;
+  font-size: clamp(2.2rem, 5.6vw, 4.6rem); letter-spacing: -.03em; max-width: 14ch;
+}
+.footer-mega em { font-style: italic; color: var(--gold-bright); }
+html[dir="rtl"] .footer-mega em { font-style: normal; }
+.footer-links strong { font-size: 1.15rem; }
+
+/* buttons: a touch more weight and air */
+.btn { border-radius: 999px; }
+.btn-lg { padding-inline: 28px; }
+
+/* closing call-to-action panels become typographic, not boxed */
+.cta-panel {
+  background: radial-gradient(ellipse 70% 80% at 50% 120%, var(--gold-soft), transparent 70%);
+  border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: clamp(48px, 7vw, 88px) 20px; margin-top: 48px;
+}
+.cta-panel h2 { font-size: clamp(2rem, 4.4vw, 3.2rem); line-height: 1.02; }
+
+/* filter chips read like the homepage's room pills */
+.chip { border-color: rgba(135, 96, 34, .3); background: rgba(255, 253, 248, .7); font-weight: 600; }
+.chip.active { background: var(--navy); color: var(--paper); }
+
+/* ---------- the registry page: an invitation ---------- */
+.invite {
+  background-color: var(--navy-deep);
+  background-image: linear-gradient(var(--grid-dark) 1px, transparent 1px), linear-gradient(90deg, var(--grid-dark) 1px, transparent 1px);
+  background-size: 28px 28px;
+  padding: clamp(32px, 6vw, 72px) 16px clamp(40px, 6vw, 80px);
+}
+.invite-card {
+  position: relative; max-width: 720px; margin: 0 auto; text-align: center;
+  background: #fffdf8; color: var(--ink);
+  padding: clamp(36px, 6vw, 64px) clamp(22px, 6vw, 72px);
+  box-shadow: 0 50px 80px -40px rgba(0, 0, 0, .6);
+  outline: 1px solid var(--gold-bright); outline-offset: -12px;
+}
+.invite-card::before { /* the inner rule of the double frame */
+  content: ""; position: absolute; inset: 18px; border: 1px solid rgba(201, 162, 74, .55); pointer-events: none;
+}
+.invite-card .sample-flag { position: relative; margin-bottom: 14px; }
+.invite-card .reg-eyebrow { color: var(--gold); letter-spacing: .28em; font-size: .74rem; margin-bottom: 18px; }
+html[dir="rtl"] .invite-card .reg-eyebrow { letter-spacing: .04em; font-size: .86rem; }
+.invite-rule {
+  display: block; width: 120px; height: 14px; margin: 0 auto 14px;
+  background: no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 14'%3E%3Cpath d='M2 7h46M72 7h46' stroke='%23c9a24a' stroke-width='1.2'/%3E%3Cpath d='M60 1l3 6-3 6-3-6z' fill='%23c9a24a'/%3E%3C/svg%3E");
+}
+.invite-card h1 {
+  color: var(--navy); font-style: italic; margin: 0 0 10px;
+  font-size: clamp(2.3rem, 6vw, 4rem); line-height: 1; letter-spacing: -.025em;
+}
+html[dir="rtl"] .invite-card h1 { font-style: normal; }
+.invite-card .reg-couple { color: var(--gold); font-size: clamp(1.2rem, 2.4vw, 1.5rem); margin: 0 0 6px; }
+.invite-card .reg-countdown { color: var(--gold); margin: 10px 0 0; }
+.invite-card .reg-message {
+  color: var(--ink-soft); font-family: var(--font-display); font-style: italic;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem); line-height: 1.45; max-width: 46ch; margin: 18px auto 0;
+}
+html[dir="rtl"] .invite-card .reg-message { font-style: normal; }
+.invite-card .progress { background: var(--paper-deep); height: 4px; margin: 30px auto 10px; max-width: 360px; }
+.invite-card .progress-label { color: var(--ink-soft); font-size: .9rem; }
+.invite-card .reg-jump { color: var(--navy); text-decoration-color: var(--gold-bright); }
+.invite-card .reg-jump:hover { color: var(--gold); }
+
+/* cash gift: an envelope band, not a boxed card */
+.reg-body .cash-card {
+  background: var(--navy); color: var(--paper); border: 0; border-radius: 6px; padding: clamp(22px, 3vw, 32px);
+  position: relative; overflow: hidden;
+}
+.reg-body .cash-card::after { /* envelope flap */
+  content: ""; position: absolute; inset: 0 0 auto 0; height: 100%;
+  background: linear-gradient(to bottom right, transparent 49.6%, rgba(201, 162, 74, .14) 50%, transparent 50.4%),
+              linear-gradient(to bottom left, transparent 49.6%, rgba(201, 162, 74, .14) 50%, transparent 50.4%);
+  background-size: 50% 60%; background-position: left top, right top; background-repeat: no-repeat; pointer-events: none;
+}
+.reg-body .cash-card h2 { color: var(--gold-bright); font-size: clamp(1.4rem, 2.4vw, 1.8rem); }
+.reg-body .cash-card .ic { color: var(--gold-bright); }
+.reg-body .cash-card p { color: rgba(250, 246, 236, .82); }
+.reg-body .cash-card > * { position: relative; z-index: 1; }
+
+/* the list: a count beside the title, numbered gifts, stamps on what's been given */
+.list-title { display: flex; align-items: baseline; gap: 14px; }
+.list-count { font: 700 .8rem/1 var(--font-body); letter-spacing: .12em; color: var(--gold); border: 1px solid var(--gold-bright); border-radius: 999px; padding: 6px 10px; }
+.gift-card { position: relative; border-radius: 6px; }
+.lot-no { font: 700 .66rem/1 var(--font-body); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+html[dir="rtl"] .lot-no { letter-spacing: .04em; font-size: .78rem; }
+.gift-body h3 { font-family: var(--font-display); font-weight: 400; font-size: 1.22rem; line-height: 1.15; }
+.stamp {
+  position: absolute; top: 18px; inset-inline-end: 14px; z-index: 2;
+  padding: 6px 12px 5px; border: 2px solid currentColor; border-radius: 4px;
+  font: 700 .74rem/1 var(--font-body); letter-spacing: .2em; text-transform: uppercase;
+  transform: rotate(-8deg); background: rgba(255, 253, 248, .82);
+  box-shadow: inset 0 0 0 2px rgba(255, 253, 248, .82), inset 0 0 0 3px currentColor;
+}
+html[dir="rtl"] .stamp { transform: rotate(8deg); letter-spacing: .04em; font-size: .86rem; }
+.stamp-received { color: var(--green); }
+.stamp-reported { color: var(--gold); }
+.stamp-reserved { color: var(--navy); }
+.gift-card.is-gifted { opacity: 1; }
+.gift-card.is-gifted .gift-ph, .gift-card.is-gifted .gift-img { filter: saturate(.35) opacity(.75); }
+@media (prefers-reduced-motion: no-preference) {
+  .js .stamp { animation: stamp-in .4s cubic-bezier(.2, 1.6, .4, 1) both; }
+}
+@keyframes stamp-in { from { opacity: 0; transform: rotate(-8deg) scale(1.6); } }
+
+/* ---------- v4 pages: how it works, shana rishonah, catalog, guides, guest page ---------- */
+.route-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.how-page .route-sec { padding-top: clamp(40px, 6vw, 80px); }
+.how-title { font-size: clamp(2.6rem, 6vw, 4.6rem); margin-bottom: clamp(28px, 4vw, 48px); }
+.how-sub { font-size: clamp(1.6rem, 2.8vw, 2.2rem); color: var(--navy); margin: clamp(36px, 5vw, 64px) 0 6px; }
+.how-page .route { margin-top: 32px; }
+@media (max-width: 860px) { .route-3 { grid-template-columns: 1fr; } }
+
+.stamp-inline { position: static; display: inline-block; vertical-align: middle; margin-inline-end: 14px; transform: rotate(-4deg); animation: none !important; }
+html[dir="rtl"] .stamp-inline { transform: rotate(4deg); }
+.stamp-legend { list-style: none; margin: 18px 0 14px; padding: 0; display: grid; gap: 16px; }
+.stamp-legend li { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--ink); }
+
+/* shana: board hero, boarding-pass packages, editorial terms, the request on a taped sheet */
+.shana-top h1 { font-size: clamp(2.4rem, 5vw, 4rem); color: var(--paper); line-height: 1; margin: 0 0 18px; }
+.tickets-sec { padding: clamp(56px, 8vw, 100px) 0; background: var(--stone); border-top: 1px solid var(--line); }
+.home .tickets-sub { margin: 10px 0 clamp(28px, 4vw, 44px); max-width: 60ch; }
+.home .closing > p { max-width: 60ch; margin-inline: auto; }
+.tickets { display: grid; gap: 22px; }
+.ticket {
+  display: grid; grid-template-columns: minmax(0, 1fr) 260px; background: #fffdf8;
+  border-radius: 10px; box-shadow: 0 24px 40px -30px rgba(22, 34, 60, .45); position: relative;
+  border: 0; padding: 0; overflow: visible;
+}
+.ticket.tier-standard { box-shadow: 0 0 0 2px var(--gold-bright), 0 24px 40px -30px rgba(22, 34, 60, .45); }
+.ticket-main { padding: clamp(22px, 3.5vw, 36px); }
+.ticket-kicker { margin: 0 0 6px; font: 700 .7rem/1 var(--font-body); letter-spacing: .24em; text-transform: uppercase; color: var(--gold); }
+html[dir="rtl"] .ticket-kicker { letter-spacing: .04em; font-size: .8rem; }
+.ticket h3 { font-size: clamp(1.7rem, 3vw, 2.3rem); color: var(--navy); margin: 0 0 10px; }
+.ticket .bundle-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 22px; }
+.ticket-stub {
+  position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  text-align: center; padding: 28px 22px; border-inline-start: 2px dashed var(--line);
+  background: linear-gradient(180deg, rgba(243, 233, 207, .5), rgba(243, 233, 207, .2));
+  border-start-end-radius: 10px; border-end-end-radius: 10px;
+}
+.ticket-stub::before, .ticket-stub::after { /* the punched notches of a tear-off stub */
+  content: ""; position: absolute; inset-inline-start: -13px; width: 24px; height: 24px; border-radius: 50%; background: var(--stone);
+}
+.ticket-stub::before { top: -12px; }
+.ticket-stub::after { bottom: -12px; }
+.ticket-from { font: 700 .7rem/1 var(--font-body); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); }
+.ticket-price { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.2rem, 3.6vw, 2.9rem); color: var(--navy); line-height: 1; }
+.ticket-note { font-size: .78rem; color: var(--ink-soft); max-width: 22ch; margin-bottom: 8px; }
+@media (max-width: 760px) {
+  .ticket { grid-template-columns: 1fr; }
+  .ticket .bundle-facts { grid-template-columns: 1fr; }
+  .ticket-stub { border-inline-start: 0; border-top: 2px dashed var(--line); border-radius: 0 0 10px 10px; }
+  .ticket-stub::before, .ticket-stub::after { top: -13px; bottom: auto; inset-inline-start: auto; }
+  .ticket-stub::before { left: -12px; }
+  .ticket-stub::after { right: -12px; }
+}
+.shana-page .terms-panel { background: none; border: 0; border-radius: 0; padding: 0; margin: clamp(48px, 7vw, 88px) 0 0; }
+.shana-page .terms-list { grid-template-columns: minmax(160px, 260px) minmax(0, 1fr); gap: 0; margin-top: 24px; }
+.shana-page .terms-list dt, .shana-page .terms-list dd { padding: 16px 0; border-top: 1px solid rgba(135, 96, 34, .25); }
+.shana-page .terms-list dt { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; padding-inline-end: 24px; }
+@media (max-width: 640px) { .shana-page .terms-list { grid-template-columns: 1fr; } .shana-page .terms-list dd { border-top: 0; padding-top: 0; } }
+.shana-page .form-panel {
+  position: relative; max-width: 860px; margin: clamp(56px, 8vw, 96px) auto 0; background: #fffdf8;
+  border: 1px solid var(--line); border-radius: 3px; padding: clamp(26px, 4.5vw, 52px);
+  box-shadow: 0 40px 70px -40px rgba(22, 34, 60, .45);
+}
+.shana-page .form-panel::before {
+  content: ""; position: absolute; top: -12px; inset-inline-start: 46%; width: 96px; height: 24px;
+  background: rgba(201, 162, 74, .28); transform: rotate(-3deg); border-radius: 2px;
+}
+.shana-page .form-panel .section-title { font-size: clamp(2rem, 4vw, 3rem); }
+
+/* catalog: lighter cards — softer media, one solid action per row of attention */
+.gift-card .gift-ph.ill-box { height: auto; aspect-ratio: 16 / 9; }
+.ph-kitchen.ill-box, .ph-appliances.ill-box, .ph-dining.ill-box, .ph-bedding.ill-box, .ph-judaica.ill-box, .ph-home.ill-box {
+  background-color: #f6efe0;
+  background-image: linear-gradient(var(--grid-light) 1px, transparent 1px), linear-gradient(90deg, var(--grid-light) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+.gift-card[id^="c-"] .btn-primary { background: transparent; color: var(--navy); border: 1.5px solid var(--navy); }
+.gift-card[id^="c-"] .btn-primary:hover { background: var(--navy); color: var(--paper); }
+
+/* guides: a reading column */
+.guide-article { max-width: 760px; }
+.guide-article .page-sub { max-width: 58ch; font-size: 1.15rem; }
+.guide-article p, .guide-article li { max-width: 68ch; }
+
+/* the guest's gift page: the gift as a tag on the invitation paper */
+.gift-sheet .glass-panel {
+  background: #fffdf8; border: 1px solid var(--line); border-radius: 3px; backdrop-filter: none;
+  outline: 1px solid var(--gold-bright); outline-offset: -12px; box-shadow: 0 40px 70px -40px rgba(22, 34, 60, .45);
+  padding: clamp(28px, 5vw, 56px);
+}
+
+/* Hebrew: no tracking on small caps; board rows in the body face (monospace spaces Hebrew letters apart) */
+html[dir="rtl"] .ticket-from { letter-spacing: .02em; font-size: .82rem; }
+html[dir="rtl"] .board-table td, html[dir="rtl"] .board-head { font-family: var(--font-body); }
+html[dir="rtl"] .board-table td { font-size: .95rem; }

@@ -18,60 +18,61 @@
 </script>
 {% endblock %}
 {% block content %}
-<div class="wrap section narrow">
-  <h1 class="section-title">{{ t('how_title') }}</h1>
+{% set arrow = '←' if rtl else '→' %}
+<div class="home how-page">
+<section class="route-sec">
+  <div class="sec-inner">
+    <h1 class="sec-title how-title">{{ t('how_title') }}</h1>
 
-  <h2 class="sub-title" style="margin-top:0">{{ t('how_couples') }}</h2>
-  <p class="page-sub">{{ t('how_couples_intro') }}</p>
-  <div class="grid-3">
-    {% for n, icon in [(1, 'i-gift'), (2, 'i-link'), (3, 'i-house')] %}
-    <div class="card step-card">
-      <div class="step-num">{{ n }}</div>
-      <svg class="ic ic-lg"><use href="#{{ icon }}"/></svg>
-      <h3>{{ t('step' ~ n ~ '_t') }}</h3>
-      <p>{{ t('step' ~ n ~ '_b') }}</p>
-    </div>
-    {% endfor %}
+    <h2 class="how-sub">{{ t('how_couples') }}</h2>
+    <p class="sec-sub">{{ t('how_couples_intro') }}</p>
+    <ol class="route">
+      {% for n in [1, 2, 3] %}
+      <li class="route-stop"><span class="route-num" aria-hidden="true">0{{ n }}</span>
+        <h3>{{ t('step' ~ n ~ '_t') }}</h3><p>{{ t('step' ~ n ~ '_b') }}</p></li>
+      {% endfor %}
+      <li class="route-stop route-end">
+        <svg class="route-end-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-candlesticks"/></svg>
+        <h3>{{ t('route_end_t') }}</h3><p>{{ t('route_end_b') }}</p>
+      </li>
+    </ol>
+
+    <h2 class="how-sub">{{ t('how_guests') }}</h2>
+    <p class="sec-sub">{{ t('how_guests_intro') }}</p>
+    <ol class="route route-3">
+      {% for n in [1, 2, 3] %}
+      <li class="route-stop"><span class="route-num" aria-hidden="true">0{{ n }}</span>
+        <h3>{{ t('how_g' ~ n ~ '_t') }}</h3><p>{{ t('how_g' ~ n ~ '_b') }}</p></li>
+      {% endfor %}
+    </ol>
+
+    <h2 class="how-sub">{{ t('how_status_t') }}</h2>
+    <ol class="stamp-legend">
+      <li><span class="stamp stamp-inline stamp-reserved">{{ t('status_reserved_short') }}</span> {{ t('claim_status_reserved') }}</li>
+      <li><span class="stamp stamp-inline stamp-reported">{{ t('status_reported_short') }}</span> {{ t('claim_status_reported') }}</li>
+      <li><span class="stamp stamp-inline stamp-received">{{ t('status_received_short') }}</span> {{ t('claim_status_received') }}</li>
+    </ol>
+    <p class="hint">{{ t('claim_expiry_hint') }} {{ t('how_status_note') }}</p>
   </div>
+</section>
 
-  <h2 class="sub-title">{{ t('how_guests') }}</h2>
-  <p class="page-sub">{{ t('how_guests_intro') }}</p>
-  <div class="grid-3">
-    {% for n, icon in [(1, 'i-link'), (2, 'i-gift'), (3, 'i-check')] %}
-    <div class="card step-card">
-      <div class="step-num">{{ n }}</div>
-      <svg class="ic ic-lg"><use href="#{{ icon }}"/></svg>
-      <h3>{{ t('how_g' ~ n ~ '_t') }}</h3>
-      <p>{{ t('how_g' ~ n ~ '_b') }}</p>
-    </div>
-    {% endfor %}
+<section class="faq-sec">
+  <div class="sec-inner">
+    <h2 class="sec-title">{{ t('faq_title') }}</h2>
+    <ol class="faq-cols">
+      {% for n in [1, 2, 3, 4, 5, 6] %}
+      <li><details><summary><span class="faq-n" aria-hidden="true">{{ '%02d' % n }}</span><span>{{ t('faq_q' ~ n) }}</span></summary>
+        <p>{{ t('faq_a' ~ n) }}</p></details></li>
+      {% endfor %}
+    </ol>
+    <p class="sec-links"><a class="link-arrow" href="{{ url_for('guides') }}">{{ t('guides_link_from_how') }} <span aria-hidden="true">{{ arrow }}</span></a></p>
   </div>
+</section>
 
-  <h2 class="sub-title">{{ t('how_status_t') }}</h2>
-  <ol class="page-sub status-legend" style="padding-inline-start:20px">
-    <li><span class="gifted-tag state-reserved">{{ t('status_reserved_short') }}</span> {{ t('claim_status_reserved') }}</li>
-    <li><span class="gifted-tag state-reported">{{ t('status_reported_short') }}</span> {{ t('claim_status_reported') }}</li>
-    <li><span class="gifted-tag state-received">{{ t('status_received_short') }}</span> {{ t('claim_status_received') }}</li>
-  </ol>
-  <p class="hint">{{ t('claim_expiry_hint') }} {{ t('how_status_note') }}</p>
-
-  <div class="faq-list" style="margin-top:34px">
-    {% for n in [1, 2, 3, 4, 5, 6] %}
-    <details>
-      <summary>{{ t('faq_q' ~ n) }}</summary>
-      <p>{{ t('faq_a' ~ n) }}</p>
-    </details>
-    {% endfor %}
-  </div>
-
-  <p class="section-more"><a href="{{ url_for('guides') }}">{{ t('guides_link_from_how') }} {{ '←' if rtl else '→' }}</a></p>
-
-  <p class="section-more"><a href="{{ url_for('guides') }}">{{ t('guides_link_from_how') }} {{ '←' if rtl else '→' }}</a></p>
-
-  <div class="cta-panel">
-    <h2>{{ t('how_money_t') }}</h2>
-    <p>{{ t('how_money_b') }}</p>
-    <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>
-  </div>
+<section class="closing">
+  <h2 class="closing-title">{{ t('how_money_t') }}</h2>
+  <p>{{ t('how_money_b') }}</p>
+  <div class="closing-ctas"><a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a></div>
+</section>
 </div>
 {% endblock %}

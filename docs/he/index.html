@@ -20,11 +20,8 @@
 <meta name="theme-color" content="#223354">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bellefair&family=Assistant:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../static/style.css?v=1a179d46483">
-
-
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../static/style.css?v=1a179e85882">
 
 
 <script type="application/ld+json">
@@ -198,9 +195,10 @@
           </g>
           <g class="plan-furniture">
             <rect x="80" y="92" width="150" height="76" rx="6"/>
+            <rect x="62" y="120" width="12" height="20" rx="2"/><rect x="236" y="120" width="12" height="20" rx="2"/>
+            <rect x="238" y="40" width="94" height="18" rx="2"/>
             <path d="M96 78h20v10H96zM146 78h20v10h-20zM196 78h20v10h-20zM96 172h20v10H96zM146 172h20v10h-20zM196 172h20v10h-20z"/>
-            <circle cx="140" cy="130" r="3.5"/><circle cx="170" cy="130" r="3.5"/>
-            <rect x="62" y="232" width="176" height="44" rx="7"/><path d="M62 246h176"/>
+                        <rect x="62" y="232" width="176" height="44" rx="7"/><path d="M62 246h176"/>
             <path d="M362 42H578V206H548V72H362z"/>
             <rect x="398" y="47" width="42" height="18" rx="4"/>
             <circle cx="478" cy="56" r="6"/><circle cx="500" cy="56" r="6"/>
@@ -222,30 +220,40 @@
         </svg>
 
         
-        
         <div class="plan-pins" aria-hidden="true">
           
+          <span class="plan-pin st-received" style="--x: 90.8%; --y: 23.8%; --i: 0">1</span>
           
-          <span class="plan-pin st-open" style="--x: 79.5%; --y: 15%; --i: 0">1</span>
+          <span class="plan-pin st-open" style="--x: 90.8%; --y: 35.7%; --i: 1">2</span>
           
+          <span class="plan-pin st-reserved" style="--x: 60.6%; --y: 12.1%; --i: 2">3</span>
           
-          <span class="plan-pin st-partial" style="--x: 25%; --y: 27.6%; --i: 1">2</span>
+          <span class="plan-pin st-received" style="--x: 45.8%; --y: 10.4%; --i: 3">4</span>
           
+          <span class="plan-pin st-open" style="--x: 15.8%; --y: 27.7%; --i: 4">5</span>
           
-          <span class="plan-pin st-received" style="--x: 66.5%; --y: 13.5%; --i: 2">3</span>
+          <span class="plan-pin st-reported" style="--x: 42.7%; --y: 86.8%; --i: 5">6</span>
           
+          <span class="plan-pin st-received" style="--x: 11.0%; --y: 71.9%; --i: 6">7</span>
           
-          <span class="plan-pin st-reported" style="--x: 42.7%; --y: 86%; --i: 3">4</span>
+          <span class="plan-pin st-reserved" style="--x: 80.2%; --y: 74.9%; --i: 7">8</span>
           
         </div>
         </div>
         <div class="plan-schedule">
         <ol class="plan-gifts" aria-label="רשימה לדוגמה">
           
-          
-          
-          <li class="plan-gift side-l st-open" style="--x: 79.5%; --y: 15%; --i: 0">
+          <li class="plan-gift st-received" style="--i: 0">
             <span class="plan-num" aria-hidden="true">1</span>
+            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-urn"/></svg>
+            <span class="plan-tag-text">
+              <strong>מיחם מים לשבת</strong>
+              <span class="plan-tag-meta">התקבל · מלונדון</span>
+            </span>
+          </li>
+          
+          <li class="plan-gift st-open" style="--i: 1">
+            <span class="plan-num" aria-hidden="true">2</span>
             <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-platta"/></svg>
             <span class="plan-tag-text">
               <strong>פלטת שבת</strong>
@@ -253,36 +261,57 @@
             </span>
           </li>
           
-          
-          
-          <li class="plan-gift side-r st-partial" style="--x: 25%; --y: 27.6%; --i: 1">
-            <span class="plan-num" aria-hidden="true">2</span>
-            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-urn"/></svg>
-            <span class="plan-tag-text">
-              <strong>מיחם מים לשבת</strong>
-              <span class="plan-tag-meta">1 מתוך 2 עדיין פנוי · מיוהנסבורג</span>
-            </span>
-          </li>
-          
-          
-          
-          <li class="plan-gift side-l st-received" style="--x: 66.5%; --y: 13.5%; --i: 2">
+          <li class="plan-gift st-reserved" style="--i: 2">
             <span class="plan-num" aria-hidden="true">3</span>
             <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-mixer"/></svg>
             <span class="plan-tag-text">
               <strong>מיקסר עומד</strong>
-              <span class="plan-tag-meta">התקבל · מלונדון</span>
+              <span class="plan-tag-meta">שוריין · מיוהנסבורג</span>
             </span>
           </li>
           
-          
-          
-          <li class="plan-gift side-r st-reported" style="--x: 42.7%; --y: 86%; --i: 3">
+          <li class="plan-gift st-received" style="--i: 3">
             <span class="plan-num" aria-hidden="true">4</span>
+            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-candlesticks"/></svg>
+            <span class="plan-tag-text">
+              <strong>פמוטי שבת</strong>
+              <span class="plan-tag-meta">התקבל · מברוקלין</span>
+            </span>
+          </li>
+          
+          <li class="plan-gift st-open" style="--i: 4">
+            <span class="plan-num" aria-hidden="true">5</span>
+            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-challah"/></svg>
+            <span class="plan-tag-text">
+              <strong>מגש וסכין לחלה</strong>
+              <span class="plan-tag-meta">פנוי</span>
+            </span>
+          </li>
+          
+          <li class="plan-gift st-reported" style="--i: 5">
+            <span class="plan-num" aria-hidden="true">6</span>
             <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-slowcooker"/></svg>
             <span class="plan-tag-text">
               <strong>סיר בישול איטי (לצ׳ולנט!)</strong>
-              <span class="plan-tag-meta">בדרך · מברוקלין</span>
+              <span class="plan-tag-meta">בדרך · מטורונטו</span>
+            </span>
+          </li>
+          
+          <li class="plan-gift st-received" style="--i: 6">
+            <span class="plan-num" aria-hidden="true">7</span>
+            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-towel"/></svg>
+            <span class="plan-tag-text">
+              <strong>סט מגבות</strong>
+              <span class="plan-tag-meta">התקבל · מפתח תקווה</span>
+            </span>
+          </li>
+          
+          <li class="plan-gift st-reserved" style="--i: 7">
+            <span class="plan-num" aria-hidden="true">8</span>
+            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-bedding"/></svg>
+            <span class="plan-tag-text">
+              <strong>סטי מצעים (2)</strong>
+              <span class="plan-tag-meta">שוריין · מטורונטו</span>
             </span>
           </li>
           
@@ -831,6 +860,7 @@
 
 
 <footer class="site-footer">
+  
   <div class="wrap footer-inner">
     <div>
       <a class="brand brand-footer" href="../he/">

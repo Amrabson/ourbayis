@@ -228,6 +228,13 @@ the CSRF token. Keep it the first-registered after_request hook (Flask runs hook
 - **Admin outbox** (`/admin/outbox`): masked addresses (`a***@x.com`) — the body is never shown.
   Failed rows get a one-click "Retry" that resets them to `status='queued'`.
 
+## Design system v4 (2026-10-26, site-wide)
+The last two blocks of style.css ("Design system v4", "v4 pages") override the earlier layers. Pages built
+from the homepage components wrap in `<div class="home">` (shana.html, how.html) to get `.sec-inner`,
+`.route`, `.faq-cols`, `.board*`, `.closing`, `.link-arrow`, `.kicker`. Registry hero = `.invite` /
+`.invite-card` (keeps `<h1 dir="auto">`, `.reg-couple bdi`, `.reg-message` for tests); stamps =
+`.stamp.stamp-<state>` (`.stamp-inline` for static use); gift numbers = `gift_card(n=)` + `lot_no`.
+
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =
 Fraunces / Frank Ruhl Libre, loaded via `{% block head_extra %}` on the homepage only). The floor plan is
