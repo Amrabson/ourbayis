@@ -930,12 +930,36 @@ def sample_registry(db, limit=6):
     return reg, items, breakdown
 
 
+# The homepage floor plan: each sample gift pinned where it lives in the apartment (x, y in the
+# drawing's 620x470 viewBox), with a synthetic state like the /sample fixture's. Owner, 2026-10-26:
+# the meicham is in the kitchen, leichter on the dining-room sideboard, challah board at the head
+# of the table. `origin` n -> plan_from_<n> ("from London" ...), None for an open gift.
+PLAN_PINS = (
+    ("shabbos-urn-meicham", 563, 112, "received", 1),
+    ("shabbos-hot-plate-platta", 563, 168, "open", None),
+    ("stand-mixer", 376, 57, "reserved", 3),
+    ("shabbos-candlesticks", 284, 49, "received", 2),
+    ("challah-board-knife", 98, 130, "open", None),
+    ("slow-cooker-for-cholent", 265, 408, "reported", 4),
+    ("towel-set", 68, 338, "received", 5),
+    ("sheet-sets-x2", 497, 352, "reserved", 4),
+)
+
+
+def plan_pins(db):
+    pins = []
+    for key, x, y, state, origin in PLAN_PINS:
+        row = db.execute("SELECT * FROM catalog_items WHERE seed_key=? AND active=1", (key,)).fetchone()
+        if row:
+            pins.append(dict(item=row, x=f"{x / 620 * 100:.1f}%", y=f"{y / 470 * 100:.1f}%",
+                             state=state, origin=f"plan_from_{origin}" if origin else None))
+    return pins
+
+
 @app.route("/")
 def index():
     db = get_db()
-    featured = featured_items(db, limit=8)
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
-    sample_reg, sample_items, sample_breakdown = sample_registry(db, limit=4)
     # "Room by room": per category, its best four (featured first, in stock, with a store link)
     rooms = []
     for slug in CATEGORIES:
@@ -945,9 +969,7 @@ def index():
         n = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND category=?", (slug,)).fetchone()[0]
         if rows:
             rooms.append({"slug": slug, "items": rows, "count": n})
-    return render_template("index.html", featured=featured, bundles=bundles, rooms=rooms,
-                           sample_reg=sample_reg, sample_items=sample_items,
-                           sample_breakdown=sample_breakdown)
+    return render_template("index.html", bundles=bundles, rooms=rooms, plan_pins=plan_pins(db))
 
 
 @app.route("/sample")

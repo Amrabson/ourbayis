@@ -72,9 +72,10 @@
           </g>
           <g class="plan-furniture">
             <rect x="80" y="92" width="150" height="76" rx="6"/>
+            <rect x="62" y="120" width="12" height="20" rx="2"/><rect x="236" y="120" width="12" height="20" rx="2"/>
+            <rect x="238" y="40" width="94" height="18" rx="2"/>
             <path d="M96 78h20v10H96zM146 78h20v10h-20zM196 78h20v10h-20zM96 172h20v10H96zM146 172h20v10h-20zM196 172h20v10h-20z"/>
-            <circle cx="140" cy="130" r="3.5"/><circle cx="170" cy="130" r="3.5"/>
-            <rect x="62" y="232" width="176" height="44" rx="7"/><path d="M62 246h176"/>
+                        <rect x="62" y="232" width="176" height="44" rx="7"/><path d="M62 246h176"/>
             <path d="M362 42H578V206H548V72H362z"/>
             <rect x="398" y="47" width="42" height="18" rx="4"/>
             <circle cx="478" cy="56" r="6"/><circle cx="500" cy="56" r="6"/>
@@ -95,32 +96,27 @@
           <g class="plan-north" transform="translate(604 452)"><circle r="14"/><path d="M0-9L5 6 0 3-5 6z"/></g>
         </svg>
 
-        {# pins on the drawing are decorative; the numbered list carries the content. On wide screens
-           each list item sits beside its pin; on phones the list stacks under the drawing. #}
-        {% set spots = [('79.5%', '15%', 'l'), ('25%', '27.6%', 'r'), ('66.5%', '13.5%', 'l'), ('42.7%', '86%', 'r')] %}
+        {# pins on the drawing are decorative; the numbered schedule below carries the content #}
         <div class="plan-pins" aria-hidden="true">
-          {% for item in sample_items[:4] %}
-          {% set st = gift_status(item, sample_breakdown) %}
-          <span class="plan-pin st-{{ st.state }}" style="--x: {{ spots[loop.index0][0] }}; --y: {{ spots[loop.index0][1] }}; --i: {{ loop.index0 }}">{{ loop.index }}</span>
+          {% for p in plan_pins %}
+          <span class="plan-pin st-{{ p.state }}" style="--x: {{ p.x }}; --y: {{ p.y }}; --i: {{ loop.index0 }}">{{ loop.index }}</span>
           {% endfor %}
         </div>
         </div>
         <div class="plan-schedule">
         <ol class="plan-gifts" aria-label="{{ t('sample_label') }}">
-          {% for item in sample_items[:4] %}
-          {% set st = gift_status(item, sample_breakdown) %}
-          {% set spot = spots[loop.index0] %}
-          <li class="plan-gift side-{{ spot[2] }} st-{{ st.state }}" style="--x: {{ spot[0] }}; --y: {{ spot[1] }}; --i: {{ loop.index0 }}">
+          {% for p in plan_pins %}
+          <li class="plan-gift st-{{ p.state }}" style="--i: {{ loop.index0 }}">
             <span class="plan-num" aria-hidden="true">{{ loop.index }}</span>
-            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-{{ illustration_for(item) }}"/></svg>
+            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-{{ illustration_for(p.item) }}"/></svg>
             <span class="plan-tag-text">
-              <strong>{{ pick(item, 'name') }}</strong>
+              <strong>{{ pick(p.item, 'name') }}</strong>
               <span class="plan-tag-meta">
-                {%- if st.state == 'received' %}{{ t('status_received_short') }} · {{ t('plan_from_1') }}
-                {%- elif st.state == 'reported' %}{{ t('status_reported_short') }} · {{ t('plan_from_2') }}
-                {%- elif st.state == 'reserved' %}{{ t('status_reserved_short') }} · {{ t('plan_from_3') }}
-                {%- elif st.state == 'partial' %}{{ tf('qty_available', left=st.left, qty=st.qty, n=st.left) }} · {{ t('plan_from_3') }}
+                {%- if p.state == 'received' %}{{ t('status_received_short') }}
+                {%- elif p.state == 'reported' %}{{ t('status_reported_short') }}
+                {%- elif p.state == 'reserved' %}{{ t('status_reserved_short') }}
                 {%- else %}{{ t('status_open_short') }}{% endif -%}
+                {%- if p.origin %} · {{ t(p.origin) }}{% endif -%}
               </span>
             </span>
           </li>
