@@ -936,7 +936,16 @@ def index():
     featured = featured_items(db, limit=8)
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
     sample_reg, sample_items, sample_breakdown = sample_registry(db, limit=4)
-    return render_template("index.html", featured=featured, bundles=bundles,
+    # "Room by room": per category, its best four (featured first, in stock, with a store link)
+    rooms = []
+    for slug in CATEGORIES:
+        rows = db.execute(
+            "SELECT * FROM catalog_items WHERE active=1 AND category=?"
+            " ORDER BY featured DESC, (availability='unavailable'), (url=''), sort LIMIT 4", (slug,)).fetchall()
+        n = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND category=?", (slug,)).fetchone()[0]
+        if rows:
+            rooms.append({"slug": slug, "items": rows, "count": n})
+    return render_template("index.html", featured=featured, bundles=bundles, rooms=rooms,
                            sample_reg=sample_reg, sample_items=sample_items,
                            sample_breakdown=sample_breakdown)
 

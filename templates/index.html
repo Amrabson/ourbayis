@@ -1,5 +1,10 @@
 {% extends "base.html" %}
-{% from "_cards.html" import gift_card, gift_media, price_line, status_label with context %}
+{% from "_cards.html" import gift_card, price_line with context %}
+
+{% block head_extra %}
+{# homepage display face (2026-10-26 redesign): Fraunces for Latin, Frank Ruhl Libre for Hebrew #}
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block jsonld %}
 <script type="application/ld+json">
@@ -22,157 +27,266 @@
 {% endblock %}
 
 {% block content %}
+{% set arrow = '←' if rtl else '→' %}
+<div class="home">
 
-<section class="hero">
-  <div class="light-field" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <p class="eyebrow">{{ t('hero_eyebrow') }}</p>
-      <h1>{{ t('hero_title') }}</h1>
-      <p class="hero-lead">{{ t('hero_lead') }}</p>
-      <p class="hero-body">{{ t('hero_body') }}</p>
-      <p class="hero-note">{{ t('hero_note') }}</p>
-      <div class="hero-ctas">
-        <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">
-          <svg class="ic"><use href="#i-gift"/></svg> {{ t('cta_start') }}</a>
-        <a class="btn btn-ghost btn-lg" href="{{ url_for('find') }}">
-          <svg class="ic"><use href="#i-search"/></svg> {{ t('cta_find') }}</a>
+{# ============ 1. the plan: the sample registry drawn as the apartment it fills ============ #}
+<section class="plan-hero">
+  <div class="plan-hero-inner">
+    <div class="plan-copy">
+      <p class="kicker">{{ t('hero_eyebrow') }}</p>
+      <h1 class="mega">
+        <span class="mega-line">{{ t('hero_title_a') }} <em class="mega-em">{{ t('hero_title_em') }}</em></span>
+        <span class="mega-line">{{ t('hero_title_b') }}</span>
+      </h1>
+      <p class="plan-lead">{{ t('hero_lead') }}</p>
+      <p class="plan-body">{{ t('hero_body') }} {{ t('hero_note') }}</p>
+      <div class="plan-ctas">
+        <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>
+        <a class="link-arrow" href="{{ url_for('find') }}">{{ t('cta_find') }} <span aria-hidden="true">{{ arrow }}</span></a>
       </div>
-      <p class="hero-sample-link"><a href="{{ url_for('sample') }}">{{ t('cta_sample') }} {{ '←' if rtl else '→' }}</a></p>
-      <ul class="trust-row" aria-label="{{ t('trust_label') }}">
-        <li><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust1') }}</li>
-        <li><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust2') }}</li>
-        <li><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('trust3') }}</li>
-      </ul>
+      <p class="plan-facts">
+        <span>{{ t('trust1') }}</span><span>{{ t('trust2') }}</span><span>{{ t('trust3') }}</span>
+      </p>
     </div>
 
-    {# Live preview of the one canonical sample registry (same fixture as /sample) #}
-    <a class="hero-preview glass" href="{{ url_for('sample') }}" aria-label="{{ t('cta_sample') }}">
-      <svg class="preview-motif" viewBox="0 0 220 96" aria-hidden="true" fill="none">
-        <g class="draw" stroke="#a5762a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M40 94V26M180 94V26"/>
-          <path d="M24 28q86-28 172 0" fill="#f3e4bd" fill-opacity=".55"/>
-          <path d="M24 28q21 14 43 0q21 14 43 0q21 14 43 0q21 14 43 0"/>
-          <path d="M40 50q70 36 140 0" stroke-width="1.3" opacity=".8"/>
-        </g>
-        <g fill="#c9a24a" stroke="none">
-          <circle class="tw tw1" cx="60" cy="58" r="3.4"/><circle class="tw tw2" cx="86" cy="65" r="3.4"/>
-          <circle class="tw tw3" cx="110" cy="68" r="3.4"/><circle class="tw tw4" cx="134" cy="65" r="3.4"/>
-          <circle class="tw tw5" cx="160" cy="58" r="3.4"/>
-        </g>
-        <g stroke="#a5762a" stroke-width="2" stroke-linecap="round">
-          <path d="M96 94V72M124 94V72M90 94h12M118 94h12"/>
-        </g>
-        <ellipse class="tw tw2" cx="96" cy="66" rx="2.6" ry="5" fill="#c9a24a"/>
-        <ellipse class="tw tw4" cx="124" cy="66" rx="2.6" ry="5" fill="#c9a24a"/>
-      </svg>
-      <div class="preview-head">
+    <figure class="plan">
+      <div class="plan-sheet">
+        <div class="plan-drawing">
+        <svg class="plan-svg" viewBox="0 0 620 470" role="img" aria-label="{{ t('plan_caption') }}">
+          <g class="plan-walls">
+            <path d="M30 30H590V430H290M240 430H30V30"/>
+            <path d="M350 30V120M350 170V300M350 340V430"/>
+            <path d="M350 220H590"/>
+            <path d="M30 300H170M300 300H350"/>
+            <path d="M170 300V340M170 380V430"/>
+          </g>
+          <g class="plan-windows">
+            <rect x="80" y="25" width="130" height="10"/><rect x="420" y="25" width="110" height="10"/>
+            <rect x="585" y="270" width="10" height="110"/><rect x="25" y="120" width="10" height="110"/>
+          </g>
+          <g class="plan-doors">
+            <path d="M240 430V380A50 50 0 0 1 290 430"/>
+            <path d="M350 340H390A40 40 0 0 0 350 300"/>
+            <path d="M170 340H132A38 38 0 0 0 170 378"/>
+          </g>
+          <g class="plan-furniture">
+            <rect x="80" y="92" width="150" height="76" rx="6"/>
+            <path d="M96 78h20v10H96zM146 78h20v10h-20zM196 78h20v10h-20zM96 172h20v10H96zM146 172h20v10h-20zM196 172h20v10h-20z"/>
+            <circle cx="140" cy="130" r="3.5"/><circle cx="170" cy="130" r="3.5"/>
+            <rect x="62" y="232" width="176" height="44" rx="7"/><path d="M62 246h176"/>
+            <path d="M362 42H578V206H548V72H362z"/>
+            <rect x="398" y="47" width="42" height="18" rx="4"/>
+            <circle cx="478" cy="56" r="6"/><circle cx="500" cy="56" r="6"/>
+            <rect x="436" y="262" width="122" height="142" rx="6"/>
+            <rect x="446" y="272" width="46" height="22" rx="5"/><rect x="502" y="272" width="46" height="22" rx="5"/>
+            <path d="M436 318h122"/>
+            <rect x="40" y="310" width="56" height="110" rx="14"/>
+            <circle cx="140" cy="326" r="10"/><ellipse cx="140" cy="404" rx="12" ry="16"/>
+            <rect x="236" y="396" width="58" height="24" rx="3" class="plan-mat"/>
+          </g>
+          <g class="plan-labels">
+            <text x="155" y="214">{{ t('plan_room_salon') }}</text>
+            <text x="455" y="150">{{ t('plan_room_kitchen') }}</text>
+            <text x="497" y="248">{{ t('plan_room_bedroom') }}</text>
+            <text x="118" y="368">{{ t('plan_room_bath') }}</text>
+            <text x="262" y="340">{{ t('plan_room_entry') }}</text>
+          </g>
+          <g class="plan-north" transform="translate(604 452)"><circle r="14"/><path d="M0-9L5 6 0 3-5 6z"/></g>
+        </svg>
+
+        {# pins on the drawing are decorative; the numbered list carries the content. On wide screens
+           each list item sits beside its pin; on phones the list stacks under the drawing. #}
+        {% set spots = [('79.5%', '15%', 'l'), ('25%', '27.6%', 'r'), ('66.5%', '13.5%', 'l'), ('42.7%', '86%', 'r')] %}
+        <div class="plan-pins" aria-hidden="true">
+          {% for item in sample_items[:4] %}
+          {% set st = gift_status(item, sample_breakdown) %}
+          <span class="plan-pin st-{{ st.state }}" style="--x: {{ spots[loop.index0][0] }}; --y: {{ spots[loop.index0][1] }}; --i: {{ loop.index0 }}">{{ loop.index }}</span>
+          {% endfor %}
+        </div>
+        </div>
+        <div class="plan-schedule">
+        <ol class="plan-gifts" aria-label="{{ t('sample_label') }}">
+          {% for item in sample_items[:4] %}
+          {% set st = gift_status(item, sample_breakdown) %}
+          {% set spot = spots[loop.index0] %}
+          <li class="plan-gift side-{{ spot[2] }} st-{{ st.state }}" style="--x: {{ spot[0] }}; --y: {{ spot[1] }}; --i: {{ loop.index0 }}">
+            <span class="plan-num" aria-hidden="true">{{ loop.index }}</span>
+            <svg class="plan-tag-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-{{ illustration_for(item) }}"/></svg>
+            <span class="plan-tag-text">
+              <strong>{{ pick(item, 'name') }}</strong>
+              <span class="plan-tag-meta">
+                {%- if st.state == 'received' %}{{ t('status_received_short') }} · {{ t('plan_from_1') }}
+                {%- elif st.state == 'reported' %}{{ t('status_reported_short') }} · {{ t('plan_from_2') }}
+                {%- elif st.state == 'reserved' %}{{ t('status_reserved_short') }} · {{ t('plan_from_3') }}
+                {%- elif st.state == 'partial' %}{{ tf('qty_available', left=st.left, qty=st.qty, n=st.left) }} · {{ t('plan_from_3') }}
+                {%- else %}{{ t('status_open_short') }}{% endif -%}
+              </span>
+            </span>
+          </li>
+          {% endfor %}
+        </ol>
+        <div class="plan-titleblock" aria-hidden="true"><strong>{{ brand }}</strong><span>{{ t('sample_label') }}</span><span>1:50</span></div>
+        </div>
+      </div>
+      <figcaption class="plan-caption">
         <span class="sample-flag">{{ t('sample_label') }}</span>
-        <strong class="preview-title">{{ pick(sample_reg, 'title') }}</strong>
-        <span class="preview-sub"><bdi>{{ pick(sample_reg, 'couple_names') }}</bdi> · <bdi>{{ sample_reg['city'] }}</bdi></span>
-      </div>
-      <ul class="preview-list">
-        {% for item in sample_items %}
-        {% set st = gift_status(item, sample_breakdown) %}
-        <li class="preview-row {% if st.left <= 0 %}is-gifted{% endif %}">
-          {{ gift_media(item, small=True) }}
-          <span class="preview-name">{{ pick(item, 'name') }}</span>
-          <span class="preview-state">
-            {% if st.state == 'received' %}<span class="badge badge-ok">{{ t('status_received_short') }}</span>
-            {% elif st.state == 'reported' %}<span class="badge badge-ok">{{ t('status_reported_short') }}</span>
-            {% elif st.state == 'reserved' %}<span class="badge badge-plain">{{ t('status_reserved_short') }}</span>
-            {% elif st.state == 'partial' %}<span class="badge badge-plain">{{ tf('qty_available', left=st.left, qty=st.qty, n=st.left) }}</span>
-            {% else %}<span class="badge badge-gold">{{ t('status_open_short') }}</span>{% endif %}
-          </span>
-          {{ price_line(item, cls='preview-price') }}
-        </li>
-        {% endfor %}
-      </ul>
-      <span class="preview-more">{{ t('cta_sample_full') }} {{ '←' if rtl else '→' }}</span>
-    </a>
+        <span>{{ t('plan_caption') }}</span>
+        <a href="{{ url_for('sample') }}">{{ t('cta_sample_full') }} <span aria-hidden="true">{{ arrow }}</span></a>
+      </figcaption>
+    </figure>
   </div>
 </section>
 
-<!-- One shared three-step story, with short notes for each audience -->
-<section class="wrap section reveal">
-  <h2 class="section-title">{{ t('steps_title') }}</h2>
-  <div class="grid-3 steps-grid">
-    {% for n, icon in [(1, 'i-gift'), (2, 'i-link'), (3, 'i-house')] %}
-    <div class="card step-card">
-      <div class="step-num">{{ n }}</div>
-      <svg class="ic ic-lg"><use href="#{{ icon }}"/></svg>
-      <h3>{{ t('step' ~ n ~ '_t') }}</h3>
-      <p>{{ t('step' ~ n ~ '_b') }}</p>
-      <p class="step-note"><span class="step-who">{{ t('how_guests') }}:</span> {{ t('step' ~ n ~ '_g') }}</p>
+{# ============ 2. the route: three stops and a destination ============ #}
+<section class="route-sec reveal">
+  <div class="sec-inner">
+    <h2 class="sec-title">{{ t('steps_title') }}</h2>
+    <ol class="route">
+      {% for n in [1, 2, 3] %}
+      <li class="route-stop">
+        <span class="route-num" aria-hidden="true">0{{ n }}</span>
+        <h3>{{ t('step' ~ n ~ '_t') }}</h3>
+        <p>{{ t('step' ~ n ~ '_b') }}</p>
+        <p class="route-guest"><span>{{ t('how_guests') }}</span> {{ t('step' ~ n ~ '_g') }}</p>
+      </li>
+      {% endfor %}
+      <li class="route-stop route-end">
+        <svg class="route-end-ill" viewBox="0 0 120 90" aria-hidden="true"><use href="#ill-candlesticks"/></svg>
+        <h3>{{ t('route_end_t') }}</h3>
+        <p>{{ t('route_end_b') }}</p>
+      </li>
+    </ol>
+    <p class="sec-links">
+      <a class="link-arrow" href="{{ url_for('how') }}">{{ t('how_full_link') }} <span aria-hidden="true">{{ arrow }}</span></a>
+      <a class="link-arrow" href="{{ url_for('guides') }}">{{ t('guides_link_from_home') }} <span aria-hidden="true">{{ arrow }}</span></a>
+    </p>
+  </div>
+</section>
+
+{# ============ 3. room by room ============ #}
+{% if rooms %}
+<section class="rooms-sec reveal">
+  <div class="sec-inner">
+    <div class="rooms-head">
+      <h2 class="sec-title">{{ t('rooms_title') }}</h2>
+      <p class="sec-sub">{{ t('rooms_sub') }}</p>
     </div>
-    {% endfor %}
-  </div>
-  <p class="section-more"><a href="{{ url_for('how') }}">{{ t('how_full_link') }} {{ '←' if rtl else '→' }}</a>
-    <span class="section-more-sep">·</span>
-    <a href="{{ url_for('guides') }}">{{ t('guides_link_from_home') }} {{ '←' if rtl else '→' }}</a></p>
-</section>
-
-{% if featured %}
-<section class="wrap section reveal">
-  <h2 class="section-title">{{ t('popular_title') }}</h2>
-  <p class="page-sub">{{ t('catalog_intro_label') }}</p>
-  <div class="gift-grid featured-grid">
-    {% for c in featured %}
-      {{ gift_card(c, mode='link') }}
-    {% endfor %}
-  </div>
-  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
-  <div class="cat-strip">
-    <span class="cat-strip-label">{{ t('cats_title') }}</span>
-    {% for slug, (icon, en, he) in categories.items() %}
-    <a class="chip" href="{{ url_for('catalog_page', cat=slug) }}"><svg class="ic ic-sm" aria-hidden="true"><use href="#ill-{{ slug }}"/></svg> {{ cat_label(slug) }}</a>
-    {% endfor %}
-    <a class="chip chip-more" href="{{ url_for('catalog_page') }}">{{ t('cta_explore') }} {{ '←' if rtl else '→' }}</a>
+    <div class="rooms" data-rooms>
+      <nav class="rooms-nav" aria-label="{{ t('rooms_title') }}">
+        {% for r in rooms %}
+        <a class="room-link" href="#room-{{ r.slug }}" data-room="{{ r.slug }}">
+          <span class="room-link-name">{{ cat_label(r.slug) }}</span><span class="room-link-n">{{ r.count }}</span>
+        </a>
+        {% endfor %}
+      </nav>
+      <div class="rooms-panels">
+        {% for r in rooms %}
+        <div class="room-panel" id="room-{{ r.slug }}" data-room-panel="{{ r.slug }}">
+          <h3 class="room-panel-title">{{ cat_label(r.slug) }}</h3>
+          <div class="gift-grid room-grid">
+            {% for c in r['items'] %}{{ gift_card(c, mode='link') }}{% endfor %}
+          </div>
+          <a class="link-arrow room-all" href="{{ url_for('catalog_page', cat=r.slug) }}">{{ tf('rooms_all', n=r.count, room=cat_label(r.slug)) }} <span aria-hidden="true">{{ arrow }}</span></a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
   </div>
 </section>
 {% endif %}
 
-<section class="wrap section reveal">
-  <h2 class="section-title">{{ t('why_fit_title') }}</h2>
-  <div class="grid-3">
-    {% for n in [1, 2, 3] %}
-    <div class="card why-card">
-      <h3>{{ t('why_fit' ~ n ~ '_t') }}</h3>
-      <p>{{ t('why_fit' ~ n ~ '_b') }}</p>
-    </div>
-    {% endfor %}
+{# ============ 4. the vocabulary of a home here ============ #}
+<section class="ribbon" aria-label="{{ t('why_fit_title') }}">
+  <p class="ribbon-label">{{ t('why_fit_title') }}</p>
+  <div class="ribbon-track">
+    {% set terms = t('ribbon_terms').split('|') %}
+    <ul class="ribbon-list">{% for w in terms %}<li>{{ w }}</li>{% endfor %}</ul>
+    <ul class="ribbon-list" aria-hidden="true">{% for w in terms %}<li>{{ w }}</li>{% endfor %}</ul>
   </div>
 </section>
 
-<section class="shana-band reveal">
-  <div class="wrap shana-band-inner">
-    <div>
-      <p class="eyebrow eyebrow-light">{{ t('shana_intro_eyebrow') }}</p>
+{# ============ 5. two ways to give ============ #}
+<section class="give-sec reveal">
+  <div class="sec-inner">
+    <h2 class="sec-title">{{ t('give_title') }}</h2>
+    <div class="give-split">
+      <article class="give give-store">
+        <svg class="give-ill" viewBox="0 0 120 90" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 34l36-14 36 14v38l-36 14-36-14z"/><path d="M24 34l36 14 36-14M60 48v38"/><path d="M42 27l36 14"/></g></svg>
+        <h3>{{ t('give_store_t') }}</h3>
+        <ul>{% for n in [1, 2, 3] %}<li>{{ t('give_store_' ~ n) }}</li>{% endfor %}</ul>
+      </article>
+      <article class="give give-cash">
+        <svg class="give-ill" viewBox="0 0 120 90" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="22" y="24" width="76" height="50" rx="4"/><path d="M22 28l38 28 38-28"/><path d="M60 8v10M54 12l6-6 6 6"/></g></svg>
+        <h3>{{ t('give_cash_t') }}</h3>
+        <ul>{% for n in [1, 2, 3] %}<li>{{ t('give_cash_' ~ n) }}</li>{% endfor %}</ul>
+      </article>
+    </div>
+    <p class="give-never">{{ t('give_never') }}</p>
+  </div>
+</section>
+
+{# ============ 6. shana rishonah: an arrivals board ============ #}
+<section class="board-sec reveal">
+  <div class="sec-inner board-grid">
+    <div class="board-copy">
+      <p class="kicker kicker-light">{{ t('shana_intro_eyebrow') }}</p>
       <h2>{{ t('shana_intro_title') }}</h2>
       <p>{{ t('shana_intro_body') }}</p>
+      <a class="btn btn-gold btn-lg" href="{{ url_for('shana') }}">{{ t('shana_intro_cta') }} {{ arrow }}</a>
     </div>
-    <a class="btn btn-gold btn-lg" href="{{ url_for('shana') }}">{{ t('shana_intro_cta') }} {{ '←' if rtl else '→' }}</a>
+    <figure class="board">
+      <div class="board-head"><span class="board-plane" aria-hidden="true">✈</span> {{ t('board_title') }} <span class="board-code">TLV</span></div>
+      <table class="board-table">
+        <thead><tr><th scope="col">{{ t('board_col_when') }}</th><th scope="col">{{ t('board_col_what') }}</th><th scope="col">{{ t('board_col_status') }}</th></tr></thead>
+        <tbody>
+          {% for n in [1, 2, 3, 4] %}
+          <tr style="--row: {{ n }}">
+            <td>{{ t('board_r' ~ n ~ '_when') }}</td>
+            <td>{{ t('board_r' ~ n ~ '_what') }}</td>
+            <td><span class="board-status">{{ t('board_r' ~ n ~ '_status') }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <figcaption>{{ t('board_note') }}</figcaption>
+    </figure>
   </div>
 </section>
 
-<section class="wrap section narrow reveal">
-  <h2 class="section-title" style="text-align:center">{{ t('faq_title') }}</h2>
-  <div class="faq-list">
-    {% for n in [1, 2, 3, 4, 5, 6] %}
-    <details>
-      <summary>{{ t('faq_q' ~ n) }}</summary>
-      <p>{{ t('faq_a' ~ n) }}</p>
-    </details>
-    {% endfor %}
+{# ============ 7. questions, answered ============ #}
+<section class="faq-sec reveal">
+  <div class="sec-inner">
+    <h2 class="sec-title">{{ t('faq_title') }}</h2>
+    <ol class="faq-cols">
+      {% for n in [1, 2, 3, 4, 5, 6] %}
+      <li>
+        <details>
+          <summary><span class="faq-n" aria-hidden="true">{{ '%02d' % n }}</span><span>{{ t('faq_q' ~ n) }}</span></summary>
+          <p>{{ t('faq_a' ~ n) }}</p>
+        </details>
+      </li>
+      {% endfor %}
+    </ol>
   </div>
 </section>
 
-<section class="wrap section reveal">
-  <div class="cta-panel">
-    <h2>{{ t('final_cta_title') }}</h2>
-    <p>{{ t('final_cta_body') }}</p>
+{# ============ 8. the close ============ #}
+<section class="closing reveal">
+  <svg class="closing-motif" viewBox="0 0 220 96" aria-hidden="true" fill="none">
+    <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M40 94V26M180 94V26"/><path d="M24 28q86-28 172 0"/>
+      <path d="M24 28q21 14 43 0q21 14 43 0q21 14 43 0q21 14 43 0"/>
+    </g>
+  </svg>
+  <h2 class="closing-title">{{ t('final_cta_title') }}</h2>
+  <p>{{ t('final_cta_body') }}</p>
+  <div class="closing-ctas">
     <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>
+    <a class="link-arrow" href="{{ url_for('sample') }}">{{ t('cta_sample') }} <span aria-hidden="true">{{ arrow }}</span></a>
   </div>
 </section>
 
+</div>
 {% endblock %}

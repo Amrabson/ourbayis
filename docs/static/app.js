@@ -271,6 +271,47 @@
     window.addEventListener("pageshow", update);
   });
 
+  // homepage "room by room": anchor links to stacked panels, upgraded to tabs
+  // (one panel at a time, arrow keys move between rooms; RTL-aware)
+  document.addEventListener("DOMContentLoaded", function () {
+    var rooms = document.querySelector("[data-rooms]");
+    if (!rooms) return;
+    var nav = rooms.querySelector(".rooms-nav");
+    var links = Array.prototype.slice.call(rooms.querySelectorAll(".room-link"));
+    var panels = Array.prototype.slice.call(rooms.querySelectorAll("[data-room-panel]"));
+    if (!links.length || links.length !== panels.length) return;
+    rooms.classList.add("is-tabbed");
+    nav.setAttribute("role", "tablist");
+    function select(i, focus) {
+      links.forEach(function (a, j) {
+        var on = i === j;
+        a.setAttribute("aria-selected", on ? "true" : "false");
+        a.tabIndex = on ? 0 : -1;
+        panels[j].hidden = !on;
+      });
+      if (focus) links[i].focus();
+    }
+    links.forEach(function (a, i) {
+      a.setAttribute("role", "tab");
+      a.id = "tab-" + panels[i].id;
+      a.setAttribute("aria-controls", panels[i].id);
+      panels[i].setAttribute("role", "tabpanel");
+      panels[i].setAttribute("aria-labelledby", a.id);
+      a.addEventListener("click", function (e) { e.preventDefault(); select(i, false); });
+      a.addEventListener("keydown", function (e) {
+        var rtl = document.documentElement.dir === "rtl";
+        var next = { ArrowDown: 1, ArrowUp: -1, ArrowRight: rtl ? -1 : 1, ArrowLeft: rtl ? 1 : -1 }[e.key];
+        if (e.key === "Home") next = -i;
+        if (e.key === "End") next = links.length - 1 - i;
+        if (next === undefined) return;
+        e.preventDefault();
+        select((i + next + links.length) % links.length, true);
+      });
+    });
+    var start = links.findIndex ? links.findIndex(function (a) { return a.getAttribute("href") === location.hash; }) : -1;
+    select(start > 0 ? start : 0, false);
+  });
+
   // coming Back to a page from the back/forward cache would otherwise leave its buttons dead
   window.addEventListener("pageshow", function (e) {
     if (!e.persisted) return;

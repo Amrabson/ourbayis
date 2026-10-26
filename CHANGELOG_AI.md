@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-10-26 (homepage redesign: "build your bayis", literally)
+- Owner asked for a site that doesn't look like the standard AI-made skeleton (hero + 3 step cards +
+  product grid + 3 "why" cards + band + FAQ accordion + boxed CTA). The homepage is rebuilt around the
+  product's own idea — an apartment being filled:
+  1. **Plan hero**: oversized editorial headline ("Build your *bayis* in Israel.", gold italic + swash) beside
+     a taped architectural floor plan (kitchen, salon & Shabbos table, bedroom, bath, entrance) that draws
+     itself in. The sample registry's four gifts are numbered pins in their rooms (the "on its way" gift
+     waits at the front door) with a gift schedule + title block under the drawing; committed gifts say
+     "from London / Brooklyn / Johannesburg". Clearly flagged "Sample registry"; links to /sample.
+  2. **Route**: a dashed gold thread through the three steps (outline numerals) to "Shabbos in your own home".
+  3. **Room by room**: room names as large serif tabs (counts beside), each showing its best four catalog
+     gifts as compact cards (`rooms` from the index route). Anchor links + stacked panels without JS;
+     app.js upgrades them to ARIA tabs (arrow keys, RTL-aware).
+  4. **Ribbon**: a slowly scrolling line of Israel-only vocabulary (platta · meicham · sponja · milchig &
+     fleishig…); static under reduced motion.
+  5. **Two ways to give**: store gift (paper) / cash (navy) split, closed by "OurBayis never touches, holds
+     or processes the money."
+  6. **Shana Rishonah as an arrivals board** (QUOTED → DELIVERED → LANDED → HOME, flip-in), "an example
+     timeline" caption.
+  7. FAQ as a numbered two-column list; a large typographic close (chuppah motif) instead of a boxed CTA.
+- Type: Fraunces (Latin) / Frank Ruhl Libre (Hebrew) for display, loaded on the homepage only via a new
+  `head_extra` block in base.html — the rest of the site is unchanged until the owner approves the
+  direction. Hebrew labels are never letter-spaced. All motion is off under `prefers-reduced-motion`.
+- 45 new strings EN/HE (`hero_title_a/em/b`, `plan_*`, `route_end_*`, `rooms_*`, `ribbon_terms`, `give_*`,
+  `board_*`). Checked at 1280 (EN/HE) and 375; no horizontal overflow. 257 tests pass unchanged.
+- run_dev.py sets `jinja_env.auto_reload` directly (app.py builds jinja_env at import, so the config flag
+  alone never took effect — the preview served stale templates). `shots/` is git-ignored.
+
 ## 2026-10-25 (guide search markup; couple sees their own request)
 - Guide pages: the Article JSON-LD gains `url`, `mainEntityOfPage`, `image` (og.png), `datePublished`
   (a guide's optional `published`, else `updated`), `author` and a publisher logo, per Google's article

@@ -228,6 +228,12 @@ the CSRF token. Keep it the first-registered after_request hook (Flask runs hook
 - **Admin outbox** (`/admin/outbox`): masked addresses (`a***@x.com`) — the body is never shown.
   Failed rows get a one-click "Retry" that resets them to `status='queued'`.
 
+## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
+templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =
+Fraunces / Frank Ruhl Libre, loaded via `{% block head_extra %}` on the homepage only). The floor plan is
+inline SVG (viewBox 620×470); pins are positioned in % of `.plan-drawing`; the gift schedule is the
+accessible list. Room tabs: `[data-rooms]` in app.js. Not yet rolled out to other pages (owner review).
+
 ## Visual system (v3 phase 2 + integration)
 Parchment/navy/gold + Bellefair/Assistant kept. Glass surfaces (`.glass`, `.glass-panel`: translucent
 card + `backdrop-filter`, solid `@supports not` fallback) on the sticky header, hero card, registry hero,
