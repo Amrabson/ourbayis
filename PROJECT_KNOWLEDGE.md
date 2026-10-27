@@ -242,6 +242,10 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   registry_form adds `.form-rail` + `.rform-sec`; items_starter = one `.sheet` per group; error.html
   includes `_lost_room.html`. Fields inside `.sheet` are filled underlines (scoped, so admin forms are
   untouched).
+- Reading pages: about (`.about-grid`, letter on `.about-letter`), guides (`.guide-toc`, scoped so the
+  guide article's own guide list is untouched), advertise (`.adv-*`), privacy/terms (`.legal-*`, reuse
+  `.form-rail` + `.rform-h`; any page can use the rail by marking links `data-rail-link` and sections
+  `data-rail-sec`).
 
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =

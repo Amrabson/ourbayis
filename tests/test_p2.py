@@ -1831,3 +1831,12 @@ def test_error_pages_draw_the_room_that_was_never_built(client):
     assert "Not on the plan" in html and 'class="plan lost-plan"' in html and "Room not found" in html
     he = client.get("/no-such-page?lang=he").get_data(as_text=True)
     assert "לא בתוכנית" in he and "החדר לא נמצא" in he
+
+
+def test_privacy_and_terms_contents_point_at_real_sections(client):
+    for path, n in (("/privacy?lang=en", 6), ("/terms?lang=he", 10)):
+        html = client.get(path).get_data(as_text=True)
+        links = re.findall(r'<a href="#([pt]-[a-z]+)" data-rail-link>', html)
+        assert len(links) == n
+        for sec in links:
+            assert f'id="{sec}" data-rail-sec' in html

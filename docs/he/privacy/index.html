@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../static/style.css?v=1a17a09e460">
+<link rel="stylesheet" href="../../static/style.css?v=1a17c06ac36">
 
 
 
@@ -132,26 +132,80 @@
 
 <main id="main">
 
-<div class="wrap section narrow prose">
-  <h1 class="section-title">פרטיות</h1>
-  <p class="page-sub">מה OurBayis שומר, ומה הוא אף פעם לא רואה.</p>
-  <p><strong>מה אנחנו שומרים:</strong> האימייל והשם של החשבון שלכם, פרטי הרשימה, והשמות, האימיילים (אופציונלי) וההודעות שאורחים משאירים כשהם משריינים מתנה. פניות לשנה ראשונה נשמרות עם פרטי הקשר שמסרתם. זהו — אנחנו שומרים רק מה שהאתר צריך כדי לעבוד.</p>
-  <p><strong>מה אנחנו אף פעם לא רואים:</strong> את הכסף ואת פרטי הכרטיס שלכם. רכישות מהחנות מתבצעות באתר של החנות; מתנות כספיות עוברות דרך קישור ה-PayPal, Stripe, Bit או PayBox של הזוג. OurBayis אף פעם לא מעבד תשלומים.</p>
-  <p><strong>נראות הרשימה:</strong> רשימות חדשות מתחילות כ״לא רשומה״: כל מי שיש לו את הקישור יכול לפתוח אותן, אבל אי אפשר למצוא אותן בחיפוש. ״טיוטה״ מסתירה את הרשימה מכולם חוץ מכם; ״ציבורית״ מאפשרת לאורחים גם למצוא אותה לפי השמות שלכם. אפשר לשנות בכל עת בהגדרות הרשימה.</p>
-  <h2 class="sub-title">עוגיות</h2>
-  <p>עוגיית session אחת, לכניסה ולהעדפת שפה/מטבע. בלי עוגיות אנליטיקס ובלי פיקסלי מעקב.</p>
-  <h2 class="sub-title">מונים מצטברים</h2>
-  <p>אנחנו שומרים ספירות יומיות של דברים כמו הרשמות ושריונים כדי להבין איך האתר בשימוש. למונים האלה אין מידע אישי — בלי שמות, בלי אימיילים, בלי כתובות IP.</p>
-  <h2 class="sub-title">אימיילים יוצאים</h2>
-  <p>אימיילים שאנחנו שולחים (אישורים, התראות) יושבים בתיבת יוצא פנימית — כתובת נמען וגוף ההודעה — עד שהם נשלחים, ואז הרשומה נשמרת רק לצורך פתרון בעיות משלוח.</p>
-  <h2 class="sub-title">קישורי שחזור לאורחים</h2>
-  <p>כשאורח משריין מתנה, אנחנו יוצרים קישור פרטי כדי שיוכל לנהל את השריון בלי חשבון. רק hash של הטוקן של הקישור נשמר — לא הקישור עצמו.</p>
-  <h2 class="sub-title">קישורי שותפים</h2>
-  <p>חלק מקישורי החנויות מזכים את OurBayis בעמלה קטנה, ללא עלות עבורכם או עבור האורחים. זה אף פעם לא משפיע על אילו פריטים מוצגים או על המחיר שלהם.</p>
-  <h2 class="sub-title">מחיקת הנתונים שלכם</h2>
-  <p>זוגות יכולים להוריד את הנתונים שלהם (JSON) ולמחוק את החשבון — כולל הרשימה, המתנות ושריוני האורחים — מעמוד החשבון. אורחים יכולים לבטל שריון דרך קישור המתנה שלהם או לבקש מהזוג להסיר אותו. נתונים שנמחקו נעלמים גם מגיבויי בסיס הנתונים המתוארכים שלנו כשהגיבויים מתחלפים.</p>
-  <p>שאלות על הנתונים שלכם? כתבו לנו דרך <a href="../../he/contact/">צור קשר</a>.</p>
-  <p class="hint">העמוד הזה מתאר איך האתר עובד היום ויעודכן אם זה ישתנה.</p>
+
+<div class="home legal-page">
+  <section class="sheet-page legal-head">
+    <div class="sec-inner">
+      <p class="kicker">פרטיות</p>
+      <h1 class="sheet-title">מה OurBayis שומר, ומה הוא אף פעם לא רואה.</h1>
+      <h2 class="sr-only">בקצרה</h2>
+      <dl class="legal-glance">
+        
+        <div><dt>מה אנחנו שומרים</dt><dd>האימייל והשם של החשבון שלכם, פרטי הרשימה, והשמות, האימיילים (אופציונלי) וההודעות שאורחים משאירים כשהם משריינים מתנה. פניות לשנה ראשונה נשמרות עם פרטי הקשר שמסרתם. זהו — אנחנו שומרים רק מה שהאתר צריך כדי לעבוד.</dd></div>
+        
+        <div><dt>מה אנחנו אף פעם לא רואים</dt><dd>את הכסף ואת פרטי הכרטיס שלכם. רכישות מהחנות מתבצעות באתר של החנות; מתנות כספיות עוברות דרך קישור ה-PayPal, Stripe, Bit או PayBox של הזוג. OurBayis אף פעם לא מעבד תשלומים.</dd></div>
+        
+        <div><dt>נראות הרשימה</dt><dd>רשימות חדשות מתחילות כ״לא רשומה״: כל מי שיש לו את הקישור יכול לפתוח אותן, אבל אי אפשר למצוא אותן בחיפוש. ״טיוטה״ מסתירה את הרשימה מכולם חוץ מכם; ״ציבורית״ מאפשרת לאורחים גם למצוא אותה לפי השמות שלכם. אפשר לשנות בכל עת בהגדרות הרשימה.</dd></div>
+        
+      </dl>
+    </div>
+  </section>
+
+  <div class="sec-inner rform-grid legal-grid">
+    <nav class="form-rail" aria-label="בעמוד הזה">
+      <p class="kicker">בעמוד הזה</p>
+      <ol>
+        
+        <li><a href="#p-cookies" data-rail-link><span class="rail-n">01</span>עוגיות</a></li>
+        
+        <li><a href="#p-counters" data-rail-link><span class="rail-n">02</span>מונים מצטברים</a></li>
+        
+        <li><a href="#p-mail" data-rail-link><span class="rail-n">03</span>אימיילים יוצאים</a></li>
+        
+        <li><a href="#p-guest" data-rail-link><span class="rail-n">04</span>קישורי שחזור לאורחים</a></li>
+        
+        <li><a href="#p-affiliate" data-rail-link><span class="rail-n">05</span>קישורי שותפים</a></li>
+        
+        <li><a href="#p-delete" data-rail-link><span class="rail-n">06</span>מחיקת הנתונים שלכם</a></li>
+        
+      </ol>
+    </nav>
+    <div class="prose legal-body">
+      
+      <section class="legal-sec" id="p-cookies" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">01</span>עוגיות</h2>
+        <p>עוגיית session אחת, לכניסה ולהעדפת שפה/מטבע. בלי עוגיות אנליטיקס ובלי פיקסלי מעקב.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-counters" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">02</span>מונים מצטברים</h2>
+        <p>אנחנו שומרים ספירות יומיות של דברים כמו הרשמות ושריונים כדי להבין איך האתר בשימוש. למונים האלה אין מידע אישי — בלי שמות, בלי אימיילים, בלי כתובות IP.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-mail" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">03</span>אימיילים יוצאים</h2>
+        <p>אימיילים שאנחנו שולחים (אישורים, התראות) יושבים בתיבת יוצא פנימית — כתובת נמען וגוף ההודעה — עד שהם נשלחים, ואז הרשומה נשמרת רק לצורך פתרון בעיות משלוח.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-guest" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">04</span>קישורי שחזור לאורחים</h2>
+        <p>כשאורח משריין מתנה, אנחנו יוצרים קישור פרטי כדי שיוכל לנהל את השריון בלי חשבון. רק hash של הטוקן של הקישור נשמר — לא הקישור עצמו.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-affiliate" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">05</span>קישורי שותפים</h2>
+        <p>חלק מקישורי החנויות מזכים את OurBayis בעמלה קטנה, ללא עלות עבורכם או עבור האורחים. זה אף פעם לא משפיע על אילו פריטים מוצגים או על המחיר שלהם.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-delete" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">06</span>מחיקת הנתונים שלכם</h2>
+        <p>זוגות יכולים להוריד את הנתונים שלהם (JSON) ולמחוק את החשבון — כולל הרשימה, המתנות ושריוני האורחים — מעמוד החשבון. אורחים יכולים לבטל שריון דרך קישור המתנה שלהם או לבקש מהזוג להסיר אותו. נתונים שנמחקו נעלמים גם מגיבויי בסיס הנתונים המתוארכים שלנו כשהגיבויים מתחלפים.</p>
+      </section>
+      
+      <p class="legal-contact">שאלות על הנתונים שלכם? כתבו לנו דרך <a href="../../he/contact/">צור קשר</a>.</p>
+      <p class="hint">העמוד הזה מתאר איך האתר עובד היום ויעודכן אם זה ישתנה.</p>
+    </div>
+  </div>
 </div>
 
 </main>

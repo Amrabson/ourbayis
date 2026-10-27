@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-27 (reading pages in the v4 language; slow cooker moved)
+- **Floor plan fix (owner)**: the slow cooker (pin 6) sat by the front door; it's now on the kitchen
+  counter beside the hob (`PLAN_PINS`: 526, 57).
+- **About** is a letter: "A gift registry built for *a home in Israel.*" with four facts on the left
+  (sticky), the story on a cream sheet with a drop cap (English only) and a sign-off under the gold
+  rule. The 🏠 emoji is gone.
+- **Guides** is a contents page: numbered rows (01–05) with large serif titles, summary, "Read the guide"
+  and the guide's icon in a ring; ruled navy lines between them.
+- **Advertise** is a rate card: "Who you reach" as three numbered columns, then the offer on a
+  double-ruled sheet (format → description, ruled) closed by a "Sponsored" stamp and the honesty note.
+- **Privacy / Terms**: a blueprint head with the intro as the title (Privacy adds the three "at a glance"
+  facts as columns; Terms shows its date and the draft notice there), then numbered sections with the
+  same sticky contents rail as the registry form (`data-rail-link` / `data-rail-sec`).
+- 8 new EN/HE strings (`about_title_a/em`, `about_fact4`, `toc_label`, `privacy_glance`, `guides_kicker`,
+  `adv_kicker`, `adv_label_note`). 1 test (261).
+
 ## 2026-10-26 (the paperwork: every remaining form in the v4 language)
 - **`.sheet`**: forms are cream sheets taped to the blueprint grid (`.home.sheet-page`), with filled-underline
   fields, a big serif title under a kicker, and a tear-off `.sheet-stub` (dashed rule + punched notches)

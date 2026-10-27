@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../static/style.css?v=1a17a09e460">
+<link rel="stylesheet" href="../static/style.css?v=1a17c06ac36">
 
 
 
@@ -132,26 +132,80 @@
 
 <main id="main">
 
-<div class="wrap section narrow prose">
-  <h1 class="section-title">Privacy</h1>
-  <p class="page-sub">What OurBayis stores, and what it never sees.</p>
-  <p><strong>What we store:</strong> Your account email and name, your registry details, and the names, optional emails and messages guests leave when reserving a gift. Shana Rishonah inquiries are stored with the contact details you give us. That&#39;s it — we keep only what the site needs to work.</p>
-  <p><strong>What we never see:</strong> Your money and your card details. Store purchases happen on the store&#39;s own site; cash gifts go through the couple&#39;s own PayPal, Stripe, Bit or PayBox link. OurBayis never processes payments.</p>
-  <p><strong>Registry visibility:</strong> New registries start as “Unlisted”: anyone with the link can open them, but they aren&#39;t searchable. “Draft” hides your registry from everyone but you; “Public” also lets guests find it by searching your names. Change this any time in your registry settings.</p>
-  <h2 class="sub-title">Cookies</h2>
-  <p>One session cookie, used for login and your language/currency preference. No analytics cookies and no tracking pixels.</p>
-  <h2 class="sub-title">Aggregate counters</h2>
-  <p>We keep daily counts of things like signups and reservations to understand how the site is used. These counters carry no personal data — no names, no emails, no IP addresses.</p>
-  <h2 class="sub-title">Outgoing email</h2>
-  <p>Emails we send (confirmations, notifications) sit in an internal outbox — recipient address and message body — until they&#39;re sent, then the record is kept only for delivery troubleshooting.</p>
-  <h2 class="sub-title">Guest recovery links</h2>
-  <p>When a guest reserves a gift, we generate a private link so they can manage that reservation without an account. Only a hash of that link&#39;s token is stored — not the link itself.</p>
-  <h2 class="sub-title">Affiliate links</h2>
-  <p>Some store links earn OurBayis a small commission at no cost to you or your guests. This never affects which items are shown or their price.</p>
-  <h2 class="sub-title">Deleting your data</h2>
-  <p>Couples can download their data (JSON) and delete their account — registry, gifts and guest reservations included — from the Account page. Guests can cancel a reservation from their gift link or ask the couple to remove it. Deleted data also drops out of our dated database backups as those backups are rotated.</p>
-  <p>Questions about your data? Write to us through the <a href="../contact/">contact page</a>.</p>
-  <p class="hint">This page describes how the site works today and will be updated if that changes.</p>
+
+<div class="home legal-page">
+  <section class="sheet-page legal-head">
+    <div class="sec-inner">
+      <p class="kicker">Privacy</p>
+      <h1 class="sheet-title">What OurBayis stores, and what it never sees.</h1>
+      <h2 class="sr-only">At a glance</h2>
+      <dl class="legal-glance">
+        
+        <div><dt>What we store</dt><dd>Your account email and name, your registry details, and the names, optional emails and messages guests leave when reserving a gift. Shana Rishonah inquiries are stored with the contact details you give us. That&#39;s it — we keep only what the site needs to work.</dd></div>
+        
+        <div><dt>What we never see</dt><dd>Your money and your card details. Store purchases happen on the store&#39;s own site; cash gifts go through the couple&#39;s own PayPal, Stripe, Bit or PayBox link. OurBayis never processes payments.</dd></div>
+        
+        <div><dt>Registry visibility</dt><dd>New registries start as “Unlisted”: anyone with the link can open them, but they aren&#39;t searchable. “Draft” hides your registry from everyone but you; “Public” also lets guests find it by searching your names. Change this any time in your registry settings.</dd></div>
+        
+      </dl>
+    </div>
+  </section>
+
+  <div class="sec-inner rform-grid legal-grid">
+    <nav class="form-rail" aria-label="On this page">
+      <p class="kicker">On this page</p>
+      <ol>
+        
+        <li><a href="#p-cookies" data-rail-link><span class="rail-n">01</span>Cookies</a></li>
+        
+        <li><a href="#p-counters" data-rail-link><span class="rail-n">02</span>Aggregate counters</a></li>
+        
+        <li><a href="#p-mail" data-rail-link><span class="rail-n">03</span>Outgoing email</a></li>
+        
+        <li><a href="#p-guest" data-rail-link><span class="rail-n">04</span>Guest recovery links</a></li>
+        
+        <li><a href="#p-affiliate" data-rail-link><span class="rail-n">05</span>Affiliate links</a></li>
+        
+        <li><a href="#p-delete" data-rail-link><span class="rail-n">06</span>Deleting your data</a></li>
+        
+      </ol>
+    </nav>
+    <div class="prose legal-body">
+      
+      <section class="legal-sec" id="p-cookies" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">01</span>Cookies</h2>
+        <p>One session cookie, used for login and your language/currency preference. No analytics cookies and no tracking pixels.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-counters" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">02</span>Aggregate counters</h2>
+        <p>We keep daily counts of things like signups and reservations to understand how the site is used. These counters carry no personal data — no names, no emails, no IP addresses.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-mail" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">03</span>Outgoing email</h2>
+        <p>Emails we send (confirmations, notifications) sit in an internal outbox — recipient address and message body — until they&#39;re sent, then the record is kept only for delivery troubleshooting.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-guest" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">04</span>Guest recovery links</h2>
+        <p>When a guest reserves a gift, we generate a private link so they can manage that reservation without an account. Only a hash of that link&#39;s token is stored — not the link itself.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-affiliate" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">05</span>Affiliate links</h2>
+        <p>Some store links earn OurBayis a small commission at no cost to you or your guests. This never affects which items are shown or their price.</p>
+      </section>
+      
+      <section class="legal-sec" id="p-delete" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">06</span>Deleting your data</h2>
+        <p>Couples can download their data (JSON) and delete their account — registry, gifts and guest reservations included — from the Account page. Guests can cancel a reservation from their gift link or ask the couple to remove it. Deleted data also drops out of our dated database backups as those backups are rotated.</p>
+      </section>
+      
+      <p class="legal-contact">Questions about your data? Write to us through the <a href="../contact/">contact page</a>.</p>
+      <p class="hint">This page describes how the site works today and will be updated if that changes.</p>
+    </div>
+  </div>
 </div>
 
 </main>

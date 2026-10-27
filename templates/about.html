@@ -1,18 +1,28 @@
 {% extends "base.html" %}
 {% block title %}{{ t('nav_about') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section narrow prose">
-  <h1 class="section-title">{{ t('nav_about') }}</h1>
+<div class="home sheet-page about-page">
+<div class="sec-inner about-grid">
+  <header class="about-head">
+    <p class="kicker">{{ t('nav_about') }}</p>
+    <h1 class="about-title">{{ t('about_title_a') }} <em>{{ t('about_title_em') }}</em></h1>
+    <ul class="about-facts">
+      <li>{{ t('trust1') }}</li><li>{{ t('trust2') }}</li><li>{{ t('trust3') }}</li><li>{{ t('about_fact4') }}</li>
+    </ul>
+  </header>
+  <div class="prose about-letter">
   {% if rtl %}
   <p><strong>OurBayis</strong> נולד מבעיה פשוטה: זוגות שמקימים בית בישראל — חתנים וכלות, עולים חדשים, וזוגות שבאים לשנה ראשונה מארה״ב, בריטניה, דרום אפריקה, אוסטרליה, קנדה ועוד — לא מצאו רשימת מתנות שבאמת עובדת כאן. רשימות שנבנו למדינה אחרת שולחות לשם; והחנויות הישראליות לא תמיד נוחות לאורחים מרחוק.</p>
   <p>אז בנינו רשימה שמדברת שתי שפות. הזוג בוחר את הדברים שבית בישראל באמת משתמש בהם — מפלטת שבת ועד מצעים במידה ישראלית — ומשתף קישור אחד. משפחה וחברים בכל מקום, בעברית או באנגלית, משריינים מתנה, קונים אותה מהחנות המקושרת או שולחים לזוג את הכסף, ואז מודיעים לזוג שהיא בדרך.</p>
   <p>מתנות מהחנות נקנות ישירות מהחנות, ומתנות כספיות עוברות ישירות לקישור התשלום של הזוג עצמו. אנחנו לא נוגעים בכסף שלכם. האתר מתפרנס מקישורי שותפים, מפרסום, ומשירות ההקמה הנפרד לשנה ראשונה. שאלות? <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>.</p>
-  <p>בהצלחה בבניית הבית — מזל טוב! 🏠</p>
+  <p class="about-signoff"><span class="invite-rule" aria-hidden="true"></span>בהצלחה בבניית הבית — מזל טוב!</p>
   {% else %}
   <p><strong>OurBayis</strong> was born from a simple problem: couples building a home in Israel — chassanim and kallahs, new olim, and couples coming for shana rishonah from the US, UK, South Africa, Australia, Canada and beyond — had no gift registry that actually works here. Registries built for another country ship there; Israeli stores aren't always easy for guests giving from far away.</p>
   <p>So we built a registry that speaks both languages. The couple picks the things a home in Israel actually uses — from a platta to Israeli-size linen — and shares one link. Family and friends anywhere, in English or Hebrew, reserve a gift, buy it from the linked store or send the couple the money, then let the couple know it's on its way.</p>
   <p>Store gifts are bought directly from the store, and cash gifts go directly to the couple's own payment link. We never touch your money. The site is supported by affiliate links, advertising, and our separate Shana Rishonah setup service. Questions? <a href="{{ url_for('contact') }}">{{ t('nav_contact') }}</a>.</p>
-  <p>Hatzlacha building your bayis — mazel tov! 🏠</p>
+  <p class="about-signoff"><span class="invite-rule" aria-hidden="true"></span>Hatzlacha building your bayis — mazel tov!</p>
   {% endif %}
+  </div>
+</div>
 </div>
 {% endblock %}

@@ -859,6 +859,14 @@ T_EN = {
     "notfound_room": "Room not found",
     "err_kicker": "Error {code}",
     "starter_kicker": "Starter packs",
+    "about_title_a": "A gift registry built for",
+    "about_title_em": "a home in Israel.",
+    "about_fact4": "Stores that deliver in Israel",
+    "toc_label": "On this page",
+    "privacy_glance": "At a glance",
+    "guides_kicker": "Notes for couples and guests",
+    "adv_kicker": "For businesses",
+    "adv_label_note": "Every placement carries this label.",
 }
 
 T_HE = {
@@ -1702,6 +1710,14 @@ T_HE = {
     "notfound_room": "החדר לא נמצא",
     "err_kicker": "שגיאה {code}",
     "starter_kicker": "חבילות פתיחה",
+    "about_title_a": "רשימת מתנות שנבנתה",
+    "about_title_em": "לבית בישראל.",
+    "about_fact4": "חנויות שמשלחות בישראל",
+    "toc_label": "בעמוד הזה",
+    "privacy_glance": "בקצרה",
+    "guides_kicker": "הערות לזוגות ולאורחים",
+    "adv_kicker": "לעסקים",
+    "adv_label_note": "כל פרסום נושא את התווית הזאת.",
 }
 
 # Catalog / item categories: slug -> (icon-id, EN label, HE label)

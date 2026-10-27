@@ -933,14 +933,14 @@ def sample_registry(db, limit=6):
 # The homepage floor plan: each sample gift pinned where it lives in the apartment (x, y in the
 # drawing's 620x470 viewBox), with a synthetic state like the /sample fixture's. Owner, 2026-10-26:
 # the meicham is in the kitchen, leichter on the dining-room sideboard, challah board at the head
-# of the table. `origin` n -> plan_from_<n> ("from London" ...), None for an open gift.
+# of the table; 2026-10-27: the slow cooker on the kitchen counter, not by the door. `origin` n -> plan_from_<n> ("from London" ...), None for an open gift.
 PLAN_PINS = (
     ("shabbos-urn-meicham", 563, 112, "received", 1),
     ("shabbos-hot-plate-platta", 563, 168, "open", None),
     ("stand-mixer", 376, 57, "reserved", 3),
     ("shabbos-candlesticks", 284, 49, "received", 2),
     ("challah-board-knife", 98, 130, "open", None),
-    ("slow-cooker-for-cholent", 265, 408, "reported", 4),
+    ("slow-cooker-for-cholent", 526, 57, "reported", 4),  # on the counter beside the hob
     ("towel-set", 68, 338, "received", 5),
     ("sheet-sets-x2", 497, 352, "reserved", 4),
 )

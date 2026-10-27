@@ -1,15 +1,35 @@
 {% extends "base.html" %}
 {% block title %}{{ t('nav_terms') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section narrow prose">
-  <h1 class="section-title">{{ t('nav_terms') }}</h1>
-  <p class="page-sub">{{ t('terms_intro') }}</p>
-  {% if not terms_reviewed %}<p class="notice-panel terms-draft">{{ t('terms_draft_note') }}</p>{% endif %}
-  {% for key in ['what', 'buy', 'cash', 'prices', 'reserve', 'couples', 'accounts', 'links', 'shana', 'site'] %}
-  <h2 class="sub-title">{{ t('terms_' ~ key ~ '_t') }}</h2>
-  <p>{{ t('terms_' ~ key ~ '_b') }}</p>
-  {% endfor %}
-  <p>{{ t('terms_contact_b') }} <a href="{{ url_for('contact') }}">{{ t('contact_page_link') }}</a>.</p>
-  <p class="hint">{{ tf('terms_updated', date=fmt_date(terms_updated)) }}</p>
+{% set sections = ['what', 'buy', 'cash', 'prices', 'reserve', 'couples', 'accounts', 'links', 'shana', 'site'] %}
+<div class="home legal-page">
+  <section class="sheet-page legal-head">
+    <div class="sec-inner">
+      <p class="kicker">{{ t('nav_terms') }}</p>
+      <h1 class="sheet-title">{{ t('terms_intro') }}</h1>
+      <p class="hint">{{ tf('terms_updated', date=fmt_date(terms_updated)) }}</p>
+      {% if not terms_reviewed %}<p class="notice-panel terms-draft">{{ t('terms_draft_note') }}</p>{% endif %}
+    </div>
+  </section>
+
+  <div class="sec-inner rform-grid legal-grid">
+    <nav class="form-rail" aria-label="{{ t('toc_label') }}">
+      <p class="kicker">{{ t('toc_label') }}</p>
+      <ol>
+        {% for key in sections %}
+        <li><a href="#t-{{ key }}" data-rail-link><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ t('terms_' ~ key ~ '_t') }}</a></li>
+        {% endfor %}
+      </ol>
+    </nav>
+    <div class="prose legal-body">
+      {% for key in sections %}
+      <section class="legal-sec" id="t-{{ key }}" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ t('terms_' ~ key ~ '_t') }}</h2>
+        <p>{{ t('terms_' ~ key ~ '_b') }}</p>
+      </section>
+      {% endfor %}
+      <p class="legal-contact">{{ t('terms_contact_b') }} <a href="{{ url_for('contact') }}">{{ t('contact_page_link') }}</a>.</p>
+    </div>
+  </div>
 </div>
 {% endblock %}

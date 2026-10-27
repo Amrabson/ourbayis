@@ -1,25 +1,40 @@
 {% extends "base.html" %}
 {% block title %}{{ t('nav_privacy') }} — {{ brand }}{% endblock %}
 {% block content %}
-<div class="wrap section narrow prose">
-  <h1 class="section-title">{{ t('nav_privacy') }}</h1>
-  <p class="page-sub">{{ t('privacy_intro') }}</p>
-  <p><strong>{{ t('privacy_store_t') }}:</strong> {{ t('privacy_store_b') }}</p>
-  <p><strong>{{ t('privacy_never_t') }}:</strong> {{ t('privacy_never_b') }}</p>
-  <p><strong>{{ t('privacy_visibility_t') }}:</strong> {{ t('privacy_visibility_b') }}</p>
-  <h2 class="sub-title">{{ t('privacy_cookies_t') }}</h2>
-  <p>{{ t('privacy_cookies_b') }}</p>
-  <h2 class="sub-title">{{ t('privacy_counters_t') }}</h2>
-  <p>{{ t('privacy_counters_b') }}</p>
-  <h2 class="sub-title">{{ t('privacy_mail_t') }}</h2>
-  <p>{{ t('privacy_mail_b') }}</p>
-  <h2 class="sub-title">{{ t('privacy_guest_t') }}</h2>
-  <p>{{ t('privacy_guest_b') }}</p>
-  <h2 class="sub-title">{{ t('privacy_affiliate_t') }}</h2>
-  <p>{{ t('privacy_affiliate_b') }}</p>
-  <h2 class="sub-title">{{ t('privacy_delete_t') }}</h2>
-  <p>{{ t('privacy_delete_b') }}</p>
-  <p>{{ t('privacy_contact_b') }} <a href="{{ url_for('contact') }}">{{ t('contact_page_link') }}</a>.</p>
-  <p class="hint">{{ t('privacy_legal_note') }}</p>
+{% set sections = ['cookies', 'counters', 'mail', 'guest', 'affiliate', 'delete'] %}
+<div class="home legal-page">
+  <section class="sheet-page legal-head">
+    <div class="sec-inner">
+      <p class="kicker">{{ t('nav_privacy') }}</p>
+      <h1 class="sheet-title">{{ t('privacy_intro') }}</h1>
+      <h2 class="sr-only">{{ t('privacy_glance') }}</h2>
+      <dl class="legal-glance">
+        {% for key in ['store', 'never', 'visibility'] %}
+        <div><dt>{{ t('privacy_' ~ key ~ '_t') }}</dt><dd>{{ t('privacy_' ~ key ~ '_b') }}</dd></div>
+        {% endfor %}
+      </dl>
+    </div>
+  </section>
+
+  <div class="sec-inner rform-grid legal-grid">
+    <nav class="form-rail" aria-label="{{ t('toc_label') }}">
+      <p class="kicker">{{ t('toc_label') }}</p>
+      <ol>
+        {% for key in sections %}
+        <li><a href="#p-{{ key }}" data-rail-link><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ t('privacy_' ~ key ~ '_t') }}</a></li>
+        {% endfor %}
+      </ol>
+    </nav>
+    <div class="prose legal-body">
+      {% for key in sections %}
+      <section class="legal-sec" id="p-{{ key }}" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ t('privacy_' ~ key ~ '_t') }}</h2>
+        <p>{{ t('privacy_' ~ key ~ '_b') }}</p>
+      </section>
+      {% endfor %}
+      <p class="legal-contact">{{ t('privacy_contact_b') }} <a href="{{ url_for('contact') }}">{{ t('contact_page_link') }}</a>.</p>
+      <p class="hint">{{ t('privacy_legal_note') }}</p>
+    </div>
+  </div>
 </div>
 {% endblock %}
