@@ -867,6 +867,9 @@ T_EN = {
     "guides_kicker": "Notes for couples and guests",
     "adv_kicker": "For businesses",
     "adv_label_note": "Every placement carries this label.",
+    "guide_minutes": "{n} min read",
+    "guide_minutes_one": "1 min read",
+    "catalog_notes_summary": "About the prices, drawings and links",
 }
 
 T_HE = {
@@ -1718,6 +1721,9 @@ T_HE = {
     "guides_kicker": "הערות לזוגות ולאורחים",
     "adv_kicker": "לעסקים",
     "adv_label_note": "כל פרסום נושא את התווית הזאת.",
+    "guide_minutes": "{n} דקות קריאה",
+    "guide_minutes_one": "דקת קריאה אחת",
+    "catalog_notes_summary": "על המחירים, הציורים והקישורים",
 }
 
 # Catalog / item categories: slug -> (icon-id, EN label, HE label)

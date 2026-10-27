@@ -33,42 +33,66 @@
 </script>
 {% endblock %}
 {% block content %}
-<article class="wrap section narrow guide-article">
-  <p class="eyebrow"><a href="{{ url_for('guides') }}">{{ t('guides_title') }}</a></p>
-  <h1 class="section-title">{{ gpick(guide, 'title') }}</h1>
-  <p class="page-sub">{{ gpick(guide, 'summary') }}</p>
-  <p class="hint guide-updated">{{ tf('guide_updated', date=fmt_date(guide['updated'])) }}</p>
+{%- set _words = [] -%}
+{%- for s in guide['sections'] -%}{%- for para in gpick(s, 'p') %}{% set _ = _words.append(para | wordcount) %}{% endfor -%}
+{%- for li in (gpick(s, 'list') or []) %}{% set _ = _words.append(li | wordcount) %}{% endfor %}{%- endfor -%}
+{%- set minutes = [1, ((_words | sum) / 200) | round(0, 'ceil') | int] | max -%}
+<article class="home guide-page">
+  <header class="sheet-page guide-head">
+    <div class="sec-inner">
+      <p class="kicker"><a href="{{ url_for('guides') }}">{{ t('guides_title') }}</a></p>
+      <h1 class="sheet-title guide-title">{{ gpick(guide, 'title') }}</h1>
+      <p class="guide-lede">{{ gpick(guide, 'summary') }}</p>
+      <p class="guide-meta"><span>{{ tf('guide_updated', date=fmt_date(guide['updated'])) }}</span><span>{{ t('guide_minutes_one') if minutes == 1 else tf('guide_minutes', n=minutes) }}</span></p>
+    </div>
+  </header>
 
-  {% for s in guide['sections'] %}
-  <section class="guide-section">
-    <h2 class="sub-title">{{ gpick(s, 'h') }}</h2>
-    {% for para in gpick(s, 'p') %}<p>{{ para }}</p>{% endfor %}
-    {% set bullets = gpick(s, 'list') %}
-    {% if bullets %}
-    <ul class="guide-bullets">{% for li in bullets %}<li>{{ li }}</li>{% endfor %}</ul>
-    {% endif %}
-  </section>
-  {% endfor %}
+  <div class="sec-inner rform-grid guide-grid">
+    <nav class="form-rail" aria-label="{{ t('toc_label') }}">
+      <p class="kicker">{{ t('toc_label') }}</p>
+      <ol>
+        {% for s in guide['sections'] %}
+        <li><a href="#g-{{ loop.index }}" data-rail-link><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ gpick(s, 'h') }}</a></li>
+        {% endfor %}
+      </ol>
+    </nav>
+    <div class="guide-article">
+      {% for s in guide['sections'] %}
+      <section class="guide-section legal-sec" id="g-{{ loop.index }}" data-rail-sec>
+        <h2 class="rform-h"><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ gpick(s, 'h') }}</h2>
+        {% for para in gpick(s, 'p') %}<p>{{ para }}</p>{% endfor %}
+        {% set bullets = gpick(s, 'list') %}
+        {% if bullets %}
+        <ul class="guide-bullets guide-checklist">{% for li in bullets %}<li>{{ li }}</li>{% endfor %}</ul>
+        {% endif %}
+      </section>
+      {% endfor %}
+
+      {% if others %}
+      <aside class="guide-others">
+        <h2 class="rform-h">{{ t('guides_more') }}</h2>
+        <ol class="guide-list guide-toc guide-toc-sm">
+          {% for g in others %}
+          <li>
+            <a class="guide-card" href="{{ url_for('guide', slug=g['slug']) }}">
+              <span class="guide-n"><svg class="ic" aria-hidden="true"><use href="#{{ g['icon'] }}"/></svg></span>
+              <span class="guide-body">
+                <strong>{{ gpick(g, 'title') }}</strong>
+                <span class="guide-summary">{{ gpick(g, 'summary') }}</span>
+              </span>
+            </a>
+          </li>
+          {% endfor %}
+        </ol>
+      </aside>
+      {% endif %}
+    </div>
+  </div>
 
   {% set cta = guide_cta(guide) %}
   <div class="cta-panel guide-cta">
     <h2>{{ t('guide_cta_title') }}</h2>
     <a class="btn btn-primary btn-lg" href="{{ cta[0] }}">{{ t(cta[1]) }}</a>
   </div>
-
-  {% if others %}
-  <h2 class="sub-title">{{ t('guides_more') }}</h2>
-  <div class="guide-list">
-    {% for g in others %}
-    <a class="guide-card" href="{{ url_for('guide', slug=g['slug']) }}">
-      <span class="guide-icon"><svg class="ic ic-lg" aria-hidden="true"><use href="#{{ g['icon'] }}"/></svg></span>
-      <span class="guide-body">
-        <strong>{{ gpick(g, 'title') }}</strong>
-        <span class="guide-summary">{{ gpick(g, 'summary') }}</span>
-      </span>
-    </a>
-    {% endfor %}
-  </div>
-  {% endif %}
 </article>
 {% endblock %}

@@ -246,6 +246,8 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   guide article's own guide list is untouched), advertise (`.adv-*`), privacy/terms (`.legal-*`, reuse
   `.form-rail` + `.rform-h`; any page can use the rail by marking links `data-rail-link` and sections
   `data-rail-sec`).
+- Guide article (`guide.html`) uses the same rail + `.legal-sec`; reading time computed in the template.
+  Catalog head is `.catalog-head`; the affiliate note must stay visible (only the rate/drawing notes fold).
 
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =

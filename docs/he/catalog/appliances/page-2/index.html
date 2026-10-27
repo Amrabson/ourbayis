@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../../../static/style.css?v=1a17c06ac36">
+<link rel="stylesheet" href="../../../../static/style.css?v=1a17c18ebd9">
 
 
 
@@ -131,10 +131,15 @@
 
 <main id="main">
 
-<div class="wrap section">
-  <h1 class="section-title">קטלוג המתנות</h1>
-  <p class="page-sub">כל מה שבית בישראל צריך — אפשר לעיין בהכול עוד לפני ההרשמה. מחירים בשקלים עם המרה משוערת, מחנויות שמשלחות בישראל.</p>
-
+<div class="home catalog-page">
+<section class="sheet-page catalog-head">
+  <div class="sec-inner">
+    <p class="kicker">חנויות שמשלחות בישראל</p>
+    <h1 class="section-title catalog-title">קטלוג המתנות</h1>
+    <p class="page-sub">כל מה שבית בישראל צריך — אפשר לעיין בהכול עוד לפני ההרשמה. מחירים בשקלים עם המרה משוערת, מחנויות שמשלחות בישראל.</p>
+  </div>
+</section>
+<div class="wrap section catalog-body">
   <div class="glass filter-bar">
     <div class="chip-row" id="cat-chips-static">
       <a class="chip " href="../../../../he/catalog/">כל הקטגוריות</a>
@@ -185,8 +190,14 @@
     </p>
   </div>
 
-  <p class="hint rates-note">סכומים עם ≈ ב-USD הם הערכה משוערת בלבד (שער נכון ל-⁨19 באוקטובר 2026⁩) להתמצאות. המחירים נקבעים בשקלים; מה שתשלמו בפועל תלוי בחנות או בספק התשלום ובשער של הבנק שלכם.</p>
-  <p class="hint catalog-legend">האיורים מחליפים תמונות מוצר. ״המחיר נבדק״ פירושו שהמחיר בשקלים נראה בעמוד החנות באותו יום — לא הבטחה לגבי מלאי, משלוח או תעודה. חלק מקישורי החנויות הם קישורי שותפים: OurBayis עשוי לקבל עמלה קטנה, ללא עלות לכם או לזוג.</p>
+  <div class="catalog-fine">
+  <details class="catalog-notes">
+    <summary>על המחירים, הציורים והקישורים</summary>
+    <p class="hint rates-note">סכומים עם ≈ ב-USD הם הערכה משוערת בלבד (שער נכון ל-⁨19 באוקטובר 2026⁩) להתמצאות. המחירים נקבעים בשקלים; מה שתשלמו בפועל תלוי בחנות או בספק התשלום ובשער של הבנק שלכם.</p>
+    <p class="hint catalog-legend">האיורים מחליפים תמונות מוצר. ״המחיר נבדק״ פירושו שהמחיר בשקלים נראה בעמוד החנות באותו יום — לא הבטחה לגבי מלאי, משלוח או תעודה.</p>
+  </details>
+  <p class="hint catalog-affiliate">חלק מקישורי החנויות הם קישורי שותפים: OurBayis עשוי לקבל עמלה קטנה, ללא עלות לכם או לזוג.</p>
+  </div>
   
 
   <h2 class="sr-only">מתנות</h2>
@@ -254,6 +265,7 @@
     <a class="btn btn-primary btn-lg" href="../../../../he/demo-only/">פתחו רשימה</a>
   </div>
   
+</div>
 </div>
 
 </main>

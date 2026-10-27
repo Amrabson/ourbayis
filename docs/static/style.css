@@ -2098,5 +2098,59 @@ html[dir="rtl"] .guide-toc .guide-card:hover { background: linear-gradient(270de
 .legal-page .form-rail a { font-size: .9rem; padding-block: 7px; }
 @media (max-width: 760px) { .legal-glance { grid-template-columns: minmax(0, 1fr); gap: 18px; } }
 .guides-head, .legal-head, .adv-page > .sheet-page { border-bottom: 1px solid var(--line); }
+/* privacy/terms: the page name stays the h1 (search + tests); the intro sits large beneath it */
+.home .legal-head .section-title { font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 1; letter-spacing: -.03em; color: var(--navy); margin: 0 0 14px; }
+.legal-intro { font-family: var(--font-display); font-style: italic; font-size: clamp(1.3rem, 2.4vw, 1.75rem); color: var(--gold); max-width: 34ch; margin: 0 0 6px; }
+html[dir="rtl"] .legal-intro { font-style: normal; }
+
+/* ---------- v4 guide article: blueprint head, contents rail, lists to tick off ---------- */
+.guide-head { border-bottom: 1px solid var(--line); }
+.guide-head .kicker a { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; }
+.guide-head .kicker a:hover { border-bottom-color: currentColor; }
+.home .guide-title { font-size: clamp(2.4rem, 5.4vw, 4.2rem); max-width: 20ch; }
+.guide-lede { font-family: var(--font-display); font-style: italic; font-size: clamp(1.2rem, 2.2vw, 1.55rem); line-height: 1.4; color: var(--ink-soft); max-width: 46ch; margin: 0 0 18px; }
+html[dir="rtl"] .guide-lede { font-style: normal; }
+.guide-meta { display: flex; flex-wrap: wrap; margin: 0; font-size: .88rem; font-weight: 700; color: var(--gold); }
+.guide-meta > span + span::before { content: "\00b7"; padding-inline: 10px; color: var(--gold-bright); }
+.guide-grid { padding-block: clamp(40px, 6vw, 72px); }
+.guide-page .guide-article { max-width: 720px; }
+.guide-article p, .guide-article li { font-size: 1.08rem; line-height: 1.7; }
+.guide-checklist { list-style: none; padding: 0; margin: 14px 0 0; border-top: 1px dashed rgba(135, 96, 34, .3); }
+.guide-checklist li { position: relative; padding: 9px 0; padding-inline-start: 36px; border-bottom: 1px dashed rgba(135, 96, 34, .3); }
+.guide-checklist li::before {
+  content: ""; position: absolute; inset-inline-start: 2px; top: 13px; width: 18px; height: 18px;
+  border: 1.5px solid var(--navy); border-radius: 3px; background: #fffdf8;
+}
+.guide-others { margin-top: clamp(40px, 6vw, 64px); padding-top: 26px; border-top: 1px solid var(--navy); }
+.guide-toc-sm { margin-top: 12px; border-bottom: 0; }
+.guide-toc-sm li:first-child { border-top: 0; }
+.guide-toc-sm li { border-top-color: var(--line); }
+.guide-toc-sm .guide-card { grid-template-columns: 44px minmax(0, 1fr); grid-template-areas: "n body"; padding: 16px 0; }
+.guide-toc-sm .guide-n { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 50%; color: var(--gold); }
+.guide-toc-sm .guide-body strong { font-size: 1.25rem; }
+.guide-toc-sm .guide-summary { font-size: .92rem; }
+/* .home .sec-inner resets padding; restore the body's breathing room under the blueprint heads */
+.home .guide-grid, .home .legal-grid { padding-block: clamp(40px, 6vw, 72px); }
+.guide-page .guide-checklist li { max-width: none; }
+
+/* ---------- v4 catalog head: blueprint title, a ruled filter band, the fine print folded away ---------- */
+.catalog-head { border-bottom: 1px solid var(--line); padding-block: clamp(36px, 6vw, 80px) clamp(32px, 5vw, 56px); }
+.home .catalog-title { font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 1; letter-spacing: -.03em; color: var(--navy); margin: 0 0 14px; }
+.catalog-head .page-sub { max-width: 56ch; margin: 0; }
+.catalog-page .catalog-body { padding-top: 0; }
+.catalog-page .filter-bar {
+  border-radius: 0; margin-inline: -20px; padding: 16px 20px 12px; border: 0; border-bottom: 1px solid var(--navy);
+  box-shadow: 0 14px 24px -22px rgba(22, 34, 60, .5);
+}
+.catalog-notes { margin: 0 0 22px; }
+.catalog-notes > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; font-weight: 700; font-size: .9rem; color: var(--navy); list-style: none; }
+.catalog-notes > summary::-webkit-details-marker { display: none; }
+.catalog-notes > summary::before { content: "i"; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--gold); color: var(--gold); font: italic 700 .78rem/1 var(--font-display); }
+.catalog-notes[open] > summary { color: var(--gold); }
+.catalog-notes p { max-width: 80ch; margin: 0 0 8px; }
+.catalog-fine { display: flex; flex-wrap: wrap; align-items: center; gap: 0 24px; margin: 0 0 22px; }
+.catalog-fine .catalog-notes { margin: 0; }
+.catalog-fine .catalog-notes[open] { flex-basis: 100%; }
+.catalog-affiliate { margin: 0; }
 
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}

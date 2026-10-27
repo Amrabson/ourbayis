@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../static/style.css?v=1a17c06ac36">
+<link rel="stylesheet" href="../../static/style.css?v=1a17c18ebd9">
 
 
 
@@ -131,10 +131,15 @@
 
 <main id="main">
 
-<div class="wrap section">
-  <h1 class="section-title">The gift catalog</h1>
-  <p class="page-sub">Everything a home in Israel needs — browse it all before you sign up. Prices in shekels with an approximate conversion, from stores that deliver in Israel.</p>
-
+<div class="home catalog-page">
+<section class="sheet-page catalog-head">
+  <div class="sec-inner">
+    <p class="kicker">Stores that deliver in Israel</p>
+    <h1 class="section-title catalog-title">The gift catalog</h1>
+    <p class="page-sub">Everything a home in Israel needs — browse it all before you sign up. Prices in shekels with an approximate conversion, from stores that deliver in Israel.</p>
+  </div>
+</section>
+<div class="wrap section catalog-body">
   <div class="glass filter-bar">
     <div class="chip-row" id="cat-chips-static">
       <a class="chip " href="../../catalog/">All categories</a>
@@ -185,8 +190,14 @@
     </p>
   </div>
 
-  <p class="hint rates-note">≈ amounts in USD are approximate estimates (rate as of ⁨19 October 2026⁩) for orientation only. Prices are set in shekels; what you actually pay depends on the store or payment provider and your bank&#39;s rate.</p>
-  <p class="hint catalog-legend">Line drawings stand in for product photos. “Price checked” means the shekel price was seen on the store page that day — it is not a promise about stock, delivery or certification. Some store links are affiliate links: OurBayis may earn a small commission at no cost to you or the couple.</p>
+  <div class="catalog-fine">
+  <details class="catalog-notes">
+    <summary>About the prices, drawings and links</summary>
+    <p class="hint rates-note">≈ amounts in USD are approximate estimates (rate as of ⁨19 October 2026⁩) for orientation only. Prices are set in shekels; what you actually pay depends on the store or payment provider and your bank&#39;s rate.</p>
+    <p class="hint catalog-legend">Line drawings stand in for product photos. “Price checked” means the shekel price was seen on the store page that day — it is not a promise about stock, delivery or certification.</p>
+  </details>
+  <p class="hint catalog-affiliate">Some store links are affiliate links: OurBayis may earn a small commission at no cost to you or the couple.</p>
+  </div>
   
 
   <h2 class="sr-only">Gifts</h2>
@@ -533,6 +544,7 @@
     <a class="btn btn-primary btn-lg" href="../../demo-only/">Create your registry</a>
   </div>
   
+</div>
 </div>
 
 </main>

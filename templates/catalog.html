@@ -3,10 +3,15 @@
 {% block title %}{{ t('catalog_title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ t('catalog_sub') }}{% endblock %}
 {% block content %}
-<div class="wrap section">
-  <h1 class="section-title">{{ t('catalog_title') }}</h1>
-  <p class="page-sub">{{ t('catalog_sub') }}</p>
-
+<div class="home catalog-page">
+<section class="sheet-page catalog-head">
+  <div class="sec-inner">
+    <p class="kicker">{{ t('about_fact4') }}</p>
+    <h1 class="section-title catalog-title">{{ t('catalog_title') }}</h1>
+    <p class="page-sub">{{ t('catalog_sub') }}</p>
+  </div>
+</section>
+<div class="wrap section catalog-body">
   <div class="glass filter-bar">
     <div class="chip-row" id="cat-chips-static">
       <a class="chip {% if not cat %}active{% endif %}" href="{{ url_for('catalog_page', **dict(filters, cat=None, page=None)) }}">{{ t('all_cats') }}</a>
@@ -47,8 +52,14 @@
     </p>
   </div>
 
-  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
-  <p class="hint catalog-legend">{{ t('catalog_legend') }} {{ t('affiliate_note') }}</p>
+  <div class="catalog-fine">
+  <details class="catalog-notes">
+    <summary>{{ t('catalog_notes_summary') }}</summary>
+    {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+    <p class="hint catalog-legend">{{ t('catalog_legend') }}</p>
+  </details>
+  <p class="hint catalog-affiliate">{{ t('affiliate_note') }}</p>
+  </div>
   {% if not items %}
     <div class="empty-note">
       {% if unfiltered %}
@@ -83,5 +94,6 @@
     <a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a>
   </div>
   {% endif %}
+</div>
 </div>
 {% endblock %}

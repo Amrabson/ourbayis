@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-27 (guide articles and the catalog head)
+- **Guide articles**: blueprint head (kicker back to Guides, large title, the summary as an italic lede,
+  "Updated … · N min read" — word count / 200, singular form in both languages), numbered sections with
+  the sticky contents rail, bullet lists drawn as tick-off checklists, "More guides" as a compact ruled
+  list. JSON-LD unchanged.
+- **Catalog**: blueprint head ("Stores that deliver in Israel" / large title); the filter box becomes a
+  ruled band; the exchange-rate and drawings notes fold under "About the prices, drawings and links",
+  while the affiliate disclosure stays visible beside it.
+- Fixed: the body under the Privacy/Terms/guide heads sat flush against the head (`.home .sec-inner`
+  reset its padding).
+- 3 new EN/HE strings (`guide_minutes`, `guide_minutes_one`, `catalog_notes_summary`). 261 tests.
+
 ## 2026-10-27 (reading pages in the v4 language; slow cooker moved)
 - **Floor plan fix (owner)**: the slow cooker (pin 6) sat by the front door; it's now on the kitchen
   counter beside the hob (`PLAN_PINS`: 526, 57).
