@@ -5,8 +5,8 @@
 <div class="home legal-page">
   <section class="sheet-page legal-head">
     <div class="sec-inner">
-      <p class="kicker">{{ t('nav_terms') }}</p>
-      <h1 class="sheet-title">{{ t('terms_intro') }}</h1>
+      <h1 class="section-title">{{ t('nav_terms') }}</h1>
+      <p class="legal-intro">{{ t('terms_intro') }}</p>
       <p class="hint">{{ tf('terms_updated', date=fmt_date(terms_updated)) }}</p>
       {% if not terms_reviewed %}<p class="notice-panel terms-draft">{{ t('terms_draft_note') }}</p>{% endif %}
     </div>

@@ -2098,3 +2098,7 @@ html[dir="rtl"] .guide-toc .guide-card:hover { background: linear-gradient(270de
 .legal-page .form-rail a { font-size: .9rem; padding-block: 7px; }
 @media (max-width: 760px) { .legal-glance { grid-template-columns: minmax(0, 1fr); gap: 18px; } }
 .guides-head, .legal-head, .adv-page > .sheet-page { border-bottom: 1px solid var(--line); }
+/* privacy/terms: the page name stays the h1 (search + tests); the intro sits large beneath it */
+.home .legal-head .section-title { font-size: clamp(2.6rem, 6vw, 4.6rem); line-height: 1; letter-spacing: -.03em; color: var(--navy); margin: 0 0 14px; }
+.legal-intro { font-family: var(--font-display); font-style: italic; font-size: clamp(1.3rem, 2.4vw, 1.75rem); color: var(--gold); max-width: 34ch; margin: 0 0 6px; }
+html[dir="rtl"] .legal-intro { font-style: normal; }
