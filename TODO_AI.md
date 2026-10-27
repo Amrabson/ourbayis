@@ -13,6 +13,12 @@ admin queues/CSV/outbox, draft/unlisted/public, canonical/hreflang/JSON-LD/og im
 parchment redesign, currency estimates with a rate note. 47 automated tests.
 
 ## Still open (code)
+- [ ] **Homepage "Room by room" illustrations overflow into the text** (owner screenshot 2026-10-27,
+  ~720px wide; also true at 1280). Cause: the v4 catalog rule `.gift-card .gift-ph.ill-box { height: auto;
+  aspect-ratio: 16 / 9 }` (style.css "v4 pages", same specificity, later) beats `.home .room-grid .gift-ph`
+  (`height: 100%`), so the drawing box grows to the card's height x 16/9 (341-405px wide) inside its
+  112px column. Fix: `.home .room-grid .gift-ph.ill-box { aspect-ratio: auto; height: 100%; width: 100%; }`
+  (or `overflow: hidden` on it), then check the rooms tabs at 375 / 721 / 1280 in EN and HE.
 - [x] Guest reminder email — `manage.py remind-claims` (2026-09-22).
 - [x] `/advertise` page + "your ad here" band (2026-09-22).
 - [x] Viral CTA on the public registry page (2026-09-17).
