@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ t('keepsake_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="keepsake-page">
+  <div class="keepsake-toolbar wrap">
+    <a class="link-btn" href="{{ url_for('dashboard_thanks') }}">{{ '→' if rtl else '←' }} {{ t('thanks_title') }}</a>
+    {% if notes %}<button class="btn btn-primary" type="button" data-print>{{ t('keepsake_print') }}</button>{% endif %}
+  </div>
+  <article class="keepsake">
+    <header class="keepsake-head">
+      <span class="invite-rule" aria-hidden="true"></span>
+      <h1 dir="auto">{{ t('keepsake_title') }}</h1>
+      <p class="keepsake-couple" dir="auto">{{ pick(reg, 'couple_names') }}{% if reg['event_date'] %} · {{ fmt_date(reg['event_date']) }}{% endif %}</p>
+    </header>
+    {% if notes %}
+    <div class="keepsake-notes">
+      {% for n in notes %}
+      <figure class="keepsake-note">
+        <blockquote dir="auto">“{{ n['message'] }}”</blockquote>
+        <figcaption><strong><bdi>{{ n['guest_name'] }}</bdi></strong>
+          {%- if n['kind'] != 'cash' and n['item_name'] %} · {{ tf('keepsake_for', gift=(n['item_name_he'] if rtl and n['item_name_he'] else n['item_name'])) }}{% endif %}</figcaption>
+      </figure>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-note">{{ t('keepsake_none') }}</p>
+    {% endif %}
+  </article>
+</div>
+{% endblock %}
+{% block ad %}{% endblock %}

@@ -90,13 +90,14 @@ CONTENT_SECURITY_POLICY = (
 NO_STORE_ENDPOINTS = {
     "dashboard", "registry_new", "registry_edit", "items_manage",
     "guest_manage", "admin_home", "admin_login", "reset_password", "forgot",
+    "dashboard_thanks", "dashboard_keepsake",
 }
 
 # SPEC_V3 "Privacy / SEO": private/account/admin pages are never indexed.
 # `registry` overrides this per-request based on `visibility` (see the route).
 NOINDEX_ENDPOINTS = {
     "dashboard", "dashboard_qr", "dashboard_print", "dashboard_shared",
-    "dashboard_claims_csv", "registry_new", "registry_edit", "items_manage",
+    "dashboard_claims_csv", "dashboard_thanks", "dashboard_keepsake", "registry_new", "registry_edit", "items_manage",
     "items_add", "items_starter", "item_edit", "guest_manage", "account",
     "account_export", "account_delete", "admin_home", "admin_login",
     "reset_password", "forgot", "signup", "login",
@@ -984,7 +985,8 @@ def sample():
     return render_template("registry.html", reg=reg, items=items, claimed={},
                            breakdown=breakdown, total=total, done=done, bought_item=None,
                            pay_links=[], days_to_go=None, is_owner=False, is_preview=False,
-                           is_sample=True)
+                           is_sample=True, price_bands=CATALOG_PRICE_BANDS,
+                           room_fills=room_fills_for(items, {k: v["committed"] for k, v in breakdown.items()}))
 
 
 @app.route("/lang/<code>")
@@ -1272,6 +1274,7 @@ def registry(slug):
                            total=total, done=done, bought_item=bought_item,
                            pay_links=reg_pay_links(reg), days_to_go=days_to_go,
                            is_owner=is_owner, is_preview=is_preview,
+                           price_bands=CATALOG_PRICE_BANDS, room_fills=room_fills_for(items, claimed),
                            noindex=(reg["visibility"] != "public"))
 
 
@@ -1743,18 +1746,29 @@ ROOM_FOR_CATEGORY = {"kitchen": "kitchen", "appliances": "kitchen", "dining": "s
                      "bedding": "bedroom", "home": "entry"}
 
 
-def _room_fills(db, reg, committed):
-    """{room: {done, total, pct}} in gift units (qty), for the dashboard's apartment drawing:
-    how much of each room's list is already spoken for (reserved, on the way or received)."""
+def room_of(category):
+    """The room of the apartment drawing a gift of this category lives in."""
+    return ROOM_FOR_CATEGORY.get(category, "entry")
+
+
+def room_fills_for(items, committed):
+    """{room: {done, total, pct}} in gift units (qty) over registry item rows: how much of each
+    room's list is already spoken for (reserved, on the way or received). Shared by the couple's
+    dashboard and the guests' view of the registry ("their home, filling up")."""
     fills = {room: {"done": 0, "total": 0, "pct": 0.0} for room in set(ROOM_FOR_CATEGORY.values())}
-    for r in db.execute("SELECT id, category, qty_wanted FROM registry_items WHERE registry_id=? AND archived=0",
-                        (reg["id"],)):
-        f = fills[ROOM_FOR_CATEGORY.get(r["category"], "entry")]
+    for r in items:
+        f = fills[room_of(r["category"])]
         f["total"] += r["qty_wanted"]
         f["done"] += min(committed.get(r["id"], 0), r["qty_wanted"])
     for f in fills.values():
         f["pct"] = round(f["done"] / f["total"], 3) if f["total"] else 0.0
     return fills
+
+
+def _room_fills(db, reg, committed):
+    return room_fills_for(db.execute(
+        "SELECT id, category, qty_wanted FROM registry_items WHERE registry_id=? AND archived=0",
+        (reg["id"],)).fetchall(), committed)
 
 
 def _shana_offer(db, user, reg):
@@ -2346,7 +2360,65 @@ def claim_thanked(claim_id):
         abort(404)
     if c["thanked"] or c["status"] in ("reported", "received"):
         db.execute("UPDATE claims SET thanked=? WHERE id=?", (0 if c["thanked"] else 1, claim_id))
+    if request.form.get("back") == "thanks":
+        return redirect(url_for("dashboard_thanks", _anchor=f"thanks-{claim_id}"))
     return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
+
+
+def _thanks_note(reg, gift, lang):
+    """A thank-you note already started for one gift, in `lang`: {subject, body}. The couple edits
+    it and sends it themselves (copy / WhatsApp / their own mail app) — the site never sends it."""
+    name = (gift["item_name_he"] if lang == "he" and gift["item_name_he"] else gift["item_name"]) or ""
+    if gift["kind"] == "cash" or not name:
+        item = _t("dash_thank_item_cash", lang)
+    elif lang == "he":
+        item = name
+    else:  # "Thank you so much for the electric kettle" (keep "KitchenAid" / "LED" as written)
+        item = "the " + (name[:1].lower() + name[1:] if name[1:2].islower() else name)
+    return dict(subject=tf("dash_thank_mail_subj", lang, item=item),
+                body=tf("dash_thank_mail_body", lang, name=gift["guest_name"], item=item,
+                        couple=pick(reg, "couple_names", lang) or ""))
+
+
+@app.route("/dashboard/thanks")
+@login_required
+def dashboard_thanks():
+    """Thank-you studio: everyone who reported or delivered a gift, with their message and a note
+    already started in the language they used on the site."""
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("dashboard"))
+    ui = current_lang()
+    gifts = []
+    for row in get_db().execute(
+            "SELECT c.*, ri.name AS item_name, ri.name_he AS item_name_he FROM claims c"
+            " LEFT JOIN registry_items ri ON ri.id = c.item_id"
+            " WHERE c.registry_id=? AND c.status IN ('reported', 'received')"
+            " ORDER BY c.created_at DESC", (reg["id"],)):
+        gft = dict(row)
+        gft["note_lang"] = gft["lang"] if gft["lang"] in ("en", "he") else ui
+        gft["notes"] = {lang: _thanks_note(reg, gft, lang) for lang in ("en", "he")}
+        gft["amount_label"] = (ob_money.fmt_minor(gft["amount_minor"], gft["currency"] or "ILS", ui)
+                               if gft["amount_minor"] is not None and gft["kind"] == "cash" else "")
+        gifts.append(gft)
+    return render_template("thanks.html", reg=reg,
+                           to_thank=[g for g in gifts if not g["thanked"]],
+                           thanked=[g for g in gifts if g["thanked"]])
+
+
+@app.route("/dashboard/keepsake")
+@login_required
+def dashboard_keepsake():
+    """Every message guests left with their gifts, set as a printable keepsake."""
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("dashboard"))
+    notes = get_db().execute(
+        "SELECT c.guest_name, c.message, c.kind, c.created_at, ri.name AS item_name, ri.name_he AS item_name_he"
+        " FROM claims c LEFT JOIN registry_items ri ON ri.id = c.item_id"
+        " WHERE c.registry_id=? AND c.status IN ('reserved', 'reported', 'received') AND TRIM(c.message) != ''"
+        " ORDER BY c.created_at", (reg["id"],)).fetchall()
+    return render_template("keepsake.html", reg=reg, notes=notes)
 
 
 @app.route("/dashboard/claims.csv")
@@ -2514,7 +2586,7 @@ def bundle_label(slug):
     return row["name"] if row else "Custom / not sure"
 
 
-app.jinja_env.globals.update(budget_label=budget_label, bundle_label=bundle_label)
+app.jinja_env.globals.update(budget_label=budget_label, bundle_label=bundle_label, room_of=room_of)
 
 
 # pkg_lead_weeks. Owner decision 2026-09-22: Full Nest's price includes standard

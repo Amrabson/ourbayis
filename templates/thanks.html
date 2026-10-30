@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ t('thanks_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="home thanks-page">
+  <section class="sheet-page thanks-head">
+    <div class="sec-inner">
+      <p class="kicker"><a href="{{ url_for('dashboard') }}">{{ t('dash_title') }}</a></p>
+      <h1 class="sheet-title">{{ t('thanks_title') }}</h1>
+      <p class="page-sub">{{ t('thanks_sub') }}</p>
+      <p class="thanks-meta">
+        <span class="thanks-count">{{ tf('thanks_count', n=to_thank | length, m=thanked | length) }}</span>
+        <a class="link-arrow" href="{{ url_for('dashboard_keepsake') }}">{{ t('thanks_keepsake_link') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>
+      </p>
+    </div>
+  </section>
+
+  <div class="sec-inner thanks-body">
+    {% if not to_thank and not thanked %}
+      <p class="empty-note">{{ t('thanks_none') }}</p>
+    {% elif not to_thank %}
+      <p class="thanks-done-note"><span class="stamp stamp-inline stamp-received">{{ t('dash_thanked') }}</span> {{ t('thanks_all_done') }}</p>
+    {% endif %}
+
+    {% for g in to_thank %}
+    {% set nl = g['note_lang'] %}
+    <article class="thanks-card" id="thanks-{{ g['id'] }}">
+      <div class="thanks-from">
+        <p class="lot-no">{{ fmt_date(g['created_at'][:10]) }}</p>
+        <h2 class="thanks-name"><bdi>{{ g['guest_name'] }}</bdi></h2>
+        <p class="thanks-gift">
+          {% if g['kind'] == 'cash' %}{{ t('gift_cash') }}{% if g['amount_label'] %} · <bdi>{{ g['amount_label'] }}</bdi>{% endif %}
+          {% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% if g['qty'] and g['qty'] > 1 %} × {{ g['qty'] }}{% endif %}{% endif %}
+        </p>
+        <span class="stamp stamp-inline stamp-{{ g['status'] }}">{{ t('status_' ~ g['status'] ~ '_short') }}</span>
+        {% if g['message'] %}
+        <figure class="thanks-quote">
+          <figcaption>{{ t('thanks_their_words') }}</figcaption>
+          <blockquote dir="auto">“{{ g['message'] }}”</blockquote>
+        </figure>
+        {% endif %}
+        {% if g['report_note'] %}
+        <figure class="thanks-quote thanks-quote-sm">
+          <figcaption>{{ t('thanks_their_note') }}</figcaption>
+          <blockquote dir="auto">{{ g['report_note'] }}</blockquote>
+        </figure>
+        {% endif %}
+      </div>
+
+      <div class="thanks-note sheet" data-thanks
+           data-email="{{ g['guest_email'] or '' }}"
+           data-subject-en="{{ g['notes']['en']['subject'] }}" data-subject-he="{{ g['notes']['he']['subject'] }}">
+        <div class="thanks-note-head">
+          <label for="note-{{ g['id'] }}">{{ tf('thanks_note_label', name=g['guest_name']) }}</label>
+          <div class="thanks-lang" role="group" aria-label="{{ t('thanks_lang_label') }}">
+            <button type="button" data-note-lang="en" aria-pressed="{{ 'true' if nl == 'en' else 'false' }}" lang="en">English</button>
+            <button type="button" data-note-lang="he" aria-pressed="{{ 'true' if nl == 'he' else 'false' }}" lang="he">עברית</button>
+          </div>
+        </div>
+        <textarea id="note-{{ g['id'] }}" rows="8" dir="{{ 'rtl' if nl == 'he' else 'ltr' }}" lang="{{ nl }}"
+                  data-note-en="{{ g['notes']['en']['body'] }}" data-note-he="{{ g['notes']['he']['body'] }}">{{ g['notes'][nl]['body'] }}</textarea>
+        <div class="thanks-actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-copy="{{ g['notes'][nl]['body'] }}" data-copied-label="{{ t('copied') }}" data-note-copy>{{ t('thanks_copy') }}</button>
+          <a class="btn btn-wa btn-sm" target="_blank" rel="noopener" data-note-wa
+             href="https://wa.me/?text={{ g['notes'][nl]['body'] | urlencode }}"><svg class="ic"><use href="#i-wa"/></svg> {{ t('thanks_whatsapp') }}</a>
+          {% if g['guest_email'] %}
+          <a class="btn btn-ghost btn-sm" data-note-mail
+             href="mailto:{{ g['guest_email'] }}?subject={{ g['notes'][nl]['subject'] | urlencode }}&amp;body={{ g['notes'][nl]['body'] | urlencode }}">{{ t('thanks_email') }}</a>
+          {% endif %}
+          <form method="post" action="{{ url_for('claim_thanked', claim_id=g['id']) }}" class="thanks-mark">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="back" value="thanks">
+            <button class="btn btn-gold btn-sm" type="submit"><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('dash_mark_thanked') }}</button>
+          </form>
+        </div>
+        <p class="hint thanks-privacy">{{ t('thanks_send_note') }}</p>
+      </div>
+    </article>
+    {% endfor %}
+
+    {% if thanked %}
+    <section class="thanks-done">
+      <h2 class="rform-h">{{ t('thanks_done_h') }}</h2>
+      <ul class="thanks-done-list">
+        {% for g in thanked %}
+        <li id="thanks-{{ g['id'] }}">
+          <span><svg class="ic ic-sm" aria-hidden="true"><use href="#i-check"/></svg> <strong><bdi>{{ g['guest_name'] }}</bdi></strong>
+            — {% if g['kind'] == 'cash' %}{{ t('gift_cash') }}{% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% endif %}</span>
+          <form method="post" action="{{ url_for('claim_thanked', claim_id=g['id']) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="back" value="thanks">
+            <button class="link-btn thanks-undo" type="submit">{{ t('thanks_undo') }}</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block ad %}{% endblock %}

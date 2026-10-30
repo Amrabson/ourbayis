@@ -249,6 +249,14 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - Guide article (`guide.html`) uses the same rail + `.legal-sec`; reading time computed in the template.
   Catalog head is `.catalog-head`; the affiliate note must stay visible (only the rate/drawing notes fold).
 
+## Their home + thank-you studio (2026-10-30)
+- Registry page: `room_fills_for(items, committed)` (shared with the dashboard) → `plan_svg(fills=)` plus
+  `.room-hits` buttons; cards carry `data-room`; app.js `setRoom()` / `roomFilter` and `#reg-price`
+  (data-lo/hi from `CATALOG_PRICE_BANDS`) join the existing chips/available/sort filter.
+- `/dashboard/thanks` (`dashboard_thanks`, `_thanks_note(reg, gift, lang)`) and `/dashboard/keepsake`;
+  `claim_thanked` honours `back=thanks`. Notes are drafted server-side in both languages, edited and
+  sent client-side only (copy / wa.me / mailto) — nothing is sent or stored by the site.
+
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =
 Fraunces / Frank Ruhl Libre, loaded via `{% block head_extra %}` on the homepage only). The floor plan is

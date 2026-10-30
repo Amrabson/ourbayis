@@ -5,7 +5,7 @@ synthetic data, so they can be screenshotted without a browser session.
     python tools/render_private.py --out /tmp/private [--base http://127.0.0.1:5001]
 
 Writes dashboard.html, items.html, starter.html, registry.html (with claims in
-every state), guest.html and their Hebrew twins. `--base` is only used to make
+every state), thanks.html, keepsake.html, guest.html and their Hebrew twins. `--base` is only used to make
 /static/ links absolute so a headless browser can load the CSS. Never touches
 the real ourbayis.db (forces OB_DB_PATH to a temp file before importing app).
 """
@@ -72,21 +72,29 @@ def main():
     # guests: one reserved (qty item), one reported, one received, one cash-for-item
     slug = reg["slug"]
     tokens = []
+    guests = {1: ("Aunt Miriam", "miriam@example.invalid", "en",
+                  "So happy for you both! May your home always be full of guests and simchas."),
+              2: ("Savta Rachel", "", "he", "שיהיה לכם בית נאמן בישראל, מלא אור ושמחה. אוהבת, סבתא"),
+              3: ("Cousin Dov", "", "en", "Mazel tov! Use it for whatever the apartment needs most."),
+              0: ("The Levins", "", "en", "")}
     for idx, give in ((1, "buy"), (2, "buy"), (3, "cash"), (0, "buy")):
         g = A.app.test_client()
-        html = g.get(f"/r/{slug}").get_data(as_text=True)
+        name, email, glang, msg = guests[idx]
+        html = g.get(f"/r/{slug}?lang={glang}").get_data(as_text=True)
         r = g.post(f"/r/{slug}/claim/{items[idx]['id']}", data=dict(
-            csrf_token=get_csrf(html), form_key=get_form_key(html), guest_name=f"Guest {idx}",
-            guest_email="", message="Mazel tov!", give=give))
+            csrf_token=get_csrf(html), form_key=get_form_key(html), guest_name=name,
+            guest_email=email, message=msg, give=give))
         tokens.append(r.headers["Location"].rsplit("/", 1)[-1])
     db = sqlite3.connect(os.environ["OB_DB_PATH"])
     db.execute("UPDATE claims SET status='reported' WHERE id=2")
     db.execute("UPDATE claims SET status='received' WHERE id=3")
+    db.execute("UPDATE claims SET status='received', thanked=1 WHERE id=1")
     db.commit()
     db.close()
 
     pages = {"dashboard": "/dashboard", "items": "/registry/items", "starter": "/registry/items/starter",
-             "registry": f"/r/{slug}", "edit": "/registry/edit"}
+             "registry": f"/r/{slug}", "edit": "/registry/edit", "thanks": "/dashboard/thanks",
+             "keepsake": "/dashboard/keepsake"}
     for lang in ("en", "he"):
         for name, url in pages.items():
             html = c.get(f"{url}?lang={lang}").get_data(as_text=True)

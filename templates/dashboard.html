@@ -30,6 +30,7 @@
         <a class="btn btn-primary" href="{{ url_for('items_manage') }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('dash_items') }}</a>
         <a class="link-arrow" href="{{ url_for('registry_edit') }}">{{ t('dash_edit') }}</a>
         <a class="link-arrow" href="{{ url_for('registry', slug=reg['slug']) }}">{{ t('dash_view_public') }}</a>
+        <a class="link-arrow" href="{{ url_for('dashboard_thanks') }}">{{ t('thanks_title') }}</a>
         <a class="link-arrow" href="{{ url_for('dashboard_claims_csv') }}">{{ t('dash_export_csv') }}</a>
       </div>
       <div class="stat-row">
@@ -76,6 +77,7 @@
         <div class="queue-card">
           <h3>{{ t('dash_queue_unthanked') }}</h3>
           <ul>{% for g in queues['unthanked'] %}<li><a href="#claim-{{ g['id'] }}"><bdi>{{ g['guest_name'] }}</bdi></a> — {{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}</li>{% endfor %}</ul>
+          <p class="queue-more"><a class="link-arrow" href="{{ url_for('dashboard_thanks') }}">{{ t('thanks_dash_link') }} <span aria-hidden="true">{{ arrow }}</span></a></p>
         </div>
         {% endif %}
       </div>

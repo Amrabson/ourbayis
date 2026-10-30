@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_cards.html" import gift_card, price_line, gift_facts with context %}
+{% from "_plan.html" import plan_svg with context %}
 {% block title %}{% set _names = pick(reg, 'couple_names') %}{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %}{{ _names }} · {% endif %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{% if reg['event_date'] %}{{ t('event_' ~ reg['event_type']) }} · {{ fmt_date(reg['event_date']) }} — {% endif %}{{ tf('reg_meta_desc', names=pick(reg, 'couple_names')) }}{% endblock %}
 {% block content %}
@@ -57,40 +58,70 @@
   </div>
   {% endif %}
 
-  <h2 class="section-title list-title" id="gifts">{{ t('reg_gifts') }}{% if items %} <span class="list-count">{{ items | length }}</span>{% endif %}</h2>
-  <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}</p>
-  {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+  {% set _rooms = (room_fills or {}).items() | selectattr('1.total') | list %}
+  {% set show_plan = items | length > 3 and _rooms | length > 1 %}
+  <div class="reg-list-head{% if show_plan %} has-plan{% endif %}">
+  <div class="reg-list-copy">
+      <h2 class="section-title list-title" id="gifts">{{ t('reg_gifts') }}{% if items %} <span class="list-count">{{ items | length }}</span>{% endif %}</h2>
+      <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}</p>
+      {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
-  {% if not items %}
-    <p class="empty-note">{{ t('reg_empty') }}</p>
-  {% elif total and done >= total %}
-    {# every gift is spoken for: say so up front instead of letting guests scroll a list of "reserved" #}
-    <p class="empty-note all-taken">{{ t('reg_all_taken') }}{% if pay_links %} <a href="#" data-modal="cash-modal">{{ t('reg_all_taken_cash') }}</a>{% endif %}</p>
-  {% endif %}
+      {% if not items %}
+        <p class="empty-note">{{ t('reg_empty') }}</p>
+      {% elif total and done >= total %}
+        {# every gift is spoken for: say so up front instead of letting guests scroll a list of "reserved" #}
+        <p class="empty-note all-taken">{{ t('reg_all_taken') }}{% if pay_links %} <a href="#" data-modal="cash-modal">{{ t('reg_all_taken_cash') }}</a>{% endif %}</p>
+      {% endif %}
 
-  {% set cats_present = items | map(attribute='category') | unique | list %}
-  {% if items | length > 3 %}
-  <div class="reg-controls" id="reg-controls">
-    {% if cats_present | length > 1 %}
-    <div class="chip-row" id="cat-chips" role="group" aria-label="{{ t('all_cats') }}">
-      <button class="chip active" data-filter="all" aria-pressed="true">{{ t('all_cats') }}</button>
-      {% for c in cats_present %}
-      <button class="chip" data-filter="{{ c }}" aria-pressed="false">{{ cat_label(c) }}</button>
-      {% endfor %}
-    </div>
+      {% set cats_present = items | map(attribute='category') | unique | list %}
+      {% if items | length > 3 %}
+      <div class="reg-controls" id="reg-controls">
+        {% if cats_present | length > 1 %}
+        <div class="chip-row" id="cat-chips" role="group" aria-label="{{ t('all_cats') }}">
+          <button class="chip active" data-filter="all" aria-pressed="true">{{ t('all_cats') }}</button>
+          {% for c in cats_present %}
+          <button class="chip" data-filter="{{ c }}" aria-pressed="false">{{ cat_label(c) }}</button>
+          {% endfor %}
+        </div>
+        {% endif %}
+        <div class="reg-controls-row">
+          <label class="check-label reg-available"><input type="checkbox" id="only-available"> {{ t('reg_only_available') }}</label>
+          <label class="reg-sort reg-price"><span class="sr-only">{{ t('filter_price') }}</span>
+            <select id="reg-price">
+              <option value="">{{ t('filter_price_any') }}</option>
+              {% for key, (lo, hi) in price_bands.items() %}<option value="{{ key }}" data-lo="{{ lo }}" data-hi="{{ hi if hi is not none else '' }}">{{ t('price_band_' ~ key) }}</option>{% endfor %}
+            </select></label>
+          <label class="reg-sort"><span class="sr-only">{{ t('filter_sort') }}</span>
+            <select id="reg-sort">
+              <option value="">{{ t('reg_sort_default') }}</option>
+              <option value="price_asc">{{ t('sort_price_asc') }}</option>
+              <option value="price_desc">{{ t('sort_price_desc') }}</option>
+            </select></label>
+          <span class="hint reg-count" id="reg-count" aria-live="polite" data-label="{{ t('result_count') }}" data-label-one="{{ t('result_count_one') }}"></span>
+        </div>
+      </div>
+      {% endif %}
+    {% if show_plan %}
+    <p class="reg-room-showing" id="reg-room-showing" hidden data-label="{{ t('reg_room_showing') }}">
+      <span></span> <button type="button" class="link-btn" id="reg-room-clear">{{ t('reg_room_clear') }}</button></p>
     {% endif %}
-    <div class="reg-controls-row">
-      <label class="check-label reg-available"><input type="checkbox" id="only-available"> {{ t('reg_only_available') }}</label>
-      <label class="reg-sort"><span class="sr-only">{{ t('filter_sort') }}</span>
-        <select id="reg-sort">
-          <option value="">{{ t('reg_sort_default') }}</option>
-          <option value="price_asc">{{ t('sort_price_asc') }}</option>
-          <option value="price_desc">{{ t('sort_price_desc') }}</option>
-        </select></label>
-      <span class="hint reg-count" id="reg-count" aria-live="polite" data-label="{{ t('result_count') }}" data-label-one="{{ t('result_count_one') }}"></span>
-    </div>
   </div>
+  {% if show_plan %}
+  <figure class="plan reg-plan" aria-labelledby="reg-home-title">
+    <p class="reg-plan-kicker" id="reg-home-title">{{ t('reg_home_title') }}</p>
+    <div class="plan-sheet"><div class="plan-drawing">
+      {{ plan_svg(t('reg_home_title'), fills=room_fills) }}
+      <div class="room-hits" id="room-hits">
+        {% for room, f in _rooms %}
+        <button type="button" class="room-hit room-hit-{{ room }}" data-room="{{ room }}" data-room-name="{{ t('plan_room_' ~ room) }}" aria-pressed="false"
+                aria-label="{{ tf('reg_room_btn', room=t('plan_room_' ~ room), done=f.done, total=f.total) }}"></button>
+        {% endfor %}
+      </div>
+    </div></div>
+    <figcaption class="plan-caption">{{ t('reg_home_caption') }}</figcaption>
+  </figure>
   {% endif %}
+  </div>
 
   <div class="gift-grid">
     {% for item in items %}

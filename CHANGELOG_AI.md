@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-10-30 (two features: their home for guests; the thank-you studio for couples)
+- **Their home, filling up (public registry)**: beside the gift list, the couple's apartment drawing
+  with each room filled by the share of its gifts already spoken for ("Kitchen 3 of 8 given"). Every
+  room that has gifts is a button laid over the drawing (`.room-hit-*`, physical positions — the plan is
+  never mirrored); tapping one filters the list to that room (`data-room` on each card via
+  `room_of(category)`), shows "Showing: Kitchen · Show every room", and on phones scrolls to the list.
+  Category chips reset the room and vice versa. A price-band select (the catalog's four bands) joins
+  "available only" and the sort. Same on /sample. `room_fills_for(items, committed)` is now shared by
+  the dashboard and the registry.
+- **Thank-you studio** (`/dashboard/thanks`): every reported/received gift with the giver, the gift
+  (cash amount when given), their message and report note, and a note already started — in the language
+  the guest used on the site (`claims.lang`), switchable EN/HE — from the existing
+  `dash_thank_mail_*` wording ("Thank you so much for the stand mixer"). Copy / WhatsApp (wa.me text) /
+  Email (their mail app; only when the guest left an address) always carry the note as edited. "Mark
+  thanked" returns to the studio (`back=thanks`); an "Already thanked" list has Undo. The site never
+  sends these notes or stores the edits.
+- **Keepsake** (`/dashboard/keepsake`): every message guests left with a gift, set like the invitation
+  in two columns, printable (header/footer/toolbar hidden in print).
+- Dashboard links to both (head actions + the "thank-yous" queue). Both pages are noindex + no-store.
+- tools/render_private.py now renders thanks/keepsake with named guests, messages and a Hebrew guest.
+- 27 new EN/HE strings (`reg_home_*`, `reg_room_*`, `thanks_*`, `keepsake_*`). 2 tests (263).
+
 ## 2026-10-27 (guide articles and the catalog head)
 - **Guide articles**: blueprint head (kicker back to Guides, large title, the summary as an italic lede,
   "Updated … · N min read" — word count / 200, singular form in both languages), numbered sections with

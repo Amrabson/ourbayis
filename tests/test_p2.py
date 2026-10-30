@@ -1840,3 +1840,54 @@ def test_privacy_and_terms_contents_point_at_real_sections(client):
         assert len(links) == n
         for sec in links:
             assert f'id="{sec}" data-rail-sec' in html
+
+
+def test_registry_shows_their_home_and_each_room_filters_the_list(client, app_module):
+    """Guests see the couple's apartment filling up; each room with gifts is a button over the
+    drawing, and every card says which room it lives in (the script filters on that)."""
+    reg, items = _couple_with_catalog_items(
+        client, app_module, ["stand-mixer", "slow-cooker-for-cholent", "towel-set", "shabbos-candlesticks"])
+    by_key = _items_by_seed_key(items)
+    _claim(app_module, reg["slug"], by_key["stand-mixer"]["id"])
+    html = app_module.app.test_client().get(f"/r/{reg['slug']}?lang=en").get_data(as_text=True)
+    assert html.count('<g class="plan-fills">') == 1
+    hits = dict(re.findall(r'data-room="([a-z]+)" data-room-name="[^"]*" aria-pressed="false"\s+aria-label="([^"]+)"', html))
+    assert set(hits) == {"kitchen", "bedroom", "salon"}           # no gifts in the entrance: no button
+    assert hits["kitchen"].startswith("Kitchen: 1 of 2 given")
+    rooms = re.findall(r'data-cat="[a-z]+" data-room="([a-z]+)"', html)
+    assert sorted(rooms) == ["bedroom", "kitchen", "kitchen", "salon"]
+    assert html.count('data-lo="') == 4                             # the catalog's four price bands
+    he = app_module.app.test_client().get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
+    assert "הבית שלהם מתמלא" in he and "מטבח: 1 מתוך 2 ניתנו" in he
+
+
+def test_thank_you_studio_drafts_each_note_in_the_guests_language(client, app_module):
+    reg, items = _couple_with_catalog_items(client, app_module, ["stand-mixer", "towel-set"])
+    by_key = _items_by_seed_key(items)
+    _claim(app_module, reg["slug"], by_key["stand-mixer"]["id"], name="Aunt Miriam",
+           message="So happy for you both!")
+    _claim(app_module, reg["slug"], by_key["towel-set"]["id"], name="Savta", message="שיהיה בית נאמן")
+    db = _db()
+    db.execute("UPDATE claims SET status='reported'")
+    db.execute("UPDATE claims SET lang='he' WHERE guest_name='Savta'")
+    db.commit()
+    ids = {r["guest_name"]: r["id"] for r in db.execute("SELECT id, guest_name FROM claims")}
+    db.close()
+    anon = app_module.app.test_client()
+    for path in ("/dashboard/thanks", "/dashboard/keepsake"):
+        assert "/login" in anon.get(path).headers["Location"]
+
+    html = client.get("/dashboard/thanks?lang=en").get_data(as_text=True)
+    assert "2 to thank · 0 thanked" in html
+    assert "Thank you so much for the stand mixer" in html             # English draft names the gift
+    assert f'id="note-{ids["Savta"]}" rows="8" dir="rtl" lang="he"' in html  # she used the site in Hebrew
+    assert "תודה רבה על" in html and "So happy for you both!" in html
+
+    tok = get_csrf(html)
+    r = client.post(f"/claim/{ids['Savta']}/thanked", data=dict(csrf_token=tok, back="thanks"))
+    assert r.headers["Location"].endswith(f"/dashboard/thanks#thanks-{ids['Savta']}")
+    html = client.get("/dashboard/thanks?lang=en").get_data(as_text=True)
+    assert "1 to thank · 1 thanked" in html and "Already thanked" in html
+
+    keep = client.get("/dashboard/keepsake?lang=en").get_data(as_text=True)
+    assert "So happy for you both!" in keep and "שיהיה בית נאמן" in keep

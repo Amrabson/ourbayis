@@ -19,16 +19,25 @@
     var onlyAvail = document.getElementById("only-available");
     var regSort = document.getElementById("reg-sort");
     var regCount = document.getElementById("reg-count");
+    var regPrice = document.getElementById("reg-price");
+    var roomHits = document.getElementById("room-hits");
+    var roomShowing = document.getElementById("reg-room-showing");
     var grid = document.querySelector(".gift-grid");
-    var catFilter = "all";
+    var catFilter = "all", roomFilter = "all";
     // remember the couple's own order so "Suggested order" can put it back after a price sort
     if (grid) grid.querySelectorAll(".gift-card[data-cat]").forEach(function (card, i) { card.setAttribute("data-order", i); });
     function applyRegistryView() {
       if (!grid) return;
       var cards = Array.prototype.slice.call(grid.querySelectorAll(".gift-card[data-cat]"));
       var shown = 0;
+      var band = regPrice && regPrice.value ? regPrice.options[regPrice.selectedIndex] : null;
+      var lo = band ? +band.getAttribute("data-lo") || 0 : 0;
+      var hi = band && band.getAttribute("data-hi") ? +band.getAttribute("data-hi") : Infinity;
       cards.forEach(function (card) {
+        var price = +card.getAttribute("data-price") || 0;
         var ok = (catFilter === "all" || card.getAttribute("data-cat") === catFilter) &&
+                 (roomFilter === "all" || card.getAttribute("data-room") === roomFilter) &&
+                 (!band || (price >= lo && price < hi)) &&
                  (!onlyAvail || !onlyAvail.checked || card.getAttribute("data-available") === "1");
         card.style.display = ok ? "" : "none";
         if (ok) shown++;
@@ -60,14 +69,56 @@
       chip.classList.add("active");
       chip.setAttribute("aria-pressed", "true");
       catFilter = chip.getAttribute("data-filter");
+      setRoom("all");
       applyRegistryView();
     });
     if (onlyAvail) onlyAvail.addEventListener("change", applyRegistryView);
     if (regSort) regSort.addEventListener("change", applyRegistryView);
+    if (regPrice) regPrice.addEventListener("change", applyRegistryView);
+
+    // "their home, filling up": each room of the drawing filters the list to the gifts that live
+    // there (a second tap, or "Show every room", brings the whole list back)
+    function setRoom(room) {
+      roomFilter = room;
+      if (!roomHits) return;
+      var name = "";
+      roomHits.querySelectorAll(".room-hit").forEach(function (b) {
+        var on = b.getAttribute("data-room") === room;
+        b.setAttribute("aria-pressed", on ? "true" : "false");
+        if (on) name = b.getAttribute("data-room-name");
+      });
+      if (roomShowing) {
+        roomShowing.hidden = room === "all";
+        roomShowing.querySelector("span").textContent = (roomShowing.getAttribute("data-label") || "").replace("{room}", name);
+      }
+    }
+    function resetChips() {
+      if (!chips) return;
+      catFilter = "all";
+      chips.querySelectorAll(".chip").forEach(function (c) {
+        var all = c.getAttribute("data-filter") === "all";
+        c.classList.toggle("active", all);
+        c.setAttribute("aria-pressed", all ? "true" : "false");
+      });
+    }
+    if (roomHits) roomHits.addEventListener("click", function (e) {
+      var b = e.target.closest(".room-hit");
+      if (!b) return;
+      var room = b.getAttribute("data-room");
+      resetChips();
+      setRoom(roomFilter === room ? "all" : room);
+      applyRegistryView();
+      // on a phone the list sits below the drawing: bring its first gift into view
+      if (roomFilter !== "all" && window.matchMedia("(max-width: 900px)").matches && grid) {
+        grid.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+    var roomClear = document.getElementById("reg-room-clear");
+    if (roomClear) roomClear.addEventListener("click", function () { setRoom("all"); applyRegistryView(); });
     // browsers restore the checkbox/select after Back or reload; make the list match them
     // (they're restored after DOMContentLoaded, so check again on pageshow)
     window.addEventListener("pageshow", function () {
-      if (grid && ((onlyAvail && onlyAvail.checked) || (regSort && regSort.value))) applyRegistryView();
+      if (grid && ((onlyAvail && onlyAvail.checked) || (regSort && regSort.value) || (regPrice && regPrice.value))) applyRegistryView();
     });
 
     // shana bundle-picker: clicking a bundle's CTA pre-selects it in the form
@@ -327,6 +378,39 @@
       });
     }, { rootMargin: "-25% 0px -65% 0px" });
     document.querySelectorAll("[data-rail-sec]").forEach(function (sec) { io.observe(sec); });
+  });
+
+  // thank-you studio: switching a note's language swaps in the other draft, and every edit keeps
+  // the Copy / WhatsApp / Email buttons carrying the note as it now reads
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("[data-thanks]").forEach(function (box) {
+      var area = box.querySelector("textarea");
+      var copyBtn = box.querySelector("[data-note-copy]");
+      var wa = box.querySelector("[data-note-wa]");
+      var mail = box.querySelector("[data-note-mail]");
+      var lang = area.getAttribute("lang") || "en";
+      function sync() {
+        var text = area.value;
+        if (copyBtn) copyBtn.setAttribute("data-copy", text);
+        if (wa) wa.href = "https://wa.me/?text=" + encodeURIComponent(text);
+        if (mail) mail.href = "mailto:" + box.getAttribute("data-email") +
+          "?subject=" + encodeURIComponent(box.getAttribute("data-subject-" + lang) || "") +
+          "&body=" + encodeURIComponent(text);
+      }
+      area.addEventListener("input", sync);
+      box.querySelectorAll("[data-note-lang]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          lang = b.getAttribute("data-note-lang");
+          box.querySelectorAll("[data-note-lang]").forEach(function (o) {
+            o.setAttribute("aria-pressed", o === b ? "true" : "false");
+          });
+          area.value = area.getAttribute("data-note-" + lang) || area.value;
+          area.setAttribute("dir", lang === "he" ? "rtl" : "ltr");
+          area.setAttribute("lang", lang);
+          sync();
+        });
+      });
+    });
   });
 
   // coming Back to a page from the back/forward cache would otherwise leave its buttons dead
