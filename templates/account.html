@@ -19,7 +19,13 @@
       <section class="account-row account-danger">
         <div>
           <h2>{{ t('account_delete_title') }}</h2>
+          {% if reg and not is_reg_owner(reg) %}
+          <p class="hint">{{ tf('account_delete_hint_member', owner=reg_owner['name']) }}</p>
+          {% else %}
           <p class="hint">{{ t('account_delete_hint') }}</p>
+          {% if helpers %}<p class="hint account-helpers">{{ tf('account_delete_helpers', names=helpers | map(attribute='name') | join(', ')) }}
+            <a href="{{ url_for('registry_people') }}">{{ t('people_kicker') }}</a></p>{% endif %}
+          {% endif %}
         </div>
         <form method="post" action="{{ url_for('account_delete') }}" data-confirm="{{ t('account_delete_confirm') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">

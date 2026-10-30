@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ t('join_kicker') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="home sheet-page">
+  <div class="sec-inner sheet-grid sheet-solo">
+    <div class="sheet join-sheet">
+      <p class="kicker">{{ t('join_kicker') }}</p>
+      {% if state == 'bad' %}
+        <h1 class="sheet-title">{{ t('join_bad_title') }}</h1>
+        <p class="page-sub">{{ t('join_bad') }}</p>
+        <p class="auth-alt sheet-stub"><a class="link-arrow" href="{{ url_for('index') }}">{{ brand }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a></p>
+      {% else %}
+        <h1 class="sheet-title" dir="auto">{{ tf('join_title', title=pick(inv, 'title')) }}</h1>
+        <p class="page-sub">{{ tf('join_from', name=inv['inviter']) }}</p>
+        <p class="hint">{{ tf('join_what', name=inv['inviter']) }}</p>
+
+        {% if state == 'signin' %}
+          <div class="join-actions">
+            <a class="btn btn-primary" href="{{ url_for('login') }}">{{ t('join_signin') }}</a>
+            <a class="link-arrow" href="{{ url_for('signup') }}">{{ t('join_signup') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>
+          </div>
+        {% elif state == 'ok' %}
+          <form method="post" action="{{ url_for('join_registry', token=token) }}" class="join-actions">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="btn btn-primary" type="submit">{{ t('join_accept') }}</button>
+          </form>
+          <p class="hint">{{ tf('join_signed_in_as', email=user['email']) }}</p>
+        {% else %}
+          <p class="join-note">{{ t({'already': 'join_already', 'own': 'join_has_own', 'other': 'join_has_other'}[state]) }}</p>
+          <p class="hint">{{ tf('join_signed_in_as', email=user['email']) }}</p>
+          <p class="auth-alt sheet-stub"><a class="link-arrow" href="{{ url_for('dashboard') }}">{{ t('back_to_dashboard') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a></p>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block ad %}{% endblock %}

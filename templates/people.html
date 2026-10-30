@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ t('people_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+{% set owner_view = is_reg_owner(reg) %}
+<div class="home sheet-page">
+  <div class="sec-inner sheet-grid sheet-solo sheet-wide">
+    <div class="sheet people-sheet">
+      <p class="kicker">{{ t('people_kicker') }}</p>
+      <h1 class="sheet-title">{{ t('people_title') }}</h1>
+      <p class="page-sub">{{ t('people_sub') if owner_view else tf('people_member_note', owner=owner['name']) }}</p>
+
+      {% if new_link %}
+      <section class="people-new" id="new-invite">
+        <h2 class="rform-h">{{ tf('people_new_link_h', name=new_link['label']) if new_link['label'] else t('people_new_link_h_plain') }}</h2>
+        <p class="people-link"><bdi dir="ltr">{{ new_link['url'] }}</bdi></p>
+        <div class="people-link-actions">
+          <button type="button" class="btn btn-primary btn-sm" data-copy="{{ new_link['url'] }}" data-copied-label="{{ t('copied') }}">{{ t('people_copy_link') }}</button>
+          <a class="btn btn-wa btn-sm" target="_blank" rel="noopener"
+             href="https://wa.me/?text={{ tf('people_wa_text', link=new_link['url']) | urlencode }}"><svg class="ic"><use href="#i-wa"/></svg> {{ t('thanks_whatsapp') }}</a>
+        </div>
+        <p class="hint">{{ t('people_new_link_note') }}</p>
+      </section>
+      {% endif %}
+
+      <ul class="people-list">
+        <li class="person" id="person-{{ owner['id'] }}">
+          <div class="person-who">
+            <span><strong><bdi>{{ owner['name'] }}</bdi></strong>{% if owner['id'] == session.get('uid') %} <span class="hint">{{ t('people_you') }}</span>{% endif %}</span>
+            <span class="person-mail"><bdi>{{ owner['email'] }}</bdi></span>
+          </div>
+          <span class="stamp stamp-inline stamp-received">{{ t('people_owner') }}</span>
+        </li>
+        {% for h in helpers %}
+        <li class="person" id="person-{{ h['id'] }}">
+          <div class="person-who">
+            <span><strong><bdi>{{ h['name'] }}</bdi></strong>{% if h['id'] == session.get('uid') %} <span class="hint">{{ t('people_you') }}</span>{% endif %}</span>
+            <span class="person-mail"><bdi>{{ h['email'] }}</bdi></span>
+            <span class="hint">{{ t('people_helper') }} · {{ tf('people_since', date=fmt_date(h['added_at'][:10])) }}</span>
+          </div>
+          {% if owner_view %}
+          <div class="person-actions">
+            <form method="post" action="{{ url_for('people_remove', user_id=h['id']) }}" data-confirm="{{ tf('people_remove_confirm', name=h['name']) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="link-btn thanks-undo" type="submit">{{ t('people_remove') }}</button>
+            </form>
+            <details class="person-owner">
+              <summary>{{ t('people_make_owner') }}</summary>
+              <form method="post" action="{{ url_for('people_make_owner', user_id=h['id']) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <p class="hint">{{ t('people_make_owner_hint') }}</p>
+                <label>{{ t('current_password') }}<input type="password" name="current_password" required autocomplete="current-password"></label>
+                <button class="btn btn-ghost btn-sm" type="submit">{{ t('people_make_owner_btn') }}</button>
+              </form>
+            </details>
+          </div>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="hint people-mail-note">{{ t('people_owner_mail') }}</p>
+
+      {% if owner_view %}
+        {% if invites %}
+        <section class="people-pending">
+          <h2 class="rform-h">{{ t('people_pending_h') }}</h2>
+          <ul class="thanks-done-list">
+            {% for i in invites %}
+            <li>
+              <span>{{ tf('people_pending_for', name=i['label']) if i['label'] else t('people_pending_unnamed') }}
+                <span class="hint">· {{ tf('people_expires', date=fmt_date(i['expires_at'][:10])) }}</span></span>
+              <form method="post" action="{{ url_for('people_invite_revoke', invite_id=i['id']) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="link-btn thanks-undo" type="submit">{{ t('people_revoke') }}</button>
+              </form>
+            </li>
+            {% endfor %}
+          </ul>
+        </section>
+        {% endif %}
+
+        <section class="people-invite">
+          <h2 class="rform-h">{{ t('people_invite_h') }}</h2>
+          {% if room_left > 0 %}
+          <form method="post" action="{{ url_for('people_invite') }}" class="people-invite-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label>{{ t('people_invite_label') }}<input name="label" maxlength="60" autocomplete="off"></label>
+            <button class="btn btn-primary" type="submit">{{ t('people_invite_btn') }}</button>
+          </form>
+          <p class="hint">{{ t('people_invite_label_hint') }}</p>
+          {% else %}
+          <p class="hint">{{ tf('people_invite_full', n=max_helpers) }}</p>
+          {% endif %}
+        </section>
+      {% else %}
+        <form method="post" action="{{ url_for('people_leave') }}" class="people-leave" data-confirm="{{ t('people_leave_confirm') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="btn btn-ghost" type="submit">{{ t('people_leave') }}</button>
+        </form>
+      {% endif %}
+
+      <p class="auth-alt sheet-stub"><a class="link-arrow" href="{{ url_for('dashboard') }}">{{ t('back_to_dashboard') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block ad %}{% endblock %}

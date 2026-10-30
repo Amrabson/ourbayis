@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-10-30 (managing a registry together; homepage room cards)
+- **Co-managers** (m026 `registry_members` + `registry_invites`): the owner makes an invite link on
+  `/registry/people` ("Manage it together", linked from the dashboard and the account page), labelled
+  for whoever it's for ("Yosef", "Ima"). The link is single-use, open 7 days, shown once (only its
+  sha256 is stored; the raw token rides in the owner's session for that one page view), with Copy and
+  WhatsApp buttons. `/join/<token>` explains who invited them and what they'll see; logged out, the token
+  waits in the session through signup/login, which bring them back to accept explicitly. On accept the
+  owner gets an email (`mail_member_joined`) so an unexpected joiner is noticed.
+- A helper sees and does everything the owner does (gifts, claims, thank-yous, keepsake, CSV, registry
+  details, visibility) **except the payment links**: the form shows them disabled with "Only <owner> can
+  change these", and `_save_registry` ignores pay fields from a non-owner. Only the owner invites,
+  cancels invites, removes helpers, or **hands the registry over** (password re-auth; the new owner gets
+  `mail_owner_moved`; the old owner stays on as a helper) — so one of them can delete their account
+  without deleting the registry. Helpers can leave. Up to 4 helpers + open invites. Gift emails still go
+  to the owner only.
+- An account manages one registry (`registry_members.user_id` UNIQUE); `/join` refuses accounts that own
+  a registry or already help elsewhere. `user_registry()` returns the owned registry, else the one helped
+  with; `is_reg_owner(reg)` / `can_manage(reg)` (the public page's owner view and view counting) /
+  `registry_owner_name(reg)` (Jinja globals). Account export for a helper is their account plus
+  `helping_with`, not the couple's guest data; the account page warns an owner whose helpers would lose
+  the registry. Privacy "Registry visibility" says what a helper sees.
+- **Homepage "Room by room"**: the drawings stay in their 112px column again
+  (`.home .room-grid .gift-ph.ill-box` beats the v4 catalog's 16/9 rule). Closes the 2026-10-27 TODO.
+- tools/render_private.py renders people (owner + helper), join, and the helper's dashboard/edit form.
+- 57 new EN/HE strings (`people_*`, `join_*`, `mail_member_joined_*`, `mail_owner_moved_*`, ...).
+  7 tests in tests/test_people.py (270).
+
 ## 2026-10-30 (two features: their home for guests; the thank-you studio for couples)
 - **Their home, filling up (public registry)**: beside the gift list, the couple's apartment drawing
   with each room filled by the share of its gifts already spoken for ("Kitchen 3 of 8 given"). Every

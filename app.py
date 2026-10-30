@@ -90,7 +90,7 @@ CONTENT_SECURITY_POLICY = (
 NO_STORE_ENDPOINTS = {
     "dashboard", "registry_new", "registry_edit", "items_manage",
     "guest_manage", "admin_home", "admin_login", "reset_password", "forgot",
-    "dashboard_thanks", "dashboard_keepsake",
+    "dashboard_thanks", "dashboard_keepsake", "registry_people", "join_registry",
 }
 
 # SPEC_V3 "Privacy / SEO": private/account/admin pages are never indexed.
@@ -100,7 +100,7 @@ NOINDEX_ENDPOINTS = {
     "dashboard_claims_csv", "dashboard_thanks", "dashboard_keepsake", "registry_new", "registry_edit", "items_manage",
     "items_add", "items_starter", "item_edit", "guest_manage", "account",
     "account_export", "account_delete", "admin_home", "admin_login",
-    "reset_password", "forgot", "signup", "login",
+    "reset_password", "forgot", "signup", "login", "registry_people", "join_registry",
 }
 
 
@@ -461,11 +461,34 @@ def admin_required(f):
 
 
 def user_registry():
+    """The registry this account manages: its own, or the one it was invited to help with."""
     uid = session.get("uid")
     if not uid or not current_user():
         return None
-    return get_db().execute(
-        "SELECT * FROM registries WHERE user_id=? ORDER BY id LIMIT 1", (uid,)).fetchone()
+    db = get_db()
+    return (db.execute("SELECT * FROM registries WHERE user_id=? ORDER BY id LIMIT 1", (uid,)).fetchone()
+            or db.execute("SELECT r.* FROM registries r JOIN registry_members m ON m.registry_id = r.id"
+                          " WHERE m.user_id=?", (uid,)).fetchone())
+
+
+def is_reg_owner(reg):
+    """The account that made the registry (or was handed it). Only the owner changes the payment
+    links, decides who else can help, and deletes the registry along with their account."""
+    return bool(reg) and session.get("uid") == reg["user_id"]
+
+
+def registry_owner_name(reg):
+    row = get_db().execute("SELECT name FROM users WHERE id=?", (reg["user_id"],)).fetchone() if reg else None
+    return row["name"] if row else ""
+
+
+def can_manage(reg):
+    """Owner or helper — used where a page is looked up by slug rather than through user_registry()."""
+    uid = session.get("uid")
+    if not reg or not uid:
+        return False
+    return uid == reg["user_id"] or get_db().execute(
+        "SELECT 1 FROM registry_members WHERE registry_id=? AND user_id=?", (reg["id"], uid)).fetchone() is not None
 
 
 def pick(row, field, lang):
@@ -1229,8 +1252,8 @@ def registry(slug):
     reg = db.execute("SELECT * FROM registries WHERE slug=?", (slug,)).fetchone()
     if not reg:
         abort(404)
-    is_owner = session.get("uid") == reg["user_id"]
-    g.registry_owner_uid = reg["user_id"]
+    is_owner = can_manage(reg)  # the owner or someone helping them
+    g.registry_owner_uid = session.get("uid") if is_owner else reg["user_id"]  # don't count their own views
     if reg["display_currency"] in ob_money.CURRENCIES and reg["display_currency"] != "ILS":
         g.display_currency = reg["display_currency"]  # couple's suggested guest currency
     if reg["visibility"] == "draft" and not is_owner and not session.get("admin"):
@@ -1555,11 +1578,13 @@ def signup():
                 cur = db.execute(
                     "INSERT INTO users (email, pw_hash, name) VALUES (?,?,?)",
                     (email, generate_password_hash(pw), name))
-                _fresh_session("pending_add")
+                _fresh_session("pending_add", "pending_join")
                 session["uid"] = cur.lastrowid
                 session["sv"] = 1
                 db.execute("UPDATE users SET lang=? WHERE id=?", (current_lang(), cur.lastrowid))
                 track("signup")
+                if session.get("pending_join"):  # came from an invite: back to it, not a registry of their own
+                    return redirect(url_for("join_registry", token=session["pending_join"]))
                 return redirect(url_for("registry_new"))
             except sqlite3.IntegrityError:
                 flash(_t("email_taken", lang), "err")
@@ -1578,10 +1603,12 @@ def login():
         row = get_db().execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         if row and check_password_hash(row["pw_hash"], pw):
             nxt = ob_security.safe_next(request.form.get("next") or request.args.get("next", ""))
-            _fresh_session()
+            _fresh_session("pending_join")
             session["uid"] = row["id"]
             session["sv"] = row["session_ver"]
             get_db().execute("UPDATE users SET lang=? WHERE id=?", (current_lang(), row["id"]))
+            if not nxt and session.get("pending_join"):
+                nxt = url_for("join_registry", token=session["pending_join"])
             return redirect(nxt or url_for("dashboard"))
         flash(_t("login_error", current_lang()), "err")
     return render_template("login.html", next=request.args.get("next", ""))
@@ -1738,6 +1765,7 @@ def dashboard():
         )
     return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats, totals=totals,
                            checklist=checklist, queues=queues, room_fills=room_fills,
+                           helping_owner=(_people(reg)[0] if reg and not is_reg_owner(reg) else None),
                            shana_arrival=_shana_offer(get_db(), current_user(), reg) if reg else None)
 
 
@@ -1897,6 +1925,10 @@ def _save_registry(reg):
         except ValueError as e:
             pay[col] = u  # keep what they typed so they can fix it
             pay_errors.append(_t(str(e), lang))
+    if reg and not is_reg_owner(reg):
+        # a helper edits everything else; where guests' money goes stays the owner's decision
+        pay = {c: (reg[c] or "") for c in ("paypal_url", "stripe_url", "bit_url")}
+        pay_errors = []
     event_type = f.get("event_type") if f.get("event_type") in EVENT_TYPES else "wedding"
     visibility = f.get("visibility") if f.get("visibility") in VISIBILITY_VALUES else (
         reg["visibility"] if reg else "unlisted")
@@ -1979,8 +2011,9 @@ def _save_registry(reg):
     while db.execute("SELECT 1 FROM registries WHERE slug=?", (slug,)).fetchone():
         slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
     with ob_db.write_txn(db):
-        if db.execute("SELECT 1 FROM registries WHERE user_id=?", (session["uid"],)).fetchone():
-            return redirect(url_for("registry_edit"))  # a double-submitted create form
+        if (db.execute("SELECT 1 FROM registries WHERE user_id=?", (session["uid"],)).fetchone()
+                or db.execute("SELECT 1 FROM registry_members WHERE user_id=?", (session["uid"],)).fetchone()):
+            return redirect(url_for("registry_edit"))  # a double-submitted create form, or already helping
         cur = db.execute(
             "INSERT INTO registries (user_id, slug, title, title_he, couple_names,"
             " couple_names_he, event_type, event_date, city, message, message_he,"
@@ -2421,6 +2454,216 @@ def dashboard_keepsake():
     return render_template("keepsake.html", reg=reg, notes=notes)
 
 
+# ---------------------------------------------------------------- managing it together
+MAX_HELPERS = 4      # people besides the owner: helpers plus invites still open
+INVITE_DAYS = 7
+
+
+def _utc_stamp(delta=None):
+    t = datetime.now(timezone.utc).replace(tzinfo=None)
+    return (t + delta if delta else t).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def _people(reg):
+    """(owner, helpers) — users rows; helpers in the order they joined."""
+    db = get_db()
+    owner = db.execute("SELECT id, name, email, created_at FROM users WHERE id=?", (reg["user_id"],)).fetchone()
+    helpers = db.execute(
+        "SELECT u.id, u.name, u.email, m.added_at FROM registry_members m JOIN users u ON u.id = m.user_id"
+        " WHERE m.registry_id=? ORDER BY m.added_at, u.id", (reg["id"],)).fetchall()
+    return owner, helpers
+
+
+def _open_invites(reg):
+    return get_db().execute(
+        "SELECT * FROM registry_invites WHERE registry_id=? AND used_at IS NULL AND revoked_at IS NULL"
+        " AND expires_at > ? ORDER BY id", (reg["id"], _utc_stamp())).fetchall()
+
+
+def _owned_registry_or_403():
+    reg = user_registry()
+    if not reg or not is_reg_owner(reg):
+        abort(403)
+    return reg
+
+
+@app.route("/registry/people")
+@login_required
+def registry_people():
+    """Who manages this registry: the owner, helpers, open invites — and a fresh invite link,
+    shown once right after it's made (only its hash is stored)."""
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("registry_new"))
+    owner, helpers = _people(reg)
+    invites = _open_invites(reg) if is_reg_owner(reg) else []
+    new = session.pop("new_invite", None)
+    new_link = None
+    if new and is_reg_owner(reg):
+        made = [i for i in invites if i["id"] == new.get("id")]
+        if made:
+            new_link = dict(id=made[0]["id"], label=made[0]["label"],
+                            url=ext_url("join_registry", token=new.get("token", "")))
+    return render_template("people.html", reg=reg, owner=owner, helpers=helpers, invites=invites,
+                           new_link=new_link, max_helpers=MAX_HELPERS,
+                           room_left=MAX_HELPERS - len(helpers) - len(invites))
+
+
+@app.route("/registry/people/invite", methods=["POST"])
+@login_required
+def people_invite():
+    reg = _owned_registry_or_403()
+    if rate_limited("invite", limit=10, per=3600):
+        abort(429)
+    lang = current_lang()
+    db = get_db()
+    token = ob_security.new_token()
+    with ob_db.write_txn(db):
+        _owner, helpers = _people(reg)
+        if len(helpers) + len(_open_invites(reg)) >= MAX_HELPERS:
+            flash(tf("people_invite_full", lang, n=MAX_HELPERS), "err")
+            return redirect(url_for("registry_people"))
+        cur = db.execute(
+            "INSERT INTO registry_invites (registry_id, token_hash, label, created_by, expires_at)"
+            " VALUES (?,?,?,?,?)",
+            (reg["id"], ob_security.hash_token(token), (request.form.get("label") or "").strip()[:60],
+             session["uid"], _utc_stamp(timedelta(days=INVITE_DAYS))))
+    session["new_invite"] = {"id": cur.lastrowid, "token": token}
+    track("helper_invited")
+    flash(_t("people_invite_made", lang), "ok")
+    return redirect(url_for("registry_people", _anchor="new-invite"))
+
+
+@app.route("/registry/people/invite/<int:invite_id>/revoke", methods=["POST"])
+@login_required
+def people_invite_revoke(invite_id):
+    reg = _owned_registry_or_403()
+    get_db().execute(
+        "UPDATE registry_invites SET revoked_at=? WHERE id=? AND registry_id=? AND used_at IS NULL"
+        " AND revoked_at IS NULL", (_utc_stamp(), invite_id, reg["id"]))
+    flash(_t("people_revoked", current_lang()), "ok")
+    return redirect(url_for("registry_people"))
+
+
+@app.route("/registry/people/<int:user_id>/remove", methods=["POST"])
+@login_required
+def people_remove(user_id):
+    reg = _owned_registry_or_403()
+    db = get_db()
+    row = db.execute("SELECT u.name FROM registry_members m JOIN users u ON u.id = m.user_id"
+                     " WHERE m.registry_id=? AND m.user_id=?", (reg["id"], user_id)).fetchone()
+    if not row:
+        abort(404)
+    db.execute("DELETE FROM registry_members WHERE registry_id=? AND user_id=?", (reg["id"], user_id))
+    flash(tf("people_removed", current_lang(), name=row["name"]), "ok")
+    return redirect(url_for("registry_people"))
+
+
+@app.route("/registry/people/<int:user_id>/owner", methods=["POST"])
+@login_required
+def people_make_owner(user_id):
+    """Hand the registry to a helper (they take over the payment links; the old owner stays on as a
+    helper) — so one of them can delete their account without deleting the registry."""
+    reg = _owned_registry_or_403()
+    if rate_limited("pay_reauth", limit=8, per=900):
+        abort(429)
+    lang = current_lang()
+    me = current_user()
+    if not check_password_hash(me["pw_hash"], request.form.get("current_password") or ""):
+        flash(_t("reauth_required", lang), "err")
+        return redirect(url_for("registry_people", _anchor=f"person-{user_id}"))
+    db = get_db()
+    with ob_db.write_txn(db):
+        row = db.execute("SELECT u.name FROM registry_members m JOIN users u ON u.id = m.user_id"
+                         " WHERE m.registry_id=? AND m.user_id=?", (reg["id"], user_id)).fetchone()
+        if not row:
+            abort(404)
+        db.execute("DELETE FROM registry_members WHERE user_id=?", (user_id,))
+        db.execute("UPDATE registries SET user_id=? WHERE id=?", (user_id, reg["id"]))
+        db.execute("INSERT INTO registry_members (registry_id, user_id, added_at) VALUES (?,?,?)",
+                   (reg["id"], me["id"], _utc_stamp()))
+        notify_owner(db, dict(reg, user_id=user_id), "mail_owner_moved", lang, name=me["name"])
+    flash(tf("people_owner_moved", lang, name=row["name"]), "ok")
+    return redirect(url_for("registry_people"))
+
+
+@app.route("/registry/people/leave", methods=["POST"])
+@login_required
+def people_leave():
+    reg = user_registry()
+    if not reg or is_reg_owner(reg):
+        abort(403)  # the owner hands it over or deletes their account instead
+    get_db().execute("DELETE FROM registry_members WHERE registry_id=? AND user_id=?",
+                     (reg["id"], session["uid"]))
+    flash(_t("people_left", current_lang()), "ok")
+    return redirect(url_for("dashboard"))
+
+
+def _live_invite(db, token):
+    if not token or len(token) > 100:
+        return None
+    return db.execute(
+        "SELECT i.*, r.title, r.title_he, r.user_id AS owner_id, u.name AS inviter"
+        " FROM registry_invites i JOIN registries r ON r.id = i.registry_id JOIN users u ON u.id = r.user_id"
+        " WHERE i.token_hash=? AND i.used_at IS NULL AND i.revoked_at IS NULL AND i.expires_at > ?",
+        (ob_security.hash_token(token), _utc_stamp())).fetchone()
+
+
+def _join_state(db, inv, user):
+    """bad | signin | already | own (has a registry of their own) | other (helps elsewhere) | ok"""
+    if not inv:
+        return "bad"
+    if not user:
+        return "signin"
+    if user["id"] == inv["owner_id"] or db.execute(
+            "SELECT 1 FROM registry_members WHERE registry_id=? AND user_id=?",
+            (inv["registry_id"], user["id"])).fetchone():
+        return "already"
+    if db.execute("SELECT 1 FROM registries WHERE user_id=?", (user["id"],)).fetchone():
+        return "own"
+    if db.execute("SELECT 1 FROM registry_members WHERE user_id=?", (user["id"],)).fetchone():
+        return "other"
+    return "ok"
+
+
+@app.route("/join/<token>", methods=["GET", "POST"])
+def join_registry(token):
+    """An invite to help manage a registry. Logged out: the token waits in the session through
+    signup/login, which bring them back here to accept explicitly."""
+    db = get_db()
+    lang = current_lang()
+    user = current_user()
+    if request.method == "POST":
+        if not user:
+            return redirect(url_for("login"))
+        if rate_limited("join", limit=20, per=600):
+            abort(429)
+        with ob_db.write_txn(db):
+            inv = _live_invite(db, token)
+            state = _join_state(db, inv, user)
+            if state == "ok":
+                db.execute("INSERT INTO registry_members (registry_id, user_id, added_at) VALUES (?,?,?)",
+                           (inv["registry_id"], user["id"], _utc_stamp()))
+                db.execute("UPDATE registry_invites SET used_at=?, used_by=? WHERE id=?",
+                           (_utc_stamp(), user["id"], inv["id"]))
+                reg = db.execute("SELECT * FROM registries WHERE id=?", (inv["registry_id"],)).fetchone()
+                # tells the owner straight away — if they didn't send this link, they'll want to know
+                notify_owner(db, reg, "mail_member_joined", lang, name=user["name"], email=user["email"])
+        if state == "ok":
+            session.pop("pending_join", None)
+            track("helper_joined")
+            flash(tf("join_done", lang, title=pick(inv, "title", lang), name=inv["inviter"]), "ok")
+            return redirect(url_for("dashboard"))
+    else:
+        inv = _live_invite(db, token)
+        state = _join_state(db, inv, user)
+    if state == "signin":
+        session["pending_join"] = token
+    elif state != "ok":
+        session.pop("pending_join", None)
+    return render_template("join.html", state=state, inv=inv, user=user, token=token)
+
+
 @app.route("/dashboard/claims.csv")
 @login_required
 def dashboard_claims_csv():
@@ -2449,7 +2692,9 @@ def dashboard_claims_csv():
 @app.route("/account")
 @login_required
 def account():
-    return render_template("account.html", reg=user_registry())
+    reg = user_registry()
+    owner, helpers = _people(reg) if reg else (None, [])
+    return render_template("account.html", reg=reg, reg_owner=owner, helpers=helpers)
 
 
 @app.route("/account/export.json")
@@ -2463,6 +2708,10 @@ def account_export():
         user=dict(email=user["email"], name=user["name"], created_at=user["created_at"]),
         registry=None, items=[], claims=[],
     )
+    if reg and not is_reg_owner(reg):
+        # a helper's own data is their account and which registry they help with, not the couple's guests
+        data["helping_with"] = dict(title=reg["title"], slug=reg["slug"])
+        reg = None
     if reg:
         data["registry"] = {k: reg[k] for k in reg.keys() if k not in ("id", "user_id")}
         data["items"] = [dict(r) for r in db.execute(
@@ -2586,7 +2835,8 @@ def bundle_label(slug):
     return row["name"] if row else "Custom / not sure"
 
 
-app.jinja_env.globals.update(budget_label=budget_label, bundle_label=bundle_label, room_of=room_of)
+app.jinja_env.globals.update(budget_label=budget_label, bundle_label=bundle_label, room_of=room_of,
+                             is_reg_owner=is_reg_owner, registry_owner_name=registry_owner_name)
 
 
 # pkg_lead_weeks. Owner decision 2026-09-22: Full Nest's price includes standard

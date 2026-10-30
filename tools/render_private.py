@@ -5,7 +5,8 @@ synthetic data, so they can be screenshotted without a browser session.
     python tools/render_private.py --out /tmp/private [--base http://127.0.0.1:5001]
 
 Writes dashboard.html, items.html, starter.html, registry.html (with claims in
-every state), thanks.html, keepsake.html, guest.html and their Hebrew twins. `--base` is only used to make
+every state), thanks.html, keepsake.html, people/join (owner and helper views),
+guest.html and their Hebrew twins. `--base` is only used to make
 /static/ links absolute so a headless browser can load the CSS. Never touches
 the real ourbayis.db (forces OB_DB_PATH to a temp file before importing app).
 """
@@ -92,6 +93,27 @@ def main():
     db.commit()
     db.close()
 
+    # managing it together: Yosef joins from an invite link; each language gets a fresh open invite
+    def invite(label):
+        c.get("/registry/people")
+        c.post("/registry/people/invite", data=dict(csrf_token=csrf(), label=label))
+        with c.session_transaction() as s:
+            return s["new_invite"]["token"]
+
+    h = A.app.test_client()
+    h.get(f"/join/{invite('Yosef')}")
+    h.get("/signup")
+    with h.session_transaction() as s:
+        hcsrf = s.get("_csrf")
+    h.post("/signup", data=dict(csrf_token=hcsrf, name="Yosef", email="yosef@example.invalid",
+                                password="sample-password-only", password2="sample-password-only"))
+    with h.session_transaction() as s:
+        jt = s["pending_join"]
+    h.get(f"/join/{jt}")  # signup rotated the session: this page issues the new CSRF token
+    with h.session_transaction() as s:
+        hcsrf = s.get("_csrf")
+    h.post(f"/join/{jt}", data=dict(csrf_token=hcsrf))
+
     pages = {"dashboard": "/dashboard", "items": "/registry/items", "starter": "/registry/items/starter",
              "registry": f"/r/{slug}", "edit": "/registry/edit", "thanks": "/dashboard/thanks",
              "keepsake": "/dashboard/keepsake"}
@@ -99,6 +121,12 @@ def main():
         for name, url in pages.items():
             html = c.get(f"{url}?lang={lang}").get_data(as_text=True)
             _write(out / f"{name}-{lang}.html", html, args.base)
+        tok = invite("Ima" if lang == "en" else "אמא")
+        _write(out / f"people-{lang}.html", c.get(f"/registry/people?lang={lang}").get_data(as_text=True), args.base)
+        _write(out / f"join-{lang}.html", A.app.test_client().get(f"/join/{tok}?lang={lang}").get_data(as_text=True), args.base)
+        for name, url in (("people-helper", "/registry/people"), ("edit-helper", "/registry/edit"),
+                          ("dashboard-helper", "/dashboard")):
+            _write(out / f"{name}-{lang}.html", h.get(f"{url}?lang={lang}").get_data(as_text=True), args.base)
         g = A.app.test_client()
         html = g.get(f"/g/{tokens[0]}?lang={lang}").get_data(as_text=True)
         _write(out / f"guest-{lang}.html", html, args.base)

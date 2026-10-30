@@ -64,7 +64,8 @@ units, `token_hash` for the guest's recovery link, `idempotency_key` for one-cla
 `legacy=1` on rows migrated from the pre-v3 free-text `amount` field). `claim_events` is the audit
 trail (event/actor/note per status change). Also: `catalog_items`, `bundles`, `shana_requests`
 (leads), `messages`, `ads`, `admins` (`session_ver` too), `password_resets`, `rate_events`,
-`mail_outbox`, `funnel_events` (no-PII daily counters), `schema_migrations`.
+`mail_outbox`, `funnel_events` (no-PII daily counters), `schema_migrations`, `registry_members` /
+`registry_invites` [m26] (co-managers, see "Managing it together").
 
 ## Gift lifecycle (see SPEC_V3.md "Gift lifecycle" for the full spec)
 `claims.status`: reserved → reported → received, or → cancelled/expired. Committed quantity for
@@ -256,6 +257,17 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - `/dashboard/thanks` (`dashboard_thanks`, `_thanks_note(reg, gift, lang)`) and `/dashboard/keepsake`;
   `claim_thanked` honours `back=thanks`. Notes are drafted server-side in both languages, edited and
   sent client-side only (copy / wa.me / mailto) — nothing is sent or stored by the site.
+
+## Managing it together (2026-10-30)
+- `registries.user_id` is still the single **owner**; `registry_members` (UNIQUE user_id: one registry per
+  account) adds **helpers**. Always get the registry through `user_registry()` (owned, else helped) and
+  gate owner-only actions with `is_reg_owner(reg)`: payment links (form disables them, `_save_registry`
+  ignores them), inviting/cancelling/removing, handing over (`people_make_owner`, password re-auth),
+  and deleting the registry with the account. `can_manage(reg)` is for slug-based pages (`/r/<slug>`).
+- Invites: `/registry/people` (owner + helper views), `/join/<token>` (states bad|signin|already|own|other|ok,
+  `_join_state`); token hashed like guest links, single-use, 7 days, max 4 helpers + open invites;
+  `session["pending_join"]` survives signup/login (`_fresh_session(..., "pending_join")`). Owner is emailed
+  on every join. Gift notifications still go to the owner only.
 
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =

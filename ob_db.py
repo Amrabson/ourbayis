@@ -496,6 +496,36 @@ def _m025_claim_report_note(db):
     _add_column(db, "claims", "report_note TEXT DEFAULT ''")
 
 
+def _m026_registry_members(db):
+    """Co-managers (2026-10-30): the chassan/kallah, a parent, whoever is helping. `registries.user_id`
+    stays the single owner (payment links, who else can help, deleting the registry with the
+    account); `registry_members` adds helpers — one registry per account, hence UNIQUE(user_id).
+    Invites are single-use links; like guest links only a sha256 of the token is stored."""
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS registry_members (
+          registry_id INTEGER NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
+          user_id INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+          added_at TEXT NOT NULL DEFAULT (datetime('now')),
+          PRIMARY KEY (registry_id, user_id)
+        )
+    """)
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS registry_invites (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          registry_id INTEGER NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
+          token_hash TEXT NOT NULL UNIQUE,
+          label TEXT NOT NULL DEFAULT '',
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          expires_at TEXT NOT NULL,
+          used_at TEXT,
+          used_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          revoked_at TEXT
+        )
+    """)
+    db.execute("CREATE INDEX IF NOT EXISTS ix_registry_invites_reg ON registry_invites(registry_id)")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -719,6 +749,7 @@ MIGRATIONS = [
     _m023_claim_lang,
     _m024_lead_lang,
     _m025_claim_report_note,
+    _m026_registry_members,
 ]
 
 

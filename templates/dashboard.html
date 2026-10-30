@@ -25,12 +25,14 @@
         {% if reg['event_date'] %}<span>{{ fmt_date(reg['event_date']) }}</span>{% endif %}
         {% if reg['city'] %}<span><bdi>{{ reg['city'] }}</bdi></span>{% endif %}
         <span class="dash-vis dash-vis-{{ reg['visibility'] }}">{{ t('visibility_' ~ reg['visibility']) }}</span>
+        {% if helping_owner %}<span class="dash-helping">{{ tf('dash_helping', owner=helping_owner['name']) }}</span>{% endif %}
       </p>
       <div class="dash-actions">
         <a class="btn btn-primary" href="{{ url_for('items_manage') }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('dash_items') }}</a>
         <a class="link-arrow" href="{{ url_for('registry_edit') }}">{{ t('dash_edit') }}</a>
         <a class="link-arrow" href="{{ url_for('registry', slug=reg['slug']) }}">{{ t('dash_view_public') }}</a>
         <a class="link-arrow" href="{{ url_for('dashboard_thanks') }}">{{ t('thanks_title') }}</a>
+        <a class="link-arrow" href="{{ url_for('registry_people') }}">{{ t('people_kicker') }}</a>
         <a class="link-arrow" href="{{ url_for('dashboard_claims_csv') }}">{{ t('dash_export_csv') }}</a>
       </div>
       <div class="stat-row">

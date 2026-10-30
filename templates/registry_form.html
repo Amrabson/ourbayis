@@ -96,13 +96,15 @@
 
         <section class="rform-sec" id="rf-payment" data-rail-sec>
           <h2 class="rform-h"><span class="rail-n">03</span>{{ t('rform_step_payment') }}</h2>
+          {% set pay_locked = reg and not is_reg_owner(reg) %}
           <p class="hint">{{ t('r_pay_hint') }}</p>
+          {% if pay_locked %}<p class="pay-locked">{{ tf('r_pay_owner_only', owner=registry_owner_name(reg)) }}</p>{% endif %}
           <div class="form-2col">
-            <label>{{ t('r_paypal') }}<input name="paypal_url" maxlength="300" placeholder="paypal.me/yourname" value="{{ val('paypal_url') }}"></label>
-            <label>{{ t('r_stripe') }}<input name="stripe_url" maxlength="300" placeholder="buy.stripe.com/…" value="{{ val('stripe_url') }}"></label>
-            <label>{{ t('r_bit') }}<input name="bit_url" maxlength="300" placeholder="bitpay.co.il/app/me/… / payboxapp.com/…" value="{{ val('bit_url') }}"></label>
+            <label>{{ t('r_paypal') }}<input name="paypal_url" maxlength="300" placeholder="paypal.me/yourname" value="{{ val('paypal_url') }}"{% if pay_locked %} disabled{% endif %}></label>
+            <label>{{ t('r_stripe') }}<input name="stripe_url" maxlength="300" placeholder="buy.stripe.com/…" value="{{ val('stripe_url') }}"{% if pay_locked %} disabled{% endif %}></label>
+            <label>{{ t('r_bit') }}<input name="bit_url" maxlength="300" placeholder="bitpay.co.il/app/me/… / payboxapp.com/…" value="{{ val('bit_url') }}"{% if pay_locked %} disabled{% endif %}></label>
           </div>
-          {% if reg %}
+          {% if reg and not pay_locked %}
           <label>{{ t('r_current_password') }}<input name="current_password" type="password" autocomplete="current-password"></label>
           <p class="hint">{{ t('r_current_password_hint') }}</p>
           {% endif %}

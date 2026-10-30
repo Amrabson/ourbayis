@@ -13,7 +13,7 @@ admin queues/CSV/outbox, draft/unlisted/public, canonical/hreflang/JSON-LD/og im
 parchment redesign, currency estimates with a rate note. 47 automated tests.
 
 ## Still open (code)
-- [ ] **Homepage "Room by room" illustrations overflow into the text** (owner screenshot 2026-10-27,
+- [x] **Homepage "Room by room" illustrations overflow into the text** (fixed 2026-10-30) (owner screenshot 2026-10-27,
   ~720px wide; also true at 1280). Cause: the v4 catalog rule `.gift-card .gift-ph.ill-box { height: auto;
   aspect-ratio: 16 / 9 }` (style.css "v4 pages", same specificity, later) beats `.home .room-grid .gift-ph`
   (`height: 100%`), so the drawing box grows to the card's height x 16/9 (341-405px wide) inside its
@@ -33,7 +33,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Hebrew registry-form fields collapse into an "Add Hebrew" `<details>` (2026-09-22); same on the
   item edit page.
 - [ ] Group gifting / chip-in toward big-ticket items — deliberately deferred (SPEC_V3 "Defer").
-- [ ] Multiple registries per account, co-owners, live inventory — deferred.
+- [x] Co-owners — done 2026-10-30 as owner + helpers (`/registry/people`, invite links, hand-over).
+  Possible next: let helpers opt in to the gift emails (today only the owner gets them).
+- [ ] Multiple registries per account, live inventory — deferred.
 
 ## Owner decisions from the 2026-09-17 review pass (publication blockers for the affected claims)
 - [x] **Full Nest installation** — decided 2026-09-22: included. Washer/fridge/microwave are
