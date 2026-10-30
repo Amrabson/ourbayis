@@ -23,6 +23,8 @@
   the registry. Privacy "Registry visibility" says what a helper sees.
 - **Homepage "Room by room"**: the drawings stay in their 112px column again
   (`.home .room-grid .gift-ph.ill-box` beats the v4 catalog's 16/9 rule). Closes the 2026-10-27 TODO.
+- **Cutlery drawing** (`ill-cutlery`, base.html) redrawn as a real fork, knife and spoon; the old one
+  read as two forks with half a spoon (owner report).
 - tools/render_private.py renders people (owner + helper), join, and the helper's dashboard/edit form.
 - 57 new EN/HE strings (`people_*`, `join_*`, `mail_member_joined_*`, `mail_owner_moved_*`, ...).
   7 tests in tests/test_people.py (270).
