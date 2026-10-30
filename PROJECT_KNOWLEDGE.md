@@ -267,7 +267,8 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - Invites: `/registry/people` (owner + helper views), `/join/<token>` (states bad|signin|already|own|other|ok,
   `_join_state`); token hashed like guest links, single-use, 7 days, max 4 helpers + open invites;
   `session["pending_join"]` survives signup/login (`_fresh_session(..., "pending_join")`). Owner is emailed
-  on every join. Gift notifications still go to the owner only.
+  on every join. Gift emails (`notify_owner(..., to_helpers=True)`) also go to helpers who opted in
+  (`registry_members.notify` [m27], toggled only by the helper themself).
 
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =

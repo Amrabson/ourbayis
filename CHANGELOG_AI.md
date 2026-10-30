@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-30 (helpers can get the gift emails)
+- m027 `registry_members.notify` (default off). On the people page a helper turns the gift emails on or
+  off for themselves (`POST /registry/people/notify`; the owner can't, and always gets them); the owner's
+  list shows "gets the gift emails". `notify_owner(..., to_helpers=True)` on the three gift emails
+  (reserved item/cash, cash gift, reported) also sends to opted-in helpers, each in their own
+  `users.lang`. Join / hand-over emails stay owner-only. 8 new EN/HE strings; 1 test (271).
+
 ## 2026-10-30 (managing a registry together; homepage room cards)
 - **Co-managers** (m026 `registry_members` + `registry_invites`): the owner makes an invite link on
   `/registry/people` ("Manage it together", linked from the dashboard and the account page), labelled

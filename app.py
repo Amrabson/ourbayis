@@ -229,22 +229,28 @@ def send_mail(to, subject, body, reply_to=""):
     return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH, reply_to=reply_to)
 
 
-def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, **kw):
-    """`<key>_subj` / `<key>_body` to the registry owner, in the owner's language (users.lang;
-    falls back to the current reader's), with the registry title / item name in that language
-    and a link to the dashboard."""
-    owner = db.execute("SELECT email, lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()
-    if not owner or not owner["email"]:
-        return
-    lang = owner["lang"] if owner["lang"] in ("en", "he") else fallback_lang
-    he = lang == "he"
-    kw.setdefault("title", (reg["title_he"] if he and reg["title_he"] else reg["title"]))
-    if item is not None:
-        name = item["name_he"] if he and item["name_he"] else item["name"]
-        kw["item"] = f"{name} ×{qty}" if qty > 1 else name
-    body = (_t(key + "_body", lang).format(**kw) + "\n\n"
-            + _t("mail_owner_footer", lang).format(link=ext_url("dashboard")))
-    send_mail(owner["email"], _t(key + "_subj", lang).format(**kw), body)
+def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False, **kw):
+    """`<key>_subj` / `<key>_body` to the registry owner — and, with `to_helpers` (the gift emails),
+    to every helper who turned them on — each in their own language (users.lang; falls back to the
+    current reader's), with the registry title / item name in that language and a dashboard link."""
+    people = [db.execute("SELECT email, lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()]
+    if to_helpers:
+        people += db.execute(
+            "SELECT u.email, u.lang FROM registry_members m JOIN users u ON u.id = m.user_id"
+            " WHERE m.registry_id=? AND m.notify=1 ORDER BY u.id", (reg["id"],)).fetchall()
+    for person in people:
+        if not person or not person["email"]:
+            continue
+        lang = person["lang"] if person["lang"] in ("en", "he") else fallback_lang
+        he = lang == "he"
+        words = dict(kw)
+        words.setdefault("title", (reg["title_he"] if he and reg["title_he"] else reg["title"]))
+        if item is not None:
+            name = item["name_he"] if he and item["name_he"] else item["name"]
+            words["item"] = f"{name} ×{qty}" if qty > 1 else name
+        body = (_t(key + "_body", lang).format(**words) + "\n\n"
+                + _t("mail_owner_footer", lang).format(link=ext_url("dashboard")))
+        send_mail(person["email"], _t(key + "_subj", lang).format(**words), body)
 
 
 def notify_guest(db, claim, key):
@@ -1377,7 +1383,7 @@ def claim_item(slug, item_id):
 
     _remember_claim_token(form_key, result["token"])
     reg, item = result["reg"], result["item"]
-    notify_owner(db, reg, "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item", lang,
+    notify_owner(db, reg, "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item", lang, to_helpers=True,
                  item=item, qty=result["qty"], name=result["name"])
     if _guest_email():
         send_guest_link(db, result["claim_id"], result["token"], _guest_email(), lang)
@@ -1450,7 +1456,7 @@ def cash_gift(slug):
     _remember_claim_token(form_key, token)
     _owner_lang = db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()
     _ol = _owner_lang["lang"] if _owner_lang and _owner_lang["lang"] in ("en", "he") else lang
-    notify_owner(db, reg, "mail_cash", lang, name=name,
+    notify_owner(db, reg, "mail_cash", lang, to_helpers=True, name=name,
                  amount=(ob_money.fmt_minor(amount_minor, currency, _ol) if amount_minor is not None
                          else _t("mail_cash_no_amount", _ol)))
     if _guest_email():
@@ -1525,7 +1531,7 @@ def guest_report(token):
     owner_lang = (db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone() or {"lang": ""})["lang"]
     owner_lang = owner_lang if owner_lang in ("en", "he") else lang
     extra = {} if item else {"item": _t("gift_cash", owner_lang)}
-    notify_owner(db, reg, "mail_reported", lang, item=item, qty=claim["qty"] or 1, name=claim["guest_name"],
+    notify_owner(db, reg, "mail_reported", lang, to_helpers=True, item=item, qty=claim["qty"] or 1, name=claim["guest_name"],
                  note=_t("mail_reported_note", owner_lang).format(note=note) if note else "", **extra)
     track("guest_report", owner_uid=reg["user_id"])
     flash(_t("guest_report_done", lang), "ok")
@@ -2469,7 +2475,7 @@ def _people(reg):
     db = get_db()
     owner = db.execute("SELECT id, name, email, created_at FROM users WHERE id=?", (reg["user_id"],)).fetchone()
     helpers = db.execute(
-        "SELECT u.id, u.name, u.email, m.added_at FROM registry_members m JOIN users u ON u.id = m.user_id"
+        "SELECT u.id, u.name, u.email, m.added_at, m.notify FROM registry_members m JOIN users u ON u.id = m.user_id"
         " WHERE m.registry_id=? ORDER BY m.added_at, u.id", (reg["id"],)).fetchall()
     return owner, helpers
 
@@ -2597,6 +2603,20 @@ def people_leave():
                      (reg["id"], session["uid"]))
     flash(_t("people_left", current_lang()), "ok")
     return redirect(url_for("dashboard"))
+
+
+@app.route("/registry/people/notify", methods=["POST"])
+@login_required
+def people_notify():
+    """A helper turns the gift emails on or off for themselves (never for anyone else)."""
+    reg = user_registry()
+    if not reg or is_reg_owner(reg):
+        abort(403)  # the owner always gets them
+    on = request.form.get("notify") == "1"
+    get_db().execute("UPDATE registry_members SET notify=? WHERE registry_id=? AND user_id=?",
+                     (1 if on else 0, reg["id"], session["uid"]))
+    flash(_t("people_notify_saved_on" if on else "people_notify_saved_off", current_lang()), "ok")
+    return redirect(url_for("registry_people", _anchor="gift-emails"))
 
 
 def _live_invite(db, token):

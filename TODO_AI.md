@@ -34,7 +34,7 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   item edit page.
 - [ ] Group gifting / chip-in toward big-ticket items — deliberately deferred (SPEC_V3 "Defer").
 - [x] Co-owners — done 2026-10-30 as owner + helpers (`/registry/people`, invite links, hand-over).
-  Possible next: let helpers opt in to the gift emails (today only the owner gets them).
+  Helpers can opt in to the gift emails (2026-10-30).
 - [ ] Multiple registries per account, live inventory — deferred.
 
 ## Owner decisions from the 2026-09-17 review pass (publication blockers for the affected claims)

@@ -143,6 +143,51 @@ def test_invites_refuse_accounts_that_already_manage_a_registry_and_can_be_cance
     assert "This invite has closed" in app.test_client().get("/" + path).get_data(as_text=True)
 
 
+def test_a_helper_opts_in_to_the_gift_emails_in_their_own_language(app):
+    from conftest import add_item, get_form_key
+    owner = _owner_with_registry(app)
+    add_item(owner, name="Cholent pot", price_nis="200", url="https://example.com/pot")
+    helper = _join(app, _invite(owner))
+    db = _db()
+    db.execute("UPDATE registry_items SET qty_wanted=5")
+    db.commit()
+
+    def reserve(guest):
+        db = _db()
+        slug, item = db.execute("SELECT slug FROM registries").fetchone()[0], db.execute(
+            "SELECT id FROM registry_items").fetchone()[0]
+        g = app.test_client()
+        html = g.get(f"/r/{slug}").get_data(as_text=True)
+        g.post(f"/r/{slug}/claim/{item}", data=dict(csrf_token=get_csrf(html), form_key=get_form_key(html),
+                                                    guest_name=guest, qty="1", give="buy"))
+
+    def mails(addr):
+        return _db().execute("SELECT subject FROM mail_outbox WHERE to_addr=? ORDER BY id", (addr,)).fetchall()
+
+    reserve("Aunt Miriam")
+    assert len(mails("yosef@example.com")) == 0  # off by default
+    page = helper.get("/registry/people?lang=he").get_data(as_text=True)
+    assert "שלחו גם לי מיילים על מתנות" in page
+    helper.post("/registry/people/notify", data=dict(csrf_token=get_csrf(page), notify="1"))
+    assert "Stop the gift emails" in helper.get("/registry/people?lang=en").get_data(as_text=True)
+    # the owner sees who gets them, and can't switch them on for anyone
+    people = owner.get("/registry/people").get_data(as_text=True)
+    assert "gets the gift emails" in people
+    assert owner.post("/registry/people/notify", data=dict(csrf_token=get_csrf(people), notify="1")).status_code == 403
+    helper.get("/registry/people?lang=he")  # Yosef's language is now Hebrew
+    owner_before = len(mails("rivka@example.com"))
+    reserve("Cousin Dov")
+    got = mails("yosef@example.com")
+    assert len(got) == 1 and any("֐" <= ch <= "׿" for ch in got[0]["subject"])
+    assert len(mails("rivka@example.com")) == owner_before + 1
+    # join / hand-over emails stay the owner's
+    assert not any("can now manage" in m["subject"] for m in got)
+    page = helper.get("/registry/people").get_data(as_text=True)
+    helper.post("/registry/people/notify", data=dict(csrf_token=get_csrf(page), notify="0"))
+    reserve("The Levins")
+    assert len(mails("yosef@example.com")) == 1
+
+
 def test_a_helper_can_leave(app):
     owner = _owner_with_registry(app)
     helper = _join(app, _invite(owner))

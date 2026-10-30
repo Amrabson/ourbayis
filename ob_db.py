@@ -526,6 +526,12 @@ def _m026_registry_members(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_registry_invites_reg ON registry_invites(registry_id)")
 
 
+def _m027_member_notify(db):
+    """A helper's own choice to get the gift emails too (reserved / cash / reported). Off by default:
+    it's their inbox, so only they turn it on (on the people page)."""
+    _add_column(db, "registry_members", "notify INTEGER NOT NULL DEFAULT 0")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -750,6 +756,7 @@ MIGRATIONS = [
     _m024_lead_lang,
     _m025_claim_report_note,
     _m026_registry_members,
+    _m027_member_notify,
 ]
 
 

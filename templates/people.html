@@ -36,7 +36,7 @@
           <div class="person-who">
             <span><strong><bdi>{{ h['name'] }}</bdi></strong>{% if h['id'] == session.get('uid') %} <span class="hint">{{ t('people_you') }}</span>{% endif %}</span>
             <span class="person-mail"><bdi>{{ h['email'] }}</bdi></span>
-            <span class="hint">{{ t('people_helper') }} · {{ tf('people_since', date=fmt_date(h['added_at'][:10])) }}</span>
+            <span class="hint">{{ t('people_helper') }} · {{ tf('people_since', date=fmt_date(h['added_at'][:10])) }}{% if h['notify'] %} · {{ t('people_notify_badge') }}{% endif %}</span>
           </div>
           {% if owner_view %}
           <div class="person-actions">
@@ -58,7 +58,7 @@
         </li>
         {% endfor %}
       </ul>
-      <p class="hint people-mail-note">{{ t('people_owner_mail') }}</p>
+      {% if owner_view %}<p class="hint people-mail-note">{{ t('people_owner_mail') }}</p>{% endif %}
 
       {% if owner_view %}
         {% if invites %}
@@ -93,6 +93,16 @@
           {% endif %}
         </section>
       {% else %}
+        {% set me = helpers | selectattr('id', 'equalto', session.get('uid')) | first %}
+        <section class="people-notify" id="gift-emails">
+          <h2 class="rform-h">{{ t('people_notify_h') }}</h2>
+          <p class="hint">{{ t('people_notify_on_hint') if me and me['notify'] else tf('people_notify_off_hint', owner=owner['name']) }}</p>
+          <form method="post" action="{{ url_for('people_notify') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="notify" value="{{ '0' if me and me['notify'] else '1' }}">
+            <button class="btn {{ 'btn-ghost' if me and me['notify'] else 'btn-primary' }}" type="submit">{{ t('people_notify_off_btn') if me and me['notify'] else t('people_notify_on_btn') }}</button>
+          </form>
+        </section>
         <form method="post" action="{{ url_for('people_leave') }}" class="people-leave" data-confirm="{{ t('people_leave_confirm') }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="btn btn-ghost" type="submit">{{ t('people_leave') }}</button>
