@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% from "_cards.html" import gift_media, price_line with context %}
+{% block title %}{{ t('check_kicker') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+
+{% macro suggestions(rows, label, sec) -%}
+  {%- if rows %}
+  <div class="check-suggest">
+    <p class="check-suggest-h">{{ label }}</p>
+    <ul>
+      {% for c in rows %}
+      <li class="check-pick">
+        {{ gift_media(c, small=True) }}
+        <div class="check-pick-copy">
+          <span class="check-pick-name" dir="auto">{{ pick(c, 'name') }}</span>
+          {{ price_line(c, cls='check-pick-price') }}
+        </div>
+        <form method="post" action="{{ url_for('items_add', back='check', sec=sec) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="catalog_id" value="{{ c['id'] }}">
+          <button class="btn btn-ghost btn-sm" type="submit" aria-label="{{ t('check_add') }}: {{ pick(c, 'name') }}">+ {{ t('check_add') }}</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {%- endif %}
+{%- endmacro %}
+
+<div class="home check-page">
+  <section class="sheet-page check-head">
+    <div class="sec-inner">
+      <p class="kicker"><a href="{{ url_for('dashboard') }}">{{ t('dash_title') }}</a> · {{ t('check_kicker') }}</p>
+      <h1 class="sheet-title">{{ t('check_title') }}</h1>
+      <p class="page-sub">{{ t('check_sub') }}</p>
+      {% if check['items'] %}
+      <ul class="check-score">
+        <li><strong>{{ check['budgets_ok'] }}<small>/{{ check['budgets_n'] }}</small></strong><span>{{ t('check_score_budgets') }}</span></li>
+        <li><strong>{{ check['rooms_ok'] }}<small>/{{ check['rooms_n'] }}</small></strong><span>{{ t('check_score_rooms') }}</span></li>
+        <li><strong>{{ check['open'] }}</strong><span>{{ t('check_score_open') }}</span></li>
+      </ul>
+      {% endif %}
+    </div>
+  </section>
+
+  <div class="sec-inner check-body">
+    {% if not check['items'] %}
+      <p class="empty-note">{{ t('check_empty') }}</p>
+      <p><a class="btn btn-gold" href="{{ url_for('items_starter') }}">{{ t('starter_btn') }}</a></p>
+    {% else %}
+
+    {# ---- 01 every budget ---- #}
+    {% set bmax = [1] + check['bands'].values() | map(attribute='open') | list %}
+    {% set bmax = bmax | max %}
+    <section class="check-sec" id="budgets">
+      <h2 class="rform-h"><span class="rail-n">01</span>{{ t('check_budgets_h') }}</h2>
+      <p class="hint">{{ t('check_budgets_hint') }}</p>
+      {% for key, b in check['bands'].items() %}
+      <div class="check-row check-{{ b['status'] }}">
+        <div class="check-line">
+          <span class="check-label bdi">{{ t('price_band_' ~ key) }}</span>
+          <span class="check-bar" aria-hidden="true"><span style="width: {{ (100 * b['open'] / bmax) | round(1) }}%"></span></span>
+          <span class="check-n">{{ tf('check_open_n', n=b['open']) }}</span>
+          <span class="check-tag">{{ t('check_tag_' ~ b['status']) }}</span>
+        </div>
+        {% if b['names'] %}<p class="check-names">{{ t('check_band_names') }}
+          {% for r in b['names'] %}<bdi>{{ pick(r, 'name') }}</bdi>{{ ', ' if not loop.last }}{% endfor %}</p>{% endif %}
+        {{ suggestions(b['suggest'], t('check_suggest_band'), 'budgets') }}
+      </div>
+      {% endfor %}
+    </section>
+
+    {# ---- 02 every room ---- #}
+    <section class="check-sec" id="rooms">
+      <h2 class="rform-h"><span class="rail-n">02</span>{{ t('check_rooms_h') }}</h2>
+      <p class="hint">{{ t('check_rooms_hint') }}</p>
+      {% for key, rm in check['rooms'].items() %}
+      <div class="check-row check-{{ rm['status'] }}">
+        <div class="check-line">
+          <span class="check-label">{{ t('plan_room_' ~ key) }}</span>
+          <span class="check-n">{% if rm['total'] %}{{ tf('check_room_n', n=rm['total'], open=rm['open']) }}{% endif %}</span>
+          <span class="check-tag">{{ t('check_tag_' ~ rm['status']) }}</span>
+        </div>
+        {{ suggestions(rm['suggest'], t('check_suggest_room'), 'rooms') }}
+      </div>
+      {% endfor %}
+    </section>
+
+    {# ---- 03 every gift can be given ---- #}
+    <section class="check-sec" id="giving">
+      <h2 class="rform-h"><span class="rail-n">03</span>{{ t('check_giving_h') }}</h2>
+      {% if check['cant_give'] %}
+      <div class="check-row check-none">
+        <p class="check-warn">{{ t('check_cant_give') }}</p>
+        <ul class="check-fix">
+          {% for r in check['cant_give'] %}<li><span dir="auto">{{ pick(r, 'name') }}</span> <a href="{{ url_for('item_edit', item_id=r['id']) }}">{{ t('check_edit') }}</a></li>{% endfor %}
+        </ul>
+        <a class="link-arrow" href="{{ url_for('registry_edit') }}#rf-payment">{{ t('check_add_pay') }} <span aria-hidden="true">{{ arrow }}</span></a>
+      </div>
+      {% elif not check['no_price'] %}
+      <p class="check-ok">{{ t('check_giving_ok') }}</p>
+      {% endif %}
+      {% if check['no_price'] %}
+      <div class="check-row check-few">
+        <p class="check-warn">{{ t('check_no_price') }}</p>
+        <ul class="check-fix">
+          {% for r in check['no_price'] %}<li><span dir="auto">{{ pick(r, 'name') }}</span> <a href="{{ url_for('item_edit', item_id=r['id']) }}">{{ t('check_edit') }}</a></li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <p class="hint check-pay">{{ t('check_pay_ok') if check['pay'] else t('check_pay_missing') }}
+        {% if not check['pay'] and not check['cant_give'] %}<a href="{{ url_for('registry_edit') }}#rf-payment">{{ t('check_add_pay') }}</a>{% endif %}</p>
+    </section>
+
+    <p class="check-foot">
+      <a class="link-arrow" href="{{ url_for('items_manage') }}#add-more">{{ t('check_more') }} <span aria-hidden="true">{{ arrow }}</span></a>
+      <a class="link-arrow" href="{{ url_for('registry', slug=reg['slug'], preview=1) }}">{{ t('dash_view_public') }} <span aria-hidden="true">{{ arrow }}</span></a>
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+{% block ad %}{% endblock %}

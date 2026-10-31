@@ -116,7 +116,7 @@ def main():
 
     pages = {"dashboard": "/dashboard", "items": "/registry/items", "starter": "/registry/items/starter",
              "registry": f"/r/{slug}", "edit": "/registry/edit", "thanks": "/dashboard/thanks",
-             "keepsake": "/dashboard/keepsake"}
+             "keepsake": "/dashboard/keepsake", "check": "/registry/check"}
     for lang in ("en", "he"):
         for name, url in pages.items():
             html = c.get(f"{url}?lang={lang}").get_data(as_text=True)

@@ -90,7 +90,7 @@ CONTENT_SECURITY_POLICY = (
 NO_STORE_ENDPOINTS = {
     "dashboard", "registry_new", "registry_edit", "items_manage",
     "guest_manage", "admin_home", "admin_login", "reset_password", "forgot",
-    "dashboard_thanks", "dashboard_keepsake", "registry_people", "join_registry",
+    "dashboard_thanks", "dashboard_keepsake", "registry_people", "join_registry", "registry_check",
 }
 
 # SPEC_V3 "Privacy / SEO": private/account/admin pages are never indexed.
@@ -100,7 +100,7 @@ NOINDEX_ENDPOINTS = {
     "dashboard_claims_csv", "dashboard_thanks", "dashboard_keepsake", "registry_new", "registry_edit", "items_manage",
     "items_add", "items_starter", "item_edit", "guest_manage", "account",
     "account_export", "account_delete", "admin_home", "admin_login",
-    "reset_password", "forgot", "signup", "login", "registry_people", "join_registry",
+    "reset_password", "forgot", "signup", "login", "registry_people", "join_registry", "registry_check",
 }
 
 
@@ -2158,12 +2158,98 @@ def items_add():
             _maybe_track_first_gifts(db, reg["id"])
         elif not name:
             flash(_t("form_error", current_lang()), "err")
+    if request.args.get("back") == "check":
+        return redirect(url_for("registry_check") + "#" + (request.args.get("sec") or "budgets")[:20])
     if request.args.get("back") == "catalog":
         keep = {k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "page")
                 if request.args.get(k)}
         return redirect(url_for("catalog_page", **keep) + (f"#c-{cat_id}" if cat_id else ""))
     return redirect(url_for("items_manage", cat=request.args.get("cat", ""),
                             q=request.args.get("q", "")) + ("#add-more" if cat_id else "#mine"))
+
+
+# ---------------------------------------------------------------- list check
+CHECK_ROOMS = ("kitchen", "salon", "bedroom", "entry")   # rooms a category can put a gift in
+CHECK_FEW = 3       # fewer open gifts than this in a guest budget = "only a few left"
+CHECK_SUGGEST = 3   # catalog suggestions per gap
+
+
+def _band_of(price):
+    for key, (lo, hi) in CATALOG_PRICE_BANDS.items():
+        if price >= lo and (hi is None or price < hi):
+            return key
+    return None
+
+
+def _check_suggestions(db, have, band=None, room=None):
+    """Catalog gifts not on the list yet for one gap: starter-pack staples first, then featured."""
+    sql = "SELECT * FROM catalog_items WHERE active=1 AND price_nis > 0"
+    params = []
+    if band:
+        lo, hi = CATALOG_PRICE_BANDS[band]
+        sql += " AND price_nis >= ?" + (" AND price_nis < ?" if hi is not None else "")
+        params += [lo] + ([hi] if hi is not None else [])
+    if room:
+        cats = [c for c, r in ROOM_FOR_CATEGORY.items() if r == room]
+        sql += " AND category IN (%s)" % ",".join("?" * len(cats))
+        params += cats
+    if have:
+        sql += " AND id NOT IN (%s)" % ",".join("?" * len(have))
+        params += sorted(have)
+    sql += " ORDER BY (starter_group != '') DESC, featured DESC, sort, id LIMIT ?"
+    return db.execute(sql, params + [CHECK_SUGGEST]).fetchall()
+
+
+def list_check(db, reg):
+    """What a guest finds on the list right now, gap by gap. Counts are open gift units
+    (qty still wanted minus what's reserved, on its way or received)."""
+    items = db.execute("SELECT * FROM registry_items WHERE registry_id=? AND archived=0"
+                       " ORDER BY priority DESC, price_nis, id", (reg["id"],)).fetchall()
+    committed = {k: v["committed"] for k, v in item_claim_breakdown(reg["id"]).items()}
+    have = {r["catalog_id"] for r in items if r["catalog_id"]}
+    pay = bool(reg_pay_links(reg))
+    bands = {k: {"open": 0, "total": 0, "names": []} for k in CATALOG_PRICE_BANDS}
+    rooms = {k: {"open": 0, "total": 0} for k in CHECK_ROOMS}
+    no_price, cant_give = [], []
+    for r in items:
+        left = max(r["qty_wanted"] - committed.get(r["id"], 0), 0)
+        room = rooms[room_of(r["category"])]
+        room["total"] += r["qty_wanted"]
+        room["open"] += left
+        if not r["url"] and not pay:
+            cant_give.append(r)
+        if not r["price_nis"]:
+            no_price.append(r)
+            continue
+        b = bands[_band_of(r["price_nis"])]
+        b["total"] += r["qty_wanted"]
+        b["open"] += left
+        if left and len(b["names"]) < 3:
+            b["names"].append(r)
+    for key, b in bands.items():
+        # the top band can be empty on purpose; the three guest budgets shouldn't be
+        b["status"] = ("good" if b["open"] >= CHECK_FEW else "few" if b["open"] else
+                       "none" if key != "1500plus" else "quiet")
+        b["suggest"] = _check_suggestions(db, have, band=key) if b["status"] in ("few", "none") else []
+    for key, rm in rooms.items():
+        rm["status"] = "listed" if rm["total"] else "empty"
+        rm["suggest"] = _check_suggestions(db, have, room=key) if not rm["total"] else []
+    budget_keys = [k for k in CATALOG_PRICE_BANDS if k != "1500plus"]
+    return dict(
+        items=len(items), open=sum(b["open"] for b in bands.values()),
+        bands=bands, rooms=rooms, no_price=no_price, cant_give=cant_give, pay=pay,
+        budgets_ok=sum(1 for k in budget_keys if bands[k]["status"] == "good"), budgets_n=len(budget_keys),
+        rooms_ok=sum(1 for rm in rooms.values() if rm["status"] == "listed"), rooms_n=len(rooms),
+    )
+
+
+@app.route("/registry/check")
+@login_required
+def registry_check():
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("registry_new"))
+    return render_template("list_check.html", reg=reg, check=list_check(get_db(), reg))
 
 
 STARTER_GROUPS_ORDER = ["first_week", "kitchen", "shabbos", "bedbath", "appliances"]

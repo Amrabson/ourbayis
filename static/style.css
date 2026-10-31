@@ -2285,3 +2285,54 @@ html[dir="rtl"] .keepsake-head h1 { font-style: normal; }
 /* homepage "Room by room": keep each drawing inside its own column (the v4 catalog rule
    `.gift-card .gift-ph.ill-box { aspect-ratio: 16/9 }` otherwise widens it under the text) */
 .home .room-grid .gift-ph.ill-box { aspect-ratio: auto; height: 100%; width: 100%; }
+
+/* ---------- list check: how the list looks to guests (budgets, rooms, giveable) ---------- */
+.check-head { border-bottom: 1px solid var(--line); }
+.check-head .kicker a { color: inherit; text-decoration: none; }
+.check-score { list-style: none; display: flex; flex-wrap: wrap; gap: 14px 40px; margin: 22px 0 0; padding: 0; }
+.check-score li { display: grid; gap: 4px; }
+.check-score strong { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.2rem, 4vw, 3rem); line-height: 1; color: var(--navy); }
+.check-score small { font-size: .45em; color: var(--ink-soft); }
+.check-score span { font-size: .9rem; color: var(--ink-soft); max-width: 16ch; }
+.home .check-body { padding-block: clamp(32px, 5vw, 64px); max-width: 920px; }
+.home .check-head .sec-inner { max-width: 920px; }
+.check-sec { margin-bottom: clamp(36px, 5vw, 56px); scroll-margin-top: 90px; }
+.check-row { padding: 16px 0; border-top: 1px solid var(--line); }
+.check-sec .check-row:last-of-type { border-bottom: 1px solid var(--line); }
+.check-line { display: grid; grid-template-columns: minmax(110px, 11rem) minmax(0, 1fr) auto auto; align-items: center; gap: 10px 16px; }
+#rooms .check-line { grid-template-columns: minmax(110px, 1fr) auto auto; }
+.check-label { font-weight: 700; color: var(--navy); }
+.check-bar { height: 10px; background: var(--paper-deep); border-radius: 999px; overflow: hidden; }
+.check-bar span { display: block; height: 100%; min-width: 2px; background: var(--gold); border-radius: inherit; }
+.check-good .check-bar span { background: var(--green); }
+.check-n { color: var(--ink-soft); font-size: .92rem; white-space: nowrap; }
+.check-tag { font: 700 .72rem/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+html[dir="rtl"] .check-tag { letter-spacing: 0; font-size: .82rem; }
+.check-good .check-tag, .check-listed .check-tag { color: var(--green); }
+.check-few .check-tag { color: var(--gold); }
+.check-none .check-tag, .check-empty .check-tag { color: #a3412f; }
+.check-quiet .check-tag { color: var(--ink-soft); border-style: dashed; }
+.check-names { margin: 8px 0 0; font-size: .92rem; color: var(--ink-soft); }
+.check-suggest { margin-top: 12px; padding: 12px 14px; background: var(--paper); border: 1px dashed var(--gold-bright); }
+.check-suggest-h { margin: 0 0 8px; font-weight: 700; font-size: .9rem; color: var(--navy); }
+.check-suggest ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.check-pick { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 12px; }
+.check-pick .gift-ph { width: 54px; height: 54px; min-height: 0; aspect-ratio: 1; border-radius: 8px; }
+.check-pick .gift-ph svg { width: 70%; height: 70%; }
+.check-pick-copy { display: grid; gap: 2px; min-width: 0; }
+.check-pick-name { font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.check-pick-price { margin: 0; font-size: .9rem; }
+.check-pick form { margin: 0; }
+.check-warn { margin: 0 0 8px; font-weight: 600; color: var(--navy); }
+.check-fix { margin: 0 0 10px; padding-inline-start: 20px; }
+.check-fix li { margin: 4px 0; }
+.check-ok { margin: 0 0 10px; padding: 12px 14px; border-inline-start: 3px solid var(--green); background: var(--paper); font-weight: 600; color: var(--navy); }
+.check-pay { margin-top: 12px; }
+.check-foot { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+@media (max-width: 620px) {
+  .check-line { grid-template-columns: minmax(0, 1fr) auto; }
+  .check-line .check-bar { grid-column: 1 / -1; grid-row: 2; }
+  .check-line .check-n { grid-row: 3; }
+  #rooms .check-line { grid-template-columns: minmax(0, 1fr) auto; }
+  #rooms .check-line .check-n { grid-row: 2; }
+}

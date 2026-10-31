@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-10-31 (list check: how the list looks to guests)
+- **`/registry/check`** ("List check", linked from the dashboard and the gifts page; owner and helpers):
+  a score head (guest budgets with plenty to choose of 3, rooms with gifts of 4, gifts still open) and three
+  numbered sections, all counted in *open* gift units (qty wanted minus reserved / on its way / received):
+  1. **Every budget**: one bar per catalog price band, tagged Plenty (3+ open) / Only a few / Nothing open;
+     the top band (₪1,500+) may be empty ("None, and that's fine"). Names a few open gifts per band.
+  2. **Every room**: the rooms a category puts gifts in (kitchen, salon, bedroom, entrance), "On the list" or
+     "No gifts yet".
+  3. **Every gift can be given**: gifts with no store link while there's no payment link (with edit links and
+     "Add a payment link"), and gifts with no price (invisible to the guests' budget filter).
+  Every gap offers 3 catalog gifts not on the list yet (starter-pack staples first, then featured) with an
+  Add button: `items_add?back=check&sec=<section>` returns to the check at that section.
+- Hebrew price bands now read "₪200 עד ₪500" / "₪500 עד ₪1,500" (the en-dash ranges flipped in RTL — on the
+  catalog filter and the registry price select too).
+- `list_check(db, reg)`, `_check_suggestions()`, `CHECK_FEW` / `CHECK_SUGGEST` in app.py. 32 EN/HE strings.
+  3 tests in tests/test_list_check.py (274). tools/render_private.py renders check-en/he.
+
 ## 2026-10-30 (helpers can get the gift emails)
 - m027 `registry_members.notify` (default off). On the people page a helper turns the gift emails on or
   off for themselves (`POST /registry/people/notify`; the owner can't, and always gets them); the owner's

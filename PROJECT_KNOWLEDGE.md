@@ -270,6 +270,12 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   on every join. Gift emails (`notify_owner(..., to_helpers=True)`) also go to helpers who opted in
   (`registry_members.notify` [m27], toggled only by the helper themself).
 
+## List check (2026-10-31)
+`/registry/check` → `list_check(db, reg)`: open units per `CATALOG_PRICE_BANDS` band (status good ≥ `CHECK_FEW`,
+few, none; the 1500plus band is "quiet" when empty), per room (`CHECK_ROOMS`, via `room_of`), plus `cant_give`
+(no url and no `reg_pay_links`) and `no_price`. Suggestions: `_check_suggestions(db, have, band=|room=)`.
+Add buttons post to `items_add` with `back=check&sec=`.
+
 ## Homepage v4 (2026-10-26) — see CHANGELOG for the section list
 templates/index.html + the "Homepage v4" block at the end of style.css, all scoped to `.home` (`--ed` =
 Fraunces / Frank Ruhl Libre, loaded via `{% block head_extra %}` on the homepage only). The floor plan is

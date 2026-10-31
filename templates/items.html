@@ -8,6 +8,7 @@
 
   <div class="notice-panel starter-panel">
     <a class="btn btn-gold" href="{{ url_for('items_starter') }}"><svg class="ic"><use href="#i-star"/></svg> {{ t('starter_btn') }}</a>
+    <a class="link-arrow" href="{{ url_for('registry_check') }}">{{ t('check_kicker') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>
     <p>{{ t('starter_hint') }}</p>
   </div>
 
