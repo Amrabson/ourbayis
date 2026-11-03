@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-03 (brachos: guests leave a wish without a gift)
+- m029 `brachos` (registry_id CASCADE, guest_name, message, lang, form_key; unique per registry+form_key so a
+  double-submitted form is one bracha). At the bottom of every registry page a "Leave them a bracha — no gift
+  needed" card (name + message, honeypot, rate limit 6/10 min, 404 on drafts) posts to `POST /r/<slug>/bracha`
+  (`bracha_add`) and comes back to `?bracha=sent#bracha` with a thank-you line. The sample registry shows the
+  card with a disabled button; the couple and helpers see a note linking to their brachos instead of the form.
+- Brachos are never shown on the registry. The couple gets an email (`mail_bracha`, owner + helpers who opted
+  in to gift emails), a "Brachos" section at the bottom of `/dashboard/thanks` (two columns, Remove →
+  `bracha_delete`), an "N brachos" link in the thanks header and on the dashboard, and they print in the keepsake.
+  JSON export includes them; privacy "What we store" mentions them. Funnel counter `bracha`.
+- 21 EN/HE strings; 4 tests in tests/test_brachos.py. render_private writes registry-guest/-sent-en/he and adds
+  two brachos.
+
 ## 2026-11-03 (gifts from outside the list, on the thank-you page)
 - m028 `outside_gifts` (registry_id CASCADE, giver_name, gift, message, email, lang, thanked, created_by).
   On `/dashboard/thanks` an "Add a gift from outside the list" panel (open when there's nothing to thank

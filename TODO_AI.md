@@ -36,6 +36,7 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Co-owners — done 2026-10-30 as owner + helpers (`/registry/people`, invite links, hand-over).
   Helpers can opt in to the gift emails (2026-10-30).
 - [x] Gifts from outside the list on the thank-you page (2026-11-03), with paste-a-list.
+- [x] Brachos: guests leave a wish without a gift (2026-11-03).
 - [ ] Multiple registries per account, live inventory — deferred.
 
 ## Owner decisions from the 2026-09-17 review pass (publication blockers for the affected claims)

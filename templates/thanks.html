@@ -10,6 +10,7 @@
       <p class="page-sub">{{ t('thanks_sub') }}</p>
       <p class="thanks-meta">
         <span class="thanks-count">{{ tf('thanks_count', n=to_thank | length, m=thanked | length) }}</span>
+        {% if brachos %}<a class="link-arrow" href="#brachos">{{ tf('brachos_count', n=brachos | length) if brachos | length > 1 else t('brachos_count_one') }}</a>{% endif %}
         <a class="link-arrow" href="{{ url_for('dashboard_keepsake') }}">{{ t('thanks_keepsake_link') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>
       </p>
     </div>
@@ -148,6 +149,27 @@
       </ul>
     </section>
     {% endif %}
+
+    <section class="thanks-brachos" id="brachos">
+      <h2 class="rform-h">{{ t('brachos_h') }}</h2>
+      {% if brachos %}
+      <p class="hint">{{ t('brachos_hint') }}</p>
+      <div class="brachos-list">
+        {% for b in brachos %}
+        <figure class="bracha-note" id="bracha-{{ b['id'] }}">
+          <blockquote dir="auto">“{{ b['message'] }}”</blockquote>
+          <figcaption><span><strong><bdi>{{ b['guest_name'] }}</bdi></strong> · {{ fmt_date(b['created_at'][:10]) }}</span>
+            <form method="post" action="{{ url_for('bracha_delete', bracha_id=b['id']) }}" data-confirm="{{ t('brachos_remove_confirm') }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <button class="link-btn thanks-undo" type="submit">{{ t('outside_remove') }}</button>
+            </form></figcaption>
+        </figure>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="hint">{{ t('brachos_none') }}</p>
+      {% endif %}
+    </section>
   </div>
 </div>
 {% endblock %}

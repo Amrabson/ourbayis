@@ -32,6 +32,7 @@
         <a class="link-arrow" href="{{ url_for('registry_edit') }}">{{ t('dash_edit') }}</a>
         <a class="link-arrow" href="{{ url_for('registry', slug=reg['slug']) }}">{{ t('dash_view_public') }}</a>
         <a class="link-arrow" href="{{ url_for('dashboard_thanks') }}">{{ t('thanks_title') }}</a>
+        {% if stats['brachos'] %}<a class="link-arrow" href="{{ url_for('dashboard_thanks', _anchor='brachos') }}">{{ tf('brachos_count', n=stats['brachos']) if stats['brachos'] > 1 else t('brachos_count_one') }}</a>{% endif %}
         <a class="link-arrow" href="{{ url_for('registry_check') }}">{{ t('check_kicker') }}</a>
         <a class="link-arrow" href="{{ url_for('registry_people') }}">{{ t('people_kicker') }}</a>
         <a class="link-arrow" href="{{ url_for('dashboard_claims_csv') }}">{{ t('dash_export_csv') }}</a>

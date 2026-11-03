@@ -553,6 +553,26 @@ def _m028_outside_gifts(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_outside_gifts_reg ON outside_gifts(registry_id)")
 
 
+def _m029_brachos(db):
+    """Brachos (2026-11-03): a guest leaves the couple a wish without giving a gift. Only the couple
+    (and their helpers) read them — thank-you page, keepsake, an email; never shown on the registry.
+    `form_key` makes a double-submitted form one bracha."""
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS brachos (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          registry_id INTEGER NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
+          guest_name TEXT NOT NULL,
+          message TEXT NOT NULL,
+          lang TEXT NOT NULL DEFAULT '',
+          form_key TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+    """)
+    db.execute("CREATE INDEX IF NOT EXISTS ix_brachos_reg ON brachos(registry_id)")
+    db.execute("CREATE UNIQUE INDEX IF NOT EXISTS ux_brachos_form_key ON brachos(registry_id, form_key)"
+               " WHERE form_key IS NOT NULL")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -779,6 +799,7 @@ MIGRATIONS = [
     _m026_registry_members,
     _m027_member_notify,
     _m028_outside_gifts,
+    _m029_brachos,
 ]
 
 

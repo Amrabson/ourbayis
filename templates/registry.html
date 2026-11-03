@@ -191,6 +191,34 @@
   </div>
   <p class="hint viral-note"><a href="{{ url_for('index') }}">{{ t('reg_make_your_own') }}</a></p>
   {% endif %}
+
+  <section class="bracha" id="bracha" aria-labelledby="bracha-title">
+    <div class="bracha-card">
+      <p class="bracha-kicker">{{ t('bracha_kicker') }}</p>
+      <h2 id="bracha-title">{{ t('bracha_title') }}</h2>
+      <p class="bracha-sub">{{ tf('bracha_sub', couple=pick(reg, 'couple_names') or t('the_couple')) }}</p>
+      {% if is_sample %}
+      <span class="sample-btn-disabled sample-btn-inline" aria-disabled="true">{{ t('bracha_submit') }}</span>
+      {% elif is_owner %}
+      <p class="bracha-owner">{{ t('bracha_owner_note') }}
+        <a href="{{ url_for('dashboard_thanks', _anchor='brachos') }}">{{ t('bracha_owner_link') }}</a></p>
+      {% elif bracha_sent %}
+      <p class="bracha-done" role="status"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> {{ tf('bracha_sent', couple=pick(reg, 'couple_names') or t('the_couple')) }}</p>
+      {% else %}
+      <form method="post" action="{{ url_for('bracha_add', slug=reg['slug']) }}" class="bracha-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="form_key" value="{{ form_key }}">
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label>{{ t('bracha_msg') }} *<textarea name="message" rows="3" required maxlength="1000" dir="auto" placeholder="{{ t('bracha_msg_ph') }}"></textarea></label>
+        <div class="bracha-row">
+          <label>{{ t('bracha_name') }} *<input name="guest_name" required maxlength="120" autocomplete="name" dir="auto"></label>
+          <button class="btn btn-primary" type="submit">{{ t('bracha_submit') }}</button>
+        </div>
+        <p class="hint">{{ t('bracha_private') }}</p>
+      </form>
+      {% endif %}
+    </div>
+  </section>
 </div>
 
 {% if pay_links and not is_sample %}

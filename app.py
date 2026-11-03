@@ -1303,6 +1303,7 @@ def registry(slug):
                            total=total, done=done, bought_item=bought_item,
                            pay_links=reg_pay_links(reg), days_to_go=days_to_go,
                            is_owner=is_owner, is_preview=is_preview,
+                           bracha_sent=request.args.get("bracha") == "sent",
                            price_bands=CATALOG_PRICE_BANDS, room_fills=room_fills_for(items, claimed),
                            noindex=(reg["visibility"] != "public"))
 
@@ -1405,6 +1406,34 @@ class _Abort(Exception):
     def __init__(self, response=None):
         super().__init__()
         self.response = response
+
+
+@app.route("/r/<slug>/bracha", methods=["POST"])
+def bracha_add(slug):
+    """A guest's bracha without a gift: name + message, read only by the couple."""
+    if rate_limited("bracha", limit=6, per=600):
+        abort(429)
+    if is_spam():
+        return redirect(url_for("registry", slug=slug))
+    lang = current_lang()
+    db = get_db()
+    reg = db.execute("SELECT * FROM registries WHERE slug=?", (slug,)).fetchone()
+    if not reg or reg["visibility"] == "draft":
+        abort(404)
+    name = (request.form.get("guest_name") or "").strip()[:120]
+    message = (request.form.get("message") or "").strip()[:1000]
+    if not name or not message:
+        flash(_t("bracha_required", lang), "err")
+        return redirect(url_for("registry", slug=slug, _anchor="bracha"))
+    form_key = (request.form.get("form_key") or "").strip()[:80] or None
+    try:
+        db.execute("INSERT INTO brachos (registry_id, guest_name, message, lang, form_key) VALUES (?,?,?,?,?)",
+                   (reg["id"], name, message, lang, form_key))
+    except sqlite3.IntegrityError:  # the same form sent twice: already saved
+        return redirect(url_for("registry", slug=slug, bracha="sent", _anchor="bracha"))
+    notify_owner(db, reg, "mail_bracha", lang, to_helpers=True, name=name, message=message)
+    track("bracha", owner_uid=reg["user_id"])
+    return redirect(url_for("registry", slug=slug, bracha="sent", _anchor="bracha"))
 
 
 @app.route("/r/<slug>/cash", methods=["POST"])
@@ -1756,6 +1785,7 @@ def dashboard():
             committed.get(r["id"], 0) >= r["qty_wanted"] for r in db.execute(
                 "SELECT id, qty_wanted FROM registry_items WHERE registry_id=? AND archived=0", (reg["id"],)))
         stats = dict(items=n_items, claimed=n_claimed, cash=n_cash, all_taken=all_taken,
+                     brachos=db.execute("SELECT COUNT(*) FROM brachos WHERE registry_id=?", (reg["id"],)).fetchone()[0],
                      views=reg["views"] if "views" in reg.keys() else 0)
         totals = {}
         for gft in gifts:
@@ -2544,7 +2574,9 @@ def dashboard_thanks():
         gft["note_lang"] = gft["lang"] if gft["lang"] in ("en", "he") else ui
         gft["notes"] = {lang: _thanks_note(reg, gft, lang) for lang in ("en", "he")}
     gifts.sort(key=lambda gft: (gft["created_at"] or "", gft["anchor"]), reverse=True)
-    return render_template("thanks.html", reg=reg, outside_max=OUTSIDE_MAX,
+    brachos = db.execute("SELECT * FROM brachos WHERE registry_id=? ORDER BY created_at DESC, id DESC",
+                         (reg["id"],)).fetchall()
+    return render_template("thanks.html", reg=reg, outside_max=OUTSIDE_MAX, brachos=brachos,
                            to_thank=[g for g in gifts if not g["thanked"]],
                            thanked=[g for g in gifts if g["thanked"]])
 
@@ -2634,6 +2666,18 @@ def outside_thanked(gift_id):
     return redirect(url_for("dashboard_thanks", _anchor=f"thanks-o{gift_id}"))
 
 
+@app.route("/dashboard/brachos/<int:bracha_id>/delete", methods=["POST"])
+@login_required
+def bracha_delete(bracha_id):
+    reg = user_registry()
+    row = get_db().execute("SELECT registry_id FROM brachos WHERE id=?", (bracha_id,)).fetchone()
+    if not reg or not row or row["registry_id"] != reg["id"]:
+        abort(404)
+    get_db().execute("DELETE FROM brachos WHERE id=?", (bracha_id,))
+    flash(_t("brachos_removed", current_lang()), "ok")
+    return redirect(url_for("dashboard_thanks", _anchor="brachos"))
+
+
 @app.route("/dashboard/thanks/outside/<int:gift_id>/delete", methods=["POST"])
 @login_required
 def outside_delete(gift_id):
@@ -2656,7 +2700,8 @@ def dashboard_keepsake():
         " WHERE c.registry_id=? AND c.status IN ('reserved', 'reported', 'received') AND TRIM(c.message) != ''"
         " UNION ALL SELECT giver_name, message, 'outside', created_at, gift, NULL FROM outside_gifts"
         " WHERE registry_id=? AND TRIM(message) != ''"
-        " ORDER BY 4", (reg["id"], reg["id"])).fetchall()
+        " UNION ALL SELECT guest_name, message, 'bracha', created_at, NULL, NULL FROM brachos WHERE registry_id=?"
+        " ORDER BY 4", (reg["id"], reg["id"], reg["id"])).fetchall()
     return render_template("keepsake.html", reg=reg, notes=notes)
 
 
@@ -2942,6 +2987,9 @@ def account_export():
         data["outside_gifts"] = [
             {k: v for k, v in dict(r).items() if k not in ("id", "registry_id", "created_by")}
             for r in db.execute("SELECT * FROM outside_gifts WHERE registry_id=?", (reg["id"],))]
+        data["brachos"] = [
+            {k: r[k] for k in ("guest_name", "message", "lang", "created_at")}
+            for r in db.execute("SELECT * FROM brachos WHERE registry_id=?", (reg["id"],))]
     resp = app.response_class(json.dumps(data, indent=2, default=str), mimetype="application/json")
     resp.headers["Content-Disposition"] = "attachment; filename=ourbayis-data.json"
     resp.headers["Cache-Control"] = "no-store"

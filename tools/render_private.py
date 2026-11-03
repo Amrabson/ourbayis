@@ -123,6 +123,19 @@ def main():
     c.post("/dashboard/thanks/outside", data=dict(
         csrf_token=csrf(), lines="Rabbi and Mrs. Katz - a check\nמשפחת לוי - קערת סלט"))
 
+    # brachos left without a gift
+    for name, glang, msg in (("Mrs. Adler (3rd grade)", "en", "Watching you build a home of your own is such a nachas. Mazel tov!"),
+                             ("דודה שושי", "he", "שתזכו לבנות בית נאמן בישראל, מלא שמחה ושלום.")):
+        g = A.app.test_client()
+        html = g.get(f"/r/{slug}?lang={glang}").get_data(as_text=True)
+        g.post(f"/r/{slug}/bracha", data=dict(csrf_token=get_csrf(html), form_key=get_form_key(html),
+                                              guest_name=name, message=msg))
+    for lang in ("en", "he"):  # the guest's view of the form, and of it sent
+        g = A.app.test_client()
+        _write(out / f"registry-guest-{lang}.html", g.get(f"/r/{slug}?lang={lang}").get_data(as_text=True), args.base)
+        _write(out / f"registry-sent-{lang}.html",
+               g.get(f"/r/{slug}?lang={lang}&bracha=sent").get_data(as_text=True), args.base)
+
     pages = {"dashboard": "/dashboard", "items": "/registry/items", "starter": "/registry/items/starter",
              "registry": f"/r/{slug}", "edit": "/registry/edit", "thanks": "/dashboard/thanks",
              "keepsake": "/dashboard/keepsake", "check": "/registry/check"}

@@ -2357,3 +2357,32 @@ html[dir="rtl"] .check-tag { letter-spacing: 0; font-size: .82rem; }
 @media (max-width: 620px) { .outside-grid { grid-template-columns: minmax(0, 1fr); } }
 .thanks-remove .link-btn { padding-inline: 0; }
 .outside-form > .btn { margin-top: 8px; }
+
+/* ---------- registry page: leave a bracha (no gift needed) ---------- */
+.bracha { margin-top: clamp(48px, 7vw, 88px); scroll-margin-top: 90px; }
+.bracha-card { max-width: 680px; margin-inline: auto; text-align: center; padding: clamp(28px, 5vw, 44px) clamp(18px, 4vw, 40px);
+  background: var(--paper); border: 1px solid var(--gold-bright); box-shadow: inset 0 0 0 6px var(--paper), inset 0 0 0 7px rgba(201, 162, 74, .35); }
+.bracha-kicker { margin: 0 0 6px; font: 700 .72rem/1 var(--font-body); letter-spacing: .18em; text-transform: uppercase; color: var(--gold); }
+html[dir="rtl"] .bracha-kicker { letter-spacing: .02em; font-size: .85rem; }
+.bracha-card h2 { margin: 0 0 8px; font-family: var(--font-display); font-weight: 400; font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.05; color: var(--navy); }
+.bracha-sub { margin: 0 auto 20px; max-width: 54ch; color: var(--ink-soft); }
+.bracha-form { text-align: start; margin: 0; }
+.bracha-form textarea { font-family: var(--font-display); font-size: 1.1rem; line-height: 1.5; }
+.bracha-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 0 14px; }
+.bracha-row .btn { margin-bottom: 14px; }
+.bracha-form .hint { margin: 2px 0 0; text-align: center; }
+.bracha-done { display: inline-flex; align-items: center; gap: 10px; margin: 0; font-family: var(--font-display); font-size: 1.3rem; color: var(--navy); }
+.bracha-done .ic { color: var(--green); flex: none; }
+.bracha-owner { margin: 0; color: var(--ink-soft); }
+@media (max-width: 560px) {
+  .bracha-row { grid-template-columns: minmax(0, 1fr); }
+  .bracha-row .btn { width: 100%; }
+}
+/* thank-you page: the brachos */
+.thanks-brachos { margin-top: clamp(40px, 6vw, 64px); padding-top: 24px; border-top: 1px solid var(--navy); scroll-margin-top: 90px; }
+.brachos-list { columns: 2 300px; column-gap: 40px; margin-top: 18px; }
+.bracha-note { break-inside: avoid; margin: 0 0 24px; padding-top: 14px; border-top: 1px solid rgba(201, 162, 74, .5); }
+.bracha-note blockquote { margin: 0 0 8px; font-family: var(--font-display); font-size: 1.15rem; line-height: 1.5; color: var(--navy); }
+html[dir="rtl"] .bracha-note blockquote { font-style: normal; }
+.bracha-note figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 14px; font-size: .9rem; color: var(--ink-soft); }
+.bracha-note form { margin: 0; }

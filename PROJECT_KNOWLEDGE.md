@@ -66,7 +66,7 @@ trail (event/actor/note per status change). Also: `catalog_items`, `bundles`, `s
 (leads), `messages`, `ads`, `admins` (`session_ver` too), `password_resets`, `rate_events`,
 `mail_outbox`, `funnel_events` (no-PII daily counters), `schema_migrations`, `registry_members` /
 `registry_invites` [m26] (co-managers, see "Managing it together"), `outside_gifts` [m28] (gifts the couple
-notes from outside the list, thank-you page only).
+notes from outside the list, thank-you page only), `brachos` [m29] (guests' wishes without a gift; couple-only).
 
 ## Gift lifecycle (see SPEC_V3.md "Gift lifecycle" for the full spec)
 `claims.status`: reserved → reported → received, or → cancelled/expired. Committed quantity for
@@ -261,6 +261,8 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - Gifts from outside the list (2026-11-03): `outside_gifts` rows are folded into the same list as dicts with
   `kind="outside"`, `status="outside"`, `anchor="o<id>"` (claims: `anchor=str(id)`) and their own `toggle_url`;
   `_outside_split()` parses pasted lines. The keepsake query UNIONs their `message`. Guests never see them.
+- Brachos (2026-11-03): registry page card → `bracha_add` (honeypot + rate limit + form_key dedupe), emailed via
+  `notify_owner("mail_bracha", to_helpers=True)`, listed in the thanks page's `#brachos`, UNIONed into the keepsake.
 
 ## Managing it together (2026-10-30)
 - `registries.user_id` is still the single **owner**; `registry_members` (UNIQUE user_id: one registry per
