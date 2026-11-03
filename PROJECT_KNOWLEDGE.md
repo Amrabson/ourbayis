@@ -65,7 +65,8 @@ units, `token_hash` for the guest's recovery link, `idempotency_key` for one-cla
 trail (event/actor/note per status change). Also: `catalog_items`, `bundles`, `shana_requests`
 (leads), `messages`, `ads`, `admins` (`session_ver` too), `password_resets`, `rate_events`,
 `mail_outbox`, `funnel_events` (no-PII daily counters), `schema_migrations`, `registry_members` /
-`registry_invites` [m26] (co-managers, see "Managing it together").
+`registry_invites` [m26] (co-managers, see "Managing it together"), `outside_gifts` [m28] (gifts the couple
+notes from outside the list, thank-you page only).
 
 ## Gift lifecycle (see SPEC_V3.md "Gift lifecycle" for the full spec)
 `claims.status`: reserved → reported → received, or → cancelled/expired. Committed quantity for
@@ -257,6 +258,9 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - `/dashboard/thanks` (`dashboard_thanks`, `_thanks_note(reg, gift, lang)`) and `/dashboard/keepsake`;
   `claim_thanked` honours `back=thanks`. Notes are drafted server-side in both languages, edited and
   sent client-side only (copy / wa.me / mailto) — nothing is sent or stored by the site.
+- Gifts from outside the list (2026-11-03): `outside_gifts` rows are folded into the same list as dicts with
+  `kind="outside"`, `status="outside"`, `anchor="o<id>"` (claims: `anchor=str(id)`) and their own `toggle_url`;
+  `_outside_split()` parses pasted lines. The keepsake query UNIONs their `message`. Guests never see them.
 
 ## Managing it together (2026-10-30)
 - `registries.user_id` is still the single **owner**; `registry_members` (UNIQUE user_id: one registry per

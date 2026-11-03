@@ -532,6 +532,27 @@ def _m027_member_notify(db):
     _add_column(db, "registry_members", "notify INTEGER NOT NULL DEFAULT 0")
 
 
+def _m028_outside_gifts(db):
+    """Gifts that came outside the list (2026-11-03): envelopes at the wedding, a gift handed over at
+    the door. The couple notes them on the thank-you page so every thank-you is in one place; guests
+    never see them and nothing here touches money (`gift` is free text like "a check")."""
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS outside_gifts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          registry_id INTEGER NOT NULL REFERENCES registries(id) ON DELETE CASCADE,
+          giver_name TEXT NOT NULL,
+          gift TEXT NOT NULL DEFAULT '',
+          message TEXT NOT NULL DEFAULT '',
+          email TEXT NOT NULL DEFAULT '',
+          lang TEXT NOT NULL DEFAULT 'en',
+          thanked INTEGER NOT NULL DEFAULT 0,
+          created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        )
+    """)
+    db.execute("CREATE INDEX IF NOT EXISTS ix_outside_gifts_reg ON outside_gifts(registry_id)")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -757,6 +778,7 @@ MIGRATIONS = [
     _m025_claim_report_note,
     _m026_registry_members,
     _m027_member_notify,
+    _m028_outside_gifts,
 ]
 
 

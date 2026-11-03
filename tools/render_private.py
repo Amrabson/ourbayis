@@ -114,6 +114,15 @@ def main():
         hcsrf = s.get("_csrf")
     h.post(f"/join/{jt}", data=dict(csrf_token=hcsrf))
 
+    # gifts from outside the list: one with their card, a pasted pair
+    c.get("/dashboard/thanks")
+    c.post("/dashboard/thanks/outside", data=dict(
+        csrf_token=csrf(), giver_name="The Friedman family", gift="Shabbos candlesticks",
+        message="May your home be filled with light. Mazel tov!", lang="en"))
+    c.get("/dashboard/thanks")
+    c.post("/dashboard/thanks/outside", data=dict(
+        csrf_token=csrf(), lines="Rabbi and Mrs. Katz - a check\nמשפחת לוי - קערת סלט"))
+
     pages = {"dashboard": "/dashboard", "items": "/registry/items", "starter": "/registry/items/starter",
              "registry": f"/r/{slug}", "edit": "/registry/edit", "thanks": "/dashboard/thanks",
              "keepsake": "/dashboard/keepsake", "check": "/registry/check"}

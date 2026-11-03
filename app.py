@@ -2490,6 +2490,11 @@ def claim_thanked(claim_id):
     return redirect(url_for("dashboard", _anchor=f"claim-{claim_id}"))
 
 
+# words that stay capitalised mid-sentence in an English note
+_KEEP_CAPS = ("Shabbos", "Kiddush", "Havdalah", "Pesach", "Chanukah", "Sukkos", "Shavuos", "Yom Tov", "Seder",
+              "Netilas", "Challah")
+
+
 def _thanks_note(reg, gift, lang):
     """A thank-you note already started for one gift, in `lang`: {subject, body}. The couple edits
     it and sends it themselves (copy / WhatsApp / their own mail app) — the site never sends it."""
@@ -2498,37 +2503,144 @@ def _thanks_note(reg, gift, lang):
         item = _t("dash_thank_item_cash", lang)
     elif lang == "he":
         item = name
-    else:  # "Thank you so much for the electric kettle" (keep "KitchenAid" / "LED" as written)
-        item = "the " + (name[:1].lower() + name[1:] if name[1:2].islower() else name)
+    elif gift["kind"] == "outside" and re.match(r"(a|an|the|your|our|some)\s", name, re.I):
+        item = name[:1].lower() + name[1:]
+    else:  # "Thank you so much for the electric kettle" (keep "KitchenAid" / "LED" / "Shabbos" as written)
+        keep = name[1:2].isupper() or name.startswith(_KEEP_CAPS)
+        item = "the " + (name if keep else name[:1].lower() + name[1:])
+    who = gift["guest_name"] or ""
+    if lang == "en" and who[:4].lower() == "the " and len(who) > 4:
+        who = who[4:]  # "Dear Friedman family", not "Dear The Friedman family"
     return dict(subject=tf("dash_thank_mail_subj", lang, item=item),
-                body=tf("dash_thank_mail_body", lang, name=gift["guest_name"], item=item,
+                body=tf("dash_thank_mail_body", lang, name=who, item=item,
                         couple=pick(reg, "couple_names", lang) or ""))
 
 
 @app.route("/dashboard/thanks")
 @login_required
 def dashboard_thanks():
-    """Thank-you studio: everyone who reported or delivered a gift, with their message and a note
-    already started in the language they used on the site."""
+    """Thank-you studio: everyone who reported or delivered a gift — and the gifts the couple noted
+    from outside the list — with their message and a note already started in their language."""
     reg = user_registry()
     if not reg:
         return redirect(url_for("dashboard"))
     ui = current_lang()
+    db = get_db()
     gifts = []
-    for row in get_db().execute(
+    for row in db.execute(
             "SELECT c.*, ri.name AS item_name, ri.name_he AS item_name_he FROM claims c"
             " LEFT JOIN registry_items ri ON ri.id = c.item_id"
-            " WHERE c.registry_id=? AND c.status IN ('reported', 'received')"
-            " ORDER BY c.created_at DESC", (reg["id"],)):
-        gft = dict(row)
-        gft["note_lang"] = gft["lang"] if gft["lang"] in ("en", "he") else ui
-        gft["notes"] = {lang: _thanks_note(reg, gft, lang) for lang in ("en", "he")}
+            " WHERE c.registry_id=? AND c.status IN ('reported', 'received')", (reg["id"],)):
+        gft = dict(row, anchor=str(row["id"]), toggle_url=url_for("claim_thanked", claim_id=row["id"]))
         gft["amount_label"] = (ob_money.fmt_minor(gft["amount_minor"], gft["currency"] or "ILS", ui)
                                if gft["amount_minor"] is not None and gft["kind"] == "cash" else "")
         gifts.append(gft)
-    return render_template("thanks.html", reg=reg,
+    for row in db.execute("SELECT * FROM outside_gifts WHERE registry_id=?", (reg["id"],)):
+        gifts.append(dict(row, kind="outside", status="outside", guest_name=row["giver_name"],
+                          guest_email=row["email"], item_name=row["gift"], item_name_he=None, report_note="",
+                          qty=1, amount_label="", anchor=f"o{row['id']}",
+                          toggle_url=url_for("outside_thanked", gift_id=row["id"])))
+    for gft in gifts:
+        gft["note_lang"] = gft["lang"] if gft["lang"] in ("en", "he") else ui
+        gft["notes"] = {lang: _thanks_note(reg, gft, lang) for lang in ("en", "he")}
+    gifts.sort(key=lambda gft: (gft["created_at"] or "", gft["anchor"]), reverse=True)
+    return render_template("thanks.html", reg=reg, outside_max=OUTSIDE_MAX,
                            to_thank=[g for g in gifts if not g["thanked"]],
                            thanked=[g for g in gifts if g["thanked"]])
+
+
+# gifts from outside the list: noted by the couple, seen only on their thank-you page and keepsake
+OUTSIDE_MAX = 600         # per registry: a big wedding's envelopes, with room to spare
+OUTSIDE_PASTE_MAX = 200   # lines per paste
+_HEBREW = re.compile("[א-ת]")
+_OUTSIDE_SEPS = ("\t", " — ", " – ", " - ", ",", "،")
+
+
+def _outside_split(line):
+    """'Cohen family - salad bowl' -> ('Cohen family', 'salad bowl'); a bare name -> (name, '')."""
+    for sep in _OUTSIDE_SEPS:
+        if sep in line:
+            name, gift = line.split(sep, 1)
+            return name.strip(), gift.strip()
+    return line.strip(), ""
+
+
+def _owned_outside(gift_id):
+    reg = user_registry()
+    row = get_db().execute("SELECT * FROM outside_gifts WHERE id=?", (gift_id,)).fetchone()
+    if not reg or not row or row["registry_id"] != reg["id"]:
+        abort(404)
+    return row
+
+
+@app.route("/dashboard/thanks/outside", methods=["POST"])
+@login_required
+def outside_add():
+    """One gift from the form, or a pasted list (one 'name - gift' per line)."""
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("dashboard"))
+    ui = current_lang()
+    if rate_limited("outside_add", limit=60, per=600):
+        abort(429)
+    db = get_db()
+    room = OUTSIDE_MAX - db.execute("SELECT COUNT(*) FROM outside_gifts WHERE registry_id=?",
+                                    (reg["id"],)).fetchone()[0]
+    f = request.form
+    if "lines" in f:
+        rows = [_outside_split(ln) for ln in f.get("lines", "").splitlines() if ln.strip()]
+        rows = [(n[:80], gft[:120]) for n, gft in rows if n]
+        if not rows:
+            flash(_t("outside_err_paste", ui), "err")
+            return redirect(url_for("dashboard_thanks", _anchor="outside-add"))
+        cut = len(rows) > min(OUTSIDE_PASTE_MAX, room)
+        rows = rows[:max(0, min(OUTSIDE_PASTE_MAX, room))]
+        if not rows:
+            flash(tf("outside_err_full", ui, n=OUTSIDE_MAX), "err")
+            return redirect(url_for("dashboard_thanks"))
+        with ob_db.write_txn(db):
+            for n, gft in rows:  # a line written in Hebrew starts its note in Hebrew, and vice versa
+                note_lang = "he" if _HEBREW.search(n + gft) else "en" if re.search(r"[A-Za-z]", n + gft) else ui
+                db.execute("INSERT INTO outside_gifts (registry_id, giver_name, gift, lang, created_by)"
+                           " VALUES (?,?,?,?,?)", (reg["id"], n, gft, note_lang, session["uid"]))
+        flash(tf("outside_added_n", ui, n=len(rows)) + (" " + tf("outside_paste_cut", ui, n=len(rows)) if cut else ""),
+              "ok")
+        return redirect(url_for("dashboard_thanks"))
+    name = (f.get("giver_name") or "").strip()[:80]
+    email = (f.get("email") or "").strip()
+    lang = f.get("lang") if f.get("lang") in ("en", "he") else ui
+    if not name:
+        flash(_t("outside_err_name", ui), "err")
+        return redirect(url_for("dashboard_thanks", _anchor="outside-add"))
+    if email and not ob_security.valid_email(email):
+        flash(_t("outside_err_email", ui), "err")
+        return redirect(url_for("dashboard_thanks", _anchor="outside-add"))
+    if room <= 0:
+        flash(tf("outside_err_full", ui, n=OUTSIDE_MAX), "err")
+        return redirect(url_for("dashboard_thanks"))
+    cur = db.execute(
+        "INSERT INTO outside_gifts (registry_id, giver_name, gift, message, email, lang, created_by)"
+        " VALUES (?,?,?,?,?,?,?)", (reg["id"], name, (f.get("gift") or "").strip()[:120],
+                                    (f.get("message") or "").strip()[:1000], email, lang, session["uid"]))
+    flash(tf("outside_added", ui, name=name), "ok")
+    return redirect(url_for("dashboard_thanks", _anchor=f"thanks-o{cur.lastrowid}"))
+
+
+@app.route("/dashboard/thanks/outside/<int:gift_id>/thanked", methods=["POST"])
+@login_required
+def outside_thanked(gift_id):
+    row = _owned_outside(gift_id)
+    get_db().execute("UPDATE outside_gifts SET thanked=? WHERE id=?", (0 if row["thanked"] else 1, gift_id))
+    return redirect(url_for("dashboard_thanks", _anchor=f"thanks-o{gift_id}"))
+
+
+@app.route("/dashboard/thanks/outside/<int:gift_id>/delete", methods=["POST"])
+@login_required
+def outside_delete(gift_id):
+    _owned_outside(gift_id)
+    get_db().execute("DELETE FROM outside_gifts WHERE id=?", (gift_id,))
+    flash(_t("outside_removed", current_lang()), "ok")
+    return redirect(url_for("dashboard_thanks"))
 
 
 @app.route("/dashboard/keepsake")
@@ -2542,7 +2654,9 @@ def dashboard_keepsake():
         "SELECT c.guest_name, c.message, c.kind, c.created_at, ri.name AS item_name, ri.name_he AS item_name_he"
         " FROM claims c LEFT JOIN registry_items ri ON ri.id = c.item_id"
         " WHERE c.registry_id=? AND c.status IN ('reserved', 'reported', 'received') AND TRIM(c.message) != ''"
-        " ORDER BY c.created_at", (reg["id"],)).fetchall()
+        " UNION ALL SELECT giver_name, message, 'outside', created_at, gift, NULL FROM outside_gifts"
+        " WHERE registry_id=? AND TRIM(message) != ''"
+        " ORDER BY 4", (reg["id"], reg["id"])).fetchall()
     return render_template("keepsake.html", reg=reg, notes=notes)
 
 
@@ -2825,6 +2939,9 @@ def account_export():
         data["claims"] = [
             {k: v for k, v in dict(r).items() if k not in ("token_hash",)}
             for r in db.execute("SELECT * FROM claims WHERE registry_id=?", (reg["id"],))]
+        data["outside_gifts"] = [
+            {k: v for k, v in dict(r).items() if k not in ("id", "registry_id", "created_by")}
+            for r in db.execute("SELECT * FROM outside_gifts WHERE registry_id=?", (reg["id"],))]
     resp = app.response_class(json.dumps(data, indent=2, default=str), mimetype="application/json")
     resp.headers["Content-Disposition"] = "attachment; filename=ourbayis-data.json"
     resp.headers["Cache-Control"] = "no-store"

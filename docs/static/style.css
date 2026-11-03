@@ -2337,4 +2337,25 @@ html[dir="rtl"] .check-tag { letter-spacing: 0; font-size: .82rem; }
   #rooms .check-line .check-n { grid-row: 2; }
 }
 
+/* ---------- thank-you page: gifts from outside the list ---------- */
+.outside-add.sheet { --pad: clamp(16px, 3vw, 24px); margin-bottom: clamp(32px, 5vw, 48px); }
+.outside-add > summary { cursor: pointer; font-weight: 700; color: var(--navy); list-style: none; display: flex; align-items: center; gap: 10px; min-height: 32px; }
+.outside-add > summary::-webkit-details-marker { display: none; }
+.outside-plus { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--gold-bright); color: var(--gold); font-size: 1.2rem; line-height: 1; transition: transform .2s; }
+.outside-add[open] > summary .outside-plus { transform: rotate(45deg); }
+.outside-add > .hint { margin: 10px 0 16px; }
+.outside-form { margin: 0; }
+.outside-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; }
+.outside-grid .outside-wide { grid-column: 1 / -1; }
+.outside-grid .hint { margin: 4px 0 0; }
+.outside-paste { margin-top: 18px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.outside-paste > summary { cursor: pointer; font-weight: 600; color: var(--navy); }
+.outside-paste form { margin: 12px 0 0; }
+.outside-paste textarea { margin-bottom: 12px; line-height: 1.6; }
+.stamp-outside { color: var(--ink-soft); border-style: dashed; }
+.thanks-remove { margin: 14px 0 0; }
+@media (max-width: 620px) { .outside-grid { grid-template-columns: minmax(0, 1fr); } }
+.thanks-remove .link-btn { padding-inline: 0; }
+.outside-form > .btn { margin-top: 8px; }
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}

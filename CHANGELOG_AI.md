@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-03 (gifts from outside the list, on the thank-you page)
+- m028 `outside_gifts` (registry_id CASCADE, giver_name, gift, message, email, lang, thanked, created_by).
+  On `/dashboard/thanks` an "Add a gift from outside the list" panel (open when there's nothing to thank
+  yet) notes envelopes at the wedding / gifts handed over: from, what they gave, what their card said,
+  their email, the note's language. "Or paste a whole list": one per line, `name - gift` / `name, gift`
+  (tab, em/en dash, spaced hyphen, comma) or just a name; up to 200 lines per paste, 600 per registry; a
+  line in Hebrew starts its note in Hebrew. Guests never see them; nothing touches money ("a check" is text).
+- They join the thank-you list with a dashed "Outside the list" stamp, a note started in both languages,
+  Mark thanked / Undo and Remove (`outside_add` / `outside_thanked` / `outside_delete`, owner + helpers,
+  404 for anyone else's). Their card's words join the keepsake; the JSON export includes them.
+- Notes: a free-text gift keeps its own article ("for a salad bowl"); "Shabbos", "Kiddush", ... stay
+  capitalised (`_KEEP_CAPS`); English salutations drop a leading "The" ("Dear Friedman family").
+- Privacy "What we store" mentions gifts the couple notes themselves. 29 EN/HE strings; 4 tests in
+  tests/test_outside_gifts.py. tools/render_private.py adds three outside gifts to the thanks render.
+
 ## 2026-10-31 (list check: how the list looks to guests)
 - **`/registry/check`** ("List check", linked from the dashboard and the gifts page; owner and helpers):
   a score head (guest budgets with plenty to choose of 3, rooms with gifts of 4, gifts still open) and three

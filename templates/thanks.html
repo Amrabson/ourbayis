@@ -16,6 +16,47 @@
   </section>
 
   <div class="sec-inner thanks-body">
+    {% set n_outside = (to_thank + thanked) | selectattr('kind', 'equalto', 'outside') | list | length %}
+    <details class="outside-add sheet" id="outside-add"{% if not to_thank and not thanked %} open{% endif %}>
+      <summary><span class="outside-plus" aria-hidden="true">+</span> {{ t('outside_add_sum') }}</summary>
+      <p class="hint">{{ t('outside_add_hint') }}</p>
+      {% if n_outside < outside_max %}
+      <form method="post" action="{{ url_for('outside_add') }}" class="outside-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="outside-grid">
+          <div class="field"><label for="og-name">{{ t('outside_name') }}</label>
+            <input id="og-name" name="giver_name" maxlength="80" required dir="auto" placeholder="{{ t('outside_name_ph') }}"></div>
+          <div class="field"><label for="og-gift">{{ t('outside_gift') }}</label>
+            <input id="og-gift" name="gift" maxlength="120" dir="auto" placeholder="{{ t('outside_gift_ph') }}"></div>
+          <div class="field outside-wide"><label for="og-msg">{{ t('outside_message') }}</label>
+            <textarea id="og-msg" name="message" rows="2" maxlength="1000" dir="auto"></textarea>
+            <p class="hint">{{ t('outside_message_hint') }}</p></div>
+          <div class="field"><label for="og-email">{{ t('outside_email') }}</label>
+            <input id="og-email" name="email" type="email" maxlength="200" dir="ltr" autocomplete="off"></div>
+          <div class="field"><label for="og-lang">{{ t('outside_lang') }}</label>
+            <select id="og-lang" name="lang">
+              <option value="en"{% if lang == 'en' %} selected{% endif %}>English</option>
+              <option value="he"{% if lang == 'he' %} selected{% endif %}>עברית</option>
+            </select></div>
+        </div>
+        <button class="btn btn-gold btn-sm" type="submit">{{ t('outside_add_btn') }}</button>
+      </form>
+      <details class="outside-paste">
+        <summary>{{ t('outside_paste_sum') }}</summary>
+        <form method="post" action="{{ url_for('outside_add') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label for="og-lines">{{ t('outside_paste_label') }}</label>
+          <p class="hint" id="og-lines-hint">{{ t('outside_paste_hint') }}</p>
+          <textarea id="og-lines" name="lines" rows="6" dir="auto" aria-describedby="og-lines-hint"
+                    placeholder="{{ t('outside_paste_example') }}"></textarea>
+          <button class="btn btn-ghost btn-sm" type="submit">{{ t('outside_paste_btn') }}</button>
+        </form>
+      </details>
+      {% else %}
+      <p class="hint">{{ tf('outside_err_full', n=outside_max) }}</p>
+      {% endif %}
+    </details>
+
     {% if not to_thank and not thanked %}
       <p class="empty-note">{{ t('thanks_none') }}</p>
     {% elif not to_thank %}
@@ -24,18 +65,23 @@
 
     {% for g in to_thank %}
     {% set nl = g['note_lang'] %}
-    <article class="thanks-card" id="thanks-{{ g['id'] }}">
+    <article class="thanks-card" id="thanks-{{ g['anchor'] }}">
       <div class="thanks-from">
         <p class="lot-no">{{ fmt_date(g['created_at'][:10]) }}</p>
         <h2 class="thanks-name"><bdi>{{ g['guest_name'] }}</bdi></h2>
         <p class="thanks-gift">
-          {% if g['kind'] == 'cash' %}{{ t('gift_cash') }}{% if g['amount_label'] %} · <bdi>{{ g['amount_label'] }}</bdi>{% endif %}
+          {% if g['kind'] == 'outside' %}<bdi>{{ g['item_name'] or t('outside_gift_some') }}</bdi>
+          {% elif g['kind'] == 'cash' %}{{ t('gift_cash') }}{% if g['amount_label'] %} · <bdi>{{ g['amount_label'] }}</bdi>{% endif %}
           {% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% if g['qty'] and g['qty'] > 1 %} × {{ g['qty'] }}{% endif %}{% endif %}
         </p>
+        {% if g['kind'] == 'outside' %}
+        <span class="stamp stamp-inline stamp-outside">{{ t('outside_stamp') }}</span>
+        {% else %}
         <span class="stamp stamp-inline stamp-{{ g['status'] }}">{{ t('status_' ~ g['status'] ~ '_short') }}</span>
+        {% endif %}
         {% if g['message'] %}
         <figure class="thanks-quote">
-          <figcaption>{{ t('thanks_their_words') }}</figcaption>
+          <figcaption>{{ t('outside_their_card') if g['kind'] == 'outside' else t('thanks_their_words') }}</figcaption>
           <blockquote dir="auto">“{{ g['message'] }}”</blockquote>
         </figure>
         {% endif %}
@@ -45,19 +91,25 @@
           <blockquote dir="auto">{{ g['report_note'] }}</blockquote>
         </figure>
         {% endif %}
+        {% if g['kind'] == 'outside' %}
+        <form method="post" action="{{ url_for('outside_delete', gift_id=g['id']) }}" class="thanks-remove" data-confirm="{{ t('outside_remove_confirm') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <button class="link-btn thanks-undo" type="submit">{{ t('outside_remove') }}</button>
+        </form>
+        {% endif %}
       </div>
 
       <div class="thanks-note sheet" data-thanks
            data-email="{{ g['guest_email'] or '' }}"
            data-subject-en="{{ g['notes']['en']['subject'] }}" data-subject-he="{{ g['notes']['he']['subject'] }}">
         <div class="thanks-note-head">
-          <label for="note-{{ g['id'] }}">{{ tf('thanks_note_label', name=g['guest_name']) }}</label>
+          <label for="note-{{ g['anchor'] }}">{{ tf('thanks_note_label', name=g['guest_name']) }}</label>
           <div class="thanks-lang" role="group" aria-label="{{ t('thanks_lang_label') }}">
             <button type="button" data-note-lang="en" aria-pressed="{{ 'true' if nl == 'en' else 'false' }}" lang="en">English</button>
             <button type="button" data-note-lang="he" aria-pressed="{{ 'true' if nl == 'he' else 'false' }}" lang="he">עברית</button>
           </div>
         </div>
-        <textarea id="note-{{ g['id'] }}" rows="8" dir="{{ 'rtl' if nl == 'he' else 'ltr' }}" lang="{{ nl }}"
+        <textarea id="note-{{ g['anchor'] }}" rows="8" dir="{{ 'rtl' if nl == 'he' else 'ltr' }}" lang="{{ nl }}"
                   data-note-en="{{ g['notes']['en']['body'] }}" data-note-he="{{ g['notes']['he']['body'] }}">{{ g['notes'][nl]['body'] }}</textarea>
         <div class="thanks-actions">
           <button type="button" class="btn btn-ghost btn-sm" data-copy="{{ g['notes'][nl]['body'] }}" data-copied-label="{{ t('copied') }}" data-note-copy>{{ t('thanks_copy') }}</button>
@@ -67,7 +119,7 @@
           <a class="btn btn-ghost btn-sm" data-note-mail
              href="mailto:{{ g['guest_email'] }}?subject={{ g['notes'][nl]['subject'] | urlencode }}&amp;body={{ g['notes'][nl]['body'] | urlencode }}">{{ t('thanks_email') }}</a>
           {% endif %}
-          <form method="post" action="{{ url_for('claim_thanked', claim_id=g['id']) }}" class="thanks-mark">
+          <form method="post" action="{{ g['toggle_url'] }}" class="thanks-mark">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="back" value="thanks">
             <button class="btn btn-gold btn-sm" type="submit"><svg class="ic ic-sm"><use href="#i-check"/></svg> {{ t('dash_mark_thanked') }}</button>
@@ -83,10 +135,10 @@
       <h2 class="rform-h">{{ t('thanks_done_h') }}</h2>
       <ul class="thanks-done-list">
         {% for g in thanked %}
-        <li id="thanks-{{ g['id'] }}">
+        <li id="thanks-{{ g['anchor'] }}">
           <span><svg class="ic ic-sm" aria-hidden="true"><use href="#i-check"/></svg> <strong><bdi>{{ g['guest_name'] }}</bdi></strong>
-            — {% if g['kind'] == 'cash' %}{{ t('gift_cash') }}{% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% endif %}</span>
-          <form method="post" action="{{ url_for('claim_thanked', claim_id=g['id']) }}">
+            — {% if g['kind'] == 'outside' %}<bdi>{{ g['item_name'] or t('outside_gift_some') }}</bdi>{% elif g['kind'] == 'cash' %}{{ t('gift_cash') }}{% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% endif %}</span>
+          <form method="post" action="{{ g['toggle_url'] }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="back" value="thanks">
             <button class="link-btn thanks-undo" type="submit">{{ t('thanks_undo') }}</button>
