@@ -261,6 +261,9 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - Gifts from outside the list (2026-11-03): `outside_gifts` rows are folded into the same list as dicts with
   `kind="outside"`, `status="outside"`, `anchor="o<id>"` (claims: `anchor=str(id)`) and their own `toggle_url`;
   `_outside_split()` parses pasted lines. The keepsake query UNIONs their `message`. Guests never see them.
+- Weekly summary (2026-11-03): `send_digests()` / `digest_mail()` / `digest_lines()` in app.py, run by
+  `manage.py weekly-summary` inside `test_request_context(base_url=OB_BASE_URL)`. `users.digest` [m30] opt-out
+  (account page or signed `/digest/off/<token>`), `users.digest_at` throttles and starts the next "new".
 - Brachos (2026-11-03): registry page card → `bracha_add` (honeypot + rate limit + form_key dedupe), emailed via
   `notify_owner("mail_bracha", to_helpers=True)`, listed in the thanks page's `#brachos`, UNIONed into the keepsake.
 

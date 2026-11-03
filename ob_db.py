@@ -573,6 +573,13 @@ def _m029_brachos(db):
                " WHERE form_key IS NOT NULL")
 
 
+def _m030_weekly_summary(db):
+    """The weekly summary email (2026-11-03): on by default, off from the account page or the email's
+    own link. `digest_at` is when the last one was queued (also the start of the next one's "new")."""
+    _add_column(db, "users", "digest INTEGER NOT NULL DEFAULT 1")
+    _add_column(db, "users", "digest_at TEXT")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -800,6 +807,7 @@ MIGRATIONS = [
     _m027_member_notify,
     _m028_outside_gifts,
     _m029_brachos,
+    _m030_weekly_summary,
 ]
 
 

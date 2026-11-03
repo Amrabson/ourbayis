@@ -16,6 +16,25 @@
         <a class="btn btn-ghost" href="{{ url_for('account_export') }}">{{ t('account_export_btn') }}</a>
       </section>
 
+      <section class="account-row" id="weekly-summary">
+        <div>
+          <h2>{{ t('digest_title') }}</h2>
+          <p class="hint">{{ t('digest_hint') }}{% if reg and not is_reg_owner(reg) %} {{ t('digest_hint_helper') }}{% endif %}</p>
+        </div>
+        <form method="post" action="{{ url_for('account_digest') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          {% if me['digest'] %}
+          <input type="hidden" name="digest" value="0">
+          <p class="account-state"><svg class="ic ic-sm" aria-hidden="true"><use href="#i-check"/></svg> {{ t('digest_is_on') }}</p>
+          <button type="submit" class="btn btn-ghost btn-sm">{{ t('digest_turn_off') }}</button>
+          {% else %}
+          <input type="hidden" name="digest" value="1">
+          <p class="account-state account-state-off">{{ t('digest_is_off') }}</p>
+          <button type="submit" class="btn btn-ghost btn-sm">{{ t('digest_turn_on') }}</button>
+          {% endif %}
+        </form>
+      </section>
+
       <section class="account-row account-danger">
         <div>
           <h2>{{ t('account_delete_title') }}</h2>

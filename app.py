@@ -26,6 +26,7 @@ from flask import (Flask, abort, flash, g, redirect, render_template,
                    request, session, url_for)
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
+from itsdangerous import BadSignature, URLSafeSerializer
 
 import guides as ob_guides
 import i18n as i18n_mod
@@ -90,7 +91,7 @@ CONTENT_SECURITY_POLICY = (
 NO_STORE_ENDPOINTS = {
     "dashboard", "registry_new", "registry_edit", "items_manage",
     "guest_manage", "admin_home", "admin_login", "reset_password", "forgot",
-    "dashboard_thanks", "dashboard_keepsake", "registry_people", "join_registry", "registry_check",
+    "dashboard_thanks", "dashboard_keepsake", "registry_people", "join_registry", "registry_check", "digest_off",
 }
 
 # SPEC_V3 "Privacy / SEO": private/account/admin pages are never indexed.
@@ -100,7 +101,7 @@ NOINDEX_ENDPOINTS = {
     "dashboard_claims_csv", "dashboard_thanks", "dashboard_keepsake", "registry_new", "registry_edit", "items_manage",
     "items_add", "items_starter", "item_edit", "guest_manage", "account",
     "account_export", "account_delete", "admin_home", "admin_login",
-    "reset_password", "forgot", "signup", "login", "registry_people", "join_registry", "registry_check",
+    "reset_password", "forgot", "signup", "login", "registry_people", "join_registry", "registry_check", "digest_off",
 }
 
 
@@ -2959,7 +2960,120 @@ def dashboard_claims_csv():
 def account():
     reg = user_registry()
     owner, helpers = _people(reg) if reg else (None, [])
-    return render_template("account.html", reg=reg, reg_owner=owner, helpers=helpers)
+    return render_template("account.html", reg=reg, reg_owner=owner, helpers=helpers, me=current_user())
+
+
+# ---------------------------------------------------------------- the weekly summary
+DIGEST_EVERY = timedelta(days=7) - timedelta(hours=12)  # a daily job lands on the same weekday
+DIGEST_SOON_DAYS = 60   # list gaps are worth an email of their own only this close to the event
+
+
+def _digest_signer():
+    return URLSafeSerializer(app.secret_key, salt="digest-off")
+
+
+def digest_lines(db, reg, lang, since):
+    """The weekly summary's bullet lines for one registry, in `lang` — [] when there's nothing to say.
+    New gifts and brachos since `since`; gifts to confirm and to thank; and, close to the event, guest
+    budgets with nothing left to choose (from the list check)."""
+    rid = reg["id"]
+    one = lambda sql: db.execute(sql, (rid,)).fetchone()[0]  # noqa: E731
+    new_gifts = db.execute("SELECT COUNT(*) FROM claims WHERE registry_id=? AND created_at > ?"
+                           " AND status IN ('reserved', 'reported', 'received')", (rid, since)).fetchone()[0]
+    new_brachos = db.execute("SELECT COUNT(*) FROM brachos WHERE registry_id=? AND created_at > ?",
+                             (rid, since)).fetchone()[0]
+    confirm = one("SELECT COUNT(*) FROM claims WHERE registry_id=? AND status='reported'")
+    thank = (one("SELECT COUNT(*) FROM claims WHERE registry_id=? AND status IN ('reported', 'received')"
+                 " AND thanked=0") + one("SELECT COUNT(*) FROM outside_gifts WHERE registry_id=? AND thanked=0"))
+    lines = []
+    for key, n in (("digest_new_gifts", new_gifts), ("digest_brachos", new_brachos),
+                   ("digest_confirm", confirm), ("digest_thank", thank)):
+        if n:
+            lines.append(_t(key + "_one", lang) if n == 1 else tf(key, lang, n=n))
+    try:
+        days = (date.fromisoformat(reg["event_date"]) - date.today()).days
+    except (TypeError, ValueError):
+        days = None
+    if days is not None and 0 < days <= DIGEST_SOON_DAYS:
+        check = list_check(db, reg)
+        empty = [_t("price_band_" + k, lang) for k, b in check["bands"].items() if b["status"] == "none"]
+        if check["items"] and empty:
+            bands = empty[0] if len(empty) == 1 else ", ".join(empty[:-1]) + _t("digest_or", lang) + empty[-1]
+            lines.append(tf("digest_gap", lang, bands=bands,
+                            link=ext_url("registry_check") + ("?lang=he" if lang == "he" else "")))
+    if not lines:
+        return [], days
+    return lines, days
+
+
+def digest_mail(db, user, reg, now):
+    """(subject, body) of one person's weekly summary, or None when there's nothing to say."""
+    lang = user["lang"] if user["lang"] in ("en", "he") else "en"
+    week_ago = (now - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+    since = max(user["digest_at"] or week_ago, week_ago)
+    lines, days = digest_lines(db, reg, lang, since)
+    if not lines:
+        return None
+    title = reg["title_he"] if lang == "he" and reg["title_he"] else reg["title"]
+    q = "?lang=he" if lang == "he" else ""
+    head = _t("digest_intro", lang)
+    if days is not None and 0 < days <= DIGEST_SOON_DAYS:
+        head += " " + (_t("digest_days_one", lang) if days == 1 else tf("digest_days", lang, n=days))
+    body = "\n".join([head, ""] + ["• " + ln for ln in lines] + [
+        "", tf("digest_links", lang, dashboard=ext_url("dashboard") + q, thanks=ext_url("dashboard_thanks") + q),
+        "", tf("digest_off", lang, link=ext_url("digest_off", token=_digest_signer().dumps(user["id"])) + q)])
+    return tf("digest_subj", lang, title=title), body
+
+
+def send_digests(db, now=None):
+    """Queue the weekly summary for everyone who is due one and has something to read: each owner, and
+    each helper who turned on the gift emails, unless they turned the summary off. Returns the count."""
+    now = now or datetime.now(timezone.utc).replace(tzinfo=None)
+    due = (now - DIGEST_EVERY).strftime("%Y-%m-%d %H:%M:%S")
+    people = db.execute(
+        "SELECT u.*, r.id AS reg_id FROM users u JOIN registries r ON r.user_id = u.id"
+        " WHERE u.digest=1 AND (u.digest_at IS NULL OR u.digest_at <= ?)"
+        " UNION ALL SELECT u.*, m.registry_id FROM users u JOIN registry_members m ON m.user_id = u.id"
+        " WHERE m.notify=1 AND u.digest=1 AND (u.digest_at IS NULL OR u.digest_at <= ?)",
+        (due, due)).fetchall()
+    sent = 0
+    for person in people:
+        reg = db.execute("SELECT * FROM registries WHERE id=?", (person["reg_id"],)).fetchone()
+        mail = digest_mail(db, person, reg, now) if reg and person["email"] else None
+        if not mail:
+            continue
+        with ob_db.write_txn(db):  # mark first, then queue: a crash loses one summary, never repeats it
+            db.execute("UPDATE users SET digest_at=? WHERE id=?", (now.strftime("%Y-%m-%d %H:%M:%S"), person["id"]))
+            ob_mail.enqueue(db, person["email"], *mail)
+        sent += 1
+    return sent
+
+
+@app.route("/account/digest", methods=["POST"])
+@login_required
+def account_digest():
+    on = request.form.get("digest") == "1"
+    get_db().execute("UPDATE users SET digest=? WHERE id=?", (1 if on else 0, session["uid"]))
+    flash(_t("digest_saved_on" if on else "digest_saved_off", current_lang()), "ok")
+    return redirect(url_for("account", _anchor="weekly-summary"))
+
+
+@app.route("/digest/off/<token>", methods=["GET", "POST"])
+def digest_off(token):
+    """The email's own link: a page with one button (mail scanners open links; only a POST changes
+    anything), no login needed — the signed token names the account."""
+    try:
+        uid = int(_digest_signer().loads(token))
+    except (BadSignature, ValueError, TypeError):
+        abort(404)
+    db = get_db()
+    user = db.execute("SELECT id, digest FROM users WHERE id=?", (uid,)).fetchone()
+    if not user:
+        abort(404)
+    if request.method == "POST":
+        db.execute("UPDATE users SET digest=0 WHERE id=?", (uid,))
+        return render_template("digest_off.html", done=True)
+    return render_template("digest_off.html", done=not user["digest"])
 
 
 @app.route("/account/export.json")

@@ -177,6 +177,22 @@ def cmd_remind_claims(args):
     return 0
 
 
+def cmd_weekly_summary(args):
+    """Queue the couples' weekly summary (app.send_digests). Safe to schedule daily: each person gets at
+    most one a week, and only when there's something new or waiting."""
+    base = os.environ.get("OB_BASE_URL", "").rstrip("/")
+    if not base:
+        print("OB_BASE_URL is not set (instance/ob.env) — not queuing summaries with broken links.")
+        return 1
+    import app as A
+    with A.app.test_request_context("/", base_url=base):
+        db = _open()
+        A.g.db = db
+        n = A.send_digests(db)
+    print(f"Queued {n} weekly summar{'y' if n == 1 else 'ies'}.")
+    return 0
+
+
 def cmd_check(args):
     """Read-only: never migrates, so it's safe to run against any copy of the DB."""
     problems = []
@@ -365,6 +381,9 @@ def main():
                         help="queue one nudge per stale reservation that has a guest email")
     sp.add_argument("--dry-run", action="store_true")
     sp.set_defaults(fn=cmd_remind_claims)
+
+    sp = sub.add_parser("weekly-summary", help="queue the couples' weekly summary email (schedule daily)")
+    sp.set_defaults(fn=cmd_weekly_summary)
 
     sp = sub.add_parser("check")
     sp.set_defaults(fn=cmd_check)

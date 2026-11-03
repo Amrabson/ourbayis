@@ -113,6 +113,10 @@ work from anywhere (manage.py finds the database and `instance/ob.env` next to i
 # email and haven't reported; never sends twice (claims.reminded_at). Needs SMTP to actually go out.
 /home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py remind-claims
 
+# daily (any hour): the couples' weekly summary — each person gets at most one a week, only when
+# something is new or waiting; needs OB_BASE_URL in instance/ob.env (refuses without it) and SMTP
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py weekly-summary
+
 # daily: refresh the ≈ conversion rates (ECB reference rates via frankfurter.app, no key needed);
 # writes instance/rates.json, the web app re-reads it on the next request — no Reload needed
 /home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py fetch-rates

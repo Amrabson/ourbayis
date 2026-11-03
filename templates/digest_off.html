@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{{ t('digest_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="home sheet-page">
+  <div class="sec-inner sheet-grid sheet-solo">
+    <div class="sheet">
+      <p class="kicker">{{ t('digest_title') }}</p>
+      {% if done %}
+      <h1 class="sheet-title">{{ t('digest_off_done_h') }}</h1>
+      <p>{{ t('digest_off_done') }}</p>
+      {% else %}
+      <h1 class="sheet-title">{{ t('digest_off_h') }}</h1>
+      <p>{{ t('digest_off_body') }}</p>
+      <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-primary" type="submit">{{ t('digest_off_btn') }}</button>
+      </form>
+      {% endif %}
+      <p class="auth-alt sheet-stub"><a class="link-arrow" href="{{ url_for('account') }}">{{ t('account_title') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block ad %}{% endblock %}

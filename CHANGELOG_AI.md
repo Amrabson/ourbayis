@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-03 (weekly summary email for couples)
+- `manage.py weekly-summary` (schedule daily; DEPLOY_AI.md) → `send_digests(db)`: once a week (`DIGEST_EVERY`,
+  7 days minus 12h so a daily job keeps the weekday) and only when there's something to say, one email per
+  owner and per helper with gift emails on, in their own `users.lang`. Lines (`digest_lines`): new gifts and
+  new brachos since the last summary, gifts to confirm (reported), gifts to thank for (reported/received
+  unthanked + outside gifts), and — within `DIGEST_SOON_DAYS` (60) of the event — guest budgets with nothing
+  open (from `list_check`) with a link to the list check; a countdown in the intro. Links to the dashboard and
+  thank-you page. `users.digest_at` is marked before queueing (a crash loses one, never repeats).
+- m030 `users.digest` (default on) + `users.digest_at`. Off/on from the account page ("Weekly summary email",
+  `POST /account/digest`) or the email's own link `/digest/off/<token>` (itsdangerous-signed user id, no login;
+  GET shows one button, only the POST changes anything — mail scanners open links). Refuses to run without
+  `OB_BASE_URL`.
+- 30 EN/HE strings; 5 tests in tests/test_weekly_summary.py (incl. the manage.py command).
+
 ## 2026-11-03 (brachos: guests leave a wish without a gift)
 - m029 `brachos` (registry_id CASCADE, guest_name, message, lang, form_key; unique per registry+form_key so a
   double-submitted form is one bracha). At the bottom of every registry page a "Leave them a bracha — no gift
