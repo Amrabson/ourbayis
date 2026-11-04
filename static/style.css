@@ -2397,3 +2397,20 @@ html[dir="rtl"] .bracha-note blockquote { font-style: normal; }
 .hdate-is { display: block; margin: 6px 0 0; font-weight: 400; }
 .hdate-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: 0 12px; }
 .flash-warn { background: #fbf1dc; color: #7a5212; border: 1px solid #e8d2a4; }
+
+/* share kit (/registry/share) */
+.share-more { margin: 12px 0 0; font-weight: 700; }
+.share-draft { background: #fbf1dc; color: #7a5212; border: 1px solid #e8d2a4; border-radius: var(--radius-sm); padding: 12px 16px; }
+.share-draft a { color: inherit; font-weight: 700; }
+.share-group { margin: 26px 0 0; }
+.share-msg { border-top: 1px solid var(--line); padding: 18px 0 4px; }
+.share-group > .share-msg:first-of-type { border-top: 0; padding-top: 6px; }
+.share-msg-h { font-size: 1rem; margin: 0 0 8px; color: var(--navy); }
+.share-text { width: 100%; resize: vertical; line-height: 1.55; field-sizing: content; min-height: 4.5lh; }
+.share-msg-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+.share-other { margin-top: 26px; }
+.share-other[open] > summary { margin-bottom: 4px; }
+.share-paper { display: flex; gap: 20px; align-items: center; margin: 30px 0 0; padding: 20px 0 0; border-top: 1px solid var(--line); }
+.share-paper img { flex: none; border: 1px solid var(--line); border-radius: var(--radius-sm); background: #fff; }
+.share-paper .rform-h { margin-top: 0; }
+@media (max-width: 520px) { .share-paper { flex-direction: column; align-items: flex-start; } }

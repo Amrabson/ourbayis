@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-04 (share kit: ready-made messages to send the list)
+- `GET /registry/share` (`registry_share`, owner and helpers; templates/share.html): "Send your list". Five messages
+  (`SHARE_KINDS`: family group, friends, family abroad, one line for an invitation/website, a gentle reminder) from
+  `share_messages(reg, lang)`, in the couple's language first and the other language folded below. Each message
+  links to the registry **in its own language** (Hebrew messages carry `?lang=he`) and signs with the couple's names
+  in that language. The abroad message adds the cash-gift sentence only when the couple has a payment link; the
+  reminder ("the simcha is in N days") only while the date is 3+ days away.
+- Every message is an editable box with WhatsApp (`wa.me/?text=`), Email (`mailto:` with subject) and Copy; app.js
+  keeps those three in step with the box as it's edited. All three fire the existing share beacon (checklist
+  "shared" step). The page also has the QR code (with a download link) and the printable insert, and warns when
+  the list is still a draft. Dashboard share panel links to it.
+- 25 EN/HE strings (`share_*`); 3 tests in tests/test_share_kit.py.
+
 ## 2026-11-04 (Hebrew date for the simcha)
 - New `ob_hebcal.py` (pure Python, no dependency): Gregorian <-> Hebrew (`to_hebrew`, `from_hebrew`; months
   numbered from Nisan, 12 = Adar / Adar I, 13 = Adar II), `numeral()` (geresh/gershayim, 15/16 as ט״ו/ט״ז),

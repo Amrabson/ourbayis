@@ -1923,6 +1923,45 @@ def dashboard_qr():
     return resp
 
 
+# ---------------------------------------------------------------- share kit
+SHARE_KINDS = ("family", "friends", "abroad", "invite", "reminder")
+
+
+def share_messages(reg, msg_lang):
+    """Ready-to-send messages in `msg_lang`, each linking to the registry page in that language
+    (a Hebrew message opens the Hebrew page whatever language the couple uses). The abroad
+    message mentions the cash option only when the couple has a payment link; the reminder
+    only shows while the date is 3+ days away."""
+    link = ext_url("registry", slug=reg["slug"], **({"lang": "he"} if msg_lang == "he" else {}))
+    cash = _t("share_msg_abroad_cash", msg_lang) if reg_pay_links(reg) else ""
+    try:
+        days = (date.fromisoformat(reg["event_date"]) - date.today()).days
+    except (ValueError, TypeError):
+        days = 0
+    out = []
+    for kind in SHARE_KINDS:
+        if kind == "reminder" and days < 3:
+            continue
+        text = _t("share_msg_" + kind, msg_lang).format(
+            link=link, names=pick(reg, "couple_names", msg_lang), cash=cash, n=days)
+        out.append(dict(kind=kind, text=text, subject=_t("share_mail_subj", msg_lang)))
+    return out
+
+
+@app.route("/registry/share")
+@login_required
+def registry_share():
+    """Share kit: the messages in the couple's language first, the other language folded below,
+    each with WhatsApp / email / copy (an edited message sends as edited: app.js), plus the QR
+    code and the printable insert."""
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("registry_new"))
+    lang = current_lang()
+    groups = [(code, share_messages(reg, code)) for code in (lang, "he" if lang == "en" else "en")]
+    return render_template("share.html", reg=reg, groups=groups)
+
+
 @app.route("/registry/new", methods=["GET", "POST"])
 @login_required
 def registry_new():

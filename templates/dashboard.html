@@ -195,6 +195,7 @@
              href="https://wa.me/?text={{ (pick(reg, 'title') ~ ' — ' ~ registry_share_url(reg['slug'])) | urlencode }}">
             <svg class="ic"><use href="#i-wa"/></svg> {{ t('share_whatsapp') }}</a>
         </div>
+        <p class="share-more"><a href="{{ url_for('registry_share') }}">{{ t('share_more') }} {{ arrow }}</a></p>
       </div>
       <div class="qr-box share-ticket-stub">
         <img src="{{ url_for('dashboard_qr') }}" width="120" height="120" alt="QR — {{ pick(reg, 'title') }}">

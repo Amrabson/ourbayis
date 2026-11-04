@@ -283,6 +283,12 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   on every join. Gift emails (`notify_owner(..., to_helpers=True)`) also go to helpers who opted in
   (`registry_members.notify` [m27], toggled only by the helper themself).
 
+## Share kit (2026-11-04)
+`/registry/share` → `share_messages(reg, msg_lang)` per language (texts are `share_msg_<kind>` in i18n with
+`{link}`, `{names}`, `{cash}`, `{n}`). The link is built per message language, not from `registry_share_url`
+(which follows the UI language). app.js `[data-share-text]` input handler rewrites the message's
+`[data-share-wa]` / `[data-share-mail]` hrefs and its `[data-copy]`.
+
 ## List check (2026-10-31)
 `/registry/check` → `list_check(db, reg)`: open units per `CATALOG_PRICE_BANDS` band (status good ≥ `CHECK_FEW`,
 few, none; the 1500plus band is "quiet" when empty), per room (`CHECK_ROOMS`, via `room_of`), plus `cant_give`

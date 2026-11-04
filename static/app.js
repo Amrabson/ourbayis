@@ -244,6 +244,19 @@
     fetch(el.getAttribute("data-share-beacon"), { method: "POST", body: fd, credentials: "same-origin", keepalive: true }).catch(function () {});
   });
 
+  // share kit: an edited message sends as edited (WhatsApp / email / copy follow the box)
+  document.addEventListener("input", function (e) {
+    var box = e.target.closest("[data-share-text]");
+    if (!box) return;
+    var msg = box.closest("[data-share-msg]"), v = box.value;
+    var wa = msg.querySelector("[data-share-wa]"), mail = msg.querySelector("[data-share-mail]"),
+        copy = msg.querySelector("[data-copy]");
+    if (wa) wa.href = "https://wa.me/?text=" + encodeURIComponent(v);
+    if (mail) mail.href = "mailto:?subject=" + encodeURIComponent(mail.getAttribute("data-subject") || "") +
+      "&body=" + encodeURIComponent(v);
+    if (copy) copy.setAttribute("data-copy", v);
+  });
+
   // copy-link buttons, with a select+prompt fallback when the Clipboard API fails
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-copy]");
