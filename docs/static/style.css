@@ -2415,4 +2415,17 @@ html[dir="rtl"] .bracha-note blockquote { font-style: normal; }
 .share-paper .rform-h { margin-top: 0; }
 @media (max-width: 520px) { .share-paper { flex-direction: column; align-items: flex-start; } }
 
+/* after the simcha: closed list (registry) and the Mazel tov panel (dashboard) */
+.reg-closed { text-align: center; max-width: 620px; margin: 8px auto 36px; padding: 30px 24px; background: var(--paper, #fffdf7); border: 3px double var(--gold); border-radius: var(--radius-sm); }
+.reg-closed h2 { color: var(--navy); margin: 14px 0 8px; }
+.reg-closed p { margin: 0 0 14px; }
+.reg-closed .hint { margin: 6px 0 0; }
+.dash-after { border: 1px solid var(--gold-bright); background: var(--gold-soft); border-radius: var(--radius-sm); padding: 16px 18px; margin: 0 0 22px; }
+.dash-after h2 { font-size: 1.3rem; color: var(--navy); margin: 2px 0 8px; }
+.dash-after p { margin: 0 0 10px; }
+.dash-after form { margin: 0; }
+.dash-closed { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; }
+.dash-closed p { margin: 0; }
+.rform-close { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}

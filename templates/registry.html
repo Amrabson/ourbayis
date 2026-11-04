@@ -13,9 +13,10 @@
     <span class="invite-rule" aria-hidden="true"></span>
     <h1 dir="auto">{{ pick(reg, 'title') }}</h1>
     {% set _names = pick(reg, 'couple_names') %}{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %}<p class="reg-couple bdi">{{ _names }}</p>{% endif %}
-    {% if days_to_go %}<p class="reg-countdown">✦ {{ tf('reg_countdown', n=days_to_go) }} ✦</p>{% endif %}
+    {% if days_to_go %}<p class="reg-countdown">✦ {{ tf('reg_countdown', n=days_to_go) }} ✦</p>
+    {% elif after_days and not reg['closed_at'] %}<p class="reg-countdown">✦ {{ t('reg_after') }} ✦</p>{% endif %}
     {% if pick(reg, 'message') %}<p class="reg-message" dir="auto">“{{ pick(reg, 'message') }}”</p>{% endif %}
-    {% if total %}
+    {% if total and not reg['closed_at'] %}
     <div class="progress" role="img" aria-label="{{ tf('reg_progress', claimed=done, total=total) }}"><div class="progress-fill" style="width: {{ (100 * done // total) if total else 0 }}%"></div></div>
     <p class="progress-label">{{ tf('reg_progress', claimed=done, total=total) }}</p>
     {# on a phone the list starts ~1.5 screens down, below the cash card and notes #}
@@ -32,6 +33,16 @@
     <p>{{ t('sample_notice') }} <a href="{{ url_for('signup') }}">{{ t('cta_start') }}</a></p>
   </div>
   {% endif %}
+
+  {% if reg['closed_at'] %}
+  <div class="reg-closed">
+    <span class="invite-rule" aria-hidden="true"></span>
+    <h2>{{ t('reg_closed_title') }}</h2>
+    <p>{{ tf('reg_closed_body', couple=pick(reg, 'couple_names') or t('the_couple')) }}</p>
+    <p><a class="btn btn-gold" href="#bracha">{{ t('bracha_title') }}</a></p>
+    {% if is_owner %}<p class="hint"><a href="{{ url_for('registry_edit', _anchor='rf-close') }}">{{ t('reg_closed_owner') }}</a></p>{% endif %}
+  </div>
+  {% else %}
 
   {% if bought_item and bought_item['url'] %}
   <div class="flash flash-ok buy-next">
@@ -192,6 +203,7 @@
   </div>
   <p class="hint viral-note"><a href="{{ url_for('index') }}">{{ t('reg_make_your_own') }}</a></p>
   {% endif %}
+  {% endif %}{# closed #}
 
   <section class="bracha" id="bracha" aria-labelledby="bracha-title">
     <div class="bracha-card">
@@ -222,7 +234,7 @@
   </section>
 </div>
 
-{% if pay_links and not is_sample %}
+{% if pay_links and not is_sample and not reg['closed_at'] %}
 <dialog class="modal" id="cash-modal" aria-labelledby="cash-modal-title">
   <div class="modal-body">
     <button type="button" class="modal-x" data-close aria-label="{{ t('close') }}">✕</button>

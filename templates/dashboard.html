@@ -57,6 +57,30 @@
     {% if reg['visibility'] == 'draft' %}
     <p class="notice-panel dash-draft-note">{{ t('visibility_draft_dash_note') }}</p>
     {% endif %}
+    {% if reg['closed_at'] %}
+    <div class="dash-after dash-closed">
+      <p>{{ t('dash_closed_note') }}</p>
+      <form method="post" action="{{ url_for('registry_reopen') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-ghost btn-sm">{{ t('reopen_list_btn') }}</button>
+      </form>
+    </div>
+    {% elif after_days %}
+    <div class="dash-after">
+      <p class="kicker">{{ t('dash_after_kicker') }}</p>
+      <h2>{{ tf('dash_after_title', n=after_days) }}</h2>
+      {% if to_thank %}
+      <p>{{ tf('dash_after_thanks', n=to_thank) }} <a href="{{ url_for('dashboard_thanks') }}">{{ t('dash_after_thanks_cta') }} {{ arrow }}</a></p>
+      {% else %}
+      <p>{{ t('dash_after_all_thanked') }}</p>
+      {% endif %}
+      <p class="hint">{{ t('close_list_b') }}</p>
+      <form method="post" action="{{ url_for('registry_close') }}" data-confirm="{{ t('close_list_confirm') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-ghost btn-sm">{{ t('close_list_btn') }}</button>
+      </form>
+    </div>
+    {% endif %}
     {% if stats['all_taken'] %}
     <p class="notice-panel">{{ t('dash_all_taken') }} <a href="{{ url_for('items_manage', _anchor='add-more') }}">{{ t('items_add_more') }} {{ arrow }}</a></p>
     {% endif %}

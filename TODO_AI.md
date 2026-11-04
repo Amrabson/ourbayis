@@ -38,6 +38,7 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Gifts from outside the list on the thank-you page (2026-11-03), with paste-a-list.
 - [x] Brachos: guests leave a wish without a gift (2026-11-03).
 - [x] Weekly summary email for couples (2026-11-03) — owner: add `manage.py weekly-summary` as a daily task.
+- [x] After the simcha (2026-11-04): Mazel tov line, thank-you nudge on the dashboard, close/reopen the list.
 - [x] Share kit: ready-made EN/HE messages with WhatsApp / email / copy (2026-11-04).
 - [x] Hebrew date for the simcha (2026-11-04): shown beside the date everywhere, pickable on the registry
   form, gentle note for a wedding set on Shabbos / Yom Tov.

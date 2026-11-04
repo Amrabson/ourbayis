@@ -580,6 +580,12 @@ def _m030_weekly_summary(db):
     _add_column(db, "users", "digest_at TEXT")
 
 
+def _m031_registry_closed(db):
+    """After the simcha (2026-11-04): the couple can close the gift list. `closed_at` set = guests see
+    a thank-you instead of the gifts (brachos stay open); NULL = open."""
+    _add_column(db, "registries", "closed_at TEXT")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -808,6 +814,7 @@ MIGRATIONS = [
     _m028_outside_gifts,
     _m029_brachos,
     _m030_weekly_summary,
+    _m031_registry_closed,
 ]
 
 

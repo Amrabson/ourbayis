@@ -156,6 +156,19 @@
           {% if reg %}<a class="link-arrow" href="{{ url_for('dashboard') }}">{{ t('back_to_dashboard') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>{% endif %}
         </div>
       </form>
+
+      {% if reg %}
+      <section class="rform-sec rform-close" id="rf-close">
+        <h2 class="rform-h">{{ t('rform_close_h') }}</h2>
+        <p class="hint">{{ t('dash_closed_note') if reg['closed_at'] else t('close_list_b') }}</p>
+        <form method="post" action="{{ url_for('registry_reopen' if reg['closed_at'] else 'registry_close') }}"
+              {% if not reg['closed_at'] %}data-confirm="{{ t('close_list_confirm') }}"{% endif %}>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="back" value="edit">
+          <button class="btn btn-ghost btn-sm">{{ t('reopen_list_btn' if reg['closed_at'] else 'close_list_btn') }}</button>
+        </form>
+      </section>
+      {% endif %}
     </div>
   </div>
 </div>

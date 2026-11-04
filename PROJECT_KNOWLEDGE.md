@@ -283,6 +283,12 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   on every join. Gift emails (`notify_owner(..., to_helpers=True)`) also go to helpers who opted in
   (`registry_members.notify` [m27], toggled only by the helper themself).
 
+## After the simcha (2026-11-04)
+`registries.closed_at` [m31]: set = closed (thank-you card on `/r/<slug>`, no new claims or cash records,
+brachos still open, out of the sitemap). Routes `registry_close` / `registry_reopen` → `_set_closed()`. The registry
+route passes `after_days` (days since the date) for the "Mazel tov" line; the dashboard passes `after_days` +
+`to_thank` for its panel.
+
 ## Share kit (2026-11-04)
 `/registry/share` → `share_messages(reg, msg_lang)` per language (texts are `share_msg_<kind>` in i18n with
 `{link}`, `{names}`, `{cash}`, `{n}`). The link is built per message language, not from `registry_share_url`

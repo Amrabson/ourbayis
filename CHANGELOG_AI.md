@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-04 (after the simcha: Mazel tov, thank-you nudge, closing the list)
+- Registry page: once the date has passed (`after_days`), the countdown line becomes "Mazel tov! Gifts are still
+  very welcome." Gifts stay open; nothing changes until the couple closes the list.
+- Dashboard: from the day after the date, a "Mazel tov!" panel ("The simcha was N days ago") with how many gifts
+  (reported/received claims + outside gifts) still wait for a thank-you note, a link to write them, and a
+  "Close the list" button (confirm). The edit page has the same close/reopen control at the bottom (`#rf-close`),
+  so a couple without a date can close too.
+- m031 `registries.closed_at`. `POST /registry/close` / `/registry/reopen` (owner or helper; `back=edit` returns to
+  the edit page; funnel `registry_closed` / `registry_reopened`). A closed list: the registry page shows a
+  thank-you card instead of the cash card, gift list, progress bar, cash dialog and share row; the bracha card
+  stays (brachos keep arriving). `claim_item` and `cash_gift` refuse with `reg_closed_flash` (stale tabs);
+  reservations already made stay manageable from `/g/<token>`. Dropped from the sitemap; tagged "Gift list closed"
+  in /find. The couple sees "you can reopen the list on the edit page" on their own closed page.
+- 22 EN/HE strings; 2 tests in tests/test_after_simcha.py.
+
 ## 2026-11-04 (share kit: ready-made messages to send the list)
 - `GET /registry/share` (`registry_share`, owner and helpers; templates/share.html): "Send your list". Five messages
   (`SHARE_KINDS`: family group, friends, family abroad, one line for an invitation/website, a gentle reminder) from

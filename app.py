@@ -969,7 +969,7 @@ def sample_registry(db, limit=6):
                event_date=_sample_date(), city=_t("sample_reg_city", lang), message=_t("sample_reg_message", "en"),
                message_he=_t("sample_reg_message", "he"), visibility="public",
                display_currency="ILS", delivery_note="", delivery_note_he="",
-               paypal_url="", stripe_url="", bit_url="", views=0, user_id=0)
+               paypal_url="", stripe_url="", bit_url="", views=0, user_id=0, closed_at=None)
     return reg, items, breakdown
 
 
@@ -1289,9 +1289,11 @@ def registry(slug):
             prefs["previewed_at"] = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
             db.execute("UPDATE registries SET preferences_json=? WHERE id=?",
                       (json.dumps(prefs), reg["id"]))
-    days_to_go = None
+    days_to_go = after_days = None
     try:
         days_to_go = (date.fromisoformat(reg["event_date"]) - date.today()).days
+        if days_to_go < 0:
+            after_days = -days_to_go
         if days_to_go <= 0:
             days_to_go = None
     except (ValueError, TypeError):
@@ -1314,7 +1316,7 @@ def registry(slug):
     return render_template("registry.html", reg=reg, items=items, claimed=claimed,
                            breakdown=breakdown, is_sample=False,
                            total=total, done=done, bought_item=bought_item,
-                           pay_links=reg_pay_links(reg), days_to_go=days_to_go,
+                           pay_links=reg_pay_links(reg), days_to_go=days_to_go, after_days=after_days,
                            is_owner=is_owner, is_preview=is_preview,
                            bracha_sent=request.args.get("bracha") == "sent",
                            price_bands=CATALOG_PRICE_BANDS, room_fills=room_fills_for(items, claimed),
@@ -1344,6 +1346,9 @@ def claim_item(slug, item_id):
                 (item_id, reg["id"] if reg else -1)).fetchone()
             if not reg or not item:
                 abort(404)
+            if reg["closed_at"]:
+                flash(_t("reg_closed_flash", lang), "err")
+                raise _Abort()
             committed = item_claim_counts(reg["id"]).get(item_id, 0)
             left = max(item["qty_wanted"] - committed, 0)
             if left <= 0:
@@ -1460,6 +1465,9 @@ def cash_gift(slug):
     reg = db.execute("SELECT * FROM registries WHERE slug=?", (slug,)).fetchone()
     if not reg:
         abort(404)
+    if reg["closed_at"]:
+        flash(_t("reg_closed_flash", lang), "err")
+        return redirect(url_for("registry", slug=slug))
     name = (request.form.get("guest_name") or "").strip()[:120]
     currency = (request.form.get("currency") or "ILS").upper()
     if currency not in ob_money.CURRENCIES:
@@ -1812,7 +1820,20 @@ def dashboard():
             waiting=[g for g in gifts if g["status"] == "reserved"],
             unthanked=[g for g in gifts if g["status"] == "received" and not g["thanked"]],
         )
+    after_days = to_thank = None
+    if reg:
+        try:
+            after_days = (date.today() - date.fromisoformat(reg["event_date"])).days
+        except (ValueError, TypeError):
+            pass
+        if not after_days or after_days < 1:
+            after_days = None
+        else:
+            to_thank = (sum(1 for gft in gifts if gft["status"] in ("reported", "received") and not gft["thanked"])
+                        + get_db().execute("SELECT COUNT(*) FROM outside_gifts WHERE registry_id=? AND thanked=0",
+                                           (reg["id"],)).fetchone()[0])
     return render_template("dashboard.html", reg=reg, gifts=gifts, stats=stats, totals=totals,
+                           after_days=after_days, to_thank=to_thank,
                            checklist=checklist, queues=queues, room_fills=room_fills,
                            helping_owner=(_people(reg)[0] if reg and not is_reg_owner(reg) else None),
                            shana_arrival=_shana_offer(get_db(), current_user(), reg) if reg else None)
@@ -1897,6 +1918,35 @@ def dashboard_shared():
                           (json.dumps(prefs), reg["id"]))
         track("share_click")
     return ("", 204)
+
+
+@app.route("/registry/close", methods=["POST"])
+@login_required
+def registry_close():
+    """Close the gift list (owner or helper): guests see a thank-you instead of the gifts and can
+    still leave a bracha; reservations already made stay as they are. `/registry/reopen` undoes it."""
+    return _set_closed(True)
+
+
+@app.route("/registry/reopen", methods=["POST"])
+@login_required
+def registry_reopen():
+    return _set_closed(False)
+
+
+def _set_closed(closed):
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("registry_new"))
+    db = get_db()
+    with ob_db.write_txn(db):
+        db.execute("UPDATE registries SET closed_at=? WHERE id=?",
+                   (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
+                    if closed else None, reg["id"]))
+    track("registry_closed" if closed else "registry_reopened")
+    flash(_t("list_closed_flash" if closed else "list_reopened_flash", current_lang()), "ok")
+    return redirect(url_for("registry_edit", _anchor="rf-close") if request.form.get("back") == "edit"
+                    else url_for("dashboard"))
 
 
 @app.route("/dashboard/print")
@@ -3973,7 +4023,7 @@ def sitemap():
         u = ext_url("guide", slug=g["slug"])
         xml.append(f"<url><loc>{u}</loc><lastmod>{g['updated']}</lastmod></url>")
         xml.append(f"<url><loc>{u}?lang=he</loc><lastmod>{g['updated']}</lastmod></url>")
-    for r in get_db().execute("SELECT slug FROM registries WHERE visibility='public'"):
+    for r in get_db().execute("SELECT slug FROM registries WHERE visibility='public' AND closed_at IS NULL"):
         xml.append(f"<url><loc>{ext_url('registry', slug=r['slug'])}</loc></url>")
     xml.append("</urlset>")
     return app.response_class("\n".join(xml), mimetype="application/xml")
