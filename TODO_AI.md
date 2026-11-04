@@ -38,6 +38,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Gifts from outside the list on the thank-you page (2026-11-03), with paste-a-list.
 - [x] Brachos: guests leave a wish without a gift (2026-11-03).
 - [x] Weekly summary email for couples (2026-11-03) — owner: add `manage.py weekly-summary` as a daily task.
+- [x] Hebrew date for the simcha (2026-11-04): shown beside the date everywhere, pickable on the registry
+  form, gentle note for a wedding set on Shabbos / Yom Tov.
 - [ ] Multiple registries per account, live inventory — deferred.
 
 ## Owner decisions from the 2026-09-17 review pass (publication blockers for the affected claims)

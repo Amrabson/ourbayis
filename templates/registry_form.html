@@ -33,9 +33,38 @@
                 {% endfor %}
               </select>
             </label>
-            <label>{{ t('r_event_date') }}<input name="event_date" type="date" value="{{ val('event_date') }}"></label>
+            {% set hd_iso = val('event_date') | trim %}
+            {% set hd_shown = fmt_hdate(hd_iso) %}
+            <label>{{ t('r_event_date') }}<input name="event_date" type="date" value="{{ hd_iso }}"{% if hd_shown %} aria-describedby="hdate-is"{% endif %}>
+              {% if hd_shown %}<span class="hint hdate-is" id="hdate-is">{{ tf('r_hdate_is', hdate=hd_shown) }}</span>{% endif %}</label>
             <label>{{ t('r_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim…" value="{{ val('city') }}"></label>
           </div>
+          {% set hd = hdate_form(form, reg, lang) %}
+          <details class="he-fields hdate-pick" {% if hd.open %}open{% endif %}>
+            <summary>{{ t('r_hdate_summary') }}</summary>
+            <p class="hint">{{ t('r_hdate_hint') }}</p>
+            <input type="hidden" name="hdate_was" value="{{ hd.was }}">
+            <div class="hdate-row">
+              <label>{{ t('r_hd_day') }}
+                <select name="hd_day">
+                  <option value="">—</option>
+                  {% for d in hd.days %}<option value="{{ d }}" {% if hd.day == d|string %}selected{% endif %}>{{ d if lang != 'he' else hnumeral(d) }}</option>{% endfor %}
+                </select>
+              </label>
+              <label>{{ t('r_hd_month') }}
+                <select name="hd_month">
+                  <option value="">—</option>
+                  {% for value, label in hd.months %}<option value="{{ value }}" {% if hd.month == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+              </label>
+              <label>{{ t('r_hd_year') }}
+                <select name="hd_year">
+                  <option value="">—</option>
+                  {% for y, label in hd.years %}<option value="{{ y }}" {% if hd.year == y|string %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                </select>
+              </label>
+            </div>
+          </details>
           <label>{{ t('r_message') }}<textarea name="message" rows="3" maxlength="2000">{{ val('message') }}</textarea></label>
 
           {# Optional Hebrew twins, collapsed by default; opened automatically when any is filled in #}

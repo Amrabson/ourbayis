@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_plan.html" import plan_svg with context %}
+{% from "_date.html" import simcha_date with context %}
 {% block title %}{{ t('dash_title') }} — {{ brand }}{% endblock %}
 {% block content %}
 {% set arrow = '←' if rtl else '→' %}
@@ -22,7 +23,7 @@
       <h1 class="dash-title" dir="auto">{{ pick(reg, 'title') }}</h1>
       <p class="dash-meta">
         <span>{{ t('event_' ~ reg['event_type']) }}</span>
-        {% if reg['event_date'] %}<span>{{ fmt_date(reg['event_date']) }}</span>{% endif %}
+        {% if reg['event_date'] %}<span>{{ simcha_date(reg['event_date']) }}</span>{% endif %}
         {% if reg['city'] %}<span><bdi>{{ reg['city'] }}</bdi></span>{% endif %}
         <span class="dash-vis dash-vis-{{ reg['visibility'] }}">{{ t('visibility_' ~ reg['visibility']) }}</span>
         {% if helping_owner %}<span class="dash-helping">{{ tf('dash_helping', owner=helping_owner['name']) }}</span>{% endif %}

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_date.html" import simcha_date with context %}
 {% block title %}{{ t('keepsake_title') }} — {{ brand }}{% endblock %}
 {% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
 {% block content %}
@@ -11,7 +12,7 @@
     <header class="keepsake-head">
       <span class="invite-rule" aria-hidden="true"></span>
       <h1 dir="auto">{{ t('keepsake_title') }}</h1>
-      <p class="keepsake-couple" dir="auto">{{ pick(reg, 'couple_names') }}{% if reg['event_date'] %} · {{ fmt_date(reg['event_date']) }}{% endif %}</p>
+      <p class="keepsake-couple" dir="auto">{{ pick(reg, 'couple_names') }}{% if reg['event_date'] %} · {{ simcha_date(reg['event_date']) }}{% endif %}</p>
     </header>
     {% if notes %}
     <div class="keepsake-notes">

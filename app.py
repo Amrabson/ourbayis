@@ -31,6 +31,7 @@ from itsdangerous import BadSignature, URLSafeSerializer
 import guides as ob_guides
 import i18n as i18n_mod
 import ob_db
+import ob_hebcal
 import ob_mail
 import ob_money
 import ob_search
@@ -877,6 +878,7 @@ def inject_globals():
         event_types=EVENT_TYPES,
         usd=usd,
         fmt_money=lambda minor, cur: ob_money.fmt_minor(minor, cur, lang),
+        fmt_hdate=lambda iso: ob_hebcal.format_hebrew(iso, lang),
         estimate_label=lambda price_nis: estimate_label(price_nis, lang),
         rates_date=ob_money.RATES_DATE,
         display_currency=(session.get("cur") or getattr(g, "display_currency", None)
@@ -938,6 +940,16 @@ _SAMPLE_STATES = [  # (qty_wanted, reserved, reported, received)
 ]
 
 
+def _sample_date():
+    """The sample couple's wedding: a Tuesday about ten weeks out (never Yom Tov or Chol
+    Hamoed), so the sample shows a date with its Hebrew date and never goes stale."""
+    d = date.today() + timedelta(days=70)
+    d += timedelta(days=(1 - d.weekday()) % 7)
+    while ob_hebcal.day_note(d):
+        d += timedelta(days=7)
+    return d.isoformat()
+
+
 def sample_registry(db, limit=6):
     lang = current_lang()
     items, breakdown = [], {}
@@ -954,7 +966,7 @@ def sample_registry(db, limit=6):
     reg = dict(id=0, slug="sample", title=_t("sample_reg_title", "en"),
                title_he=_t("sample_reg_title", "he"), couple_names=_t("sample_reg_couple", "en"),
                couple_names_he=_t("sample_reg_couple", "he"), event_type="wedding",
-               event_date="", city=_t("sample_reg_city", lang), message=_t("sample_reg_message", "en"),
+               event_date=_sample_date(), city=_t("sample_reg_city", lang), message=_t("sample_reg_message", "en"),
                message_he=_t("sample_reg_message", "he"), visibility="public",
                display_currency="ILS", delivery_note="", delivery_note_he="",
                paypal_url="", stripe_url="", bit_url="", views=0, user_id=0)
@@ -1941,6 +1953,79 @@ PREFERENCE_FIELDS = ("bed_size", "colors", "apartment_size", "furnished",
 VISIBILITY_VALUES = ("draft", "unlisted", "public")
 
 
+def _form_event_date(f, lang):
+    """The simcha date from the registry form as ISO ('' for none); ValueError with the
+    message to show. The Hebrew picker (hd_day / hd_month / hd_year) wins only when the
+    couple changed it: `hdate_was` carries what the page showed, so on a form prefilled
+    from the saved date, editing just the calendar date still works."""
+    picked = tuple((f.get(k) or "").strip() for k in ("hd_day", "hd_month", "hd_year"))
+    if any(picked) and "|".join(picked) != (f.get("hdate_was") or ""):
+        if not all(picked):
+            raise ValueError(_t("r_hdate_incomplete", lang))
+        try:
+            day, year = int(picked[0]), int(picked[2])
+        except ValueError:
+            raise ValueError(_t("r_bad_date", lang))
+        month = ob_hebcal.resolve_month(picked[1], year)
+        if month is None or not 5600 <= year <= 6000:
+            raise ValueError(_t("r_bad_date", lang))
+        try:
+            return ob_hebcal.from_hebrew(year, month, day).isoformat()
+        except ValueError:
+            raise ValueError(_t("r_hdate_no_day", lang).format(
+                month=ob_hebcal.month_name(year, month, lang),
+                year=ob_hebcal.numeral(year) if lang == "he" else year,
+                days=ob_hebcal.month_days(month, year)))
+    raw = (f.get("event_date") or "").strip()
+    if not raw:
+        return ""
+    try:
+        return date.fromisoformat(raw).isoformat()
+    except ValueError:
+        raise ValueError(_t("r_bad_date", lang))
+
+
+def _flash_date_note(event_type, event_date, old_date, lang):
+    """A newly set wedding date on Shabbos, Yom Tov, Chol Hamoed or Tisha B'Av gets one
+    gentle "check the date" note (motzei Shabbos weddings are real, so it never blocks).
+    Other simchas skip it: a bar mitzvah or a bris on Shabbos is ordinary."""
+    if event_type != "wedding" or not event_date or event_date == (old_date or ""):
+        return
+    note = ob_hebcal.day_note(date.fromisoformat(event_date))
+    if not note:
+        return
+    kind, holiday = note
+    when = f"{format_date(event_date, lang)} ({ob_hebcal.format_hebrew(event_date, lang)})"
+    flash(_t("r_date_note_" + kind, lang).format(
+        date=when, holiday=_t("hol_" + holiday, lang) if holiday else ""), "warn")
+
+
+def hdate_form(form, reg, lang):
+    """What the registry form's Hebrew-date picker shows: the submitted values when the
+    form came back with an error, else the saved date's Hebrew date; plus the year list
+    (last year to three years on, and the shown year if it's outside that)."""
+    if form is not None and "hdate_was" in form:
+        shown = tuple((form.get(k) or "") for k in ("hd_day", "hd_month", "hd_year"))
+        was = form.get("hdate_was") or ""
+    else:
+        iso = (form or {}).get("event_date") or (reg["event_date"] if reg else "") or ""
+        try:
+            y, m, d = ob_hebcal.to_hebrew(date.fromisoformat(iso[:10]))
+            shown = (str(d), ob_hebcal.month_choice(y, m), str(y))
+        except ValueError:
+            shown = ("", "", "")
+        was = "|".join(shown) if any(shown) else ""
+    this_year = ob_hebcal.to_hebrew(date.today())[0]
+    years = list(range(this_year - 1, this_year + 4))
+    if shown[2].isdigit() and int(shown[2]) not in years:
+        years.append(int(shown[2]))
+        years.sort()
+    return dict(day=shown[0], month=shown[1], year=shown[2], was=was,
+                open=any(shown) and "|".join(shown) != was,
+                days=range(1, 31), years=[(y, ob_hebcal.numeral(y) if lang == "he" else str(y)) for y in years],
+                months=[(c, ob_hebcal.choice_label(c, lang)) for c in ob_hebcal.MONTH_CHOICES])
+
+
 def _save_registry(reg):
     """4-section form: Details -> Israel preferences -> Payment (optional) ->
     Visibility. On any validation error, re-render with `request.form` so the
@@ -1980,13 +2065,11 @@ def _save_registry(reg):
     if not title or not couple:
         flash(_t("form_error", lang), "err")
         return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
-    event_date = (f.get("event_date") or "").strip()
-    if event_date:
-        try:
-            event_date = date.fromisoformat(event_date).isoformat()
-        except ValueError:
-            flash(_t("r_bad_date", lang), "err")
-            return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
+    try:
+        event_date = _form_event_date(f, lang)
+    except ValueError as e:
+        flash(str(e), "err")
+        return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
     if pay_errors:
         for msg in pay_errors:
             flash(msg, "err")
@@ -2043,6 +2126,7 @@ def _save_registry(reg):
                           _t("mail_paylinks_body", lang).format(links=links,
                                                                  contact=ext_url("contact")))
         flash(_t("r_saved", lang), "ok")
+        _flash_date_note(event_type, event_date, reg["event_date"], lang)
         return redirect(url_for("dashboard"))
     slug = slugify(couple)[:40] + "-" + secrets.token_hex(2)
     while db.execute("SELECT 1 FROM registries WHERE slug=?", (slug,)).fetchone():
@@ -2064,6 +2148,7 @@ def _save_registry(reg):
             _apply_pending_add(db, reg_id, pending)
     track("registry_created")
     flash(_t("r_created", lang), "ok")
+    _flash_date_note(event_type, event_date, "", lang)
     return redirect(url_for("items_manage"))
 
 
@@ -3221,6 +3306,7 @@ def bundle_label(slug):
 
 
 app.jinja_env.globals.update(budget_label=budget_label, bundle_label=bundle_label, room_of=room_of,
+                             hdate_form=hdate_form, hnumeral=ob_hebcal.numeral,
                              is_reg_owner=is_reg_owner, registry_owner_name=registry_owner_name)
 
 

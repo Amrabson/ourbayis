@@ -1,0 +1,8 @@
+{# The simcha date with its Hebrew date: Gregorian first in English, Hebrew first in Hebrew.
+   Import with context (it uses lang, fmt_date and fmt_hdate). #}
+{% macro simcha_date(iso) -%}
+{%- set h = fmt_hdate(iso) -%}
+{%- if lang == 'he' and h %}<span class="hdate">{{ h }}</span> · {% endif -%}
+<time datetime="{{ iso }}">{{ fmt_date(iso) }}</time>
+{%- if lang != 'he' and h %} · <span class="hdate">{{ h }}</span>{% endif -%}
+{%- endmacro %}

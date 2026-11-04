@@ -2392,4 +2392,10 @@ html[dir="rtl"] .bracha-note blockquote { font-style: normal; }
 .account-state { margin: 0; display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--green); }
 .account-state-off { color: var(--ink-soft); }
 
+/* Hebrew date (registry form picker, and beside the simcha date) */
+.hdate { unicode-bidi: isolate; white-space: nowrap; }
+.hdate-is { display: block; margin: 6px 0 0; font-weight: 400; }
+.hdate-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1.4fr); gap: 0 12px; }
+.flash-warn { background: #fbf1dc; color: #7a5212; border: 1px solid #e8d2a4; }
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}

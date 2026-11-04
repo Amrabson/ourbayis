@@ -147,7 +147,7 @@
     x.addEventListener("click", function () { stack.remove(); });
     stack.appendChild(x);
     // a success note fades on its own; an error waits until it's closed
-    if (!stack.querySelector(".flash-err")) setTimeout(function () { stack.remove(); }, 7000);
+    if (!stack.querySelector(".flash-err, .flash-warn")) setTimeout(function () { stack.remove(); }, 7000);
   });
 
   // v3 phase 2: reveal-on-scroll for elements marked .reveal

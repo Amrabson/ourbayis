@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-04 (Hebrew date for the simcha)
+- New `ob_hebcal.py` (pure Python, no dependency): Gregorian <-> Hebrew (`to_hebrew`, `from_hebrew`; months
+  numbered from Nisan, 12 = Adar / Adar I, 13 = Adar II), `numeral()` (geresh/gershayim, 15/16 as ט״ו/ט״ז),
+  `format_hebrew(d, lang)` ("5 Teves 5787" / "ה׳ בטבת תשפ״ז"), and `day_note(d)` → shabbos / yomtov (Israel) /
+  yomtov_sheni (outside Israel only) / chol_hamoed / tisha_bav. Checked against known dates and a 200-year round trip.
+- The simcha date shows its Hebrew date wherever it appears: registry header, dashboard, keepsake, /find
+  (`templates/_date.html` macro `simcha_date`; Gregorian first in English, Hebrew first in Hebrew). Jinja
+  globals `fmt_hdate`, `hnumeral`, `hdate_form`.
+- Registry form: under the date, "That's 5 Teves 5787."; a collapsed "Know the Hebrew date? Pick it here"
+  picker (day / month incl. Adar, Adar I, Adar II / year). `_form_event_date()`: the picker wins only when the
+  couple changed it (hidden `hdate_was` = what the page showed), so editing just the calendar date still works;
+  a day the month doesn't have ("Teves 5787 has only 29 days") or a half-filled picker is an error. Plain
+  "Adar" in a leap year = Adar II.
+- A wedding date newly set on Shabbos / Yom Tov / Chol Hamoed / Tisha B'Av gets one "check the date" note
+  (`_flash_date_note`, new `warn` flash that stays until closed). Never blocks: motzei Shabbos and after-Yom-Tov
+  weddings are real. Other simcha types skip it (a bar mitzvah or bris on Shabbos is ordinary).
+- 25 EN/HE strings (`r_hdate_*`, `r_hd_*`, `r_date_note_*`, `hol_*`); 4 tests in tests/test_hebrew_date.py.
+
 ## 2026-11-03 (weekly summary email for couples)
 - `manage.py weekly-summary` (schedule daily; DEPLOY_AI.md) → `send_digests(db)`: once a week (`DIGEST_EVERY`,
   7 days minus 12h so a daily job keeps the weekday) and only when there's something to say, one email per

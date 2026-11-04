@@ -36,6 +36,10 @@ Flask 3 + SQLite, server-rendered Jinja2, no build step. Same architecture as Ba
 - `ob_money.py` — everything in integer minor units (agorot/cents). `to_minor`, `fmt_minor`,
   `parse_legacy_amount` (strict — used only for the one-time migration of old free-text amounts),
   `RATES`/`CURRENCIES` from `OB_RATES` env, `estimate()`.
+- `ob_hebcal.py` — Hebrew calendar (2026-11-04): `to_hebrew`/`from_hebrew`, `format_hebrew(d, lang)`,
+  `numeral`, `day_note(d)` (Shabbos / Yom Tov / Chol Hamoed / Tisha B'Av, for the wedding-date note). The
+  simcha date always shows with its Hebrew date via `templates/_date.html` `simcha_date(iso)`; the registry
+  form's Hebrew picker resolves in `_form_event_date()` (hidden `hdate_was` decides which field the couple changed).
 - `manage.py` — CLI: `create-admin`, `backup`, `send-mail`, `expire-claims`, `check`, `stats`
   (seed-sync / refresh-registry-links are Phase 3 stubs).
 - `static/app.js` — every bit of site JS (CSP is `script-src 'self'`, no inline scripts anywhere):
