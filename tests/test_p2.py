@@ -278,8 +278,10 @@ def test_sample_registry_is_consistent_and_inert(client, app_module):
     with app_module.app.test_request_context("/sample"):
         db = app_module.get_db()
         reg, items, breakdown = app_module.sample_registry(db)
-        featured = {r["id"] for r in app_module.featured_items(db, limit=8)}
-    assert {i["catalog_id"] for i in items} <= featured  # same source as the featured strip
+        featured = [r["id"] for r in app_module.featured_items(db, limit=8)]
+        active = {r["id"] for r in db.execute("SELECT id FROM catalog_items WHERE active=1")}
+    assert [i["catalog_id"] for i in items[:len(featured)]] == featured  # the featured strip comes first
+    assert {i["catalog_id"] for i in items} <= active and len(items) > len(featured)
     assert all(not reg[k] for k in ("paypal_url", "stripe_url", "bit_url"))
     for it in items[:4]:
         assert it["name"] in home and it["name"] in sample

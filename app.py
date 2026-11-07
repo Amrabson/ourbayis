@@ -937,7 +937,9 @@ def featured_items(db, limit=8):
 # has no pay links and its buttons are inert (`is_sample`).
 _SAMPLE_STATES = [  # (qty_wanted, reserved, reported, received)
     (1, 0, 0, 0), (2, 1, 0, 0), (1, 0, 0, 1), (1, 0, 1, 0), (1, 0, 0, 0), (1, 1, 0, 0),
-]
+    (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 1), (1, 0, 0, 0), (2, 0, 0, 0), (1, 1, 0, 0),
+    (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 0), (1, 0, 0, 1),
+]  # ten weeks out most of a real list is still open
 
 
 def _sample_date():
@@ -950,10 +952,20 @@ def _sample_date():
     return d.isoformat()
 
 
-def sample_registry(db, limit=6):
+def sample_registry(db, limit=16):
+    """The featured strip's items first, then two linked, orderable items from each category,
+    so the sample reads like a real first-apartment list rather than a handful of cards."""
     lang = current_lang()
     items, breakdown = [], {}
-    picks = featured_items(db, limit=limit)
+    picks = list(featured_items(db, limit=min(limit, 8)))
+    seen, per_cat = {c["id"] for c in picks}, {}
+    for c in db.execute("SELECT * FROM catalog_items WHERE active=1 AND url != ''"
+                        " AND COALESCE(availability, '') != 'unavailable' ORDER BY category, sort"):
+        if len(picks) >= limit:
+            break
+        if c["id"] not in seen and per_cat.get(c["category"], 0) < 2:
+            picks.append(c)
+            per_cat[c["category"]] = per_cat.get(c["category"], 0) + 1
     for i, c in enumerate(picks):
         qty, res, rep, rec = _SAMPLE_STATES[i % len(_SAMPLE_STATES)]
         row = dict(c)

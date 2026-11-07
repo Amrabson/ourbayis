@@ -73,7 +73,7 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   keeps the newest 14 automatic copies in `backups/` (`--keep N` to change; hand-named snapshots are never
   pruned) — weekly backups = about 14 weeks. Once you settle N, state it in `privacy_delete_b` (EN+HE),
   and remember copies you downloaded off the server aren't covered.
-- [ ] **Sample registry title/names** ("Our new bayis in Yerushalayim" / "A sample couple") — change
+- [ ] **Sample registry title/names** ("Our new bayis in Yerushalayim" / "Chana & Moshe" since 2026-11-07) — change
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)

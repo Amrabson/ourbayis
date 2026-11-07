@@ -20,6 +20,11 @@ and arrivals board already have a voice; the words around them didn't. Changes (
   `/advertise` in the footer. (`.ad-band-empty` CSS and `ad_your_ad_here` strings are now unused.)
 - Registry countdown and "Mazel tov" line drop the ✦ sparkles.
 - tests/test_p2.py: three assertions follow the new wording / the removed placeholder.
+- **Sample registry reads like a real list:** the couple is "Chana & Moshe" / "חנה ומשה" (first names only, so it
+  can't point at a real couple; the "Sample registry" flag and the "the couple isn't real" notice stay) instead of
+  "A sample couple"; `sample_registry()` now shows 16 gifts: the 8 featured first, then two linked, orderable items
+  from each category, with `_SAMPLE_STATES` extended so most of the list is still open (as ten weeks out). The
+  sample test now checks "featured first, all real catalog rows" instead of "only featured".
 
 ## 2026-11-07 (gift ideas by budget)
 - Public, indexable landing pages built from the catalog: `/gift-ideas` (the four `CATALOG_PRICE_BANDS` as cards:
