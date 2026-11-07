@@ -511,7 +511,8 @@ def test_advertise_page_and_empty_ad_band(client):
         html = client.get(f"/advertise?lang={lang}").get_data(as_text=True)
         assert "topic=partner" in html and "ad-band" not in html  # no ad band on the ad page itself
     home = client.get("/").get_data(as_text=True)
-    assert 'class="ad-band ad-band-empty"' in home and 'href="/advertise"' in home
+    # no "your ad here" placeholder (2026-11-07): only real ads show; advertisers find the page in the footer
+    assert "ad-band" not in home and 'href="/advertise"' in home
     assert "affiliate links" in client.get("/catalog?lang=en").get_data(as_text=True)
 
 
@@ -671,7 +672,7 @@ def test_guest_can_email_themselves_the_manage_link(client, app_module, monkeypa
     assert "look right" in r.get_data(as_text=True)
     r = guest.post(f"/g/{token}/email", data=dict(csrf_token=tok, email="aunt@example.com"),
                    follow_redirects=True)
-    assert "check your inbox" in r.get_data(as_text=True)
+    assert "Check your inbox" in r.get_data(as_text=True)
     db = _db()
     assert db.execute("SELECT guest_email FROM claims").fetchone()[0] == "aunt@example.com"
     mail = db.execute("SELECT to_addr, body FROM mail_outbox WHERE to_addr='aunt@example.com'").fetchone()
@@ -1062,7 +1063,7 @@ def test_blank_guest_name_gets_a_specific_message(client, app_module):
         csrf_token=get_csrf(html), form_key=get_form_key(html), guest_name="   ", give="buy"))
     assert r.headers["Location"].endswith(f"#item-{item['id']}")
     page = g.get(r.headers["Location"]).get_data(as_text=True)
-    assert "Please add your name so the couple knows who the gift is from" in page
+    assert "Please add your name, so the couple knows who the gift is from" in page
     assert 'class="wrap flash-stack"' in page                      # app.js turns it into a toast
 
 
@@ -1384,10 +1385,10 @@ def test_dashboard_offers_a_ready_thank_you_email(client, app_module):
 def test_registry_says_when_every_gift_is_taken(client, app_module):
     reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"], pay=True)
     guest = app_module.app.test_client()
-    assert "already spoken for" not in guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    assert "list is taken" not in guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
     _claim(app_module, reg["slug"], next(iter(items.values()))["id"])
     html = guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
-    assert "already spoken for" in html and 'data-modal="cash-modal">You can still send' in html
+    assert "list is taken" in html and 'data-modal="cash-modal">You can still send' in html
     dash = client.get("/dashboard").get_data(as_text=True)
     assert "nothing left to choose" in dash and 'href="/registry/items#add-more"' in dash
 
@@ -1490,11 +1491,11 @@ def test_guest_page_says_the_link_was_emailed(client, app_module, monkeypatch):
     item = list(items.values())[0]
     with_mail = _claim(app_module, reg["slug"], item["id"], guest_email="miriam@example.com")
     g = app_module.app.test_client()
-    assert "Save this link" in g.get(f"/g/{with_mail}").get_data(as_text=True)  # mail off: nothing was sent
+    assert "Keep this link" in g.get(f"/g/{with_mail}").get_data(as_text=True)  # mail off: nothing was sent
     monkeypatch.setattr(app_module.ob_mail, "configured", lambda: True)
     html = g.get(f"/g/{with_mail}").get_data(as_text=True)
     assert "We emailed this link to miriam@example.com" in html and "Email it again" in html
-    assert "Save this link" not in html
+    assert "Keep this link" not in html
 
 
 def test_registry_title_does_not_repeat_the_names(client, app_module):

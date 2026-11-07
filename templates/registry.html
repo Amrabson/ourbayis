@@ -13,8 +13,8 @@
     <span class="invite-rule" aria-hidden="true"></span>
     <h1 dir="auto">{{ pick(reg, 'title') }}</h1>
     {% set _names = pick(reg, 'couple_names') %}{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %}<p class="reg-couple bdi">{{ _names }}</p>{% endif %}
-    {% if days_to_go %}<p class="reg-countdown">✦ {{ tf('reg_countdown', n=days_to_go) }} ✦</p>
-    {% elif after_days and not reg['closed_at'] %}<p class="reg-countdown">✦ {{ t('reg_after') }} ✦</p>{% endif %}
+    {% if days_to_go %}<p class="reg-countdown">{{ tf('reg_countdown', n=days_to_go) }}</p>
+    {% elif after_days and not reg['closed_at'] %}<p class="reg-countdown">{{ t('reg_after') }}</p>{% endif %}
     {% if pick(reg, 'message') %}<p class="reg-message" dir="auto">“{{ pick(reg, 'message') }}”</p>{% endif %}
     {% if total and not reg['closed_at'] %}
     <div class="progress" role="img" aria-label="{{ tf('reg_progress', claimed=done, total=total) }}"><div class="progress-fill" style="width: {{ (100 * done // total) if total else 0 }}%"></div></div>

@@ -38,6 +38,10 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Gifts from outside the list on the thank-you page (2026-11-03), with paste-a-list.
 - [x] Brachos: guests leave a wish without a gift (2026-11-03).
 - [x] Weekly summary email for couples (2026-11-03) — owner: add `manage.py weekly-summary` as a daily task.
+- [ ] **About page: a line from the owner.** The page now explains the problem concretely but has no person
+  behind it. Two or three true sentences from you (who you are, why you built it) would do more for trust than
+  any design change. Don't let anyone invent one.
+- [x] Voice pass on the public copy (2026-11-07): specific instead of generic, fewer dashes, no ad placeholder.
 - [x] Gift ideas by budget: public `/gift-ideas` pages from the catalog (2026-11-07).
 - [x] After the simcha (2026-11-04): Mazel tov line, thank-you nudge on the dashboard, close/reopen the list.
 - [x] Share kit: ready-made EN/HE messages with WhatsApp / email / copy (2026-11-04).

@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-11-07 (voice pass: specific, not generic)
+Owner asked for a site that doesn't read as AI-assembled. Audit of the public pages: the drawings, catalog data
+and arrivals board already have a voice; the words around them didn't. Changes (EN + HE together):
+- **Homepage:** hero lead is now "One list for the family in Yerushalayim and the aunt in Toronto." (was "Let the
+  people you love help make it home."); hero body names the meicham and 160×200 sheets; rooms intro, Shana
+  Rishonah intro and the arrivals-board note lose their dashes; the closing CTA is "Start from a list of the
+  basics: the meicham, the platta, two sets of dishes, a sponja stick…" (was "Ready to build your list? It takes a
+  few minutes"). Footer tagline: "Made for apartments in Israel: 220 volts, 160×200 beds, and a platta on Friday."
+- **About page** rewritten around the concrete problem (a 110-volt kettle from New Jersey, queen sheets instead of
+  160×200, a checkout a grandmother in Johannesburg or a cousin in Bnei Brak can't follow) instead of "was born
+  from a simple problem… so we built". No invented founder story; a personal line from the owner would be the
+  next improvement.
+- **Guest-facing strings** (registry page, gift dialog, /g/ page, catalog, FAQ, starter picker, sample message):
+  28 rewritten in plain sentences with far fewer em dashes ("One step left: send ₪… with one of these.", "Keep
+  this link: it's the only way back to this gift.", sample message no longer "means the world to us").
+- **No "Your ad here" placeholder** any more: the empty sponsored band on the homepage, catalog, find and
+  how-it-works made the site look unfinished. Real ads from `/admin/ads` still show; advertisers find
+  `/advertise` in the footer. (`.ad-band-empty` CSS and `ad_your_ad_here` strings are now unused.)
+- Registry countdown and "Mazel tov" line drop the ✦ sparkles.
+- tests/test_p2.py: three assertions follow the new wording / the removed placeholder.
+
 ## 2026-11-07 (gift ideas by budget)
 - Public, indexable landing pages built from the catalog: `/gift-ideas` (the four `CATALOG_PRICE_BANDS` as cards:
   who each budget suits, three examples, a count) and `/gift-ideas/<under-200|200-500|500-1500|1500-plus>`
