@@ -1330,6 +1330,7 @@ html[dir="rtl"] .route-end h3 { font-style: normal; }
   .rooms-nav { position: static; flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 6px; scrollbar-width: none; }
   .room-link { flex: none; border: 1px solid rgba(135, 96, 34, .3); border-radius: 999px; padding: 8px 14px; font-size: 1.05rem; background: rgba(255, 253, 248, .6); }
   .room-link:hover, .room-link[aria-selected="true"] { padding-inline-start: 14px; background: var(--navy); color: var(--paper); }
+  .room-link:hover .room-link-n, .room-link[aria-selected="true"] .room-link-n { color: var(--gold-bright); }
   .room-link::before { display: none; }
 }
 @media (max-width: 560px) { .home .room-grid { grid-template-columns: 1fr; } }
@@ -1401,7 +1402,7 @@ html[dir="rtl"] .give-never { font-style: normal; }
   display: inline-block; min-width: 9ch; text-align: center; padding: 4px 8px; border-radius: 3px;
   background: #1c2b48; color: #7fe0a3; letter-spacing: .18em; text-transform: uppercase; font-size: .72rem;
 }
-.board-table tr:last-child .board-status { background: var(--gold); color: var(--navy-deep); }
+.board-table tr:last-child .board-status { background: var(--gold-bright); color: var(--navy-deep); }
 .board figcaption { margin-top: 10px; font-family: var(--font-body); font-size: .78rem; color: rgba(250, 246, 236, .55); }
 @media (prefers-reduced-motion: no-preference) {
   .js .board-sec .board-status { transform: rotateX(90deg); }
@@ -1526,6 +1527,7 @@ html[dir="rtl"] .footer-mega em { font-style: normal; }
   content: ""; position: absolute; inset: 18px; border: 1px solid rgba(201, 162, 74, .55); pointer-events: none;
 }
 .invite-card .sample-flag { position: relative; margin-bottom: 14px; }
+.invite-card .sample-flag-dark { color: var(--gold); border-color: var(--gold); background: transparent; }
 .invite-card .reg-eyebrow { color: var(--gold); letter-spacing: .28em; font-size: .74rem; margin-bottom: 18px; }
 html[dir="rtl"] .invite-card .reg-eyebrow { letter-spacing: .04em; font-size: .86rem; }
 .invite-rule {
@@ -2446,5 +2448,10 @@ html[dir="rtl"] .bracha-note blockquote { font-style: normal; }
 .ideas-cta { padding: 22px 20px; border: 3px double var(--gold); border-radius: var(--radius-sm); background: var(--paper); }
 .ideas-cta h2 { font-size: 1.3rem; color: var(--navy); margin: 0 0 6px; }
 .ideas-cta p { margin: 0 0 14px; }
+
+/* skip link: hidden until a keyboard user tabs to it */
+.skip-link { position: absolute; inset-inline-start: 12px; top: -60px; z-index: 100; padding: 10px 16px; background: var(--navy); color: var(--paper); border-radius: var(--radius-sm); font-weight: 700; text-decoration: none; }
+.skip-link:focus { top: 12px; }
+main:focus { outline: none; }
 
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}

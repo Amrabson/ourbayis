@@ -39,6 +39,11 @@ PythonAnywhere dashboard → **Web** tab → **Add a new web app** → choose **
 - **Static files** section: add a mapping
   - URL: `/static/`
   - Directory: `/home/bashertbench/ourbayis/static/`
+  - **Then check the stylesheet is compressed** (it is 150 KB raw, about 25 KB gzipped):
+    `curl -sI -H "Accept-Encoding: gzip" https://YOUR-DOMAIN/static/style.css | grep -i content-encoding`
+    If that prints `content-encoding: gzip`, keep the mapping. If it prints nothing, delete the `/static/`
+    mapping: Flask then serves CSS/JS gzipped itself (since 2026-11-08), with year-long caching, so each visitor
+    downloads them once.
 
 ## 4b. Email (SMTP) — `instance/ob.env`
 Without this, password-reset links, guest "save this link" emails, reminders and lead

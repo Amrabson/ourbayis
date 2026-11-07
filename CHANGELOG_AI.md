@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-08 (speed and accessibility pass)
+- Audit of 13 public pages (missing alt text, unlabelled fields, nameless buttons, heading order, duplicate ids,
+  colour contrast) found the site mostly clean. Fixed:
+  - **Skip link**: "Skip to the content" / "דילוג לתוכן", first thing a keyboard reaches on every page; `<main>`
+    takes focus.
+  - **Contrast**: gold count on the navy active room tab (2.2:1 → gold-bright), the arrivals board's "HOME" pill
+    (navy on dark gold 2.8:1 → bright gold), the "Sample registry" flag on the light invitation card (2.4:1 → dark gold).
+  - (The bot-trap `website` field is reported unlabelled but is `aria-hidden` + `tabindex=-1`: left as is.)
+- **Compressed CSS/JS**: style.css (154 KB) and app.js were sent uncompressed whenever Flask served them;
+  `_gzip_static` now gzips CSS/JS/SVG from the static route once per file version (~25 KB for the stylesheet).
+  DEPLOY_AI.md says how to check the PythonAnywhere static mapping does the same, and what to do if not.
+- `gift_ideas` added to `PUBLIC_VIEW_ENDPOINTS`, so the gift-ideas pages show in the admin view counts.
+- EN/HE `skip_to_content`; 3 tests in tests/test_site_quality.py.
+
 ## 2026-11-07 (voice pass: specific, not generic)
 Owner asked for a site that doesn't read as AI-assembled. Audit of the public pages: the drawings, catalog data
 and arrivals board already have a voice; the words around them didn't. Changes (EN + HE together):

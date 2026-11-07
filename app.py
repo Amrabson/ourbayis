@@ -116,10 +116,37 @@ GZIP_MIMETYPES = {"text/html", "text/css", "text/plain", "text/csv", "text/javas
 GZIP_SAFE_ARGS = {"lang", "preview"}
 
 
+_STATIC_GZ = {}  # (path, mtime) -> gzipped bytes, so each static file is compressed once per version
+
+
+def _gzip_static(resp):
+    """CSS/JS/SVG from Flask's own static route: compressed from the file (the response is a
+    passthrough file stream, which gzip_response leaves alone). With a PythonAnywhere static
+    mapping these requests never reach Flask; see DEPLOY_AI.md for checking that path."""
+    path = os.path.join(app.static_folder, request.view_args.get("filename", ""))
+    try:
+        key = (path, os.path.getmtime(path))
+    except OSError:
+        return resp
+    if key not in _STATIC_GZ:
+        with open(path, "rb") as fh:
+            _STATIC_GZ[key] = gzip.compress(fh.read(), compresslevel=9)
+    resp.direct_passthrough = False
+    resp.set_data(_STATIC_GZ[key])
+    resp.headers["Content-Encoding"] = "gzip"
+    resp.vary.add("Accept-Encoding")
+    return resp
+
+
 @app.after_request
 def gzip_response(resp):
     """gzip text responses for browsers that accept it: the registry page carries one claim dialog
     per gift (~100 KB for 23 gifts -> ~10 KB). PythonAnywhere serves Flask output uncompressed."""
+    if (request.endpoint == "static" and request.method == "GET" and resp.status_code == 200
+            and resp.mimetype in ("text/css", "text/javascript", "application/javascript", "image/svg+xml")
+            and "Content-Encoding" not in resp.headers and not request.range
+            and "gzip" in (request.headers.get("Accept-Encoding") or "").lower()):
+        return _gzip_static(resp)
     if (request.method != "GET" or not 200 <= resp.status_code < 300 or resp.direct_passthrough
             or resp.is_streamed or "Content-Encoding" in resp.headers
             or resp.mimetype not in GZIP_MIMETYPES
@@ -137,7 +164,7 @@ def gzip_response(resp):
 
 # ---------------------------------------------------------------- security
 PUBLIC_VIEW_ENDPOINTS = {"index", "catalog_page", "registry", "sample", "shana", "how", "about",
-                         "find", "advertise", "privacy", "terms", "contact", "guides", "guide"}
+                         "find", "advertise", "privacy", "terms", "contact", "guides", "guide", "gift_ideas"}
 
 
 @app.after_request
