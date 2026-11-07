@@ -2453,3 +2453,22 @@ html[dir="rtl"] .bracha-note blockquote { font-style: normal; }
 .skip-link { position: absolute; inset-inline-start: 12px; top: -60px; z-index: 100; padding: 10px 16px; background: var(--navy); color: var(--paper); border-radius: var(--radius-sm); font-weight: 700; text-decoration: none; }
 .skip-link:focus { top: 12px; }
 main:focus { outline: none; }
+
+/* registry on phones (2026-11-08): the first gift used to start two screens down. The rates note now
+   sits under the list, the two selects share a row, and the apartment drawing folds behind a button. */
+.reg-plan-toggle { display: none; }
+.rates-note-foot { margin: 18px 0 0; max-width: 760px; }
+@media (max-width: 640px) {
+  .reg-controls-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .reg-controls-row .reg-available, .reg-controls-row .reg-count { grid-column: 1 / -1; }
+  .reg-controls-row select { width: 100%; }
+  .js .reg-plan .reg-plan-kicker { display: none; }
+  .js .reg-plan-toggle { display: flex; width: 100%; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 12px 14px; border: 1px solid rgba(135, 96, 34, .35); border-radius: var(--radius-sm);
+    background: rgba(255, 253, 248, .7); color: var(--navy); font: inherit; font-weight: 700; cursor: pointer; }
+  .reg-plan-chev { width: 9px; height: 9px; border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold);
+    transform: rotate(45deg); transition: transform .2s; flex: none; }
+  .reg-plan.is-open .reg-plan-chev { transform: rotate(-135deg); }
+  .js .reg-plan:not(.is-open) #reg-plan-body { display: none; }
+  .js .reg-plan.is-open #reg-plan-body { margin-top: 14px; }
+}

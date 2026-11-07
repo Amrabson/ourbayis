@@ -21,6 +21,11 @@
     var regCount = document.getElementById("reg-count");
     var regPrice = document.getElementById("reg-price");
     var roomHits = document.getElementById("room-hits");
+    var planToggle = document.querySelector(".reg-plan-toggle");
+    if (planToggle) planToggle.addEventListener("click", function () {
+      var open = planToggle.closest(".reg-plan").classList.toggle("is-open");
+      planToggle.setAttribute("aria-expanded", open ? "true" : "false");
+    });
     var roomShowing = document.getElementById("reg-room-showing");
     var grid = document.querySelector(".gift-grid");
     var catFilter = "all", roomFilter = "all";

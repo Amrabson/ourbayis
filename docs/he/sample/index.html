@@ -21,7 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../static/style.css?v=1a1b80c4260">
+<link rel="stylesheet" href="../../static/style.css?v=1a1b81474c5">
 
 
 
@@ -181,7 +181,6 @@
   <div class="reg-list-copy">
       <h2 class="section-title list-title" id="gifts">רשימת המתנות <span class="list-count">16</span></h2>
       <p class="hint reg-how-note">משריינים מתנה, קונים אותה בחנות המקושרת או שולחים לזוג את הכסף, ואז מודיעים להם שהיא בדרך. שריון שומר את המתנה ל-14 יום. חלק מקישורי החנויות הם קישורי שותפים: OurBayis עשוי לקבל עמלה קטנה, ללא עלות לכם או לזוג.</p>
-      <p class="hint rates-note">סכומים עם ≈ ב-USD הם הערכה משוערת בלבד (שער נכון ל-⁨19 באוקטובר 2026⁩) להתמצאות. המחירים נקבעים בשקלים; מה שתשלמו בפועל תלוי בחנות או בספק התשלום ובשער של הבנק שלכם.</p>
 
       
 
@@ -229,6 +228,10 @@
   
   <figure class="plan reg-plan" aria-labelledby="reg-home-title">
     <p class="reg-plan-kicker" id="reg-home-title">הבית שלהם מתמלא</p>
+    
+    <button type="button" class="reg-plan-toggle" aria-expanded="false" aria-controls="reg-plan-body">
+      <span>לראות את הבית שלהם, חדר אחרי חדר</span><span class="reg-plan-chev" aria-hidden="true"></span></button>
+    <div id="reg-plan-body">
     <div class="plan-sheet"><div class="plan-drawing">
       <svg class="plan-svg" viewBox="0 0 620 470" role="img" aria-label="הבית שלהם מתמלא">
   <g class="plan-fills">
@@ -286,21 +289,22 @@
 </svg>
       <div class="room-hits" id="room-hits">
         
-        <button type="button" class="room-hit room-hit-kitchen" data-room="kitchen" data-room-name="מטבח" aria-pressed="false"
-                aria-label="מטבח: 4 מתוך 7 ניתנו. הצגת המתנות האלה"></button>
-        
         <button type="button" class="room-hit room-hit-salon" data-room="salon" data-room-name="סלון ושולחן שבת" aria-pressed="false"
                 aria-label="סלון ושולחן שבת: 0 מתוך 4 ניתנו. הצגת המתנות האלה"></button>
-        
-        <button type="button" class="room-hit room-hit-bedroom" data-room="bedroom" data-room-name="חדר שינה" aria-pressed="false"
-                aria-label="חדר שינה: 2 מתוך 4 ניתנו. הצגת המתנות האלה"></button>
         
         <button type="button" class="room-hit room-hit-entry" data-room="entry" data-room-name="כניסה" aria-pressed="false"
                 aria-label="כניסה: 1 מתוך 3 ניתנו. הצגת המתנות האלה"></button>
         
+        <button type="button" class="room-hit room-hit-kitchen" data-room="kitchen" data-room-name="מטבח" aria-pressed="false"
+                aria-label="מטבח: 4 מתוך 7 ניתנו. הצגת המתנות האלה"></button>
+        
+        <button type="button" class="room-hit room-hit-bedroom" data-room="bedroom" data-room-name="חדר שינה" aria-pressed="false"
+                aria-label="חדר שינה: 2 מתוך 4 ניתנו. הצגת המתנות האלה"></button>
+        
       </div>
     </div></div>
     <figcaption class="plan-caption">הקישו על חדר כדי לראות מה עוד חסר בו.</figcaption>
+    </div>
   </figure>
   
   </div>
@@ -554,6 +558,7 @@
     
     
   </div>
+  <p class="hint rates-note rates-note-foot">סכומים עם ≈ ב-USD הם הערכה משוערת בלבד (שער נכון ל-⁨19 באוקטובר 2026⁩) להתמצאות. המחירים נקבעים בשקלים; מה שתשלמו בפועל תלוי בחנות או בספק התשלום ובשער של הבנק שלכם.</p>
 
   
   <div class="cta-panel">
@@ -618,7 +623,7 @@
   <div class="wrap footer-legal">© 2026 OurBayis · כל הזכויות שמורות.</div>
 </footer>
 
-<script src="../../static/app.js?v=1a1a3f1f208"></script>
+<script src="../../static/app.js?v=1a1b8141171"></script>
 
 <script src="../../demo.js"></script></body>
 </html>

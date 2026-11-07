@@ -76,7 +76,6 @@
   <div class="reg-list-copy">
       <h2 class="section-title list-title" id="gifts">{{ t('reg_gifts') }}{% if items %} <span class="list-count">{{ items | length }}</span>{% endif %}</h2>
       <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}</p>
-      {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
       {% if not items %}
         <p class="empty-note">{{ t('reg_empty') }}</p>
@@ -121,6 +120,10 @@
   {% if show_plan %}
   <figure class="plan reg-plan" aria-labelledby="reg-home-title">
     <p class="reg-plan-kicker" id="reg-home-title">{{ t('reg_home_title') }}</p>
+    {# phones: the drawing folds behind this button so the gifts start sooner (app.js; desktop never shows it) #}
+    <button type="button" class="reg-plan-toggle" aria-expanded="false" aria-controls="reg-plan-body">
+      <span>{{ t('reg_home_toggle') }}</span><span class="reg-plan-chev" aria-hidden="true"></span></button>
+    <div id="reg-plan-body">
     <div class="plan-sheet"><div class="plan-drawing">
       {{ plan_svg(t('reg_home_title'), fills=room_fills) }}
       <div class="room-hits" id="room-hits">
@@ -131,6 +134,7 @@
       </div>
     </div></div>
     <figcaption class="plan-caption">{{ t('reg_home_caption') }}</figcaption>
+    </div>
   </figure>
   {% endif %}
   </div>
@@ -187,6 +191,7 @@
     {% endif %}
     {% endfor %}
   </div>
+  {% set _n = estimate_note() %}{% if _n and items %}<p class="hint rates-note rates-note-foot">{{ _n }}</p>{% endif %}
 
   {% if is_sample %}
   <div class="cta-panel">

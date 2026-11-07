@@ -29,3 +29,13 @@ def test_gift_ideas_pages_are_counted(client):
     client.get("/gift-ideas/under-200")
     db = sqlite3.connect(os.environ["OB_DB_PATH"])
     assert db.execute("SELECT SUM(n) FROM funnel_events WHERE name='view:gift_ideas'").fetchone()[0] == 1
+
+
+def test_registry_on_phones_puts_gifts_first(client):
+    """The rates footnote sits under the list, and the apartment drawing has a fold-away button
+    (shown on phones only, by CSS) that controls it."""
+    page = client.get("/sample?lang=en").get_data(as_text=True)
+    assert page.index('class="gift-grid"') < page.index("rates-note-foot")
+    assert 'class="reg-plan-toggle" aria-expanded="false" aria-controls="reg-plan-body"' in page
+    assert 'id="reg-plan-body"' in page
+    assert "לראות את הבית שלהם" in client.get("/sample?lang=he").get_data(as_text=True)

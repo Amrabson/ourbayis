@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-08 (guest journey on a phone)
+- Walked the whole guest path at 375px on a seeded dev registry (open list → Gift this → reserve → /g/ page with the
+  store button and delivery address). The dialog and the gift page read clearly; the problem was getting to the
+  gifts: the first card started ~1,700px down (invitation card, cash card, how-to note, rates note, filters,
+  apartment drawing).
+- Now ~1,240px: the "≈ USD" rates footnote moves under the gift list (all widths; it explains the ≈ on the cards);
+  on phones the price and sort selects share a row, and the apartment drawing folds behind a "See their home, room
+  by room" button (`.reg-plan-toggle`, app.js; only with JS, only ≤640px; desktop unchanged).
+- EN/HE `reg_home_toggle`; test in tests/test_site_quality.py.
+
 ## 2026-11-08 (speed and accessibility pass)
 - Audit of 13 public pages (missing alt text, unlabelled fields, nameless buttons, heading order, duplicate ids,
   colour contrast) found the site mostly clean. Fixed:
