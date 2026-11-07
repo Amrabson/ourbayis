@@ -2472,3 +2472,17 @@ main:focus { outline: none; }
   .js .reg-plan:not(.is-open) #reg-plan-body { display: none; }
   .js .reg-plan.is-open #reg-plan-body { margin-top: 14px; }
 }
+
+/* first-time setup: details only, one column */
+.rform-new .rform-grid { grid-template-columns: minmax(0, 760px); justify-content: center; }
+.rform-later { margin: 18px 0 4px; padding: 12px 14px; border-inline-start: 3px solid var(--gold-bright); background: rgba(255, 253, 248, .7); }
+.show-pw { margin-top: -4px; }
+
+/* manage-gifts starter panel: on a phone the gold button shrank into a circle that cut its own label,
+   and the list-check link was navy on navy */
+.items-page .starter-panel { flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+.items-page .starter-panel .btn { flex: none; white-space: nowrap; }
+.items-page .starter-panel .link-arrow { color: var(--gold-bright); }
+.items-page .starter-panel p { flex: 1 1 100%; margin: 0; }
+/* first-time setup has one section: no step number */
+.rform-new .rform-h .rail-n { display: none; }

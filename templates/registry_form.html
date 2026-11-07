@@ -4,8 +4,10 @@
 {% macro val(field, default='') %}{{ (form.get(field, default) if form else (reg[field] if reg and field in reg.keys() else default)) }}{% endmacro %}
 {% block content %}
 {% set sections = [('rf-details', 'rform_step_details'), ('rf-prefs', 'rform_step_prefs'), ('rf-payment', 'rform_step_payment'), ('rf-visibility', 'rform_step_visibility')] %}
-<div class="home sheet-page rform-page">
+{# first-time setup asks only for the details; the rest waits on the edit page (the dashboard checklist points there) #}
+<div class="home sheet-page rform-page{% if not reg %} rform-new{% endif %}">
   <div class="sec-inner rform-grid">
+    {% if reg %}
     <nav class="form-rail" aria-label="{{ t('rform_rail') }}">
       <p class="kicker">{{ t('rform_rail') }}</p>
       <ol>
@@ -14,6 +16,7 @@
         {% endfor %}
       </ol>
     </nav>
+    {% endif %}
 
     <div class="sheet rform-sheet">
       <p class="kicker">{{ t('rform_kicker') }}</p>
@@ -24,7 +27,7 @@
         <section class="rform-sec" id="rf-details" data-rail-sec>
           <h2 class="rform-h"><span class="rail-n">01</span>{{ t('rform_step_details') }}</h2>
           <div class="form-2col">
-            <label>{{ t('r_title_label') }} *<input name="title" required maxlength="160" placeholder="{{ t('r_title_ph') }}" value="{{ val('title') }}"></label>
+            <label>{{ t('r_title_label') }}{% if reg %} *{% endif %}<input name="title" {% if reg %}required {% endif %}maxlength="160" placeholder="{{ t('r_title_ph') if reg else t('r_default_title') }}" value="{{ val('title') }}"></label>
             <label>{{ t('r_couple') }} *<input name="couple_names" required maxlength="160" placeholder="Sarah & Dovid Cohen" value="{{ val('couple_names') }}"></label>
             <label>{{ t('r_event_type') }}
               <select name="event_type">
@@ -37,7 +40,7 @@
             {% set hd_shown = fmt_hdate(hd_iso) %}
             <label>{{ t('r_event_date') }}<input name="event_date" type="date" value="{{ hd_iso }}"{% if hd_shown %} aria-describedby="hdate-is"{% endif %}>
               {% if hd_shown %}<span class="hint hdate-is" id="hdate-is">{{ tf('r_hdate_is', hdate=hd_shown) }}</span>{% endif %}</label>
-            <label>{{ t('r_city') }}<input name="city" maxlength="120" placeholder="Yerushalayim…" value="{{ val('city') }}"></label>
+            <label>{{ t('r_city') }}<input name="city" maxlength="120" placeholder="{{ t('r_city_ph') }}" value="{{ val('city') }}"></label>
           </div>
           {% set hd = hdate_form(form, reg, lang) %}
           <details class="he-fields hdate-pick" {% if hd.open %}open{% endif %}>
@@ -80,6 +83,9 @@
           </details>
         </section>
 
+        {% if not reg %}
+        <p class="hint rform-later">{{ t('rform_later') }}</p>
+        {% else %}
         <section class="rform-sec" id="rf-prefs" data-rail-sec>
           <h2 class="rform-h"><span class="rail-n">02</span>{{ t('rform_step_prefs') }}</h2>
           <p class="hint">{{ t('rform_prefs_hint') }}</p>
@@ -151,8 +157,10 @@
           </div>
         </section>
 
+        {% endif %}{# the edit-only sections #}
+
         <div class="rform-save">
-          <button class="btn btn-primary btn-lg" type="submit">{{ t('save') }}</button>
+          <button class="btn btn-primary btn-lg" type="submit">{{ t('save') if reg else t('rnew_btn') }}</button>
           {% if reg %}<a class="link-arrow" href="{{ url_for('dashboard') }}">{{ t('back_to_dashboard') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a>{% endif %}
         </div>
       </form>

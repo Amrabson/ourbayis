@@ -247,7 +247,9 @@ def csrf_protect():
         token = session.get("_csrf")
         sent = request.form.get("csrf_token", "")
         if not token or not secrets.compare_digest(token, sent):
-            abort(400)
+            # almost always a page left open past a sign-out or a server restart: say that, not "something went wrong"
+            abort(app.make_response((render_template("error.html", code=400, csrf_failed=True,
+                                                     signed_out=not session.get("uid")), 400)))
 
 
 def rate_limited(bucket, limit=20, per=600):
@@ -1704,7 +1706,7 @@ def signup():
         name = (request.form.get("name") or "").strip()[:120]
         email = (request.form.get("email") or "").strip().lower()[:200]
         pw = request.form.get("password") or ""
-        pw2 = request.form.get("password2") or ""
+        pw2 = request.form.get("password2", pw)  # the form has one field + "show password"; older forms sent two
         if not name or not ob_security.valid_email(email):
             flash(_t("form_error", lang), "err")
         elif len(pw) < 8:
@@ -2233,7 +2235,10 @@ def _save_registry(reg):
             prefs[pf] = val
         else:
             prefs.pop(pf, None)
-    prefs["visibility_reviewed_at"] = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
+    if "visibility" in f:
+        prefs["visibility_reviewed_at"] = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
+    if not reg and not title:  # first-time setup: the title can wait ("Our new home" until they change it)
+        title = _t("r_default_title", "en")
     if not title or not couple:
         flash(_t("form_error", lang), "err")
         return render_template("registry_form.html", reg=reg, form=f, prefs=prefs)
@@ -2261,7 +2266,10 @@ def _save_registry(reg):
             if not cur_pw or not check_password_hash(user["pw_hash"], cur_pw):
                 flash(_t("reauth_required", lang), "err")
                 return render_template("registry_form.html", reg=reg, form=f, prefs=prefs, show_reauth=True)
-    fields = (title, (f.get("title_he") or "").strip()[:160],
+    title_he = (f.get("title_he") or "").strip()[:160]
+    if not reg and not title_he and title == _t("r_default_title", "en"):
+        title_he = _t("r_default_title", "he")
+    fields = (title, title_he,
               couple, (f.get("couple_names_he") or "").strip()[:160],
               event_type, event_date,
               (f.get("city") or "").strip()[:120],

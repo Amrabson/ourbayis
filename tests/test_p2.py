@@ -1669,7 +1669,8 @@ def test_privacy_says_registries_start_unlisted(client):
     page = client.get("/privacy").get_data(as_text=True)
     assert "New registries start as “Unlisted”" in page and "start as drafts" not in page
     signup(client)
-    html = client.get("/registry/new").get_data(as_text=True)
+    create_registry(client)  # first-time setup asks only the details (2026-11-08); visibility is on the edit page
+    html = client.get("/registry/edit").get_data(as_text=True)
     assert re.search(r'name="visibility" value="unlisted"[^>]*checked', html)
 
 
@@ -1820,7 +1821,8 @@ def test_dashboard_plan_fills_each_room_by_its_gifts(client, app_module):
 def test_registry_form_is_four_numbered_sections_with_a_rail(client, app_module):
     """Every rail link points at a section that exists; visibility is three stamps, the current one checked."""
     signup(client)
-    html = client.get("/registry/new?lang=en").get_data(as_text=True)
+    create_registry(client)  # the four sections and the rail are on the edit page (first setup is details only)
+    html = client.get("/registry/edit?lang=en").get_data(as_text=True)
     rail = re.findall(r'<a href="#(rf-[a-z]+)" data-rail-link>', html)
     assert rail == ["rf-details", "rf-prefs", "rf-payment", "rf-visibility"]
     for sec in rail:

@@ -262,6 +262,13 @@
     if (copy) copy.setAttribute("data-copy", v);
   });
 
+  // "show password" checkboxes: data-show-password="<input id>"
+  document.addEventListener("change", function (e) {
+    var box = e.target.closest("[data-show-password]");
+    var input = box && document.getElementById(box.getAttribute("data-show-password"));
+    if (input) input.type = box.checked ? "text" : "password";
+  });
+
   // copy-link buttons, with a select+prompt fallback when the Clipboard API fails
   document.addEventListener("click", function (e) {
     var btn = e.target.closest("[data-copy]");

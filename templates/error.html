@@ -5,8 +5,14 @@
   <div class="sec-inner lost-grid">
     <div class="lost-copy">
       <p class="kicker">{{ t('notfound_kicker') if code == 404 else tf('err_kicker', code=code) }}</p>
+      {% if csrf_failed %}
+      <h1 class="sheet-title">{{ t('err_csrf_t') }}</h1>
+      <p class="page-sub">{{ t('err_csrf_b') }}</p>
+      {% if signed_out %}<p><a class="btn btn-primary" href="{{ url_for('login') }}">{{ t('err_csrf_login') }}</a></p>{% endif %}
+      {% else %}
       <h1 class="sheet-title">{{ t('err_' ~ code ~ '_t') }}</h1>
       <p class="page-sub">{{ t('err_' ~ code ~ '_b') }}</p>
+      {% endif %}
       <form class="find-form err-find" method="get" action="{{ url_for('find') }}">
         <input type="search" name="q" placeholder="{{ t('find_placeholder') }}" aria-label="{{ t('notfound_search_label') }}">
         <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-search"/></svg> {{ t('find_btn') }}</button>

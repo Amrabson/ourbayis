@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-08 (a new couple's first five minutes, on a phone)
+Walked signup → setup → manage gifts at 375px as a new couple (EN and HE). Fixed:
+- **Signup asks for the password once**, with a "Show password" checkbox (`data-show-password`, app.js) and an
+  "At least 8 characters" hint. The server still checks `password2` when a form sends it (old tabs, tests).
+- **First-time setup is the details only**: names, simcha, date (with the Hebrew picker), city, message. It was
+  26 fields over 4,300px (Israel preferences, payment links, delivery, visibility); now ~2,300px and a note that
+  the rest waits on the dashboard. The title is optional there (defaults to "Our new home" / "הבית החדש שלנו").
+  The edit page keeps all four sections. `visibility_reviewed_at` is set only when the visibility section was on
+  the page, so the dashboard checklist still asks about it. New registries stay unlisted.
+- **An expired form explains itself**: a CSRF failure (page left open past a sign-out or restart) now says "That
+  page was open too long — nothing was saved; go back, reload, send again", with "Log in again" when signed out,
+  instead of "Something went wrong with that request". Found when a walkthrough session dropped mid-setup.
+- **Manage gifts on a phone**: the starter-lists button had shrunk into a gold circle that cut off its own label,
+  and the "List check" link was navy on the navy panel; both fixed. The empty-list note said "add your first gift
+  above" (the catalog is below) — it now points to the starter lists and the catalog below.
+- Hebrew city placeholder is "ירושלים…" (was the English spelling); no "01" step number when setup has one step.
+- 11 EN/HE strings; tests/test_onboarding.py (3); two test_p2 tests now read the full form on /registry/edit.
+
 ## 2026-11-08 (guest journey on a phone)
 - Walked the whole guest path at 375px on a seeded dev registry (open list → Gift this → reserve → /g/ page with the
   store button and delivery address). The dialog and the gift page read clearly; the problem was getting to the
