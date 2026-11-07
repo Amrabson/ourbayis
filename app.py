@@ -1076,6 +1076,50 @@ def terms():
                            terms_reviewed=i18n_mod.TERMS_REVIEWED)
 
 
+# ---------------------------------------------------------------- gift ideas by budget
+IDEAS_BANDS = {"under-200": "under200", "200-500": "200_500", "500-1500": "500_1500", "1500-plus": "1500plus"}
+
+
+def _band_items(db, key):
+    """Active catalog items in one CATALOG_PRICE_BANDS band, featured first, then cheapest."""
+    lo, hi = CATALOG_PRICE_BANDS[key]
+    sql, params = "SELECT * FROM catalog_items WHERE active=1 AND price_nis >= ?", [lo]
+    if hi is not None:
+        sql += " AND price_nis < ?"
+        params.append(hi)
+    return db.execute(sql + " ORDER BY featured DESC, price_nis, sort", params).fetchall()
+
+
+@app.route("/gift-ideas", defaults={"band": None})
+@app.route("/gift-ideas/<band>")
+def gift_ideas(band):
+    """Gift ideas by budget: public, indexable landing pages built from the catalog. The index
+    shows the four price bands (who each suits, a few examples); a band page lists its catalog
+    items by category, with the catalog's own cards (so a couple can add from here too)."""
+    if band is not None and band not in IDEAS_BANDS:
+        abort(404)
+    db = get_db()
+    lang = current_lang()
+    key = IDEAS_BANDS.get(band)
+    bands = []
+    for slug, k in IDEAS_BANDS.items():
+        items = _band_items(db, k)
+        bands.append(dict(slug=slug, key=k, n=len(items),
+                          examples=[pick(i, "name", lang) for i in items[:3]]))
+    groups, have = [], set()
+    reg = user_registry()
+    if key:
+        items = _band_items(db, key)
+        groups = [(cat, [i for i in items if i["category"] == cat]) for cat in CATEGORIES]
+        groups = [(cat, its) for cat, its in groups if its]
+        if reg:
+            have = {r["catalog_id"] for r in db.execute(
+                "SELECT catalog_id FROM registry_items WHERE registry_id=? AND catalog_id IS NOT NULL",
+                (reg["id"],))}
+    return render_template("gift_ideas.html", band=key, bands=bands, groups=groups,
+                           have=have, has_reg=bool(reg))
+
+
 @app.route("/guides")
 def guides():
     return render_template("guides.html", guides=ob_guides.GUIDES)
@@ -4013,7 +4057,8 @@ def robots():
 def sitemap():
     pages = [ext_url(p) for p in
              ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy", "terms",
-              "advertise", "guides")]
+              "advertise", "guides", "gift_ideas")]
+    pages += [ext_url("gift_ideas", band=slug) for slug in IDEAS_BANDS]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in pages:

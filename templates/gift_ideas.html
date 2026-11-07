@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% from "_cards.html" import gift_card with context %}
+{% block title %}{{ t('ideas_h_' ~ band) if band else t('ideas_title') }} — {{ brand }}{% endblock %}
+{% block meta_desc %}{{ t('ideas_for_' ~ band) if band else t('ideas_sub') }}{% endblock %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+<div class="home ideas-page">
+  <header class="sec-inner ideas-head">
+    <p class="kicker">{{ t('ideas_title') if band else t('nav_ideas') }}</p>
+    <h1 class="ideas-title">{{ t('ideas_h_' ~ band) if band else t('ideas_title') }}</h1>
+    <p class="page-sub">{{ t('ideas_for_' ~ band) if band else t('ideas_sub') }}</p>
+    <nav class="chip-row ideas-bands" aria-label="{{ t('ideas_other_bands') }}">
+      {% for b in bands %}
+      <a class="chip{% if b.key == band %} active{% endif %}" href="{{ url_for('gift_ideas', band=b.slug) }}"
+         {% if b.key == band %}aria-current="page"{% endif %}>{{ t('price_band_' ~ b.key) }}</a>
+      {% endfor %}
+    </nav>
+  </header>
+
+  {% if not band %}
+  <div class="sec-inner ideas-index">
+    {% for b in bands %}
+    <a class="ideas-band-card" href="{{ url_for('gift_ideas', band=b.slug) }}">
+      <span class="ideas-band-price">{{ t('price_band_' ~ b.key) }}</span>
+      <span class="ideas-band-for">{{ t('ideas_for_' ~ b.key) }}</span>
+      {% if b.examples %}<span class="hint">{{ tf('ideas_examples', list=b.examples | join(', ')) }}</span>{% endif %}
+      <span class="link-arrow">{{ t('ideas_count_one') if b.n == 1 else tf('ideas_count', n=b.n) }} {{ arrow }}</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="sec-inner ideas-body">
+    {% for cat, items in groups %}
+    <section class="ideas-group" aria-labelledby="ideas-{{ cat }}">
+      <h2 class="ideas-group-h" id="ideas-{{ cat }}">{{ cat_label(cat) }} <span class="list-count">{{ items | length }}</span></h2>
+      <div class="gift-grid">
+        {% for item in items %}{{ gift_card(item, mode='catalog', have=have, has_reg=has_reg) }}{% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+    <p class="hint catalog-affiliate">{{ t('affiliate_note') }}</p>
+  </div>
+  {% endif %}
+
+  <div class="sec-inner ideas-ctas">
+    <div class="ideas-cta">
+      <h2>{{ t('ideas_cta_couple_h') }}</h2>
+      <p>{{ t('ideas_cta_couple_b') }}</p>
+      <a class="btn btn-primary" href="{{ url_for('dashboard') if user else url_for('signup') }}">{{ t('nav_dashboard') if user else t('cta_start') }}</a>
+    </div>
+    <div class="ideas-cta">
+      <h2>{{ t('ideas_cta_guest_h') }}</h2>
+      <p>{{ t('ideas_cta_guest_b') }}</p>
+      <a class="btn btn-ghost" href="{{ url_for('find') }}">{{ t('nav_find') }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

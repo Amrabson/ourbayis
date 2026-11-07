@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-07 (gift ideas by budget)
+- Public, indexable landing pages built from the catalog: `/gift-ideas` (the four `CATALOG_PRICE_BANDS` as cards:
+  who each budget suits, three examples, a count) and `/gift-ideas/<under-200|200-500|500-1500|1500-plus>`
+  (`IDEAS_BANDS` slug → band key; that band's active items, featured first then cheapest, grouped by catalog
+  category, with the catalog's own cards so a signed-in couple can add from there). Budget chips on both, CTAs for
+  couples (start a registry / dashboard) and guests (find a registry), affiliate note. Unknown band → 404.
+- In the sitemap (both languages), the footer ("Gift ideas") and a link from the catalog's intro line. Static
+  export writes `gift-ideas/` and the four band pages.
+- tools/screenshots.py: new `ideas` / `ideas-band` pages; the target path is now absolute (Chrome was writing
+  relative screenshot paths somewhere else, so nothing appeared in `shots/`).
+- 19 EN/HE strings (`nav_ideas`, `ideas_*`); 3 tests in tests/test_gift_ideas.py.
+
 ## 2026-11-04 (after the simcha: Mazel tov, thank-you nudge, closing the list)
 - Registry page: once the date has passed (`after_days`), the countdown line becomes "Mazel tov! Gifts are still
   very welcome." Gifts stay open; nothing changes until the couple closes the list.

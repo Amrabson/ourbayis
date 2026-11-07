@@ -22,7 +22,7 @@ CANDIDATES = [
 ]
 PAGES = {"home": "/", "sample": "/sample", "catalog": "/catalog", "shana": "/shana-rishonah",
          "how": "/how-it-works", "about": "/about", "privacy": "/privacy", "terms": "/terms", "advertise": "/advertise", "guides": "/guides",
-         "guide": "/guides/sizes-plugs-delivery"}
+         "guide": "/guides/sizes-plugs-delivery", "ideas": "/gift-ideas", "ideas-band": "/gift-ideas/200-500"}
 # headless Chrome on Windows won't lay out narrower than ~500px, so phone-width
 # checks are done in the in-app Browser pane (resize_window "mobile") instead.
 WIDTHS = {"desktop": (1280, 2400), "tablet": (768, 2400), "narrow": (520, 2200)}
@@ -53,7 +53,7 @@ def main():
                 w, h = WIDTHS[wname]
                 sep = "&" if "?" in path else "?"
                 url = f"{args.base}{path}{sep}lang={lang}"
-                target = out / f"{name}-{lang}-{wname}.png"
+                target = (out / f"{name}-{lang}-{wname}.png").resolve()  # Chrome resolves relative paths elsewhere
                 cmd = [exe, "--headless=new", "--disable-gpu", "--hide-scrollbars",
                        "--virtual-time-budget=4000", f"--window-size={w},{h}",
                        f"--screenshot={target}", url]

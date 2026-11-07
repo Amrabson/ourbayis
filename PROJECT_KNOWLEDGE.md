@@ -283,6 +283,11 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   on every join. Gift emails (`notify_owner(..., to_helpers=True)`) also go to helpers who opted in
   (`registry_members.notify` [m27], toggled only by the helper themself).
 
+## Gift ideas by budget (2026-11-07)
+`/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and
+`_band_items(db, key)` lists a band. Copy per band is `ideas_h_<key>` / `ideas_for_<key>` in i18n. Indexable
+(no query args), in the sitemap and the static export.
+
 ## After the simcha (2026-11-04)
 `registries.closed_at` [m31]: set = closed (thank-you card on `/r/<slug>`, no new claims or cash records,
 brachos still open, out of the sitemap). Routes `registry_close` / `registry_reopen` → `_set_closed()`. The registry

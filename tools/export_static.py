@@ -48,6 +48,11 @@ PAGES = {  # url -> output dir (relative)
     "/sample": "sample",
     "/advertise": "advertise",
     "/guides": "guides",
+    "/gift-ideas": "gift-ideas",
+    "/gift-ideas/under-200": "gift-ideas/under-200",
+    "/gift-ideas/200-500": "gift-ideas/200-500",
+    "/gift-ideas/500-1500": "gift-ideas/500-1500",
+    "/gift-ideas/1500-plus": "gift-ideas/1500-plus",
 }
 AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new")
 

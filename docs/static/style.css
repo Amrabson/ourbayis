@@ -2428,4 +2428,23 @@ html[dir="rtl"] .bracha-note blockquote { font-style: normal; }
 .dash-closed p { margin: 0; }
 .rform-close { margin-top: 34px; padding-top: 22px; border-top: 1px solid var(--line); }
 
+/* gift ideas by budget (/gift-ideas) */
+.home .ideas-head { padding-top: 40px; padding-bottom: 8px; }
+.ideas-title { font-family: var(--ed, inherit); font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; color: var(--navy); margin: 6px 0 12px; }
+.ideas-head .page-sub { max-width: 680px; }
+.ideas-bands { margin-top: 18px; }
+.home .ideas-index { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 16px; padding-top: 14px; padding-bottom: 20px; }
+.ideas-band-card { display: flex; flex-direction: column; gap: 10px; padding: 22px 20px; text-decoration: none; color: var(--ink);
+  background: rgba(255, 253, 248, .85); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.ideas-band-card:hover, .ideas-band-card:focus-visible { border-color: var(--gold-bright); box-shadow: var(--shadow-lg); }
+.ideas-band-price { font-family: var(--ed, inherit); font-size: 1.6rem; color: var(--navy); unicode-bidi: isolate; }
+.ideas-band-card .link-arrow { margin-top: auto; align-self: flex-start; }
+.home .ideas-body { padding-top: 6px; }
+.ideas-group { margin: 0 0 34px; }
+.ideas-group-h { font-size: 1.35rem; color: var(--navy); margin: 0 0 14px; }
+.home .ideas-ctas { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 16px; padding-top: 10px; padding-bottom: 50px; }
+.ideas-cta { padding: 22px 20px; border: 3px double var(--gold); border-radius: var(--radius-sm); background: var(--paper); }
+.ideas-cta h2 { font-size: 1.3rem; color: var(--navy); margin: 0 0 6px; }
+.ideas-cta p { margin: 0 0 14px; }
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}
