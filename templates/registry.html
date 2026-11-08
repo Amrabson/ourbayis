@@ -4,6 +4,11 @@
 {% from "_date.html" import simcha_date with context %}
 {% block title %}{% set _names = pick(reg, 'couple_names') %}{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %}{{ _names }} · {% endif %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{% if reg['event_date'] %}{{ t('event_' ~ reg['event_type']) }} · {{ fmt_date(reg['event_date']) }} — {% endif %}{{ tf('reg_meta_desc', names=pick(reg, 'couple_names')) }}{% endblock %}
+{# what a WhatsApp / Facebook preview of this link says: whose list, when, and how much is still open #}
+{% block og_title %}{{ tf('reg_og_title', names=pick(reg, 'couple_names') or pick(reg, 'title')) }}{% endblock %}
+{% block og_desc %}{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · {{ fmt_date(reg['event_date']) }}{% endif %}{% if reg['city'] %} · {{ reg['city'] }}{% endif %}.
+{%- if total and not reg['closed_at'] %} {{ tf('reg_og_left', left=total - done, total=total) if total - done != 1 else tf('reg_og_left_one', total=total) }} {{ t('reg_og_cta') }}{% endif %}{% endblock %}
+{% block og_image %}{{ ext_url('static', filename='og-registry-' ~ ('he' if rtl else 'en') ~ '.png') }}{% endblock %}
 {% block content %}
 
 <section class="invite">

@@ -1031,7 +1031,10 @@ def test_share_link_and_preview_follow_the_couples_language(client, app_module):
         assert app_module.registry_share_url(slug).endswith(f"/r/{slug}?lang=he")
     page = app_module.app.test_client().get(f"/r/{slug}?lang=he").get_data(as_text=True)
     desc = re.search(r'<meta property="og:description" content="([^"]*)"', page).group(1)
-    assert "מקימים בית חדש" in desc and "Sarah &amp; Dovid" in desc
+    title = re.search(r'<meta property="og:title" content="([^"]*)"', page).group(1)
+    # since 2026-11-08 the preview names the couple in the title and says what's still open
+    assert "Sarah &amp; Dovid" in title and "רשימת המתנות שלנו" in title
+    assert "עדיין פנויה" in desc or "עדיין פנויות" in desc
     page = app_module.app.test_client().get(f"/r/{slug}?lang=en").get_data(as_text=True)
     assert "See the gifts they&#39;d love and reserve one." in page
 

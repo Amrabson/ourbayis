@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-08 (link previews: what a shared link looks like in WhatsApp)
+- New share cards in the v4 design, drawn by headless Chrome from the real `plan_svg` macro + style.css
+  (`tools/make_og_cards.py`, no new dependency; rerun after changing the drawing or the `og_*` strings):
+  `static/og-home-en/he.png` ("Build your bayis in Israel.", the empty apartment) and `og-registry-en/he.png`
+  ("Help us fill our new home.", the apartment partly filled). The old `og.png` (2026-09 skyline card) stays only
+  as the JSON-LD logo.
+- base.html: `og_title` / `og_desc` / `og_image` blocks; every page shows the homepage card in the reader's
+  language, with `og:image:width/height`.
+- Registry links: og:title "Dina & Yossi Levi: our gift list" / "דינה ויוסי לוי: רשימת המתנות שלנו" (the title
+  mixed languages on Hebrew pages when the couple had no Hebrew title); og:description "Wedding · 18 December
+  2026 · Ramat Beit Shemesh. 18 of 22 gifts still open. Reserve one so nothing is bought twice." (nothing open on a
+  closed list); the registry card in the reader's language.
+- 12 EN/HE strings (`og_*`, `reg_og_*`); test in tests/test_site_quality.py.
+
 ## 2026-11-08 (dashboard: the one next step)
 - A new couple's dashboard on a phone put the setup checklist ~1,080px down, under seven links, four "0" counters
   and an empty apartment drawing. Now a navy **"Next step"** card sits under the title (~230px): the first

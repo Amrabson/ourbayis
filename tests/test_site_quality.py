@@ -39,3 +39,21 @@ def test_registry_on_phones_puts_gifts_first(client):
     assert 'class="reg-plan-toggle" aria-expanded="false" aria-controls="reg-plan-body"' in page
     assert 'id="reg-plan-body"' in page
     assert "לראות את הבית שלהם" in client.get("/sample?lang=he").get_data(as_text=True)
+
+
+def test_share_previews_say_whose_list_and_whats_open(client):
+    """WhatsApp/Facebook read og:*: a registry link names the couple, the date, what's still open, and shows
+    the registry card in the reader's language; other pages show the homepage card."""
+    import re
+    for lang in ("en", "he"):
+        for name in ("og-home", "og-registry"):
+            assert os.path.getsize(os.path.join(client.application.static_folder, f"{name}-{lang}.png")) > 20000
+    page = client.get("/sample?lang=en").get_data(as_text=True)
+    title = re.search(r'property="og:title" content="([^"]*)"', page).group(1)
+    desc = re.search(r'property="og:description" content="([^"]*)"', page).group(1)
+    assert title == "Chana &amp; Moshe: our gift list"
+    assert "Wedding · " in desc and "still open" in desc
+    assert "og-registry-en.png" in page
+    he = client.get("/sample?lang=he").get_data(as_text=True)
+    assert "og-registry-he.png" in he and "רשימת המתנות שלנו" in he
+    assert "og-home-en.png" in client.get("/catalog?lang=en").get_data(as_text=True)

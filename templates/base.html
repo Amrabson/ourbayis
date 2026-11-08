@@ -13,12 +13,15 @@
 <link rel="alternate" hreflang="he" href="{{ alt_urls['he'] }}">
 <link rel="alternate" hreflang="x-default" href="{{ alt_urls['en'] }}">
 {% endif %}
-<meta property="og:title" content="{{ self.title() }}">
-<meta property="og:description" content="{{ self.meta_desc() }}">
+<meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
+<meta property="og:description" content="{% block og_desc %}{{ self.meta_desc() }}{% endblock %}">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="{{ 'he_IL' if rtl else 'en_US' }}">
 <meta property="og:site_name" content="{{ brand }}">
-<meta property="og:image" content="{{ ext_url('static', filename='og.png') }}">
+{# share cards from tools/make_og_cards.py, in the reader's language #}
+<meta property="og:image" content="{% block og_image %}{{ ext_url('static', filename='og-home-' ~ ('he' if rtl else 'en') ~ '.png') }}{% endblock %}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
 <link rel="icon" href="{{ url_for('favicon') }}" sizes="32x32">
