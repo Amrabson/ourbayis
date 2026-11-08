@@ -1301,12 +1301,54 @@ def go_item(item_id):
 
 _FIND_SKIP_WORDS = {"and", "the", "family", "wedding", "registry", "mr", "mrs", "ms", "את", "של", "חתונה"}
 _HE_LETTER = re.compile(r"[א-ת]")
+# English spellings of the same Jewish name vary (Cohen / Kohen / Kahn, Levi / Levy, Chaya / Haya,
+# Dovid / David, Yossi / Yosi): `name_sound` reduces a Latin word to its consonants after folding the
+# usual alternatives, so those meet. Used only when the exact search finds nothing.
+_SOUND_FOLDS = (("sch", "sh"), ("tz", "z"), ("ts", "z"), ("ch", "h"), ("kh", "h"), ("ck", "k"),
+                ("ph", "f"), ("c", "k"), ("q", "k"), ("w", "v"), ("j", "y"))
+
+
+def name_sound(word):
+    w = re.sub(r"[^a-z]", "", word.lower())
+    if not w:
+        return ""
+    for a, b in _SOUND_FOLDS:
+        w = w.replace(a, b)
+    w = re.sub(r"(?<=[aeiouy])h$", "", w)      # Sarah = Sara, Rivkah = Rivka
+    w = re.sub(r"y$", "i", w)                     # Levy = Levi, Gurary = Gurari
+    skeleton = w[0] + re.sub(r"[aeiou]", "", w[1:])
+    return re.sub(r"(.)\1+", r"\1", skeleton)  # Yossi = Yosi, Mendl = Mendel
+
+
+def _find_by_sound(words):
+    """Public registries whose names contain, for every Latin word typed, a word that sounds the same
+    (same `name_sound`, at least two letters). Hebrew words still have to appear as typed."""
+    wanted = [(w, name_sound(w)) for w in words]
+    if not any(_HE_LETTER.search(w) is None and len(s) >= 2 for w, s in wanted):
+        return []
+    found = []
+    for r in get_db().execute("SELECT * FROM registries WHERE visibility='public' ORDER BY created_at DESC"):
+        text = " ".join(filter(None, (r["couple_names"], r["couple_names_he"], r["title"], r["title_he"])))
+        sounds = {name_sound(t) for t in re.split(r"[\s,&+/.'-]+", text) if t}
+        ok = True
+        for w, s in wanted:
+            if _HE_LETTER.search(w):
+                ok = w in text or (w[0] == "ו" and w[1:] in text)
+            else:
+                ok = len(s) >= 2 and s in sounds  # whole names only: Moshe must not find Mushka
+            if not ok:
+                break
+        if ok:
+            found.append(r)
+            if len(found) >= 40:
+                break
+    return found
 
 
 @app.route("/find")
 def find():
     q = (request.args.get("q") or "").strip()
-    results = None
+    results, close = None, False
     if q:
         # every name typed must appear, in any order: "Sarah Dovid" finds "Sarah & Dovid",
         # "Dovid and Sarah" too, and "שרה ודוד" finds "שרה ודוד" or "שרה & דוד"
@@ -1321,7 +1363,10 @@ def find():
                     params.append("%" + a.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%")
             sql += " AND (" + " OR ".join(ors) + ")"
         results = get_db().execute(sql + " ORDER BY created_at DESC LIMIT 40", params).fetchall()
-    return render_template("find.html", q=q, results=results)
+        if not results and words:
+            results = _find_by_sound(words[:6])
+            close = bool(results)
+    return render_template("find.html", q=q, results=results, close=close)
 
 
 @app.route("/contact", methods=["GET", "POST"])

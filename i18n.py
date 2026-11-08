@@ -59,6 +59,7 @@ T_EN = {
 
     # Find
     "find_title": "Find a registry",
+    "find_close": "Nothing spelled exactly “{q}”, so here are names that sound the same.",
     "reg_countdown_one": "Tomorrow!",
     "starter_added_one": "1 essential added to your list!",
     "items_needs_link_one": "1 needs a store link or payment method",
@@ -1253,6 +1254,7 @@ T_HE = {
     "how_money_t": "מי משלם למי?",
 
     "find_title": "חיפוש רשימה",
+    "find_close": "אין שם שנכתב בדיוק “{q}”, אז הנה שמות שנשמעים אותו דבר.",
     "reg_countdown_one": "מחר!",
     "reg_countdown_two": "עוד יומיים!",
     "starter_added_one": "פריט בסיס אחד נוסף לרשימה!",

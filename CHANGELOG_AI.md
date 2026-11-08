@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-08 (find a registry: names spelled another way)
+- Probed /find the way guests search (surname only, first name, Hebrew, "Cohen wedding", partial "Sara"): all
+  worked, except English spellings of the same name: "levy" didn't find Levi, "Kohen" didn't find Cohen.
+- `name_sound(word)` folds a Latin name to its consonants after the usual alternatives (ch/kh→h, c/q→k, tz/ts→z,
+  w→v, final -ah→-a, final -y→-i, doubled letters once): Cohen=Kohen=Kahn, Levi=Levy, Chaya=Haya, Dovid=David,
+  Yossi=Yosi, Mendel=Mendl, Katz=Kats. `_find_by_sound` runs only when the exact search finds nothing, matches
+  whole names (Moshe must not find Mushka), keeps Hebrew words exact, and only ever looks at public registries;
+  the page then says "Nothing spelled exactly “Kohen”, so here are names that sound the same."
+- EN/HE `find_close`; 3 tests in tests/test_find_spelling.py.
+
 ## 2026-11-08 (link previews: what a shared link looks like in WhatsApp)
 - New share cards in the v4 design, drawn by headless Chrome from the real `plan_svg` macro + style.css
   (`tools/make_og_cards.py`, no new dependency; rerun after changing the drawing or the `og_*` strings):
