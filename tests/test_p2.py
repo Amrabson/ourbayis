@@ -1199,8 +1199,8 @@ def test_couple_gets_gift_emails_in_their_own_language(client, app_module):
     _claim(app_module, reg["slug"], next(iter(items.values()))["id"], name="Aunt Sarah")   # English guest
     subj, body = db.execute("SELECT subject, body FROM mail_outbox WHERE to_addr='a@b.com'").fetchone()
     db.close()
-    assert subj == "מזל טוב! מישהו שריין מתנה — הבית שלנו"
-    assert body.startswith("Aunt Sarah שריין/ה: ") and "x1" not in body and "×" not in body
+    assert subj.startswith("Aunt Sarah: שריון של ")  # who and what (2026-11-08), in the couple's Hebrew
+    assert body.startswith("Aunt Sarah שריין/ה את ") and "x1" not in body and "×" not in body
     assert "/dashboard" in body.splitlines()[-1]
     client.get("/dashboard?lang=en")                           # switching language is remembered
     assert _db().execute("SELECT lang FROM users").fetchone()[0] == "en"
@@ -1714,7 +1714,7 @@ def test_general_cash_gift_confirmation_and_resend(client, app_module, monkeypat
                                                    amount="180", currency="ILS"))
     subj, body = _guest_mail("dov@example.com")
     assert subj == "Your gift for Sarah & Dovid: Cash gift"
-    assert body.startswith("Thank you — Sarah & Dovid have been told about your cash gift.")
+    assert body.startswith("Thank you. Sarah & Dovid have been told about your cash gift.")
     assert "We hold it for you" not in body  # nothing is held: it's already reported
     # "Email it again" sends the same full confirmation
     monkeypatch.setattr(app_module.ob_mail, "configured", lambda: True)

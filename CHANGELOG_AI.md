@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-08 (reservation emails)
+Read the emails a reservation actually sends (couple + guest, EN + HE). Fixed:
+- **The guest's message reached nobody**: the gift dialog's "A message for the couple" was stored on the claim but
+  not in the couple's email. `notify_owner` now adds `mail_reserved_msg` ("Their message for you: “…”") when a
+  `guest_message` is passed; the reservation passes it.
+- **Subjects say who and what**: "Aunt Malka reserved Electric kettle" / "Aunt Malka plans to send money for …"
+  (was "Mazel tov! Someone reserved a gift — Our Home").
+- **The guest can order from the email**: store gifts now carry the store link (`/go/i/<id>`, so affiliate tagging
+  and the click count still apply) and "Have it delivered to: <the couple's delivery note>", or "the couple hasn't
+  added a delivery address yet, so ask them" — instead of "your private page has the store link and where to send it".
+  Hebrew "להזמין אותה ב-KSP" (was "מ-החנות" when no store was named).
+- Fewer dashes in these bodies. 3 EN/HE strings added, 7 rewritten; 3 tests in tests/test_reservation_mail.py.
+
 ## 2026-11-08 (find a registry: names spelled another way)
 - Probed /find the way guests search (surname only, first name, Hebrew, "Cohen wedding", partial "Sara"): all
   worked, except English spellings of the same name: "levy" didn't find Levi, "Kohen" didn't find Cohen.

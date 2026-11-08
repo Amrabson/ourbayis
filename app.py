@@ -276,6 +276,8 @@ def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False
         he = lang == "he"
         words = dict(kw)
         words.setdefault("title", (reg["title_he"] if he and reg["title_he"] else reg["title"]))
+        words["msg"] = (_t("mail_reserved_msg", lang).format(msg=kw["guest_message"])
+                        if kw.get("guest_message") else "")
         if item is not None:
             name = item["name_he"] if he and item["name_he"] else item["name"]
             words["item"] = f"{name} ×{qty}" if qty > 1 else name
@@ -329,7 +331,15 @@ def send_guest_link(db, claim_id, token, to, lang):
                       if c["amount_minor"] is not None else _t("gift_cash", lang))
             nxt = _t("mail_guest_next_cash", lang).format(amount=amount)
         elif item is not None and item["url"]:
-            nxt = _t("mail_guest_next_store", lang).format(store=item["store"] or _t("the_store", lang))
+            address = ((reg["delivery_note_he"] if he and reg["delivery_note_he"] else reg["delivery_note"]) or "").strip()
+            store = (item["store"] or "").strip()
+            # " from KSP" / " ב-KSP" ("ב" alone before a Hebrew store name); nothing when the store isn't named
+            store_part = ("" if not store else f" ב{'' if _HE_LETTER.match(store) else '-'}{store}" if he
+                          else f" from {store}")
+            nxt = _t("mail_guest_next_store", lang).format(
+                store_part=store_part, store_link=ext_url("go_item", item_id=item["id"]),
+                address=(_t("mail_guest_address", lang).format(address=address) if address
+                         else _t("mail_guest_no_address", lang)))
         else:
             nxt = _t("mail_guest_next_plain", lang)
         held = (_t("mail_guest_held", lang).format(date=format_date(c["expires_at"][:10], lang))
@@ -1533,7 +1543,8 @@ def claim_item(slug, item_id):
     _remember_claim_token(form_key, result["token"])
     reg, item = result["reg"], result["item"]
     notify_owner(db, reg, "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item", lang, to_helpers=True,
-                 item=item, qty=result["qty"], name=result["name"])
+                 item=item, qty=result["qty"], name=result["name"],
+                 guest_message=(request.form.get("message") or "").strip()[:1000])
     if _guest_email():
         send_guest_link(db, result["claim_id"], result["token"], _guest_email(), lang)
     track("reservation", owner_uid=reg["user_id"])
