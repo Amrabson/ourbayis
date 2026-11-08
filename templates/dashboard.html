@@ -28,6 +28,25 @@
         <span class="dash-vis dash-vis-{{ reg['visibility'] }}">{{ t('visibility_' ~ reg['visibility']) }}</span>
         {% if helping_owner %}<span class="dash-helping">{{ tf('dash_helping', owner=helping_owner['name']) }}</span>{% endif %}
       </p>
+      {# the one thing to do now, under the title (the full checklist stays further down) #}
+      {% set _next = (checklist or []) | rejectattr('1') | map(attribute='0') | first %}
+      {% if _next and not reg['closed_at'] %}
+      {% set _next_url = {
+          'details': url_for('registry_edit'),
+          'gifts': url_for('items_starter'),
+          'payment': url_for('registry_edit', _anchor='rf-payment'),
+          'delivery': url_for('registry_edit', _anchor='delivery'),
+          'visibility': url_for('registry_edit', _anchor='rf-visibility'),
+          'previewed': url_for('registry', slug=reg['slug'], preview=1),
+          'shared': url_for('registry_share')}[_next] %}
+      <div class="dash-next">
+        <p class="kicker">{{ t('next_kicker') }}</p>
+        <h2>{{ t('next_' ~ _next ~ '_t') }}</h2>
+        <p>{{ t('next_' ~ _next ~ '_b') }}</p>
+        <p class="dash-next-actions"><a class="btn btn-gold" href="{{ _next_url }}">{{ t('next_' ~ _next ~ '_btn') }}</a>
+          {% if _next == 'gifts' %}<a class="link-arrow" href="{{ url_for('items_manage', _anchor='add-more') }}">{{ t('next_gifts_alt') }} {{ arrow }}</a>{% endif %}</p>
+      </div>
+      {% endif %}
       <div class="dash-actions">
         <a class="btn btn-primary" href="{{ url_for('items_manage') }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('dash_items') }}</a>
         <a class="link-arrow" href="{{ url_for('registry_edit') }}">{{ t('dash_edit') }}</a>
@@ -38,12 +57,14 @@
         <a class="link-arrow" href="{{ url_for('registry_people') }}">{{ t('people_kicker') }}</a>
         <a class="link-arrow" href="{{ url_for('dashboard_claims_csv') }}">{{ t('dash_export_csv') }}</a>
       </div>
+      {% if stats['items'] or stats['claimed'] or stats['cash'] or stats['views'] %}
       <div class="stat-row">
         <div class="stat-card"><strong>{{ stats['items'] }}</strong><span>{{ t('dash_stats_items') }}</span></div>
         <div class="stat-card"><strong>{{ stats['claimed'] }}</strong><span>{{ t('dash_stats_claimed') }}</span></div>
         <div class="stat-card"><strong>{{ stats['cash'] }}</strong><span>{{ t('dash_stats_cash') }}</span></div>
         <div class="stat-card"><strong>{{ stats['views'] }}</strong><span>{{ t('dash_stats_views') }}</span></div>
       </div>
+      {% endif %}
     </div>
     <figure class="plan dash-plan">
       <div class="plan-sheet">{{ plan_svg(t('dash_plan_caption'), fills=room_fills) }}</div>

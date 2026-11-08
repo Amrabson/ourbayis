@@ -56,3 +56,16 @@ def test_expired_form_explains_itself(client):
     assert r.status_code == 400
     assert "That page was open too long" in html and "nothing was saved" in html
     assert "Log in again" in html
+
+
+def test_dashboard_names_the_one_next_step(client):
+    _signup_one_field(client)
+    page = client.get("/registry/new").get_data(as_text=True)
+    client.post("/registry/new", data=dict(csrf_token=get_csrf(page), couple_names="Rivka & Shmuel", event_type="wedding"))
+    dash = html.unescape(client.get("/dashboard?lang=en").get_data(as_text=True))
+    assert 'class="dash-next"' in dash and "Put some gifts on the list" in dash
+    assert dash.index('class="dash-next"') < dash.index('class="dash-actions"')
+    assert 'href="/registry/items/starter"' in dash
+    assert 'class="stat-row"' not in dash  # four zeros say nothing to a couple who just started
+    he = client.get("/dashboard?lang=he").get_data(as_text=True)
+    assert "השלב הבא" in he and "שימו כמה מתנות ברשימה" in he

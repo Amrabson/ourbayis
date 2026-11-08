@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-08 (dashboard: the one next step)
+- A new couple's dashboard on a phone put the setup checklist ~1,080px down, under seven links, four "0" counters
+  and an empty apartment drawing. Now a navy **"Next step"** card sits under the title (~230px): the first
+  unfinished checklist item (`checklist | rejectattr('1') | first`) with its own heading, one plain sentence and
+  one button: starter lists (+ "Or browse the whole catalog"), payment link, delivery note, visibility, preview,
+  then the share page. It disappears once the checklist is done, and on a closed list.
+- The four stat counters hide while they're all zero.
+- 23 EN/HE strings (`next_*`); test in tests/test_onboarding.py.
+
 ## 2026-11-08 (a new couple's first five minutes, on a phone)
 Walked signup → setup → manage gifts at 375px as a new couple (EN and HE). Fixed:
 - **Signup asks for the password once**, with a "Show password" checkbox (`data-show-password`, app.js) and an

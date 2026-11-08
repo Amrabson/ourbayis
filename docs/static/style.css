@@ -2487,4 +2487,12 @@ main:focus { outline: none; }
 /* first-time setup has one section: no step number */
 .rform-new .rform-h .rail-n { display: none; }
 
+/* dashboard: the one next step, under the title */
+.dash-next { margin: 18px 0 20px; padding: 18px 20px; background: var(--navy); color: var(--paper); border-radius: 10px; max-width: 620px; }
+.dash-next .kicker { color: var(--gold-bright); margin: 0 0 6px; }
+.dash-next h2 { color: var(--paper); font-size: 1.45rem; margin: 0 0 6px; }
+.dash-next p { margin: 0 0 12px; color: rgba(250, 246, 236, .85); }
+.dash-next-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; margin: 0 !important; }
+.dash-next .link-arrow { color: var(--gold-bright); }
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}
