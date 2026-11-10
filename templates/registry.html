@@ -250,26 +250,49 @@
     <button type="button" class="modal-x" data-close aria-label="{{ t('close') }}">✕</button>
     <h3 id="cash-modal-title">{{ t('reg_cash_title') }}</h3>
     <p>{{ t('reg_cash_body') }}</p>
-    {% for key, url in pay_links %}
-    <a class="btn btn-primary btn-block" href="{{ url }}" target="_blank" rel="noopener">{{ t(key) }} →</a>
-    {% endfor %}
-    <p class="hint">{{ t('reg_cash_note') }}</p>
-    <form method="post" action="{{ url_for('cash_gift', slug=reg['slug']) }}">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <label>{{ t('cash_name') }} *<input name="guest_name" required maxlength="120" autocomplete="name"></label>
-      <label>{{ t('cash_email') }}<input name="guest_email" type="email" maxlength="200" autocomplete="email"></label>
-      <div class="form-2col">
-        <label>{{ t('cash_amount') }}<input name="amount" type="number" min="0" step="0.01" inputmode="decimal"></label>
-        <label>{{ t('cash_currency') }}
-          <select name="currency">
-            {% for c in currencies %}<option value="{{ c }}" {% if c == reg['display_currency'] %}selected{% endif %}>{{ c }}</option>{% endfor %}
-          </select>
-        </label>
-      </div>
-      <label>{{ t('cash_msg') }}<textarea name="message" rows="2" maxlength="1000"></textarea></label>
-      <button class="btn btn-gold btn-block" type="submit">{{ t('cash_record') }}</button>
-    </form>
+    {# send it, then say it's from you: the money goes through the couple's own link, never this site #}
+    <ol class="gift-steps cash-steps">
+      <li>
+        <span class="gift-step-n" aria-hidden="true">1</span>
+        <div class="gift-step-body">
+          <h4>{{ t('cash_s1_h') }}</h4>
+          <div class="cash-pay-links">
+          {% for key, url in pay_links %}
+          <a class="btn btn-primary btn-block pay-btn" href="{{ url }}" target="_blank" rel="noopener">
+            <span>{{ t('guest_open_provider') }} {{ t(key) }} ↗</span>
+            <small class="bdi">{{ url | replace('https://', '') | replace('http://', '') | truncate(40, True) }}</small></a>
+          {% endfor %}
+          </div>
+          <p class="hint">{{ t('cash_s1_hint') }}</p>
+        </div>
+      </li>
+      <li>
+        <span class="gift-step-n" aria-hidden="true">2</span>
+        <div class="gift-step-body">
+          <h4>{{ t('cash_s2_h') }}</h4>
+          <form method="post" action="{{ url_for('cash_gift', slug=reg['slug']) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="form_key" value="{{ form_key }}">
+            <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+            <label>{{ t('cash_name') }} *<input name="guest_name" required maxlength="120" autocomplete="name" dir="auto"
+                   placeholder="{{ t('cash_name_ph') }}"></label>
+            <div class="form-2col">
+              <label>{{ t('cash_amount') }}<input name="amount" type="number" min="0" step="0.01" inputmode="decimal"></label>
+              <label>{{ t('cash_currency') }}
+                <select name="currency">
+                  {# the currency the guest is browsing in: someone abroad sends dollars, not shekels #}
+                  {% for c in currencies %}<option value="{{ c }}" {% if c == display_currency %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                </select>
+              </label>
+            </div>
+            <label>{{ t('cash_msg') }}<textarea name="message" rows="2" maxlength="1000" dir="auto"
+                   placeholder="{{ t('cash_msg_ph') }}"></textarea></label>
+            <label>{{ t('cash_email') }}<input name="guest_email" type="email" maxlength="200" autocomplete="email" dir="ltr"></label>
+            <button class="btn btn-gold btn-block" type="submit">{{ t('cash_record') }}</button>
+          </form>
+        </div>
+      </li>
+    </ol>
   </div>
 </dialog>
 {% endif %}

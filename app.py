@@ -1648,6 +1648,7 @@ def cash_gift(slug):
     _owner_lang = db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()
     _ol = _owner_lang["lang"] if _owner_lang and _owner_lang["lang"] in ("en", "he") else lang
     notify_owner(db, reg, "mail_cash", lang, to_helpers=True, name=name,
+                 guest_message=(request.form.get("message") or "").strip()[:1000],
                  amount=(ob_money.fmt_minor(amount_minor, currency, _ol) if amount_minor is not None
                          else _t("mail_cash_no_amount", _ol)))
     if _guest_email():

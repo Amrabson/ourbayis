@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-10 (the "send a cash gift" dialog)
+Opened the registry's cash-gift dialog on a phone and sent a gift as a guest. Fixed:
+- **A double tap sent the couple two cash gifts**: the form had no `form_key`, so the claim insert's duplicate
+  guard never ran. Now it does; a second tap lands on the same private page, one claim, one email.
+- **The guest's message never reached the couple**: the couple's cash email now quotes it (same
+  `guest_message` path as reservations). Subject "Cousin Dov sent you $50.00" (was "Mazel tov! A cash gift was
+  reported — Our Home"); body "says they sent you … That's their own report, not a payment confirmation, so
+  check your account to see it arrived."
+- **Two numbered steps** in the dialog, the same look as the guest's gift page: 1 "Send it through the couple's
+  own link" with buttons that show the account they open (paypal.me/dinayossi), "the money goes straight to them;
+  OurBayis never touches it"; 2 "Tell them it's from you" (name, amount, currency, message, email) → "Tell them
+  it's from me".
+- **The currency preselects what the guest is browsing in** (`display_currency`), so a guest abroad sees USD
+  instead of the registry's ₪.
+- `dir="auto"` on the name and message; placeholders ("e.g. The Friedman family"). `reg_cash_note` removed.
+  5 strings added, 5 rewritten (EN+HE); 3 tests in tests/test_cash_gift.py; 1 test_p2 assert updated.
+
 ## 2026-11-10 (the guest's private gift page)
 Opened `/g/<token>` on a phone as a guest who just reserved a store gift. It said "not bought yet" three times
 (status title, note, "Next step: buy it"), the hold date sat at the bottom under the rates note, the address had

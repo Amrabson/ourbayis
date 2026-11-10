@@ -48,6 +48,7 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Hebrew date for the simcha (2026-11-04): shown beside the date everywhere, pickable on the registry
   form, gentle note for a wedding set on Shabbos / Yom Tov.
 - [x] Guest's private gift page as order / send / tell steps, with Copy address and the simcha date (2026-11-10).
+- [x] Cash-gift dialog as send / tell steps; double-tap no longer records two gifts (2026-11-10).
 - [ ] Multiple registries per account, live inventory — deferred.
 
 ## Owner decisions from the 2026-09-17 review pass (publication blockers for the affected claims)

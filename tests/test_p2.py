@@ -1536,11 +1536,11 @@ def test_cash_gift_amount_is_really_optional(client, app_module):
     assert "own page decides the currency and any fees.</p>" in page
     db = _db()
     amount = db.execute("SELECT amount_minor FROM claims WHERE guest_name='Cousin Dov'").fetchone()[0]
-    body = db.execute("SELECT body FROM mail_outbox WHERE to_addr='a@b.com' AND subject LIKE '%cash gift%'"
+    body = db.execute("SELECT body FROM mail_outbox WHERE to_addr='a@b.com' AND subject LIKE 'Cousin Dov sent you%'"
                       ).fetchone()[0]
     db.close()
     assert amount is None
-    assert "Cousin Dov reports having sent you a cash gift (they didn't say how much)." in body
+    assert "Cousin Dov says they sent you a cash gift." in body
     dash = client.get("/dashboard").get_data(as_text=True)
     assert "Cousin Dov" in dash and "₪0" not in dash
 

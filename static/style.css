@@ -2511,3 +2511,12 @@ main:focus { outline: none; }
 .gift-rush { margin: 10px 0 0; padding: 8px 12px; border-inline-start: 3px solid var(--danger); background: var(--paper-deep); }
 .gift-msg-yours { margin: 14px 0 0; color: var(--ink-soft); }
 .gift-msg-yours span { color: var(--ink); font-style: italic; }
+
+/* cash-gift dialog: the same numbered steps, sized for the dialog */
+.cash-steps { margin: 12px 0 0; }
+.cash-steps > li { grid-template-columns: 32px minmax(0, 1fr); padding: 14px 0; }
+.cash-steps > li:last-child { border-bottom: 0; padding-bottom: 0; }
+.cash-steps .gift-step-n { font-size: 1.6rem; }
+.cash-steps h4 { margin: 2px 0 10px; font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--navy); }
+.cash-pay-links { display: grid; gap: 8px; margin-bottom: 6px; }
+.cash-steps form { display: grid; gap: 4px; }
