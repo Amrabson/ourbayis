@@ -404,7 +404,7 @@ def test_claim_dialog_routes_and_guest_flow_unchanged(client, app_module):
     g = app_module.app.test_client()
     html = g.get(f"/g/{token}").get_data(as_text=True)
     assert "Amount to send" in html and "paypal.me" in html
-    assert "Next step: buy it" not in html  # cash route: no store CTA
+    assert "gift-steps" not in html  # cash route: no order/send/tell steps
     r = g.post(f"/g/{token}/report", data=dict(csrf_token=get_csrf(html)), follow_redirects=True)
     assert "Guest reports" in r.get_data(as_text=True)
 
@@ -1181,7 +1181,7 @@ def test_guest_page_only_says_buy_while_there_is_something_to_buy(client, app_mo
     db.execute("UPDATE claims SET status=?", (status,))
     db.commit(); db.close()
     html = app_module.app.test_client().get(f"/g/{tok}").get_data(as_text=True)
-    assert ("Next step: buy it" in html) is to_buy
+    assert ("gift-steps" in html) is to_buy
     assert ("store-cta" in html) is to_buy
     assert ("badge-warn" in html) is to_buy
     assert ("Where to send it" in html) is to_buy

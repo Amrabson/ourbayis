@@ -1668,7 +1668,13 @@ def guest_manage(token):
     item = None
     if claim["item_id"]:
         item = db.execute("SELECT * FROM registry_items WHERE id=?", (claim["item_id"],)).fetchone()
-    return render_template("guest_manage.html", claim=claim, reg=reg, item=item,
+    days_to_simcha = None
+    if reg["event_date"]:
+        try:
+            days_to_simcha = (date.fromisoformat(reg["event_date"][:10]) - date.today()).days
+        except ValueError:
+            pass
+    return render_template("guest_manage.html", claim=claim, reg=reg, item=item, days_to_simcha=days_to_simcha,
                            token=token, pay_links=reg_pay_links(reg), can_email=ob_mail.configured())
 
 

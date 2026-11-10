@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_cards.html" import price_line, gift_facts with context %}
+{% from "_date.html" import simcha_date with context %}
 {% block title %}{{ t('guest_manage_title') }} — {{ brand }}{% endblock %}
 {% macro save_link_panel() %}
     <div class="notice-panel notice-stack save-link-panel">
@@ -53,6 +54,12 @@
     <h1 class="section-title">{{ t('guest_manage_title') }}</h1>
     {% set _names = pick(reg, 'couple_names') %}
     <p class="page-sub"><bdi>{{ pick(reg, 'title') }}</bdi>{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %} — <bdi>{{ _names }}</bdi>{% endif %}</p>
+    {% if reg['event_date'] %}<p class="gift-when">{{ t('event_' ~ reg['event_type']) }} · {{ simcha_date(reg['event_date']) }}</p>{% endif %}
+
+    {# a store gift still to buy gets three numbered steps (order it, send it here, tell the couple)
+       instead of the same "not bought yet" said three ways #}
+    {% set _to_buy = claim['kind'] != 'cash' and claim['status'] in ('reserved', 'expired') %}
+    {% set _steps_mode = _to_buy and item and item['url'] %}
 
     {% set _steps = ['reserved', 'reported', 'received'] %}
     {% set _status_for_stepper = 'reserved' if claim['status'] == 'expired' else claim['status'] %}
@@ -70,8 +77,14 @@
     {% endif %}
 
     <div class="notice-panel notice-stack">
+      {% if _steps_mode and claim['status'] == 'reserved' %}
+        <strong>{{ tf('guest_held_h', date=fmt_date(claim['expires_at'])) if claim['expires_at'] else t('claim_status_reserved') }}</strong>
+        <p>{{ t('guest_reserved_note_steps') }}</p>
+      {% else %}
       <strong>{{ t('claim_status_' ~ claim['status']) }}</strong>
-      {% if claim['status'] == 'reserved' %}
+      {% endif %}
+      {% if claim['status'] == 'reserved' and _steps_mode %}
+      {% elif claim['status'] == 'reserved' %}
         <p>{% if claim['kind'] == 'cash' and pay_links %}{{ t('guest_reserved_note_cash') }}{% elif item and item['url'] and claim['kind'] != 'cash' %}{{ t('guest_reserved_note_buy') }}{% else %}{{ t('guest_reserved_note') }}{% endif %}</p>
       {% elif claim['status'] == 'reported' %}
         <p>{{ t('guest_reported_note') }}</p>
@@ -88,21 +101,58 @@
     {{ cash_pay_block() }}
     {% if claim['status'] == 'reserved' and claim['kind'] == 'cash' %}{{ save_link_panel() }}{% endif %}
 
-    {# still to buy: store gift not yet reported — only then do price/stock and the buy button matter #}
-    {% set _to_buy = claim['kind'] != 'cash' and claim['status'] in ('reserved', 'expired') %}
+    {% if _to_buy and days_to_simcha is not none and 0 <= days_to_simcha < 10 %}
+    <p class="hint gift-rush">{{ tf('guest_rush', n=days_to_simcha) if days_to_simcha >= 2 else t('guest_rush_now') }}</p>
+    {% endif %}
+
+    {# only while the gift is still to buy do price/stock and the buy button matter #}
     {% if item %}
     <h2 class="sub-title"><bdi>{{ pick(item, 'name') }}</bdi>{% if claim['qty'] > 1 %} ×{{ claim['qty'] }}{% endif %}</h2>
     {% if claim['kind'] != 'cash' %}{{ price_line(item) }}{% endif %}
     {{ gift_facts(item, show_tags=_to_buy) }}
-    {% if item['url'] and _to_buy %}
-    <p class="next-step"><strong>{{ t('guest_next_buy') }}</strong></p>
-    <a class="btn btn-primary store-cta bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
-      <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }} ↗</a>
+    {% if _steps_mode %}
+    {% set _addr = pick(reg, 'delivery_note') if (reg['delivery_note'] or reg['delivery_note_he']) else '' %}
+    <ol class="gift-steps">
+      <li>
+        <span class="gift-step-n" aria-hidden="true">1</span>
+        <div class="gift-step-body">
+          <h3>{{ tf('guest_s1_h', store=item['store']) if item['store'] else t('guest_s1_h_nostore') }}</h3>
+          <a class="btn btn-primary store-cta bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
+            <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }} ↗</a>
+          <p class="hint">{{ t('guest_s1_hint') }}</p>
+        </div>
+      </li>
+      <li>
+        <span class="gift-step-n" aria-hidden="true">2</span>
+        <div class="gift-step-body delivery-box">
+          <h3>{{ t('guest_delivery_h') }}</h3>
+          {% if _addr %}
+          <p dir="auto">{{ _addr }}</p>
+          <button class="btn btn-ghost btn-sm" type="button" data-copy="{{ _addr }}" data-copied-label="{{ t('copied') }}">{{ t('guest_copy_address') }}</button>
+          {% else %}
+          <p>{{ t('guest_delivery_missing') }}</p>
+          {% endif %}
+        </div>
+      </li>
+      <li>
+        <span class="gift-step-n" aria-hidden="true">3</span>
+        <div class="gift-step-body">
+          <h3>{{ t('guest_s3_h') }}</h3>
+          <form class="report-form" method="post" action="{{ url_for('guest_report', token=token) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label>{{ t('guest_report_note_label') }}
+              <textarea name="report_note" rows="2" maxlength="500" dir="auto"
+                        placeholder="{{ t('guest_report_note_ph_item') }}"></textarea></label>
+            <button class="btn btn-primary" type="submit">{{ t('guest_report_btn') }}</button>
+          </form>
+        </div>
+      </li>
+    </ol>
     {% elif item['url'] %}
     <a class="store-link bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
       <svg class="ic"><use href="#i-link"/></svg> {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
     {% endif %}
-    {% if _to_buy %}
+    {% if _to_buy and not _steps_mode %}
     <div class="delivery-box">
       <h3>{{ t('guest_delivery_h') }}</h3>
       {% if reg['delivery_note'] or reg['delivery_note_he'] %}
@@ -118,12 +168,17 @@
 
     {% set _n = estimate_note() if _to_buy or (claim['kind'] == 'cash' and pay_links and claim['status'] in ('reserved', 'reported') and claim['amount_minor'] is not none and claim['currency'] == 'ILS') else '' %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
-    {% if claim['expires_at'] and claim['status'] == 'reserved' %}
+    {% if claim['expires_at'] and claim['status'] == 'reserved' and not _steps_mode %}
     <p class="hint">{{ tf('guest_expires_on', date=fmt_date(claim['expires_at'])) }}</p>
+    {% endif %}
+
+    {% if claim['message'] %}
+    <p class="gift-msg-yours">{{ t('guest_msg_yours') }} <span dir="auto">“{{ claim['message'] }}”</span></p>
     {% endif %}
 
     {% if claim['status'] in ('reserved', 'expired') %}
     <div class="dash-actions">
+      {% if not _steps_mode %}
       <form class="report-form" method="post" action="{{ url_for('guest_report', token=token) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <label>{{ t('guest_report_note_label') }}
@@ -131,6 +186,7 @@
                     placeholder="{{ t('guest_report_note_ph_cash' if claim['kind'] == 'cash' else 'guest_report_note_ph_item') }}"></textarea></label>
         <button class="btn btn-primary" type="submit">{{ t('guest_report_btn') }}</button>
       </form>
+      {% endif %}
       <form method="post" action="{{ url_for('guest_cancel', token=token) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <button class="btn btn-ghost" type="submit" data-confirm="{{ t('guest_cancel_confirm') }}">{{ t('guest_cancel_btn') }}</button>

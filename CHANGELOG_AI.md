@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-10 (the guest's private gift page)
+Opened `/g/<token>` on a phone as a guest who just reserved a store gift. It said "not bought yet" three times
+(status title, note, "Next step: buy it"), the hold date sat at the bottom under the rates note, the address had
+to be selected by hand to paste into the store's checkout, and nothing said when the simcha was. Now:
+- **Three numbered steps** while a store gift is still to buy (`_steps_mode`: not cash, reserved/expired, has a
+  link): 1 "Order it from KSP" with the store button (opens a new tab, "this page stays here for steps 2 and 3"),
+  2 "Where to send it" with the couple's address and a **Copy address** button (or "ask the couple"),
+  3 "Tell the couple it's on its way" holding the report form. Cancel stays below. Cash and link-less gifts keep
+  the old layout.
+- The status panel says it once: "Reserved for you until 24 November 2026. Nobody else can choose it meanwhile.
+  It isn't bought yet: three steps and it's done." (the bottom "Held until" line is gone in this mode).
+- **The simcha date** under the couple's names, with its Hebrew date (`simcha_date`).
+- **The guest's own message** ("Your message with the gift: “…”"); before, only a report note was shown.
+- **A heads-up when the simcha is close** (0-9 days, only while there's something to buy): "The simcha is in 5
+  days. Store deliveries usually take a few working days, so check the delivery date at checkout." / "almost here,
+  so it will probably arrive after it. That's fine". `guest_manage` passes `days_to_simcha`.
+- `guest_next_buy` removed (unused). 10 EN/HE strings; 9 tests in tests/test_guest_page.py; 2 test_p2 asserts
+  moved from "Next step: buy it" to `gift-steps`.
+
 ## 2026-11-08 (reservation emails)
 Read the emails a reservation actually sends (couple + guest, EN + HE). Fixed:
 - **The guest's message reached nobody**: the gift dialog's "A message for the couple" was stored on the claim but
