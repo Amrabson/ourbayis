@@ -41,9 +41,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [ ] Once KSP approves: note its link format, add a rule for `ksp.co.il`, and try it in "Test a link".
 - [x] A page per catalog item, `/catalog/<slug>` (2026-11-11). [ ] `tools/export_static.py` doesn't export them yet.
 - [x] Paste a link from any store on the custom-gift form (2026-11-11).
-- [ ] **Owner decision: pictures from pasted links.** A pasted link prefills the store's own preview picture
-  (og:image), hot-linked on the couple's registry; the couple can clear it. If you'd rather not show store
-  pictures, say so and the field gets removed.
+- [x] **Owner decision 2026-11-11: keep pictures from pasted links.** A pasted link prefills the store's own
+  preview picture (og:image), hot-linked on the couple's registry; the couple can clear it. (Catalog items still
+  only get photos the owner has the right to use.)
 - [ ] `refresh-registry-links`: don't lower a price below what guests already chipped in.
 - [ ] Hebrew of the six 2026-11-11 guides: have a native speaker read them.
 - [x] Co-owners — done 2026-10-30 as owner + helpers (`/registry/people`, invite links, hand-over).
