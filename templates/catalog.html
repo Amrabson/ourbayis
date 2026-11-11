@@ -58,7 +58,7 @@
     {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
     <p class="hint catalog-legend">{{ t('catalog_legend') }}</p>
   </details>
-  <p class="hint catalog-affiliate">{{ t('affiliate_note') }}</p>
+  <p class="hint catalog-affiliate">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>
   </div>
   {% if not items %}
     <div class="empty-note">

@@ -586,6 +586,24 @@ def _m031_registry_closed(db):
     _add_column(db, "registries", "closed_at TEXT")
 
 
+def _m032_affiliate_rules(db):
+    """Affiliate engine: /go/ redirects tag the destination URL from these rules
+    (see ob_affiliate.py). Stored store URLs are never modified."""
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS affiliate_rules (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          host TEXT NOT NULL UNIQUE,
+          kind TEXT NOT NULL DEFAULT 'param' CHECK (kind IN ('param','wrap')),
+          param TEXT NOT NULL DEFAULT '',
+          value TEXT NOT NULL DEFAULT '',
+          label TEXT NOT NULL DEFAULT '',
+          active INTEGER NOT NULL DEFAULT 1,
+          clicks INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -815,6 +833,7 @@ MIGRATIONS = [
     _m029_brachos,
     _m030_weekly_summary,
     _m031_registry_closed,
+    _m032_affiliate_rules,
 ]
 
 

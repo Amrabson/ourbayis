@@ -52,7 +52,7 @@
   {% if bought_item and bought_item['url'] %}
   <div class="flash flash-ok buy-next">
     <strong>{{ pick(bought_item, 'name') }}</strong> —
-    <a href="{{ go_url(bought_item) }}" target="_blank" rel="noopener sponsored">
+    <a href="{{ go_url(bought_item) }}" target="_blank" rel="nofollow sponsored noopener">
       {{ tf('buy_at', store=bought_item['store']) if bought_item['store'] else t('buy_link') }} →</a>
   </div>
   {% endif %}
@@ -80,7 +80,7 @@
   <div class="reg-list-head{% if show_plan %} has-plan{% endif %}">
   <div class="reg-list-copy">
       <h2 class="section-title list-title" id="gifts">{{ t('reg_gifts') }}{% if items %} <span class="list-count">{{ items | length }}</span>{% endif %}</h2>
-      <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}</p>
+      <p class="hint reg-how-note">{{ t('reg_how_note') }} {{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>
 
       {% if not items %}
         <p class="empty-note">{{ t('reg_empty') }}</p>
@@ -161,7 +161,7 @@
         {{ price_line(item, cls='gift-price modal-price') }}
         {{ gift_facts(item) }}
         {% if item['url'] %}
-        <a class="store-link" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
+        <a class="store-link" href="{{ go_url(item) }}" target="_blank" rel="nofollow sponsored noopener">
           <svg class="ic"><use href="#i-link"/></svg>
           {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
         {% endif %}

@@ -38,7 +38,7 @@
       </div>
     </section>
     {% endfor %}
-    <p class="hint catalog-affiliate">{{ t('affiliate_note') }}</p>
+    <p class="hint catalog-affiliate">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>
   </div>
   {% endif %}
 

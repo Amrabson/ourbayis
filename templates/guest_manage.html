@@ -117,7 +117,7 @@
         <span class="gift-step-n" aria-hidden="true">1</span>
         <div class="gift-step-body">
           <h3>{{ tf('guest_s1_h', store=item['store']) if item['store'] else t('guest_s1_h_nostore') }}</h3>
-          <a class="btn btn-primary store-cta bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
+          <a class="btn btn-primary store-cta bdi" href="{{ go_url(item) }}" target="_blank" rel="nofollow sponsored noopener">
             <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }} ↗</a>
           <p class="hint">{{ t('guest_s1_hint') }}</p>
         </div>
@@ -149,7 +149,7 @@
       </li>
     </ol>
     {% elif item['url'] %}
-    <a class="store-link bdi" href="{{ go_url(item) }}" target="_blank" rel="noopener sponsored">
+    <a class="store-link bdi" href="{{ go_url(item) }}" target="_blank" rel="nofollow sponsored noopener">
       <svg class="ic"><use href="#i-link"/></svg> {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
     {% endif %}
     {% if _to_buy and not _steps_mode %}
@@ -162,7 +162,7 @@
       {% endif %}
     </div>
     {% endif %}
-    {% if item['url'] %}<p class="hint">{{ t('affiliate_note') }}</p>{% endif %}
+    {% if item['url'] %}<p class="hint">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>{% endif %}
     {% endif %}
     {% if claim['status'] == 'reserved' and claim['kind'] != 'cash' %}{{ save_link_panel() }}{% endif %}
 

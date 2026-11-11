@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Affiliates admin — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Affiliate links</h1>
+    <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+  </div>
+  <p class="hint">Every outbound store click (catalog items and items couples add themselves) is tagged at redirect time by the first matching active rule. Stored links are never changed. Paste each program's ID once here. Amazon rules also switch on the required "Amazon Associate" sentence beside the affiliate note.</p>
+
+  <h2 class="sub-title">Add a rule</h2>
+  <div class="form-panel">
+    <form method="post" action="{{ url_for('admin_affiliates') }}" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Preset (just prefills the fields below)
+        <select data-aff-preset>
+          <option value="">Choose a program…</option>
+          <option value="amazon.com" data-host="amazon.com" data-kind="param" data-param="tag" data-value="" data-label="Amazon US">Amazon US (tag)</option>
+          <option value="amazon.co.uk" data-host="amazon.co.uk" data-kind="param" data-param="tag" data-value="" data-label="Amazon UK">Amazon UK (tag)</option>
+          <option value="aliexpress.com" data-host="aliexpress.com" data-kind="wrap" data-param="" data-value="https://example-portal.com/deeplink?id=YOURID&amp;url={url}" data-label="AliExpress">AliExpress (wrap: edit the template)</option>
+        </select>
+      </label>
+      <div class="form-2col">
+        <label>Host *<input name="host" required maxlength="120" placeholder="amazon.com"></label>
+        <label>Type *
+          <select name="kind">
+            <option value="param">param: set a query parameter</option>
+            <option value="wrap">wrap: redirect template with {url}</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-2col">
+        <label>Parameter name (param only)<input name="param" maxlength="40" placeholder="tag"></label>
+        <label>Value / template *<input name="value" required maxlength="300" placeholder="yourid-20"></label>
+      </div>
+      <label>Label (for you)<input name="label" maxlength="80"></label>
+      <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-plus"/></svg> Add rule</button>
+    </form>
+  </div>
+
+  <h2 class="sub-title">Rules</h2>
+  {% for r in rows %}
+  <div class="gift-row {% if not r['active'] %}is-thanked{% endif %}">
+    <div>
+      <strong>{{ r['host'] }}</strong>{% if r['label'] %} · {{ r['label'] }}{% endif %}{% if not r['active'] %} · (off){% endif %}
+      <p class="gift-msg">{% if r['kind'] == 'param' %}{{ r['param'] }}={{ r['value'] }}{% else %}wrap: {{ r['value'] }}{% endif %} · {{ r['clicks'] }} tagged click{{ '' if r['clicks'] == 1 else 's' }}</p>
+      <details>
+        <summary>Edit</summary>
+        <form method="post" action="{{ url_for('admin_affiliate_edit', rule_id=r['id']) }}" class="stack-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <div class="form-2col">
+            <label>Host<input name="host" required maxlength="120" value="{{ r['host'] }}"></label>
+            <label>Type
+              <select name="kind">
+                <option value="param" {% if r['kind'] == 'param' %}selected{% endif %}>param</option>
+                <option value="wrap" {% if r['kind'] == 'wrap' %}selected{% endif %}>wrap</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-2col">
+            <label>Parameter name<input name="param" maxlength="40" value="{{ r['param'] }}"></label>
+            <label>Value / template<input name="value" required maxlength="300" value="{{ r['value'] }}"></label>
+          </div>
+          <label>Label<input name="label" maxlength="80" value="{{ r['label'] }}"></label>
+          <button class="btn btn-primary btn-sm" type="submit">Save</button>
+        </form>
+      </details>
+    </div>
+    <div class="mine-actions">
+      <form method="post" action="{{ url_for('admin_affiliate_toggle', rule_id=r['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ 'Turn off' if r['active'] else 'Turn on' }}</button>
+      </form>
+      <form method="post" action="{{ url_for('admin_affiliate_delete', rule_id=r['id']) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-danger btn-sm" type="submit" data-confirm="Delete rule for {{ r['host'] }}?">Delete</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <p class="hint">No rules yet.</p>
+  {% endfor %}
+
+  <h2 class="sub-title">Test a link</h2>
+  <div class="form-panel">
+    <form method="post" action="{{ url_for('admin_affiliates_test') }}" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Store URL<input name="test_url" maxlength="500" value="{{ test_url }}" placeholder="https://www.amazon.com/dp/B000000000"></label>
+      <button class="btn btn-ghost" type="submit">Show what visitors get</button>
+    </form>
+    {% if test_result %}
+      {% if test_result.error %}
+        <p class="hint">{{ test_result.error }}</p>
+      {% elif test_result.rule %}
+        <p class="hint">Matched {{ test_result.rule['host'] }}. Visitors are sent to:</p>
+        <p class="gift-msg bdi" dir="ltr">{{ test_result.final }}</p>
+      {% else %}
+        <p class="hint">No active rule covers this link: it is sent as-is.</p>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  <h2 class="sub-title">Where clicks go</h2>
+  <p class="hint">Outbound store clicks by destination host (catalog + registry items). Hosts with many clicks and no rule are the programs worth joining.</p>
+  {% if hosts %}
+  <table class="admin-table">
+    <thead><tr><th scope="col">Host</th><th scope="col">Clicks</th><th scope="col">Covered by a rule?</th></tr></thead>
+    <tbody>
+    {% for h in hosts %}
+      <tr>
+        <td dir="ltr">{{ h.host }}</td>
+        <td>{{ h.clicks }}</td>
+        <td>{% if h.rule %}{{ 'Yes' if h.rule['active'] else 'Rule is off' }} ({{ h.rule['host'] }}){% else %}No{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="hint">No outbound clicks recorded yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

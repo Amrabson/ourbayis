@@ -30,6 +30,7 @@ from itsdangerous import BadSignature, URLSafeSerializer
 
 import guides as ob_guides
 import i18n as i18n_mod
+import ob_affiliate
 import ob_db
 import ob_hebcal
 import ob_mail
@@ -896,6 +897,15 @@ def tf(key, lang, **kw):
     return _HE_PREFIX_BEFORE_LATIN.sub(r"\1-", s) if lang == "he" else s
 
 
+def amazon_associate_active():
+    """True when an active affiliate rule targets an Amazon host (so the
+    Associates disclosure sentence must be shown). Cached per request."""
+    if not hasattr(g, "_amazon_assoc"):
+        g._amazon_assoc = bool(get_db().execute(
+            "SELECT 1 FROM affiliate_rules WHERE active=1 AND host LIKE '%amazon%' LIMIT 1").fetchone())
+    return g._amazon_assoc
+
+
 @app.context_processor
 def inject_globals():
     lang = current_lang()
@@ -934,6 +944,7 @@ def inject_globals():
         form_key=secrets.token_urlsafe(16),
         gift_routes=lambda item: item_routes(item, reg_pay_links_for_item(item)),
         go_url=go_url,
+        amazon_associate=amazon_associate_active(),
         ext_url=ext_url,
         estimate_note=lambda: estimate_note(lang),
         gpick=lambda obj, field: ob_guides.pick(obj, field, lang),
@@ -1281,6 +1292,23 @@ CATALOG_SORTS = {
 }
 
 
+def _affiliate_destination(db, url, owner_uid=None):
+    """Tag `url` with the first matching active affiliate rule. When a rule
+    applied (and this is a real visitor) count the click on the rule and fire
+    `handoff_click_tagged`. A tagged URL that no longer validates falls back
+    to the untagged one. The stored URL is never modified."""
+    rules = db.execute("SELECT * FROM affiliate_rules WHERE active=1").fetchall()
+    if not rules:
+        return url
+    final, rule_id = ob_affiliate.tag_url(url, rules)
+    if rule_id is None or not valid_http_url(final):
+        return url
+    if not is_bot():
+        db.execute("UPDATE affiliate_rules SET clicks = clicks + 1 WHERE id=?", (rule_id,))
+    track("handoff_click_tagged", owner_uid=owner_uid)
+    return final
+
+
 @app.route("/go/c/<int:catalog_id>")
 def go_catalog(catalog_id):
     """Click-through to a catalog item's store link. The destination is
@@ -1293,7 +1321,7 @@ def go_catalog(catalog_id):
     if not is_bot():
         db.execute("UPDATE catalog_items SET clicks = clicks + 1 WHERE id=?", (catalog_id,))
     track("handoff_click")
-    return redirect(row["url"], code=302)
+    return redirect(_affiliate_destination(db, row["url"]), code=302)
 
 
 @app.route("/go/i/<int:item_id>")
@@ -1305,8 +1333,9 @@ def go_item(item_id):
     if not is_bot():
         db.execute("UPDATE registry_items SET clicks = clicks + 1 WHERE id=?", (item_id,))
     reg = db.execute("SELECT user_id FROM registries WHERE id=?", (row["registry_id"],)).fetchone()
-    track("handoff_click", owner_uid=reg["user_id"] if reg else None)
-    return redirect(row["url"], code=302)
+    owner_uid = reg["user_id"] if reg else None
+    track("handoff_click", owner_uid=owner_uid)
+    return redirect(_affiliate_destination(db, row["url"], owner_uid=owner_uid), code=302)
 
 
 _FIND_SKIP_WORDS = {"and", "the", "family", "wedding", "registry", "mr", "mrs", "ms", "את", "של", "חתונה"}
@@ -4077,6 +4106,114 @@ def admin_ad_toggle(ad_id):
 def admin_ad_delete(ad_id):
     get_db().execute("DELETE FROM ads WHERE id=?", (ad_id,))
     return redirect(url_for("admin_ads"))
+
+
+def _outbound_click_hosts(db):
+    """Outbound store clicks grouped by destination hostname (catalog + registry
+    items), each with the affiliate rule that covers it, if any."""
+    rules = db.execute("SELECT * FROM affiliate_rules ORDER BY active DESC, id").fetchall()
+    totals = {}
+    for table in ("catalog_items", "registry_items"):
+        for r in db.execute(f"SELECT url, clicks FROM {table} WHERE url != '' AND clicks > 0"):
+            try:
+                host = (urlsplit(r["url"]).hostname or "").lower()
+            except ValueError:
+                continue
+            if host.startswith("www."):
+                host = host[4:]
+            if host:
+                totals[host] = totals.get(host, 0) + (r["clicks"] or 0)
+    out = []
+    for host, n in sorted(totals.items(), key=lambda kv: (-kv[1], kv[0])):
+        rule = next((x for x in rules if ob_affiliate.host_matches(host, x["host"])), None)
+        out.append(dict(host=host, clicks=n, rule=rule))
+    return out
+
+
+def _render_affiliates(test_url="", test_result=None):
+    db = get_db()
+    rows = db.execute("SELECT * FROM affiliate_rules ORDER BY active DESC, host").fetchall()
+    return render_template("admin_affiliates.html", rows=rows, hosts=_outbound_click_hosts(db),
+                           test_url=test_url, test_result=test_result)
+
+
+def _affiliate_form_values():
+    return ob_affiliate.validate_rule(request.form.get("host"), request.form.get("kind"),
+                                      request.form.get("param"), request.form.get("value"))
+
+
+@app.route("/admin/affiliates", methods=["GET", "POST"])
+@admin_required
+def admin_affiliates():
+    if request.method == "POST":
+        db = get_db()
+        try:
+            host, kind, param, value = _affiliate_form_values()
+        except ValueError as e:
+            flash(f"Rule not saved: {e}", "err")
+            return redirect(url_for("admin_affiliates"))
+        label = (request.form.get("label") or "").strip()[:80]
+        if db.execute("SELECT 1 FROM affiliate_rules WHERE host=?", (host,)).fetchone():
+            flash(f"There is already a rule for {host}: edit it instead.", "err")
+        else:
+            db.execute("INSERT INTO affiliate_rules (host, kind, param, value, label) VALUES (?,?,?,?,?)",
+                       (host, kind, param, value, label))
+            flash("Rule added.", "ok")
+        return redirect(url_for("admin_affiliates"))
+    return _render_affiliates()
+
+
+@app.route("/admin/affiliates/test", methods=["POST"])
+@admin_required
+def admin_affiliates_test():
+    u = (request.form.get("test_url") or "").strip()[:500]
+    if u and not u.startswith(("http://", "https://")):
+        u = "https://" + u
+    result = None
+    if u:
+        if not valid_http_url(u):
+            result = dict(error="That doesn't look like a valid store URL.")
+        else:
+            rules = get_db().execute("SELECT * FROM affiliate_rules WHERE active=1").fetchall()
+            final, rule_id = ob_affiliate.tag_url(u, rules)
+            if rule_id is not None and not valid_http_url(final):
+                result = dict(error="The tagged URL would be invalid, so visitors get the plain link.")
+            else:
+                rule = next((r for r in rules if r["id"] == rule_id), None)
+                result = dict(final=final, rule=rule)
+    return _render_affiliates(test_url=u, test_result=result)
+
+
+@app.route("/admin/affiliates/<int:rule_id>/edit", methods=["POST"])
+@admin_required
+def admin_affiliate_edit(rule_id):
+    db = get_db()
+    try:
+        host, kind, param, value = _affiliate_form_values()
+    except ValueError as e:
+        flash(f"Rule not saved: {e}", "err")
+        return redirect(url_for("admin_affiliates"))
+    if db.execute("SELECT 1 FROM affiliate_rules WHERE host=? AND id!=?", (host, rule_id)).fetchone():
+        flash(f"There is already a rule for {host}.", "err")
+        return redirect(url_for("admin_affiliates"))
+    db.execute("UPDATE affiliate_rules SET host=?, kind=?, param=?, value=?, label=? WHERE id=?",
+               (host, kind, param, value, (request.form.get("label") or "").strip()[:80], rule_id))
+    flash("Rule saved.", "ok")
+    return redirect(url_for("admin_affiliates"))
+
+
+@app.route("/admin/affiliates/<int:rule_id>/toggle", methods=["POST"])
+@admin_required
+def admin_affiliate_toggle(rule_id):
+    get_db().execute("UPDATE affiliate_rules SET active = 1 - active WHERE id=?", (rule_id,))
+    return redirect(url_for("admin_affiliates"))
+
+
+@app.route("/admin/affiliates/<int:rule_id>/delete", methods=["POST"])
+@admin_required
+def admin_affiliate_delete(rule_id):
+    get_db().execute("DELETE FROM affiliate_rules WHERE id=?", (rule_id,))
+    return redirect(url_for("admin_affiliates"))
 
 
 @app.route("/admin/password", methods=["POST"])

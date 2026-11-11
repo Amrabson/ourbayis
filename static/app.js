@@ -405,6 +405,21 @@
     document.querySelectorAll("[data-rail-sec]").forEach(function (sec) { io.observe(sec); });
   });
 
+  // /admin/affiliates: the preset dropdown only prefills the add-rule form
+  document.addEventListener("DOMContentLoaded", function () {
+    var sel = document.querySelector("[data-aff-preset]");
+    if (!sel) return;
+    var form = sel.closest("form");
+    sel.addEventListener("change", function () {
+      var opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) return;
+      ["host", "kind", "param", "value", "label"].forEach(function (k) {
+        var el = form.elements[k];
+        if (el) el.value = opt.getAttribute("data-" + k) || "";
+      });
+    });
+  });
+
   // thank-you studio: switching a note's language swaps in the other draft, and every edit keeps
   // the Copy / WhatsApp / Email buttons carrying the note as it now reads
   document.addEventListener("DOMContentLoaded", function () {
