@@ -604,6 +604,19 @@ def _m032_affiliate_rules(db):
     """)
 
 
+def _m033_chip_in(db):
+    """Chip in (2026-11-11): a couple can open one big gift to contributions. Contributions are
+    claims rows with kind='chip', qty=0 (so every SUM(qty) availability count ignores them) and
+    amount_minor = the guest's amount."""
+    _add_column(db, "registry_items", "chip_in INTEGER NOT NULL DEFAULT 0")
+
+
+def _m034_affiliate_direct(db):
+    """Per-rule 'link directly': the tagged store URL is linked as-is instead of through /go/
+    (Amazon's programme rules dislike a redirect that hides the referring page)."""
+    _add_column(db, "affiliate_rules", "direct INTEGER NOT NULL DEFAULT 0")
+
+
 def _m014_indexes(db):
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_reg_item_status ON claims(registry_id, item_id, status)")
     db.execute("CREATE INDEX IF NOT EXISTS ix_claims_token_hash ON claims(token_hash)")
@@ -834,6 +847,8 @@ MIGRATIONS = [
     _m030_weekly_summary,
     _m031_registry_closed,
     _m032_affiliate_rules,
+    _m033_chip_in,
+    _m034_affiliate_direct,
 ]
 
 

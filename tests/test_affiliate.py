@@ -215,3 +215,100 @@ def test_amazon_sentence_only_with_active_amazon_rule(app_module, client):
     body = client.get(page).get_data(as_text=True)
     assert SENTENCE in body
     assert SENTENCE in client.get(page + "?lang=he").get_data(as_text=True)
+
+
+# ------------------------------------------------------------------ direct links (no /go/ redirect)
+def _direct_setup(app_module, client, direct, url="https://www.amazon.com/dp/B0"):
+    with app_module.app.app_context():
+        app_module.get_db().execute(
+            "INSERT INTO affiliate_rules (host, kind, param, value, active, direct) VALUES ('amazon.com','param','tag','ob-20',1,?)",
+            (direct,))
+    signup(client)
+    create_registry(client)
+    add_item(client, url=url)
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        iid = db.execute("SELECT id FROM registry_items ORDER BY id DESC LIMIT 1").fetchone()[0]
+        slug = db.execute("SELECT slug FROM registries").fetchone()[0]
+        db.execute("UPDATE registries SET visibility='public'")
+    return slug, iid
+
+
+def test_direct_rule_links_the_tagged_url_with_a_ping(app_module, client):
+    slug, iid = _direct_setup(app_module, client, direct=1)
+    html = app_module.app.test_client().get(f"/r/{slug}").get_data(as_text=True)
+    assert ('href="https://www.amazon.com/dp/B0?tag=ob-20" data-go-ping="/go/i/%d/ping" target="_blank" '
+            'rel="nofollow sponsored noopener"' % iid) in html
+    assert f'href="/go/i/{iid}"' not in html
+
+
+def test_non_direct_rule_still_goes_through_go(app_module, client):
+    slug, iid = _direct_setup(app_module, client, direct=0)
+    html = app_module.app.test_client().get(f"/r/{slug}").get_data(as_text=True)
+    assert f'href="/go/i/{iid}"' in html and "data-go-ping" not in html and "tag=ob-20" not in html
+
+
+def test_direct_flag_needs_an_active_matching_param_rule(app_module, client):
+    slug, iid = _direct_setup(app_module, client, direct=1, url="https://shop.example.com/x")
+    html = app_module.app.test_client().get(f"/r/{slug}").get_data(as_text=True)
+    assert f'href="/go/i/{iid}"' in html and "data-go-ping" not in html  # another host: no rule
+    with app_module.app.app_context():
+        app_module.get_db().execute("UPDATE affiliate_rules SET kind='wrap', value='https://p.example.com/?u={url}', param=''")
+        app_module.get_db().execute("UPDATE registry_items SET url='https://www.amazon.com/dp/B0'")
+    html = app_module.app.test_client().get(f"/r/{slug}").get_data(as_text=True)
+    assert f'href="/go/i/{iid}"' in html  # a wrap rule is never linked directly
+    with app_module.app.app_context():
+        app_module.get_db().execute("UPDATE affiliate_rules SET kind='param', param='tag', value='ob-20', active=0")
+    html = app_module.app.test_client().get(f"/r/{slug}").get_data(as_text=True)
+    assert f'href="/go/i/{iid}"' in html  # a rule that is off tags nothing
+
+
+def test_ping_counts_like_the_redirect(app_module, client):
+    from conftest import get_csrf
+    slug, iid = _direct_setup(app_module, client, direct=1)
+    guest = app_module.app.test_client()
+    tok = get_csrf(guest.get(f"/r/{slug}").get_data(as_text=True))
+    assert guest.post(f"/go/i/{iid}/ping", data={}, headers=UA).status_code == 400  # no CSRF token, no count
+    r = guest.post(f"/go/i/{iid}/ping", data=dict(csrf_token=tok), headers=UA)
+    assert r.status_code == 204 and r.data == b""
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        assert db.execute("SELECT clicks FROM registry_items WHERE id=?", (iid,)).fetchone()[0] == 1
+        assert db.execute("SELECT clicks FROM affiliate_rules").fetchone()[0] == 1
+        names = {x[0] for x in db.execute("SELECT name FROM funnel_events")}
+        assert {"handoff_click", "handoff_click_tagged"} <= names
+    # a crawler's ping counts nothing
+    guest.post(f"/go/i/{iid}/ping", data=dict(csrf_token=tok), headers={"User-Agent": "Googlebot/2.1"})
+    with app_module.app.app_context():
+        assert app_module.get_db().execute("SELECT clicks FROM affiliate_rules").fetchone()[0] == 1
+    assert guest.post("/go/i/99999/ping", data=dict(csrf_token=tok), headers=UA).status_code == 404
+
+
+def test_catalog_ping_counts_and_is_rate_limited(app_module, client):
+    from conftest import get_csrf
+    rid = _add_rule(app_module)
+    cid = _catalog_id(app_module)
+    tok = get_csrf(client.get("/catalog").get_data(as_text=True))
+    assert client.post(f"/go/c/{cid}/ping", data=dict(csrf_token=tok), headers=UA).status_code == 204
+    assert _rule_clicks(app_module, rid) == 1
+    codes = [client.post(f"/go/c/{cid}/ping", data=dict(csrf_token=tok), headers=UA).status_code for _ in range(70)]
+    assert 429 in codes
+
+
+def test_admin_direct_checkbox_and_amazon_presets(app_module, client):
+    from conftest import get_csrf
+    admin_login(client)
+    html = client.get("/admin/affiliates").get_data(as_text=True)
+    assert "Link directly (no /go/ redirect)" in html and html.count('data-direct="1"') == 2
+    tok = get_csrf(html)
+    client.post("/admin/affiliates", data=dict(csrf_token=tok, host="amazon.com", kind="param", param="tag",
+                                               value="ob-20", direct="1"))
+    client.post("/admin/affiliates", data=dict(csrf_token=tok, host="example.com", kind="param", param="tag", value="x"))
+    with app_module.app.app_context():
+        rows = {r["host"]: r["direct"] for r in app_module.get_db().execute("SELECT host, direct FROM affiliate_rules")}
+        rid = app_module.get_db().execute("SELECT id FROM affiliate_rules WHERE host='amazon.com'").fetchone()[0]
+    assert rows == {"amazon.com": 1, "example.com": 0}
+    client.post(f"/admin/affiliates/{rid}/edit", data=dict(csrf_token=tok, host="amazon.com", kind="param",
+                                                           param="tag", value="ob-20"))  # box left unticked
+    with app_module.app.app_context():
+        assert app_module.get_db().execute("SELECT direct FROM affiliate_rules WHERE id=?", (rid,)).fetchone()[0] == 0

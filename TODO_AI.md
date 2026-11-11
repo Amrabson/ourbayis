@@ -32,7 +32,14 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 - [x] Per-page view counters (2026-09-22) — `view:<endpoint>` rows in the admin funnel table.
 - [x] Hebrew registry-form fields collapse into an "Add Hebrew" `<details>` (2026-09-22); same on the
   item edit page.
-- [ ] Group gifting / chip-in toward big-ticket items — deliberately deferred (SPEC_V3 "Defer").
+- [x] Group gifting / chip-in toward big-ticket items (2026-11-11).
+- [x] Affiliate tagging engine + `/admin/affiliates` (2026-11-11).
+- [ ] **Owner: join affiliate programs** (AFFILIATE_PROGRAMS.md): Judaica WebStore first, then Amazon Associates,
+  then Awin; paste each ID as a rule in `/admin/affiliates`. Email Home Center to ask which network runs theirs.
+- [ ] **Catalog: add items from stores that pay.** 97 of 100 links go to stores with no program. Once approved by
+  Judaica WebStore, add its listings for the Judaica items (keep prices verified); small Amazon items under USD 75.
+- [ ] `refresh-registry-links`: don't lower a price below what guests already chipped in.
+- [ ] Hebrew of the six 2026-11-11 guides: have a native speaker read them.
 - [x] Co-owners — done 2026-10-30 as owner + helpers (`/registry/people`, invite links, hand-over).
   Helpers can opt in to the gift emails (2026-10-30).
 - [x] Gifts from outside the list on the thank-you page (2026-11-03), with paste-a-list.

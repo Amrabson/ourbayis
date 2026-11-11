@@ -72,6 +72,7 @@
         <h2 class="thanks-name"><bdi>{{ g['guest_name'] }}</bdi></h2>
         <p class="thanks-gift">
           {% if g['kind'] == 'outside' %}<bdi>{{ g['item_name'] or t('outside_gift_some') }}</bdi>
+          {% elif g['kind'] == 'chip' %}<bdi>{{ g['chip_label'] }}</bdi>
           {% elif g['kind'] == 'cash' %}{{ t('gift_cash') }}{% if g['amount_label'] %} · <bdi>{{ g['amount_label'] }}</bdi>{% endif %}
           {% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% if g['qty'] and g['qty'] > 1 %} × {{ g['qty'] }}{% endif %}{% endif %}
         </p>
@@ -138,7 +139,7 @@
         {% for g in thanked %}
         <li id="thanks-{{ g['anchor'] }}">
           <span><svg class="ic ic-sm" aria-hidden="true"><use href="#i-check"/></svg> <strong><bdi>{{ g['guest_name'] }}</bdi></strong>
-            — {% if g['kind'] == 'outside' %}<bdi>{{ g['item_name'] or t('outside_gift_some') }}</bdi>{% elif g['kind'] == 'cash' %}{{ t('gift_cash') }}{% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% endif %}</span>
+            — {% if g['kind'] == 'outside' %}<bdi>{{ g['item_name'] or t('outside_gift_some') }}</bdi>{% elif g['kind'] == 'chip' %}<bdi>{{ g['chip_label'] }}</bdi>{% elif g['kind'] == 'cash' %}{{ t('gift_cash') }}{% else %}{{ (g['item_name_he'] if rtl and g['item_name_he'] else g['item_name']) or t('gift_cash') }}{% endif %}</span>
           <form method="post" action="{{ g['toggle_url'] }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="back" value="thanks">

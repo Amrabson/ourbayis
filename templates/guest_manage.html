@@ -25,9 +25,12 @@
 {% macro cash_pay_block() %}
     {# pay buttons only while the money may still be on its way — never after the couple confirmed
        it (or it was cancelled), or a returning guest could send it a second time #}
-    {% if claim['kind'] == 'cash' and pay_links and claim['status'] in ('reserved', 'reported') %}
+    {% if claim['kind'] in ('cash', 'chip') and pay_links and claim['status'] in ('reserved', 'reported') %}
     <div class="pay-block">
-      {% if claim['amount_minor'] is not none %}
+      {% if claim['kind'] == 'chip' and item %}
+      <p class="pay-amount">{{ tf('guest_chip_amount', amount=fmt_money(claim['amount_minor'], claim['currency']), item=pick(item, 'name')) }}
+        {% if claim['currency'] == 'ILS' %}{% set _e = estimate_label(claim['amount_minor'] // 100) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}{% endif %}</p>
+      {% elif claim['amount_minor'] is not none %}
       <p class="pay-amount">{{ t('guest_send_amount') }} <strong class="bdi">{{ fmt_money(claim['amount_minor'], claim['currency']) }}</strong>
         {% if claim['currency'] == 'ILS' %}{% set _e = estimate_label(claim['amount_minor'] // 100) %}{% if _e %}<span class="usd bdi">{{ _e }}</span>{% endif %}{% endif %}</p>
       {% elif claim['amount'] %}
@@ -42,7 +45,7 @@
         {% endfor %}
       </div>
       {# "the amount shown is what the couple listed" only fits money for a listed gift #}
-      <p class="hint">{{ t('guest_pay_hint') }} {{ t('guest_pay_provider_hint') if claim['item_id'] and claim['amount_minor'] is not none else t('guest_pay_provider_hint_short') }}</p>
+      <p class="hint">{{ t('guest_pay_hint') }} {{ t('guest_pay_provider_hint') if claim['item_id'] and claim['kind'] != 'chip' and claim['amount_minor'] is not none else t('guest_pay_provider_hint_short') }}</p>
     </div>
     {% elif claim['amount_minor'] is not none %}
     <p class="gift-meta bdi"><strong>{{ fmt_money(claim['amount_minor'], claim['currency']) }}</strong></p>
@@ -58,7 +61,7 @@
 
     {# a store gift still to buy gets three numbered steps (order it, send it here, tell the couple)
        instead of the same "not bought yet" said three ways #}
-    {% set _to_buy = claim['kind'] != 'cash' and claim['status'] in ('reserved', 'expired') %}
+    {% set _to_buy = claim['kind'] not in ('cash', 'chip') and claim['status'] in ('reserved', 'expired') %}
     {% set _steps_mode = _to_buy and item and item['url'] %}
 
     {% set _steps = ['reserved', 'reported', 'received'] %}
@@ -85,7 +88,7 @@
       {% endif %}
       {% if claim['status'] == 'reserved' and _steps_mode %}
       {% elif claim['status'] == 'reserved' %}
-        <p>{% if claim['kind'] == 'cash' and pay_links %}{{ t('guest_reserved_note_cash') }}{% elif item and item['url'] and claim['kind'] != 'cash' %}{{ t('guest_reserved_note_buy') }}{% else %}{{ t('guest_reserved_note') }}{% endif %}</p>
+        <p>{% if claim['kind'] in ('cash', 'chip') and pay_links %}{{ t('guest_reserved_note_cash') }}{% elif item and item['url'] and claim['kind'] not in ('cash', 'chip') %}{{ t('guest_reserved_note_buy') }}{% else %}{{ t('guest_reserved_note') }}{% endif %}</p>
       {% elif claim['status'] == 'reported' %}
         <p>{{ t('guest_reported_note') }}</p>
         {% if claim['report_note'] %}<p>{{ t('guest_report_note_yours') }} <span dir="auto">“{{ claim['report_note'] }}”</span></p>{% endif %}
@@ -99,7 +102,7 @@
     </div>
 
     {{ cash_pay_block() }}
-    {% if claim['status'] == 'reserved' and claim['kind'] == 'cash' %}{{ save_link_panel() }}{% endif %}
+    {% if claim['status'] == 'reserved' and claim['kind'] in ('cash', 'chip') %}{{ save_link_panel() }}{% endif %}
 
     {% if _to_buy and days_to_simcha is not none and 0 <= days_to_simcha < 10 %}
     <p class="hint gift-rush">{{ tf('guest_rush', n=days_to_simcha) if days_to_simcha >= 2 else t('guest_rush_now') }}</p>
@@ -108,7 +111,7 @@
     {# only while the gift is still to buy do price/stock and the buy button matter #}
     {% if item %}
     <h2 class="sub-title"><bdi>{{ pick(item, 'name') }}</bdi>{% if claim['qty'] > 1 %} ×{{ claim['qty'] }}{% endif %}</h2>
-    {% if claim['kind'] != 'cash' %}{{ price_line(item) }}{% endif %}
+    {% if claim['kind'] not in ('cash', 'chip') %}{{ price_line(item) }}{% endif %}
     {{ gift_facts(item, show_tags=_to_buy) }}
     {% if _steps_mode %}
     {% set _addr = pick(reg, 'delivery_note') if (reg['delivery_note'] or reg['delivery_note_he']) else '' %}
@@ -117,7 +120,7 @@
         <span class="gift-step-n" aria-hidden="true">1</span>
         <div class="gift-step-body">
           <h3>{{ tf('guest_s1_h', store=item['store']) if item['store'] else t('guest_s1_h_nostore') }}</h3>
-          <a class="btn btn-primary store-cta bdi" href="{{ go_url(item) }}" target="_blank" rel="nofollow sponsored noopener">
+          <a class="btn btn-primary store-cta bdi" href="{{ go_url(item) }}"{{ go_attrs(item) }} target="_blank" rel="nofollow sponsored noopener">
             <svg class="ic"><use href="#i-link"/></svg> {{ tf('buy_at', store=item['store']) if item['store'] else t('buy_link') }} ↗</a>
           <p class="hint">{{ t('guest_s1_hint') }}</p>
         </div>
@@ -149,7 +152,7 @@
       </li>
     </ol>
     {% elif item['url'] %}
-    <a class="store-link bdi" href="{{ go_url(item) }}" target="_blank" rel="nofollow sponsored noopener">
+    <a class="store-link bdi" href="{{ go_url(item) }}"{{ go_attrs(item) }} target="_blank" rel="nofollow sponsored noopener">
       <svg class="ic"><use href="#i-link"/></svg> {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
     {% endif %}
     {% if _to_buy and not _steps_mode %}
@@ -164,9 +167,9 @@
     {% endif %}
     {% if item['url'] %}<p class="hint">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>{% endif %}
     {% endif %}
-    {% if claim['status'] == 'reserved' and claim['kind'] != 'cash' %}{{ save_link_panel() }}{% endif %}
+    {% if claim['status'] == 'reserved' and claim['kind'] not in ('cash', 'chip') %}{{ save_link_panel() }}{% endif %}
 
-    {% set _n = estimate_note() if _to_buy or (claim['kind'] == 'cash' and pay_links and claim['status'] in ('reserved', 'reported') and claim['amount_minor'] is not none and claim['currency'] == 'ILS') else '' %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+    {% set _n = estimate_note() if _to_buy or (claim['kind'] in ('cash', 'chip') and pay_links and claim['status'] in ('reserved', 'reported') and claim['amount_minor'] is not none and claim['currency'] == 'ILS') else '' %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
 
     {% if claim['expires_at'] and claim['status'] == 'reserved' and not _steps_mode %}
     <p class="hint">{{ tf('guest_expires_on', date=fmt_date(claim['expires_at'])) }}</p>
@@ -183,7 +186,7 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
         <label>{{ t('guest_report_note_label') }}
           <textarea name="report_note" rows="2" maxlength="500" dir="auto"
-                    placeholder="{{ t('guest_report_note_ph_cash' if claim['kind'] == 'cash' else 'guest_report_note_ph_item') }}"></textarea></label>
+                    placeholder="{{ t('guest_report_note_ph_cash' if claim['kind'] in ('cash', 'chip') else 'guest_report_note_ph_item') }}"></textarea></label>
         <button class="btn btn-primary" type="submit">{{ t('guest_report_btn') }}</button>
       </form>
       {% endif %}

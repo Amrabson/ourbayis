@@ -6,7 +6,7 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {% for n in [1, 2, 3, 4, 5, 6] %}
+    {% for n in [1, 2, 3, 4, 5, 6, 7] %}
     {
       "@type": "Question",
       "name": {{ t('faq_q' ~ n) | tojson }},
@@ -60,7 +60,7 @@
   <div class="sec-inner">
     <h2 class="sec-title">{{ t('faq_title') }}</h2>
     <ol class="faq-cols">
-      {% for n in [1, 2, 3, 4, 5, 6] %}
+      {% for n in [1, 2, 3, 4, 5, 6, 7] %}
       <li><details><summary><span class="faq-n" aria-hidden="true">{{ '%02d' % n }}</span><span>{{ t('faq_q' ~ n) }}</span></summary>
         <p>{{ t('faq_a' ~ n) }}</p></details></li>
       {% endfor %}

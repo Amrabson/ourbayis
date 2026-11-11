@@ -2520,3 +2520,23 @@ main:focus { outline: none; }
 .cash-steps h4 { margin: 2px 0 10px; font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; color: var(--navy); }
 .cash-pay-links { display: grid; gap: 8px; margin-bottom: 6px; }
 .cash-steps form { display: grid; gap: 4px; }
+
+/* ---- Chip in (2026-11-11): several guests fund one big gift. A thin gold fill on a hairline track,
+   like the invitation's own rules; logical properties so it reads right in RTL. ---- */
+.chip-progress { margin: 10px 0 12px; }
+.chip-track { height: 5px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); overflow: hidden; }
+.chip-fill { display: block; height: 100%; min-width: 0; background: linear-gradient(90deg, var(--gold), var(--gold-bright)); border-radius: 999px; transition: width .6s ease; }
+.chip-line { margin: 6px 0 0; font-size: .9rem; color: var(--navy); }
+.chip-left { margin: 2px 0 0; font-size: .84rem; color: var(--ink-soft); }
+.chip-progress-sm { margin: 8px 0 4px; }
+.chip-choice .chip-presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+.chip-opt { display: inline-flex; cursor: pointer; position: relative; }
+.chip-opt input { position: absolute; opacity: 0; pointer-events: none; }
+.chip-opt span { padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--navy); font-weight: 600; }
+.chip-opt input:checked + span { border-color: var(--gold); background: var(--gold-soft); box-shadow: inset 0 0 0 1px var(--gold); }
+.chip-opt input:focus-visible + span { outline: 2px solid var(--navy); outline-offset: 2px; }
+.chip-custom { display: block; margin: 0 0 4px; }
+.chip-custom input { max-width: 11rem; }
+.chip-why { color: var(--danger); }
+.check-chip-suggest { margin: 10px 0 0; }
+@media (prefers-reduced-motion: reduce) { .chip-fill { transition: none; } }

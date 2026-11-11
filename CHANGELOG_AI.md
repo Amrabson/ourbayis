@@ -1,5 +1,32 @@
 # Changelog
 
+## 2026-11-11 (money pass: affiliate engine, chip in, six guides)
+Audit finding: no store link was ever affiliate-tagged, and no affiliate program exists for KSP / Heichal /
+Payngo / Hakol Abayit / Vardinon (97 of the 100 catalog links). See AFFILIATE_PROGRAMS.md (sourced research:
+Judaica WebStore, Amazon Associates, Awin first; Home Center has a tracked program on an unknown network).
+- **Affiliate engine** (`ob_affiliate.py`, migrations 32 + 34, `/admin/affiliates`): rules per hostname, kind
+  `param` (set a query parameter, e.g. amazon.com `tag=`) or `wrap` (network deep link template with `{url}`),
+  applied at click time in `/go/c|i/<id>`, so stored URLs never change and couples' own added links are tagged too.
+  `direct` rules (Amazon: its rules disfavour redirects) make `go_url()` return the tagged store URL itself; clicks
+  are then counted by a `sendBeacon` to `POST /go/c|i/<id>/ping` (`go_attrs(item)` emits `data-go-ping`). Admin
+  page has a "Test a link" box and "Where clicks go" (clicks per store hostname, rule coverage). The Amazon
+  Associate sentence (`amazon_associate_note`) shows beside `affiliate_note` only while an active amazon rule exists.
+  All `go_url` links carry `rel="nofollow sponsored noopener"`.
+- **Chip in** (migration 33 `registry_items.chip_in`; tests/test_chip_in.py): the couple ticks "let guests chip in"
+  on an item (needs a pay link, qty 1, a price). A contribution is a `claims` row `kind='chip'`, **`qty=0`**,
+  `amount_minor`, same reserved → reported → received lifecycle and 14-day hold. `item_claim_breakdown` adds
+  `chip_*` sums and counts a fully funded item as one committed unit; `gift_status` returns `chip` (funded / goal /
+  remaining / pct / count). Whole-item claims are refused once anyone has chipped in; before that the chip dialog
+  also offers "The whole gift" and "I'll buy it at the store myself" (`chip_preset=store`). Minimum ₪20 (`CHIP_MIN`).
+  Couple-side lists, thank-you notes, CSV, keepsake, emails and reminders read "₪180 toward <item>" (`chip_label`).
+  The sample registry's washing machine is a partly funded chip item; list check suggests chip-in for open items
+  ≥ ₪1,500.
+- **Six guides** (guides.py, EN+HE, 11 total): appliances from abroad, bed/linen sizes, Shabbos kitchen equipment,
+  wedding gifts from abroad, where to shop, first Yom Tov year. Facts web-checked by the writing agent; Hebrew not
+  read by a native speaker.
+- Footer said 220 volts; now 230. `run_dev.py` honours `PORT`.
+- Known gap: `manage.py refresh-registry-links` could lower a price below what's already chipped in (no guard).
+
 ## 2026-11-10 (the "send a cash gift" dialog)
 Opened the registry's cash-gift dialog on a phone and sent a gift as a guest. Fixed:
 - **A double tap sent the couple two cash gifts**: the form had no `form_key`, so the claim insert's duplicate

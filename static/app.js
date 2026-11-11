@@ -249,6 +249,33 @@
     fetch(el.getAttribute("data-share-beacon"), { method: "POST", body: fd, credentials: "same-origin", keepalive: true }).catch(function () {});
   });
 
+  // direct affiliate links skip the /go/ redirect, so the click is counted with a beacon instead
+  // (the CSRF token rides in the body, like the share beacon above)
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("a[data-go-ping]");
+    if (!a || !navigator.sendBeacon) return;
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    var fd = new FormData();
+    fd.append("csrf_token", meta ? meta.getAttribute("content") : "");
+    try { navigator.sendBeacon(a.getAttribute("data-go-ping"), fd); } catch (err) {}
+  });
+
+  // chip-in dialog: a typed amount replaces the chosen preset, picking a preset clears the typed one
+  // (without JS the server simply takes the typed amount when there is one)
+  document.addEventListener("input", function (e) {
+    var box = e.target.closest(".chip-custom input");
+    if (!box) return;
+    var form = box.closest("form");
+    if (box.value.trim() === "") return;
+    form.querySelectorAll('input[name="chip_preset"]').forEach(function (r) { r.checked = false; });
+  });
+  document.addEventListener("change", function (e) {
+    var radio = e.target.closest('input[name="chip_preset"]');
+    if (!radio) return;
+    var custom = radio.closest("form").querySelector(".chip-custom input");
+    if (custom) custom.value = "";
+  });
+
   // share kit: an edited message sends as edited (WhatsApp / email / copy follow the box)
   document.addEventListener("input", function (e) {
     var box = e.target.closest("[data-share-text]");
@@ -417,6 +444,7 @@
         var el = form.elements[k];
         if (el) el.value = opt.getAttribute("data-" + k) || "";
       });
+      if (form.elements.direct) form.elements.direct.checked = opt.getAttribute("data-direct") === "1";
     });
   });
 

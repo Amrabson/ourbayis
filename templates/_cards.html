@@ -86,6 +86,26 @@
   {%- endif -%}
 {%- endmacro %}
 
+{# Chip in: progress toward a big gift several guests fund together. `st` is gift_status(); nothing
+   here says money was verified, only what guests have given so far. #}
+{% macro chip_progress(st, small=False) -%}
+  {%- if st.chip -%}
+  {%- set _c = st.chip -%}
+  <div class="chip-progress{% if small %} chip-progress-sm{% endif %}">
+    <div class="chip-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ _c.pct }}"
+         aria-label="{{ tf('chip_aria', pct=_c.pct) }}"><span class="chip-fill" style="width: {{ _c.pct }}%"></span></div>
+    <p class="chip-line bdi">
+      {%- if _c.count -%}{{ tf('chip_given', given=fmt_money(_c.funded_minor, 'ILS'), goal=fmt_money(_c.goal_minor, 'ILS'), n=_c.count) }}
+      {%- else -%}{{ tf('chip_none', goal=fmt_money(_c.goal_minor, 'ILS')) }}{%- endif -%}
+    </p>
+    {%- if _c.remaining_minor > 0 and _c.count %}
+    <p class="chip-left bdi">{{ tf('chip_left', left=fmt_money(_c.remaining_minor, 'ILS')) }}
+      {%- set _e = estimate_label(_c.remaining_minor // 100) %}{% if _e %} <span class="usd bdi">{{ _e }}</span>{% endif %}</p>
+    {%- endif %}
+  </div>
+  {%- endif -%}
+{%- endmacro %}
+
 {# mode: 'catalog' | 'registry' | 'sample' | 'link' (homepage strip: whole card links to the catalog) #}
 {% macro gift_card(item, mode='catalog', st=None, pay_links=[], have=[], has_reg=False, back_args={}, n=None) -%}
   {%- set _tag = 'a' if mode == 'link' else 'article' -%}
@@ -106,6 +126,7 @@
       {{ price_line(item) }}
       {{ gift_facts(item) }}
       {%- if st %}{{ qty_line(st) }}{% endif -%}
+      {%- if st and st.chip and mode in ('registry', 'sample') %}{{ chip_progress(st) }}{% endif -%}
 
       {%- if mode == 'catalog' -%}
         {%- if has_reg -%}
@@ -130,7 +151,9 @@
 
       {%- elif mode == 'registry' -%}
         {%- if st.left > 0 -%}
-          {%- if item['url'] and pay_links -%}
+          {%- if st.chip and item['chip_in'] and pay_links and st.chip.remaining_minor > 0 -%}
+          <button class="btn btn-gold btn-block" data-modal="claim-{{ item['id'] }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('chip_in_btn') }}</button>
+          {%- elif item['url'] and pay_links -%}
           <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}"><svg class="ic"><use href="#i-gift"/></svg> {{ t('gift_this') }}</button>
           {%- elif item['url'] -%}
           <button class="btn btn-primary btn-block" data-modal="claim-{{ item['id'] }}"><svg class="ic"><use href="#i-link"/></svg> {{ t('reserve_buy_btn') }}</button>
@@ -147,7 +170,7 @@
         <span class="card-more">{{ t('card_view_catalog') }} {{ '←' if rtl else '→' }}</span>
       {%- elif mode == 'sample' -%}
         {%- if st.left > 0 -%}
-          <span class="sample-btn-disabled" aria-disabled="true">{% if item['url'] %}{{ t('gift_this') }}{% else %}{{ t('send_money_btn') }}{% endif %}</span>
+          <span class="sample-btn-disabled" aria-disabled="true">{% if st.chip %}{{ t('chip_in_btn') }}{% elif item['url'] %}{{ t('gift_this') }}{% else %}{{ t('send_money_btn') }}{% endif %}</span>
         {%- else -%}
           {{ status_label(st) }}
         {%- endif -%}

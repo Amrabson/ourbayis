@@ -15,8 +15,8 @@
       <label>Preset (just prefills the fields below)
         <select data-aff-preset>
           <option value="">Choose a program…</option>
-          <option value="amazon.com" data-host="amazon.com" data-kind="param" data-param="tag" data-value="" data-label="Amazon US">Amazon US (tag)</option>
-          <option value="amazon.co.uk" data-host="amazon.co.uk" data-kind="param" data-param="tag" data-value="" data-label="Amazon UK">Amazon UK (tag)</option>
+          <option value="amazon.com" data-host="amazon.com" data-kind="param" data-param="tag" data-value="" data-label="Amazon US" data-direct="1">Amazon US (tag)</option>
+          <option value="amazon.co.uk" data-host="amazon.co.uk" data-kind="param" data-param="tag" data-value="" data-label="Amazon UK" data-direct="1">Amazon UK (tag)</option>
           <option value="aliexpress.com" data-host="aliexpress.com" data-kind="wrap" data-param="" data-value="https://example-portal.com/deeplink?id=YOURID&amp;url={url}" data-label="AliExpress">AliExpress (wrap: edit the template)</option>
         </select>
       </label>
@@ -34,6 +34,7 @@
         <label>Value / template *<input name="value" required maxlength="300" placeholder="yourid-20"></label>
       </div>
       <label>Label (for you)<input name="label" maxlength="80"></label>
+      <label class="check-label"><input type="checkbox" name="direct" value="1"> Link directly (no /go/ redirect) — use for Amazon</label>
       <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-plus"/></svg> Add rule</button>
     </form>
   </div>
@@ -43,7 +44,7 @@
   <div class="gift-row {% if not r['active'] %}is-thanked{% endif %}">
     <div>
       <strong>{{ r['host'] }}</strong>{% if r['label'] %} · {{ r['label'] }}{% endif %}{% if not r['active'] %} · (off){% endif %}
-      <p class="gift-msg">{% if r['kind'] == 'param' %}{{ r['param'] }}={{ r['value'] }}{% else %}wrap: {{ r['value'] }}{% endif %} · {{ r['clicks'] }} tagged click{{ '' if r['clicks'] == 1 else 's' }}</p>
+      <p class="gift-msg">{% if r['kind'] == 'param' %}{{ r['param'] }}={{ r['value'] }}{% else %}wrap: {{ r['value'] }}{% endif %}{% if r['direct'] %} · linked directly{% endif %} · {{ r['clicks'] }} tagged click{{ '' if r['clicks'] == 1 else 's' }}</p>
       <details>
         <summary>Edit</summary>
         <form method="post" action="{{ url_for('admin_affiliate_edit', rule_id=r['id']) }}" class="stack-form">
@@ -62,6 +63,7 @@
             <label>Value / template<input name="value" required maxlength="300" value="{{ r['value'] }}"></label>
           </div>
           <label>Label<input name="label" maxlength="80" value="{{ r['label'] }}"></label>
+          <label class="check-label"><input type="checkbox" name="direct" value="1" {% if r['direct'] %}checked{% endif %}> Link directly (no /go/ redirect) — use for Amazon</label>
           <button class="btn btn-primary btn-sm" type="submit">Save</button>
         </form>
       </details>

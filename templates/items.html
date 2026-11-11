@@ -38,6 +38,7 @@
           {%- if st.reported %}{% set _ = _parts.append(tf('qty_reported', n=st.reported)) %}{% endif -%}
           {%- if st.received %}{% set _ = _parts.append(tf('qty_received', n=st.received)) %}{% endif -%}
           {{ ' · ' }}<em class="claimed-note">{{ _parts | join(', ') }}</em>{% endif %}
+        {% if st.chip %}{{ ' · ' }}<em class="claimed-note">{{ tf('chip_items_line', given=fmt_money(st.chip.funded_minor, 'ILS'), goal=fmt_money(st.chip.goal_minor, 'ILS')) }}</em>{% endif %}
         {% if m['availability'] == 'unavailable' %} · <em class="warn-note">{{ t('availability_unavailable_tag') }}</em>{% endif %}
         {% if not m['url'] and not reg['paypal_url'] and not reg['stripe_url'] and not reg['bit_url'] %}
           · <em class="warn-note">{{ t('needs_link_note') }}</em>
@@ -53,7 +54,7 @@
         {% endif %}
       </div>
       <label class="mine-qty">{{ t('qty') }}
-        <input name="qty_wanted" type="number" min="{{ [1, st.committed] | max }}" max="99" value="{{ m['qty_wanted'] }}"></label>
+        <input name="qty_wanted" type="number" min="{{ [1, st.committed] | max }}" max="{{ 1 if m['chip_in'] else 99 }}" value="{{ m['qty_wanted'] }}"></label>
       <label class="check-label"><input type="checkbox" name="priority" {% if m['priority'] %}checked{% endif %}> <svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority') }}</label>
       <div class="mine-actions">
         <a class="btn btn-ghost btn-sm" href="{{ url_for('item_edit', item_id=m['id']) }}">{{ t('edit') }}</a>

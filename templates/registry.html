@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "_cards.html" import gift_card, price_line, gift_facts with context %}
+{% from "_cards.html" import gift_card, price_line, gift_facts, chip_progress with context %}
 {% from "_plan.html" import plan_svg with context %}
 {% from "_date.html" import simcha_date with context %}
 {% block title %}{% set _names = pick(reg, 'couple_names') %}{% if _names and (_names | lower) not in (pick(reg, 'title') | lower) %}{{ _names }} · {% endif %}{{ pick(reg, 'title') }} — {{ brand }}{% endblock %}
@@ -52,7 +52,7 @@
   {% if bought_item and bought_item['url'] %}
   <div class="flash flash-ok buy-next">
     <strong>{{ pick(bought_item, 'name') }}</strong> —
-    <a href="{{ go_url(bought_item) }}" target="_blank" rel="nofollow sponsored noopener">
+    <a href="{{ go_url(bought_item) }}"{{ go_attrs(bought_item) }} target="_blank" rel="nofollow sponsored noopener">
       {{ tf('buy_at', store=bought_item['store']) if bought_item['store'] else t('buy_link') }} →</a>
   </div>
   {% endif %}
@@ -150,6 +150,7 @@
     {{ gift_card(item, mode=('sample' if is_sample else 'registry'), st=st, pay_links=pay_links, n=loop.index) }}
 
     {% if not is_sample and st.left > 0 and (item['url'] or pay_links) %}
+    {% set _chip = st.chip and item['chip_in'] and pay_links and st.chip.remaining_minor > 0 %}
     <dialog class="modal" id="claim-{{ item['id'] }}" aria-labelledby="claim-{{ item['id'] }}-title">
       <form method="post" action="{{ url_for('claim_item', slug=reg['slug'], item_id=item['id']) }}" class="modal-body">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -161,12 +162,33 @@
         {{ price_line(item, cls='gift-price modal-price') }}
         {{ gift_facts(item) }}
         {% if item['url'] %}
-        <a class="store-link" href="{{ go_url(item) }}" target="_blank" rel="nofollow sponsored noopener">
+        <a class="store-link" href="{{ go_url(item) }}"{{ go_attrs(item) }} target="_blank" rel="nofollow sponsored noopener">
           <svg class="ic"><use href="#i-link"/></svg>
           {{ tf('view_at_store', store=item['store']) if item['store'] else t('view_store_page') }} ↗</a>
         {% endif %}
 
-        {% if item['url'] and pay_links %}
+        {% if _chip %}
+        {# several guests fund one big gift: any whole-shekel amount, through the couple's own payment links #}
+        <input type="hidden" name="give" value="chip">
+        {{ chip_progress(st, small=True) }}
+        {% set _rem = st.chip.remaining_minor // 100 %}
+        <fieldset class="give-choice chip-choice">
+          <legend>{{ t('chip_amount_legend') }}</legend>
+          <div class="chip-presets">
+            {% for amt in [100, 180, 360, 500] if amt <= _rem %}
+            <label class="chip-opt"><input type="radio" name="chip_preset" value="{{ amt }}" {% if loop.first %}checked{% endif %}><span class="bdi">₪{{ amt }}</span></label>
+            {% endfor %}
+            <label class="chip-opt"><input type="radio" name="chip_preset" value="rest" {% if _rem < 100 %}checked{% endif %}><span class="bdi">{{ tf('chip_rest' if st.chip.count else 'chip_whole', amount=fmt_money(st.chip.remaining_minor, 'ILS')) }}</span></label>
+            {% if not st.chip.count and item['url'] %}
+            <label class="chip-opt"><input type="radio" name="chip_preset" value="store"><span>{{ t('chip_store_whole') }}</span></label>
+            {% endif %}
+          </div>
+          <label class="chip-custom">{{ t('chip_custom') }}
+            <input name="chip_amount" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" dir="ltr" placeholder="{{ [_rem, 20] | min }}–{{ _rem }}">
+          </label>
+          <small class="hint">{{ tf('chip_min_hint', min=fmt_money([_rem, 20] | min * 100, 'ILS'), max=fmt_money(st.chip.remaining_minor, 'ILS')) }}</small>
+        </fieldset>
+        {% elif item['url'] and pay_links %}
         <fieldset class="give-choice">
           <legend>{{ t('claim_how') }}</legend>
           <label class="radio"><input type="radio" name="give" value="buy" checked>
@@ -189,8 +211,13 @@
         </label>
         {% endif %}
         <label>{{ t('claim_msg') }}<textarea name="message" rows="2" maxlength="1000"></textarea></label>
+        {% if _chip %}
+        <p class="hint">{{ t('chip_next_hint') }} {{ t('claim_expiry_hint') }}</p>
+        <button class="btn btn-gold btn-block" type="submit">{{ t('chip_submit') }}</button>
+        {% else %}
         <p class="hint">{{ t('claim_next_hint') }} {{ t('claim_expiry_hint') }}</p>
         <button class="btn btn-primary btn-block" type="submit">{{ t('claim_submit') }}</button>
+        {% endif %}
       </form>
     </dialog>
     {% endif %}

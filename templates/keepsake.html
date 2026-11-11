@@ -20,7 +20,8 @@
       <figure class="keepsake-note">
         <blockquote dir="auto">“{{ n['message'] }}”</blockquote>
         <figcaption><strong><bdi>{{ n['guest_name'] }}</bdi></strong>
-          {%- if n['kind'] != 'cash' and n['item_name'] %} · {{ tf('keepsake_for', gift=(n['item_name_he'] if rtl and n['item_name_he'] else n['item_name'])) }}{% endif %}</figcaption>
+          {%- if n['kind'] == 'chip' and n['item_name'] %} · {{ tf('keepsake_toward', gift=(n['item_name_he'] if rtl and n['item_name_he'] else n['item_name'])) }}
+          {%- elif n['kind'] != 'cash' and n['item_name'] %} · {{ tf('keepsake_for', gift=(n['item_name_he'] if rtl and n['item_name_he'] else n['item_name'])) }}{% endif %}</figcaption>
       </figure>
       {% endfor %}
     </div>

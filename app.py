@@ -27,6 +27,7 @@ from flask import (Flask, abort, flash, g, redirect, render_template,
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import check_password_hash, generate_password_hash
 from itsdangerous import BadSignature, URLSafeSerializer
+from markupsafe import Markup, escape
 
 import guides as ob_guides
 import i18n as i18n_mod
@@ -287,6 +288,12 @@ def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False
         send_mail(person["email"], _t(key + "_subj", lang).format(**words), body)
 
 
+def chip_label(amount_minor, item_name, item_name_he, lang):
+    """"₪180 toward Fridge" / "₪180 עבור מקרר": how a chip-in contribution reads in mails and lists."""
+    name = item_name_he if lang == "he" and item_name_he else item_name
+    return tf("chip_toward", lang, amount=ob_money.fmt_minor(amount_minor or 0, "ILS", lang), item=name or "")
+
+
 def notify_guest(db, claim, key):
     """`<key>_subj` / `<key>_body` to the guest who made `claim`, if they left an email — in the
     language they reserved in (both languages for claims from before that was recorded).
@@ -304,6 +311,8 @@ def notify_guest(db, claim, key):
                   title=reg["title_he"] if he and reg["title_he"] else reg["title"],
                   item=((item["name_he"] if he and item["name_he"] else item["name"]) if item else _t("gift_cash", lang)),
                   link=ext_url("registry", slug=reg["slug"]) + ("?lang=he" if he else ""))
+        if claim["kind"] == "chip" and item:
+            kw["item"] = chip_label(claim["amount_minor"], item["name"], item["name_he"], lang)
         parts.append((_t(key + "_subj", lang).format(**kw), _t(key + "_body", lang).format(**kw)))
     send_mail(claim["guest_email"], parts[0][0], "\n\n— — —\n\n".join(b for _, b in parts))
     return True
@@ -318,7 +327,9 @@ def send_guest_link(db, claim_id, token, to, lang):
             if c["item_id"] else None)
     he = lang == "he"
     couple = (reg["couple_names_he"] if he and reg["couple_names_he"] else reg["couple_names"]) or _t("the_couple", lang)
-    if item is not None:
+    if item is not None and c["kind"] == "chip":
+        item_label = chip_label(c["amount_minor"], item["name"], item["name_he"], lang)
+    elif item is not None:
         name = item["name_he"] if he and item["name_he"] else item["name"]
         item_label = f"{name} ×{c['qty']}" if (c["qty"] or 1) > 1 else name
     else:
@@ -327,7 +338,7 @@ def send_guest_link(db, claim_id, token, to, lang):
     if c["status"] != "reserved":  # a general cash gift is recorded as already reported
         body = _t("mail_guest_cash_body", lang).format(**kw)
     else:
-        if c["kind"] == "cash":
+        if c["kind"] in ("cash", "chip"):
             amount = (ob_money.fmt_minor(c["amount_minor"], c["currency"] or "ILS", lang)
                       if c["amount_minor"] is not None else _t("gift_cash", lang))
             nxt = _t("mail_guest_next_cash", lang).format(amount=amount)
@@ -606,14 +617,53 @@ def item_routes(item, pay_links):
     return dict(store=has_url, cash=bool(pay_links))
 
 
-def go_url(item):
-    """/go/ handoff-click URL for a catalog or registry item. Jinja global —
-    see PROJECT_KNOWLEDGE.md "Click tracking" for the return-key contract."""
-    if "clicks" not in item.keys():
-        return item["url"] if "url" in item.keys() else ""
+def _active_affiliate_rules():
+    """Active affiliate rules, read once per request (go_url runs per card)."""
+    if "aff_rules" not in g:
+        g.aff_rules = get_db().execute("SELECT * FROM affiliate_rules WHERE active=1").fetchall()
+    return g.aff_rules
+
+
+def _direct_destination(item):
+    """The tagged store URL when the active rule matching this item's URL is a 'param' rule marked
+    `direct` (Amazon: its rules disfavour a redirect that hides the referring page); else None."""
+    url = item["url"] if "url" in item.keys() else ""
+    if not url:
+        return None
+    rules = _active_affiliate_rules()
+    if not rules:
+        return None
+    final, rule_id = ob_affiliate.tag_url(url, rules)
+    if rule_id is None or not valid_http_url(final):
+        return None
+    rule = next((r for r in rules if r["id"] == rule_id), None)
+    if rule is None or rule["kind"] != "param" or not rule["direct"]:
+        return None
+    return final
+
+
+def _go_path(item):
     if "category" in item.keys() and "registry_id" not in item.keys() and "sort" in item.keys():
         return url_for("go_catalog", catalog_id=item["id"])
     return url_for("go_item", item_id=item["id"])
+
+
+def go_url(item):
+    """/go/ handoff-click URL for a catalog or registry item. Jinja global —
+    see PROJECT_KNOWLEDGE.md "Click tracking" for the return-key contract.
+    A 'direct' affiliate rule links the tagged store URL itself (see go_attrs for the click ping)."""
+    if "clicks" not in item.keys():
+        return item["url"] if "url" in item.keys() else ""
+    direct = _direct_destination(item)
+    return direct if direct else _go_path(item)
+
+
+def go_attrs(item):
+    """Extra attributes for a link built with go_url(): for a direct link, `data-go-ping` names the
+    POST endpoint app.js beacons so the click is still counted. Empty otherwise. Jinja global."""
+    if "clicks" not in item.keys() or not _direct_destination(item):
+        return ""
+    return Markup(' data-go-ping="%s"' % escape(_go_path(item) + "/ping"))
 
 
 def fmt_date(iso, lang=None):
@@ -688,25 +738,70 @@ def _apply_pending_add(db, reg_id, catalog_ids):
     return added
 
 
+def _blank_breakdown():
+    return dict(reserved=0, reported=0, received=0, committed=0, chip_minor=0, chip_reserved_minor=0,
+                chip_reported_minor=0, chip_received_minor=0, chip_count=0)
+
+
+def _chip_state(price_nis, b):
+    """(fully_funded, state) for a chip-in item from its chip sums `b` (see item_claim_breakdown) and
+    price. state = 'received' when every active chip was confirmed, 'reported' when none is merely
+    reserved, else 'reserved'. (False, None) while the goal (price in agorot) isn't met."""
+    goal = int(price_nis or 0) * 100
+    funded = b.get("chip_minor", 0)
+    if not b.get("chip_count") or goal <= 0 or funded < goal:
+        return False, None
+    if b.get("chip_received_minor", 0) >= funded:
+        return True, "received"
+    if b.get("chip_reserved_minor", 0) == 0:
+        return True, "reported"
+    return True, "reserved"
+
+
 def item_claim_breakdown(registry_id):
     """Per-item committed quantity split by lifecycle status:
-    {item_id: {'reserved': n, 'reported': n, 'received': n, 'committed': n}}.
+    {item_id: {'reserved': n, 'reported': n, 'received': n, 'committed': n, chip_*...}}.
     Expired reservations (status still 'reserved' but past expires_at) are not
     counted — they free the quantity again even before `manage.py
     expire-claims` runs. The public registry page uses this to label a card
-    Reserved / Reported / Received instead of a blanket "Gifted"."""
+    Reserved / Reported / Received instead of a blanket "Gifted".
+    Chip-in contributions (kind='chip', qty=0) add to the chip_* sums: chip_minor (active total),
+    chip_reserved_minor / chip_reported_minor / chip_received_minor, chip_count (active rows).
+    A FULLY funded chip-in item also counts as one committed unit (in the bucket its chips
+    imply), so every caller that counts taken gifts from `committed` treats it as taken, and a
+    partly funded one as still open."""
     now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
-    rows = get_db().execute(
-        "SELECT item_id, status, COALESCE(SUM(qty),0) AS n FROM claims"
+    db = get_db()
+    rows = db.execute(
+        "SELECT item_id, status, COALESCE(SUM(qty),0) AS n,"
+        " COALESCE(SUM(CASE WHEN kind='chip' THEN amount_minor END),0) AS chip_minor,"
+        " COALESCE(SUM(kind='chip'),0) AS chip_n FROM claims"
         " WHERE registry_id=? AND item_id IS NOT NULL"
         " AND status IN ('reserved','reported','received')"
         " AND (expires_at IS NULL OR expires_at > ? OR status != 'reserved')"
         " GROUP BY item_id, status", (registry_id, now)).fetchall()
     out = {}
     for r in rows:
-        d = out.setdefault(r["item_id"], dict(reserved=0, reported=0, received=0, committed=0))
+        d = out.setdefault(r["item_id"], _blank_breakdown())
         d[r["status"]] += r["n"]
         d["committed"] += r["n"]
+        d["chip_minor"] += r["chip_minor"]
+        d["chip_" + r["status"] + "_minor"] += r["chip_minor"]
+        d["chip_count"] += r["chip_n"]
+    chip_ids = [i for i, d in out.items() if d["chip_count"]]
+    if chip_ids:
+        prices = {r["id"]: r["price_nis"] for r in db.execute(
+            "SELECT id, price_nis FROM registry_items WHERE registry_id=? AND id IN (%s)"
+            % ",".join("?" * len(chip_ids)), [registry_id] + chip_ids)}
+        for i in chip_ids:
+            d = out[i]
+            if d["committed"]:
+                continue  # a whole-item claim holds it (chip-in and whole claims never coexist)
+            full, state = _chip_state(prices.get(i), d)
+            if full:
+                d[state] += 1
+                d["committed"] += 1
+                d["chip_full"] = True
     return out
 
 
@@ -724,20 +819,36 @@ def gift_status(item, breakdown):
                committed unit confirmed by the couple), 'reported' (a guest
                says it's bought/sent, not yet confirmed) or 'reserved'.
       left   — units a guest can still take (never negative)
+      chip   — for a chip-in item: dict(funded_minor, goal_minor, remaining_minor, pct, count), else None.
+               Funded < goal -> state 'partial', left 1; funded >= goal -> left 0 and state by the chips.
     Nothing here implies payment verification; 'reported' is the guest's own
     word and 'received' is the couple's confirmation."""
     qty = item["qty_wanted"] if "qty_wanted" in item.keys() else 1
-    b = (breakdown or {}).get(item["id"]) or dict(reserved=0, reported=0, received=0, committed=0)
+    b = dict(_blank_breakdown(), **((breakdown or {}).get(item["id"]) or {}))
+    keys = item.keys()
+    chip = None
+    if (b["chip_count"] or ("chip_in" in keys and item["chip_in"])) and (not b["committed"] or b.get("chip_full")):
+        # chips are the only claims on this item: take the unit buckets from them (the breakdown may
+        # already carry the "fully funded" unit, so reset rather than add it twice)
+        b.update(reserved=0, reported=0, received=0, committed=0)
+        goal = int(item["price_nis"] or 0) * 100 if "price_nis" in keys else 0
+        funded = b["chip_minor"]
+        full, state = _chip_state(item["price_nis"] if "price_nis" in keys else 0, b)
+        if full:
+            b[state] = 1
+            b["committed"] = 1
+        chip = dict(funded_minor=funded, goal_minor=goal, remaining_minor=max(goal - funded, 0),
+                    pct=min(100, funded * 100 // goal) if goal else 0, count=b["chip_count"])
     left = max(qty - b["committed"], 0)
     if left > 0:
-        state = "partial" if b["committed"] else "open"
+        state = "partial" if (b["committed"] or b["chip_count"]) else "open"
     elif b["received"] >= qty:
         state = "received"
     elif b["reported"]:
         state = "reported"
     else:
         state = "reserved"
-    return dict(state=state, left=left, qty=qty, **b)
+    return dict(state=state, left=left, qty=qty, chip=chip, **b)
 
 
 # keyword -> item-specific line illustration (<symbol id="ill-*"> in base.html).
@@ -944,6 +1055,7 @@ def inject_globals():
         form_key=secrets.token_urlsafe(16),
         gift_routes=lambda item: item_routes(item, reg_pay_links_for_item(item)),
         go_url=go_url,
+        go_attrs=go_attrs,
         amazon_associate=amazon_associate_active(),
         ext_url=ext_url,
         estimate_note=lambda: estimate_note(lang),
@@ -1016,13 +1128,29 @@ def sample_registry(db, limit=16):
         if c["id"] not in seen and per_cat.get(c["category"], 0) < 2:
             picks.append(c)
             per_cat[c["category"]] = per_cat.get(c["category"], 0) + 1
+    # one big-ticket appliance is open to chip-in, about 60% given by four (synthetic) guests
+    big = db.execute("SELECT * FROM catalog_items WHERE active=1 AND category='appliances' AND price_nis >= 1500"
+                     " AND url != '' AND COALESCE(availability, '') != 'unavailable' ORDER BY price_nis, id").fetchone()
+    if big and big["id"] not in {c["id"] for c in picks}:
+        if len(picks) >= limit:
+            picks.pop()
+        picks.insert(min(len(picks), len(featured_items(db, limit=min(limit, 8)))), big)
+    chip_cid = big["id"] if big else None
     for i, c in enumerate(picks):
         qty, res, rep, rec = _SAMPLE_STATES[i % len(_SAMPLE_STATES)]
         row = dict(c)
         row.update(id=-(i + 1), registry_id=0, catalog_id=c["id"], qty_wanted=qty,
                    priority=1 if i == 0 else 0, archived=0, note="", note_he="", clicks=0)
         items.append(row)
-        if res or rep or rec:
+        if c["id"] == chip_cid:
+            row.update(qty_wanted=1, chip_in=1)
+            shares = [round(row["price_nis"] * f) for f in (0.25, 0.15, 0.1, 0.1)]
+            b = _blank_breakdown()
+            b.update(chip_minor=sum(shares) * 100, chip_count=len(shares),
+                     chip_received_minor=(shares[0] + shares[1]) * 100,
+                     chip_reported_minor=shares[2] * 100, chip_reserved_minor=shares[3] * 100)
+            breakdown[row["id"]] = b
+        elif res or rep or rec:
             breakdown[row["id"]] = dict(reserved=res, reported=rep, received=rec,
                                         committed=res + rep + rec)
     reg = dict(id=0, slug="sample", title=_t("sample_reg_title", "en"),
@@ -1338,6 +1466,40 @@ def go_item(item_id):
     return redirect(_affiliate_destination(db, row["url"], owner_uid=owner_uid), code=302)
 
 
+# A "direct" affiliate link goes straight to the store (no /go/ redirect), so app.js beacons one of
+# these on click instead. Same counting as the GET routes; the CSRF token rides in the beacon body.
+@app.route("/go/c/<int:catalog_id>/ping", methods=["POST"])
+def go_catalog_ping(catalog_id):
+    if rate_limited("go_ping", limit=60, per=600):
+        abort(429)
+    db = get_db()
+    row = db.execute("SELECT * FROM catalog_items WHERE id=?", (catalog_id,)).fetchone()
+    if not row or not valid_http_url(row["url"]):
+        abort(404)
+    if not is_bot():
+        db.execute("UPDATE catalog_items SET clicks = clicks + 1 WHERE id=?", (catalog_id,))
+    track("handoff_click")
+    _affiliate_destination(db, row["url"])
+    return "", 204
+
+
+@app.route("/go/i/<int:item_id>/ping", methods=["POST"])
+def go_item_ping(item_id):
+    if rate_limited("go_ping", limit=60, per=600):
+        abort(429)
+    db = get_db()
+    row = db.execute("SELECT * FROM registry_items WHERE id=?", (item_id,)).fetchone()
+    if not row or not valid_http_url(row["url"]):
+        abort(404)
+    if not is_bot():
+        db.execute("UPDATE registry_items SET clicks = clicks + 1 WHERE id=?", (item_id,))
+    reg = db.execute("SELECT user_id FROM registries WHERE id=?", (row["registry_id"],)).fetchone()
+    owner_uid = reg["user_id"] if reg else None
+    track("handoff_click", owner_uid=owner_uid)
+    _affiliate_destination(db, row["url"], owner_uid=owner_uid)
+    return "", 204
+
+
 _FIND_SKIP_WORDS = {"and", "the", "family", "wedding", "registry", "mr", "mrs", "ms", "את", "של", "חתונה"}
 _HE_LETTER = re.compile(r"[א-ת]")
 # English spellings of the same Jewish name vary (Cohen / Kohen / Kahn, Levi / Levy, Chaya / Haya,
@@ -1518,17 +1680,28 @@ def claim_item(slug, item_id):
             if reg["closed_at"]:
                 flash(_t("reg_closed_flash", lang), "err")
                 raise _Abort()
-            committed = item_claim_counts(reg["id"]).get(item_id, 0)
+            br = item_claim_breakdown(reg["id"]).get(item_id) or _blank_breakdown()
+            committed = br["committed"]
             left = max(item["qty_wanted"] - committed, 0)
             if left <= 0:
                 flash(_t("gifted", lang), "err")
+                raise _Abort()
+            pay_links = reg_pay_links(reg)
+            chip_minor = None
+            # the chip dialog also offers "I'll buy the whole gift at the store" while nobody has chipped in
+            whole_instead = (request.form.get("chip_preset") == "store"
+                             and not (request.form.get("chip_amount") or "").strip())
+            if request.form.get("give") == "chip" and not whole_instead:
+                chip_minor = _chip_amount_minor(item, br, pay_links, lang)  # flashes + raises _Abort when refused
+            elif br["chip_count"]:
+                # guests are already chipping in: the only way forward is to chip in too
+                flash(_t("chip_only", lang), "err")
                 raise _Abort()
             try:
                 qty = int(request.form.get("qty", 1))
             except ValueError:
                 qty = 1
-            qty = max(1, min(qty, left))
-            pay_links = reg_pay_links(reg)
+            qty = 0 if chip_minor else max(1, min(qty, left))
             routes = item_routes(item, pay_links)
             if not routes["store"] and not routes["cash"]:
                 # an "idea" with nowhere to buy and no payment link — never reservable
@@ -1537,8 +1710,11 @@ def claim_item(slug, item_id):
             # server-side card rules: the only valid routes are the ones the item has
             give_cash = (request.form.get("give") == "cash" and routes["cash"]) or not routes["store"]
             price_minor = int(item["price_nis"]) * 100
-            amount_minor = price_minor * qty if give_cash else None
-            currency = "ILS" if give_cash else None
+            if chip_minor:
+                give_cash, amount_minor, currency = False, chip_minor, "ILS"
+            else:
+                amount_minor = price_minor * qty if give_cash else None
+                currency = "ILS" if give_cash else None
             expires_at = (datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=14)).strftime("%Y-%m-%d %H:%M:%S")
             token = ob_security.new_token()
             token_hash = ob_security.hash_token(token)
@@ -1551,7 +1727,7 @@ def claim_item(slug, item_id):
                     (reg["id"], item_id, name,
                      _guest_email(),
                      (request.form.get("message") or "").strip()[:1000], qty,
-                     "cash" if give_cash else "item", "reserved", amount_minor, currency,
+                     "chip" if chip_minor else "cash" if give_cash else "item", "reserved", amount_minor, currency,
                      price_minor, "ILS", token_hash, datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"),
                      form_key or None, expires_at, lang))
             except sqlite3.IntegrityError:
@@ -1565,19 +1741,61 @@ def claim_item(slug, item_id):
                 raise _Abort()
             _log_claim_event(db, cur.lastrowid, "reserved", "guest")
             result.update(claim_id=cur.lastrowid, reg=dict(reg), item=dict(item), token=token, qty=qty,
-                          give_cash=give_cash, name=name)
+                          give_cash=give_cash, name=name, chip_minor=chip_minor)
     except _Abort as ab:
+        if request.form.get("give") == "chip":  # back to the item the guest was chipping in on
+            return ab.response or redirect(url_for("registry", slug=slug) + f"#item-{item_id}")
         return ab.response or redirect(url_for("registry", slug=slug))
 
     _remember_claim_token(form_key, result["token"])
     reg, item = result["reg"], result["item"]
-    notify_owner(db, reg, "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item", lang, to_helpers=True,
-                 item=item, qty=result["qty"], name=result["name"],
-                 guest_message=(request.form.get("message") or "").strip()[:1000])
+    extra = {}
+    if result["chip_minor"]:
+        owner = db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone()
+        extra["amount"] = ob_money.fmt_minor(result["chip_minor"], "ILS",
+                                             owner["lang"] if owner and owner["lang"] in ("en", "he") else lang)
+    notify_owner(db, reg, "mail_reserved_chip" if result["chip_minor"]
+                 else "mail_reserved_cash" if result["give_cash"] else "mail_reserved_item", lang, to_helpers=True,
+                 item=item, qty=max(result["qty"], 1), name=result["name"],
+                 guest_message=(request.form.get("message") or "").strip()[:1000], **extra)
     if _guest_email():
         send_guest_link(db, result["claim_id"], result["token"], _guest_email(), lang)
     track("reservation", owner_uid=reg["user_id"])
     return redirect(url_for("guest_manage", token=result["token"]))
+
+
+CHIP_SUGGEST_FROM = 1500  # shekels: the list check suggests chip-in for an open gift priced at least this
+CHIP_MIN = 20  # shekels: the smallest chip-in (or whatever is left, when less)
+
+
+def _chip_amount_minor(item, br, pay_links, lang):
+    """Validate a guest's chip-in against the item and what's already given (`br` is the item's
+    item_claim_breakdown row, read inside the caller's write transaction so two guests can't
+    over-fund). Returns the amount in agorot; otherwise flashes why and raises _Abort."""
+    price = int(item["price_nis"] or 0)
+    if (not item["chip_in"] or not pay_links or item["qty_wanted"] != 1 or price <= 0
+            or (br["committed"] and not br.get("chip_full"))):
+        flash(_t("chip_closed", lang), "err")
+        raise _Abort()
+    remaining = price - br["chip_minor"] // 100
+    if remaining <= 0:
+        flash(_t("gifted", lang), "err")
+        raise _Abort()
+    raw = (request.form.get("chip_amount") or "").strip()
+    if not raw:
+        preset = (request.form.get("chip_preset") or "").strip()
+        raw = str(remaining) if preset == "rest" else preset
+    if not re.fullmatch(r"[0-9]{1,7}", raw) or int(raw) <= 0:
+        flash(_t("chip_bad_amount", lang), "err")
+        raise _Abort()
+    amount = int(raw)
+    if amount > remaining:
+        flash(tf("chip_over", lang, amount=ob_money.fmt_minor(remaining * 100, "ILS", lang)), "err")
+        raise _Abort()
+    if amount < min(CHIP_MIN, remaining):
+        flash(tf("chip_under", lang, amount=ob_money.fmt_minor(min(CHIP_MIN, remaining) * 100, "ILS", lang)), "err")
+        raise _Abort()
+    return amount * 100
 
 
 def _guest_email():
@@ -1758,6 +1976,9 @@ def guest_report(token):
     owner_lang = (db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone() or {"lang": ""})["lang"]
     owner_lang = owner_lang if owner_lang in ("en", "he") else lang
     extra = {} if item else {"item": _t("gift_cash", owner_lang)}
+    if item and claim["kind"] == "chip":
+        extra = {"item": chip_label(claim["amount_minor"], item["name"], item["name_he"], owner_lang)}
+        item = None
     notify_owner(db, reg, "mail_reported", lang, to_helpers=True, item=item, qty=claim["qty"] or 1, name=claim["guest_name"],
                  note=_t("mail_reported_note", owner_lang).format(note=note) if note else "", **extra)
     track("guest_report", owner_uid=reg["user_id"])
@@ -1963,6 +2184,9 @@ def dashboard():
                 " LEFT JOIN registry_items ri ON ri.id = c.item_id"
                 " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)):
             gft = dict(row)
+            if gft["kind"] == "chip":
+                gft["chip_label"] = chip_label(gft["amount_minor"], gft["item_name"], gft["item_name_he"], current_lang())
+                gft["chip_gift"] = _thank_item(gft, current_lang())
             # a reservation past its hold is already free on the public page; show it the
             # same way here even before `manage.py expire-claims` flips the stored status
             if gft["status"] == "reserved" and gft["expires_at"] and gft["expires_at"] <= now:
@@ -1976,9 +2200,11 @@ def dashboard():
             "SELECT COUNT(*) FROM registry_items WHERE registry_id=? AND archived=0"
             " AND (url != '' OR ?)", (reg["id"], 1 if reg_pay_links(reg) else 0)).fetchone()[0]
         live = [gft for gft in gifts if gft["status"] in ("reserved", "reported", "received")]
-        n_claimed = len({gft["item_id"] for gft in live if gft["item_id"] is not None})
-        n_cash = sum(1 for gft in live if gft["kind"] == "cash")
         committed = item_claim_counts(reg["id"])
+        # an item chipped in on counts as reserved only once it is fully funded (committed counts it then)
+        n_claimed = len({gft["item_id"] for gft in live if gft["item_id"] is not None
+                         and (gft["kind"] != "chip" or committed.get(gft["item_id"], 0) > 0)})
+        n_cash = sum(1 for gft in live if gft["kind"] in ("cash", "chip"))
         all_taken = n_items > 0 and all(
             committed.get(r["id"], 0) >= r["qty_wanted"] for r in db.execute(
                 "SELECT id, qty_wanted FROM registry_items WHERE registry_id=? AND archived=0", (reg["id"],)))
@@ -2598,9 +2824,12 @@ def list_check(db, reg):
     pay = bool(reg_pay_links(reg))
     bands = {k: {"open": 0, "total": 0, "names": []} for k in CATALOG_PRICE_BANDS}
     rooms = {k: {"open": 0, "total": 0} for k in CHECK_ROOMS}
-    no_price, cant_give = [], []
+    no_price, cant_give, chip_suggest = [], [], None
     for r in items:
         left = max(r["qty_wanted"] - committed.get(r["id"], 0), 0)
+        if (chip_suggest is None and pay and left and r["qty_wanted"] == 1 and not r["chip_in"]
+                and (r["price_nis"] or 0) >= CHIP_SUGGEST_FROM):
+            chip_suggest = r  # a big open gift guests could share
         room = rooms[room_of(r["category"])]
         room["total"] += r["qty_wanted"]
         room["open"] += left
@@ -2625,7 +2854,7 @@ def list_check(db, reg):
     budget_keys = [k for k in CATALOG_PRICE_BANDS if k != "1500plus"]
     return dict(
         items=len(items), open=sum(b["open"] for b in bands.values()),
-        bands=bands, rooms=rooms, no_price=no_price, cant_give=cant_give, pay=pay,
+        bands=bands, rooms=rooms, no_price=no_price, cant_give=cant_give, pay=pay, chip_suggest=chip_suggest,
         budgets_ok=sum(1 for k in budget_keys if bands[k]["status"] == "good"), budgets_n=len(budget_keys),
         rooms_ok=sum(1 for rm in rooms.values() if rm["status"] == "listed"), rooms_n=len(rooms),
     )
@@ -2709,7 +2938,10 @@ def items_update(item_id):
         if request.form.get("use_catalog_price"):
             # the price is re-read from the catalog here, never taken from the form
             c = _catalog_price_news(db, [item]).get(item_id)
-            if c:
+            funded = (item_claim_breakdown(reg["id"]).get(item_id) or _blank_breakdown())["chip_minor"]
+            if c and (c["price_nis"] or 0) * 100 < funded:
+                flash(tf("chip_price_locked", lang, amount=ob_money.fmt_minor(funded, "ILS", lang)), "err")
+            elif c:
                 db.execute("UPDATE registry_items SET price_nis=?, price_status=?, price_checked_at=?"
                            " WHERE id=?", (c["price_nis"], c["price_status"], c["price_checked_at"], item_id))
                 flash(_t("price_news_done", lang), "ok")
@@ -2728,6 +2960,9 @@ def items_update(item_id):
         committed = item_claim_counts(reg["id"]).get(item_id, 0)
         if qty < committed:
             flash(tf("qty_below_committed", lang, n=committed), "err")
+            return redirect(here)
+        if qty > 1 and item["chip_in"]:
+            flash(_t("chip_qty_locked", lang), "err")
             return redirect(here)
         db.execute("UPDATE registry_items SET qty_wanted=?, priority=? WHERE id=?",
                    (qty, 1 if request.form.get("priority") else 0, item_id))
@@ -2759,7 +2994,9 @@ def item_edit(item_id):
         typed = dict(item)
         typed.update({k: v for k, v in request.form.items() if k in typed and k != "id"})
         typed["priority"] = 1 if request.form.get("priority") else 0
-        return render_template("item_edit.html", reg=reg, item=typed, committed=committed)
+        typed["chip_in"] = 1 if request.form.get("chip_in") or item["chip_in"] else 0
+        return render_template("item_edit.html", reg=reg, item=typed, committed=committed,
+                               chip=_chip_edit_state(reg, item))
 
     if request.method == "POST":
         f = request.form
@@ -2796,20 +3033,62 @@ def item_edit(item_id):
             if qty < committed:
                 flash(tf("qty_below_committed", lang, n=committed), "err")
                 return _again()
+            chip_in = _chip_in_for_save(reg, item, price, qty, bool(f.get("chip_in")), lang)
+            if chip_in is None:
+                return _again()
             db.execute(
                 "UPDATE registry_items SET name=?, name_he=?, brand=?, price_nis=?, url=?, store=?,"
                 " qty_wanted=?, priority=?, note=?, note_he=?, variant=?,"
-                " kind=?, overrides=? WHERE id=?",
+                " kind=?, overrides=?, chip_in=? WHERE id=?",
                 (name, (f.get("name_he") or "").strip()[:200], brand, price, url, store, qty,
                  1 if f.get("priority") else 0, (f.get("note") or "").strip()[:1000],
                  # note_he left the form (the note is private); keep whatever an older form saved
                  ((f.get("note_he") if "note_he" in f else item["note_he"]) or "").strip()[:1000],
                  (f.get("variant") or "").strip()[:120],
                  f.get("kind") if f.get("kind") in ("product", "idea", "cash_need") else item["kind"],
-                 ",".join(sorted(overrides)), item_id))
+                 ",".join(sorted(overrides)), chip_in, item_id))
         flash(_t("item_updated", lang), "ok")
         return redirect(url_for("items_manage", _anchor=f"item-{item_id}"))
-    return render_template("item_edit.html", reg=reg, item=item, committed=committed)
+    return render_template("item_edit.html", reg=reg, item=item, committed=committed,
+                           chip=_chip_edit_state(reg, item))
+
+
+def _chip_edit_state(reg, item):
+    """What the item edit page shows for the "let guests chip in" box: can it be ticked, why not,
+    and whether guests already chipped in (then it stays on)."""
+    br = item_claim_breakdown(reg["id"]).get(item["id"]) or _blank_breakdown()
+    reason = ""
+    if br["chip_count"]:
+        reason = "locked"
+    elif not reg_pay_links(reg):
+        reason = "paylink"
+    elif not int(item["price_nis"] or 0) > 0:
+        reason = "price"
+    elif item["qty_wanted"] != 1:
+        reason = "qty"
+    return dict(can=not reason, reason=reason, count=br["chip_count"], funded_minor=br["chip_minor"])
+
+
+def _chip_in_for_save(reg, item, price, qty, want, lang):
+    """The chip_in value to store when the couple saves the item form (inside the write txn, so a
+    contribution landing now is counted), or None after flashing why the save is refused: chip-in
+    needs a payment link, a price and a quantity of 1; it can't be switched off, nor the price
+    dropped below what's given, nor the quantity raised, while guests have chipped in."""
+    br = item_claim_breakdown(reg["id"]).get(item["id"]) or _blank_breakdown()
+    if br["chip_count"]:
+        if qty != 1:
+            flash(_t("chip_qty_locked", lang), "err")
+            return None
+        if price * 100 < br["chip_minor"]:
+            flash(tf("chip_price_locked", lang, amount=ob_money.fmt_minor(br["chip_minor"], "ILS", lang)), "err")
+            return None
+        return 1
+    if not want:
+        return 0
+    if not reg_pay_links(reg) or price <= 0 or qty != 1:
+        flash(_t("chip_cant", lang), "err")
+        return None
+    return 1
 
 
 def _owned_claim(claim_id):
@@ -2883,12 +3162,23 @@ _KEEP_CAPS = ("Shabbos", "Kiddush", "Havdalah", "Pesach", "Chanukah", "Sukkos", 
               "Netilas", "Challah")
 
 
+def _thank_item(gift, lang):
+    """What a thank-you note thanks a chip-in guest for: "chipping in toward the fridge"."""
+    name = (gift["item_name_he"] if lang == "he" and gift["item_name_he"] else gift["item_name"]) or ""
+    if lang == "en":
+        keep = name[1:2].isupper() or name.startswith(_KEEP_CAPS)
+        name = "the " + (name if keep else name[:1].lower() + name[1:])
+    return tf("dash_thank_item_chip", lang, item=name)
+
+
 def _thanks_note(reg, gift, lang):
     """A thank-you note already started for one gift, in `lang`: {subject, body}. The couple edits
     it and sends it themselves (copy / WhatsApp / their own mail app) — the site never sends it."""
     name = (gift["item_name_he"] if lang == "he" and gift["item_name_he"] else gift["item_name"]) or ""
     if gift["kind"] == "cash" or not name:
         item = _t("dash_thank_item_cash", lang)
+    elif gift["kind"] == "chip":
+        item = _thank_item(gift, lang)
     elif lang == "he":
         item = name
     elif gift["kind"] == "outside" and re.match(r"(a|an|the|your|our|some)\s", name, re.I):
@@ -2922,6 +3212,8 @@ def dashboard_thanks():
         gft = dict(row, anchor=str(row["id"]), toggle_url=url_for("claim_thanked", claim_id=row["id"]))
         gft["amount_label"] = (ob_money.fmt_minor(gft["amount_minor"], gft["currency"] or "ILS", ui)
                                if gft["amount_minor"] is not None and gft["kind"] == "cash" else "")
+        if gft["kind"] == "chip":
+            gft["chip_label"] = chip_label(gft["amount_minor"], gft["item_name"], gft["item_name_he"], ui)
         gifts.append(gft)
     for row in db.execute("SELECT * FROM outside_gifts WHERE registry_id=?", (reg["id"],)):
         gifts.append(dict(row, kind="outside", status="outside", guest_name=row["giver_name"],
@@ -3302,7 +3594,7 @@ def dashboard_claims_csv():
             " LEFT JOIN registry_items ri ON ri.id=c.item_id"
             " WHERE c.registry_id=? ORDER BY c.created_at DESC", (reg["id"],)):
         w.writerow([csv_safe(r["id"]), csv_safe(r["guest_name"]), csv_safe(r["guest_email"]),
-                   csv_safe(r["item_name"]), csv_safe(r["qty"]), csv_safe(r["kind"]),
+                   csv_safe(r["item_name"]), csv_safe("" if r["kind"] == "chip" else r["qty"]), csv_safe(r["kind"]),
                    csv_safe(r["status"]), csv_safe(r["amount_minor"]), csv_safe(r["currency"]),
                    csv_safe(r["created_at"])])
     resp = app.response_class(buf.getvalue(), mimetype="text/csv")
@@ -4137,6 +4429,11 @@ def _render_affiliates(test_url="", test_result=None):
                            test_url=test_url, test_result=test_result)
 
 
+def _affiliate_direct(kind):
+    """The "Link directly" checkbox; only a 'param' rule can be linked directly."""
+    return 1 if kind == "param" and request.form.get("direct") else 0
+
+
 def _affiliate_form_values():
     return ob_affiliate.validate_rule(request.form.get("host"), request.form.get("kind"),
                                       request.form.get("param"), request.form.get("value"))
@@ -4156,8 +4453,8 @@ def admin_affiliates():
         if db.execute("SELECT 1 FROM affiliate_rules WHERE host=?", (host,)).fetchone():
             flash(f"There is already a rule for {host}: edit it instead.", "err")
         else:
-            db.execute("INSERT INTO affiliate_rules (host, kind, param, value, label) VALUES (?,?,?,?,?)",
-                       (host, kind, param, value, label))
+            db.execute("INSERT INTO affiliate_rules (host, kind, param, value, label, direct) VALUES (?,?,?,?,?,?)",
+                       (host, kind, param, value, label, _affiliate_direct(kind)))
             flash("Rule added.", "ok")
         return redirect(url_for("admin_affiliates"))
     return _render_affiliates()
@@ -4196,8 +4493,9 @@ def admin_affiliate_edit(rule_id):
     if db.execute("SELECT 1 FROM affiliate_rules WHERE host=? AND id!=?", (host, rule_id)).fetchone():
         flash(f"There is already a rule for {host}.", "err")
         return redirect(url_for("admin_affiliates"))
-    db.execute("UPDATE affiliate_rules SET host=?, kind=?, param=?, value=?, label=? WHERE id=?",
-               (host, kind, param, value, (request.form.get("label") or "").strip()[:80], rule_id))
+    db.execute("UPDATE affiliate_rules SET host=?, kind=?, param=?, value=?, label=?, direct=? WHERE id=?",
+               (host, kind, param, value, (request.form.get("label") or "").strip()[:80],
+                _affiliate_direct(kind), rule_id))
     flash("Rule saved.", "ok")
     return redirect(url_for("admin_affiliates"))
 
