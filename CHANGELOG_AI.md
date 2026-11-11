@@ -1,9 +1,11 @@
 # Changelog
 
 ## 2026-11-11 (money pass: affiliate engine, chip in, six guides)
-Audit finding: no store link was ever affiliate-tagged, and no affiliate program exists for KSP / Heichal /
-Payngo / Hakol Abayit / Vardinon (97 of the 100 catalog links). See AFFILIATE_PROGRAMS.md (sourced research:
-Judaica WebStore, Amazon Associates, Awin first; Home Center has a tracked program on an unknown network).
+Audit finding: no store link was ever affiliate-tagged. **Corrected the same day (owner caught it): KSP does
+run its own affiliate program** (ksp.co.il/affiliate/, sign-up ksp.co.il/af/, aff@ksp.co.il) — 80 of the 100
+links; terms sit behind a bot check, so commission/eligibility are unconfirmed. No program found for Heichal /
+Payngo / Hakol Abayit / Vardinon. See AFFILIATE_PROGRAMS.md (also Judaica WebStore, Amazon Associates, Awin;
+Home Center has a tracked program on an unknown network).
 - **Affiliate engine** (`ob_affiliate.py`, migrations 32 + 34, `/admin/affiliates`): rules per hostname, kind
   `param` (set a query parameter, e.g. amazon.com `tag=`) or `wrap` (network deep link template with `{url}`),
   applied at click time in `/go/c|i/<id>`, so stored URLs never change and couples' own added links are tagged too.
@@ -24,6 +26,11 @@ Judaica WebStore, Amazon Associates, Awin first; Home Center has a tracked progr
 - **Six guides** (guides.py, EN+HE, 11 total): appliances from abroad, bed/linen sizes, Shabbos kitchen equipment,
   wedding gifts from abroad, where to shop, first Yom Tov year. Facts web-checked by the writing agent; Hebrew not
   read by a native speaker.
+- **Nine Judaica WebStore items** in seed_catalog.json (a store with a 10% program; Yair Emanuel pieces the catalog
+  lacked: platta cover, tzedakah box, salt & pepper set, tallis bag, honey dish, matzah cover set, mayim achronim
+  set, kiddush fountain, table runner). Each product page was fetched (in stock, canonical URL). The store prices
+  in USD only, so all nine are `price_status='estimate'` (converted at the rates.json rate); it ships within Israel
+  by express mail for $9.95 per its shipping page. Five keyword additions to `_ILLUSTRATION_RULES`.
 - Footer said 220 volts; now 230. `run_dev.py` honours `PORT`.
 - Known gap: `manage.py refresh-registry-links` could lower a price below what's already chipped in (no guard).
 

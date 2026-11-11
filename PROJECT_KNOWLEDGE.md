@@ -288,8 +288,9 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   `affiliate_rules` table [m32, `direct` m34], managed at `/admin/affiliates`. Applied only at click time by
   `_affiliate_destination()` in `/go/c|i/<id>`; `direct` param rules make `go_url()` return the tagged URL and
   `go_attrs()` add `data-go-ping` (app.js beacons `POST /go/.../ping`, CSRF token in the body). Which programs
-  exist is in AFFILIATE_PROGRAMS.md: none for KSP/Heichal/Payngo/Vardinon, so earning needs items linked to stores
-  that do have one (Judaica WebStore, Amazon, Awin merchants).
+  exist is in AFFILIATE_PROGRAMS.md: **KSP has its own program** (ksp.co.il/affiliate/, sign-up ksp.co.il/af/,
+  aff@ksp.co.il; 80 of 100 catalog links) — apply there first; none found for Heichal/Payngo/Vardinon; also
+  Judaica WebStore, Amazon, Awin merchants.
 - **Chip in**: `registry_items.chip_in` [m33]; a contribution is a claim with `kind='chip'`, `qty=0`, `amount_minor`.
   Three claim kinds now exist (item, cash, chip): anything listing claims must use `chip_label()` for chips and never
   print their qty. `item_claim_breakdown` → `chip_minor/chip_count/chip_full…`, `gift_status(...).chip`; validation in
