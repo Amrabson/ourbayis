@@ -1229,7 +1229,8 @@ def test_login_and_logout_keep_the_language(client):
 def test_catalog_search_forgives_spelling_plurals_and_synonyms(client, q, expect):
     """All of these found nothing (or only "cookie sheets") with a plain substring match."""
     html = client.get("/catalog", query_string={"q": q}).get_data(as_text=True)
-    assert f'<h3 dir="auto">{expect}</h3>' in html
+    # the card title is a link to the item's own page (2026-11-11), so the name sits inside an <a>
+    assert re.search(rf'<h3 dir="auto"><a class="gift-name-link" href="/catalog/[^"]+">{re.escape(expect)}</a></h3>', html)
 
 
 def test_catalog_search_stays_precise():

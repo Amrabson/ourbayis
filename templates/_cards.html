@@ -8,7 +8,7 @@
   {%- set _cat = item['category'] if item['category'] in categories else 'home' -%}
   {%- if item['image'] -%}
   <div class="gift-ph gift-img ph-{{ _cat }} {% if small %}gift-ph-sm{% endif %}">
-    <img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" decoding="async" width="{{ 54 if small else 240 }}" height="{{ 54 if small else 180 }}">
+    <img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="{{ 54 if small else 240 }}" height="{{ 54 if small else 180 }}">
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-{{ illustration_for(item) }}"/></svg>
   </div>
   {%- else -%}
@@ -107,10 +107,12 @@
 {%- endmacro %}
 
 {# mode: 'catalog' | 'registry' | 'sample' | 'link' (homepage strip: whole card links to the catalog) #}
-{% macro gift_card(item, mode='catalog', st=None, pay_links=[], have=[], has_reg=False, back_args={}, n=None) -%}
+{# back: where items_add returns to ('catalog' = the list with its filters; 'item' = a catalog item page, back_args then carry its slug) #}
+{% macro gift_card(item, mode='catalog', st=None, pay_links=[], have=[], has_reg=False, back_args={}, n=None, back='catalog') -%}
   {%- set _tag = 'a' if mode == 'link' else 'article' -%}
+  {%- set _page = item_url(item) if mode in ('catalog', 'link') else None -%}
   <{{ _tag }} class="gift-card {% if st and st.left <= 0 %}is-gifted{% endif %} {% if mode == 'link' %}gift-card-link{% endif %}"
-    {% if mode == 'link' %}href="{{ url_for('catalog_page', cat=item['category'], q=None) }}#c-{{ item['id'] }}"{% endif %}
+    {% if mode == 'link' %}href="{{ _page or (url_for('catalog_page', cat=item['category'], q=None) ~ '#c-' ~ item['id']) }}"{% endif %}
     {% if mode in ('registry', 'sample') %}id="item-{{ item['id'] if item['id'] > 0 else 's' ~ (-item['id']) }}" data-cat="{{ item['category'] }}" data-room="{{ room_of(item['category']) }}" data-price="{{ item['price_nis'] or 0 }}" data-available="{{ '1' if (st and st.left > 0) else '0' }}"{% endif %}
     {% if mode == 'catalog' %}id="c-{{ item['id'] }}"{% endif %}>
     {{ gift_media(item) }}
@@ -122,7 +124,7 @@
       {%- if mode in ('registry', 'sample') and item['priority'] -%}
       <span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> {{ t('priority_high') }}</span>
       {%- endif -%}
-      <h3 dir="auto">{{ pick(item, 'name') }}</h3>
+      <h3 dir="auto">{% if _page and mode == 'catalog' %}<a class="gift-name-link" href="{{ _page }}">{{ pick(item, 'name') }}</a>{% else %}{{ pick(item, 'name') }}{% endif %}</h3>
       {{ price_line(item) }}
       {{ gift_facts(item) }}
       {%- if st %}{{ qty_line(st) }}{% endif -%}
@@ -133,7 +135,7 @@
           {%- if item['id'] in have -%}
           <span class="gifted-tag state-added"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>
           {%- else -%}
-          <form method="post" action="{{ url_for('items_add', back='catalog', **back_args) }}">
+          <form method="post" action="{{ url_for('items_add', back=back, **back_args) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="catalog_id" value="{{ item['id'] }}">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
@@ -142,7 +144,7 @@
         {%- elif user -%}
           <a class="btn btn-primary btn-block" href="{{ url_for('registry_new') }}">{{ t('dash_create') }}</a>
         {%- else -%}
-          <form method="post" action="{{ url_for('items_add', back='catalog', **back_args) }}">
+          <form method="post" action="{{ url_for('items_add', back=back, **back_args) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="catalog_id" value="{{ item['id'] }}">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('catalog_signup_add') }}</button>

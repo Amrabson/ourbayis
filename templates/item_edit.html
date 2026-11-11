@@ -35,6 +35,8 @@
         <fieldset class="sheet-group">
           <legend>{{ t('item_edit_where') }}</legend>
           <label>{{ t('custom_url') }}<input name="url" maxlength="500" placeholder="https://…" value="{{ item['url'] }}"></label>
+          <label class="custom-image">{{ t('custom_image') }}<input name="image" type="text" inputmode="url" maxlength="500" placeholder="https://…" dir="ltr" value="{{ item['image'] or '' }}">
+            {% if item['image'] %}<img class="custom-image-thumb" src="{{ item['image'] }}" alt="{{ item['name'] }}" loading="lazy" referrerpolicy="no-referrer" width="72" height="72">{% endif %}</label>
           <div class="form-2col">
             <label>{{ t('custom_store') }}<input name="store" maxlength="120" value="{{ item['store'] }}"></label>
             <label>{{ t('custom_price') }}<input name="price_nis" type="number" min="0" max="99999" value="{{ item['price_nis'] }}"></label>

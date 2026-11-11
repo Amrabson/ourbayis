@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% from "_cards.html" import gift_card, gift_media, price_line, gift_facts with context %}
+{% block title %}{{ tf('item_title', name=pick(item, 'name'), brand=brand) }}{% endblock %}
+{% block meta_desc %}{{ meta_desc }}{% endblock %}
+{% block jsonld %}
+{%- set _url = ext_url('catalog_item', slug=slug) ~ ('?lang=he' if rtl else '') -%}
+{%- set _model = pick(item, 'model') if 'model' in item.keys() else '' -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ t('nav_catalog') | tojson }},
+      "item": {{ (ext_url('catalog_page') ~ ('?lang=he' if rtl else '')) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ cat_label(cat) | tojson }},
+      "item": {{ (ext_url('catalog_page') ~ '?cat=' ~ cat ~ ('&lang=he' if rtl else '')) | tojson }} },
+    { "@type": "ListItem", "position": 3, "name": {{ pick(item, 'name') | tojson }}, "item": {{ _url | tojson }} }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ pick(item, 'name') | tojson }},
+  {%- if item['brand'] %}
+  "brand": { "@type": "Brand", "name": {{ item['brand'] | tojson }} },
+  {%- endif %}
+  "category": {{ cat_label(cat) | tojson }},
+  {%- if _model %}
+  "description": {{ _model | tojson }},
+  {%- endif %}
+  {%- if item['image'] %}
+  "image": {{ (item['image'] if item['image'].startswith('http') else ext_url('index')[:-1] ~ item['image']) | tojson }},
+  {%- endif %}
+  {%- if offer_ok %}
+  "offers": {
+    "@type": "Offer",
+    "price": {{ item['price_nis'] | tojson }},
+    "priceCurrency": "ILS",
+    "url": {{ _url | tojson }}{% if item['store'] %},
+    "seller": { "@type": "Organization", "name": {{ item['store'] | tojson }} }{% endif %}
+  },
+  {%- endif %}
+  "url": {{ _url | tojson }}
+}
+</script>
+{% endblock %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+<article class="home item-page">
+  <header class="sec-inner item-head">
+    <nav class="item-crumbs" aria-label="{{ t('item_crumbs') }}">
+      <ol>
+        <li><a href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }}</a></li>
+        <li><a href="{{ url_for('catalog_page', cat=cat) }}">{{ cat_label(cat) }}</a></li>
+        <li aria-current="page" dir="auto">{{ pick(item, 'name') }}</li>
+      </ol>
+    </nav>
+
+    <div class="item-hero">
+      <div class="item-media">{{ gift_media(item) }}</div>
+      <div class="item-main">
+        <p class="kicker">{{ cat_label(cat) }}</p>
+        <h1 class="item-title" dir="auto">{{ pick(item, 'name') }}</h1>
+        {{ price_line(item, 'item-price') }}
+        {{ gift_facts(item) }}
+
+        <div class="item-actions">
+          {% if has_reg %}
+            {% if item['id'] in have %}
+            <span class="gifted-tag state-added"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>
+            {% else %}
+            <form method="post" action="{{ url_for('items_add', back='item', slug=slug) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="catalog_id" value="{{ item['id'] }}">
+              <button class="btn btn-primary btn-lg" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('item_add_registry') }}</button>
+            </form>
+            {% endif %}
+          {% elif user %}
+            <a class="btn btn-primary btn-lg" href="{{ url_for('registry_new') }}">{{ t('dash_create') }}</a>
+          {% else %}
+            <form method="post" action="{{ url_for('items_add', back='item', slug=slug) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+              <input type="hidden" name="catalog_id" value="{{ item['id'] }}">
+              <button class="btn btn-primary btn-lg" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('item_add_registry') }}</button>
+            </form>
+          {% endif %}
+          {% if item['url'] %}
+          <a class="btn btn-ghost btn-lg bdi" href="{{ go_url(item) }}"{{ go_attrs(item) }} target="_blank" rel="nofollow sponsored noopener">{{ tf('item_view_at', store=item['store']) if item['store'] else t('view_store_page') }}</a>
+          {% endif %}
+        </div>
+        <p class="hint catalog-affiliate">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>
+        {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+      </div>
+    </div>
+  </header>
+
+  <section class="sec-inner item-know" aria-labelledby="item-know-h">
+    <h2 id="item-know-h" class="item-h">{{ t('item_know_h') }}</h2>
+    <ul class="item-know-list">
+      {% for n in (1, 2, 3) %}<li>{{ t('item_know_' ~ cat ~ '_' ~ n) }}</li>{% endfor %}
+    </ul>
+  </section>
+
+  {% if band_slug or guide_obj %}
+  <section class="sec-inner item-next" aria-labelledby="item-next-h">
+    <h2 id="item-next-h" class="item-h">{{ t('item_next_h') }}</h2>
+    <ul class="item-next-list">
+      {% if band_slug %}
+      <li><a class="link-arrow" href="{{ url_for('gift_ideas', band=band_slug) }}">{{ tf('item_more_band', band=t('price_band_' ~ band_key)) }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+      {% endif %}
+      {% if guide_obj %}
+      <li><a class="link-arrow" href="{{ url_for('guide', slug=guide_obj['slug']) }}">{{ gpick(guide_obj, 'title') }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+      {% endif %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if more %}
+  <section class="sec-inner item-more" aria-labelledby="item-more-h">
+    <h2 id="item-more-h" class="item-h">{{ tf('item_more_h', cat=cat_label(cat)) }}</h2>
+    <div class="gift-grid">
+      {% for m in more %}{{ gift_card(m, mode='catalog', have=have, has_reg=has_reg, back='item', back_args={'slug': slug}) }}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="closing">
+    <svg class="closing-motif" viewBox="0 0 220 96" aria-hidden="true" fill="none">
+      <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M40 94V26M180 94V26"/><path d="M24 28q86-28 172 0"/>
+        <path d="M24 28q21 14 43 0q21 14 43 0q21 14 43 0q21 14 43 0"/>
+      </g>
+    </svg>
+    <h2 class="closing-title">{{ t('final_cta_title') }}</h2>
+    <p>{{ t('final_cta_body') }}</p>
+    <div class="closing-ctas">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') if user else url_for('signup') }}">{{ t('nav_dashboard') if user else t('cta_start') }}</a>
+      <a class="link-arrow" href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }} <span aria-hidden="true">{{ arrow }}</span></a>
+    </div>
+  </section>
+</article>
+{% endblock %}

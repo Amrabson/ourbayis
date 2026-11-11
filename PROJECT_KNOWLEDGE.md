@@ -296,6 +296,14 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   print their qty. `item_claim_breakdown` → `chip_minor/chip_count/chip_full…`, `gift_status(...).chip`; validation in
   `_chip_amount_minor()` inside the claim transaction; card/dialog via `chip_progress` in `_cards.html`.
 
+## Item pages + paste a link (2026-11-11)
+- `/catalog/<slug>` → `catalog_item` (`catalog_slug(row)`, `item_url(row)`; `catalog_item.html`). Indexable, in the
+  sitemap; per-category copy is `item_know_<cat>_1..3`; `ITEM_GUIDES` maps category → guide. Never render catalog
+  `notes` publicly (internal price-check notes).
+- `ob_linkinfo.lookup(url)` is the only place the server fetches a user-supplied URL — keep all such fetching
+  there (SSRF rules in its docstring). `items_lookup` → `link_prefill()` → `session["link_prefill"]` → the custom
+  form in items.html. Custom items can now carry an `image` (https only).
+
 ## Gift ideas by budget (2026-11-07)
 `/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and
 `_band_items(db, key)` lists a band. Copy per band is `ideas_h_<key>` / `ideas_for_<key>` in i18n. Indexable

@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-11-11 (a page per catalog item; paste a link from any store)
+- **Item pages**: `GET /catalog/<slug>` (`catalog_item`; slug = `seed_key`, else `item-<id>`; `catalog_slug()`,
+  Jinja `item_url()`), template `catalog_item.html`: breadcrumb, illustration/photo, price + facts via the shared
+  macros, "Add to your registry" (`items_add` `back=item&slug=`), "View at <store>" through `/go/`, three
+  "Good to know" lines per category (`item_know_<cat>_1..3`), links to the price-band gift ideas and one guide per
+  category (`ITEM_GUIDES`), four closest-priced items in the category. Title "<name> — price in Israel"; JSON-LD
+  BreadcrumbList + Product (offers only for verified prices with a store link; never ratings/availability). In the
+  sitemap (EN + HE) and view-counted. Catalog / gift-ideas / homepage card titles link to it; registry and sample
+  cards don't. Catalog `notes` are internal research notes and are NOT shown on the page.
+  Not done: `tools/export_static.py` doesn't export item pages.
+- **Paste a link** (`ob_linkinfo.py`, `POST /registry/items/lookup`): the custom-gift form on `/registry/items`
+  takes a product link and prefills name, link (tracking params stripped), store (`STORE_NAMES` /
+  `store_name_for`), price (ILS as is; other known currencies converted with a "check it" notice; unknown currency
+  left empty) and the page's preview picture (new optional `image` field on the custom form and the edit page,
+  https only via `clean_image_url`). Prefill travels in `session["link_prefill"]`, shown once; nothing is saved
+  until Add. 20 lookups / 10 min per user. Stores that block bots (KSP does) fall back to "we kept the link, type
+  the details". `ob_linkinfo` is the SSRF boundary: http/https on 80/443 only, no IP literals or local names, every
+  resolved address must be public, the socket is pinned to the validated address, each redirect (max 4) is
+  re-checked, 1.5 MB / 6 s caps. Card `<img>` tags send no referrer.
+
 ## 2026-11-11 (money pass: affiliate engine, chip in, six guides)
 Audit finding: no store link was ever affiliate-tagged. **Corrected the same day (owner caught it): KSP does
 run its own affiliate program** (ksp.co.il/affiliate/, sign-up ksp.co.il/af/, aff@ksp.co.il) — 80 of the 100

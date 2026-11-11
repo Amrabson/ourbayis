@@ -17,6 +17,7 @@ import re
 import secrets
 import sqlite3
 import unicodedata
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from datetime import date, datetime, timedelta, timezone
 from functools import wraps
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -34,6 +35,7 @@ import i18n as i18n_mod
 import ob_affiliate
 import ob_db
 import ob_hebcal
+import ob_linkinfo
 import ob_mail
 import ob_money
 import ob_search
@@ -166,7 +168,8 @@ def gzip_response(resp):
 
 # ---------------------------------------------------------------- security
 PUBLIC_VIEW_ENDPOINTS = {"index", "catalog_page", "registry", "sample", "shana", "how", "about",
-                         "find", "advertise", "privacy", "terms", "contact", "guides", "guide", "gift_ideas"}
+                         "find", "advertise", "privacy", "terms", "contact", "guides", "guide", "gift_ideas",
+                         "catalog_item"}
 
 
 @app.after_request
@@ -1054,6 +1057,7 @@ def inject_globals():
         classify_pay_url=ob_security.classify_pay_url,
         form_key=secrets.token_urlsafe(16),
         gift_routes=lambda item: item_routes(item, reg_pay_links_for_item(item)),
+        item_url=item_url,
         go_url=go_url,
         go_attrs=go_attrs,
         amazon_associate=amazon_associate_active(),
@@ -1401,6 +1405,106 @@ def catalog_page():
                            unfiltered=unfiltered,
                            sort=sort, page=page, pages=pages, total=total, filters=filters,
                            price_bands=CATALOG_PRICE_BANDS, have=have, has_reg=bool(reg))
+
+
+# ---------------------------------------------------------------- catalog item pages
+# One indexable page per active catalog item: /catalog/<slug>. slug = seed_key, or item-<id>
+# for admin-added rows that have none. No other route lives under /catalog/.
+ITEM_GUIDES = {  # category -> guides.py slug (skipped quietly if the guide is gone)
+    "kitchen": "kosher-kitchen-basics",
+    "appliances": "appliances-from-abroad-or-buy-in-israel",
+    "dining": "shabbos-kitchen-equipment-buying-guide",
+    "bedding": "israeli-bed-mattress-and-linen-sizes",
+    "judaica": "first-yom-tov-year-in-a-new-home",
+    "home": "first-apartment-checklist",
+}
+ITEM_DESC_MAX = 155
+
+
+def catalog_slug(row):
+    """URL segment of a catalog row: its seed_key, else item-<id>."""
+    seed_key = row["seed_key"] if "seed_key" in row.keys() else None
+    return seed_key or "item-%d" % row["id"]
+
+
+def item_url(row):
+    """Path of a catalog item's page, or None when `row` isn't (or can't be traced to) a catalog
+    row: registry items and sample rows without a seed_key. Jinja global."""
+    try:
+        keys = row.keys()
+        if "name" not in keys or "category" not in keys:
+            return None
+        seed_key = row["seed_key"] if "seed_key" in keys else None
+        if not seed_key and ("registry_id" in keys or not row["id"] or row["id"] <= 0):
+            return None
+        return url_for("catalog_item", slug=catalog_slug(row))
+    except (AttributeError, KeyError, TypeError):
+        return None
+
+
+def _catalog_by_slug(db, slug):
+    """The active catalog row a /catalog/<slug> URL names, else None."""
+    row = db.execute("SELECT * FROM catalog_items WHERE seed_key=? AND active=1", (slug,)).fetchone()
+    if row:
+        return row
+    m = re.fullmatch(r"item-(\d{1,9})", slug)
+    if m:
+        return db.execute("SELECT * FROM catalog_items WHERE id=? AND active=1"
+                          " AND (seed_key IS NULL OR seed_key='')", (int(m.group(1)),)).fetchone()
+    return None
+
+
+def _item_description(item, lang):
+    """Meta description from name, brand/model, price and store, at most ITEM_DESC_MAX characters."""
+    name = pick(item, "name", lang)
+    detail = (pick(item, "model", lang) or item["brand"] or "").strip()
+    price = ("₪{:,}".format(item["price_nis"])) if item["price_nis"] else ""
+    store = (item["store"] or "").strip()
+    tail = _t("item_desc_tail", lang)
+
+    def build(detail_txt, with_tail):
+        s = name + (" (%s)" % detail_txt if detail_txt else "")
+        facts = " ".join(x for x in (price, tf("item_desc_at", lang, store=store) if store else "") if x)
+        if facts:
+            s += ": " + facts
+        s += "."
+        return s + (" " + tail if with_tail else "")
+
+    out = build(detail, True)
+    if len(out) > ITEM_DESC_MAX:
+        out = build(detail, False)
+    if len(out) > ITEM_DESC_MAX and detail:
+        room = ITEM_DESC_MAX - len(build("", False)) - 3
+        out = build(detail[:room].rstrip(" ,;—-") + "…", False) if room >= 12 else build("", False)
+    return out[:ITEM_DESC_MAX]
+
+
+@app.route("/catalog/<slug>")
+def catalog_item(slug):
+    db = get_db()
+    lang = current_lang()
+    item = _catalog_by_slug(db, slug)
+    if not item:
+        abort(404)
+    cat = item["category"] if item["category"] in CATEGORIES else "home"
+    price = item["price_nis"] or 0
+    band_key = _band_of(price) if price else None
+    band_slug = next((s for s, k in IDEAS_BANDS.items() if k == band_key), None)
+    guide_obj = ob_guides.BY_SLUG.get(ITEM_GUIDES.get(cat, ""))
+    more = db.execute(
+        "SELECT * FROM catalog_items WHERE active=1 AND category=? AND id != ?"
+        " ORDER BY ABS(price_nis - ?), sort, id LIMIT 4", (item["category"], item["id"], price)).fetchall()
+    reg = user_registry()
+    have = set()
+    if reg:
+        have = {r["catalog_id"] for r in db.execute(
+            "SELECT catalog_id FROM registry_items WHERE registry_id=? AND catalog_id IS NOT NULL",
+            (reg["id"],))}
+    return render_template(
+        "catalog_item.html", item=item, slug=catalog_slug(item), cat=cat, band_key=band_key,
+        band_slug=band_slug, guide_obj=guide_obj, more=more, have=have, has_reg=bool(reg),
+        meta_desc=_item_description(item, lang),
+        offer_ok=(item["price_status"] == "verified" and bool(item["url"]) and price > 0))
 
 
 # Public catalog browsing controls (all server-side, URL-addressable so the
@@ -2657,6 +2761,8 @@ def items_manage():
     if not reg:
         return redirect(url_for("registry_new"))
     db = get_db()
+    prefill = session.pop("link_prefill", None) or {}   # set by items_lookup; gone after one view
+    lookup_note = prefill.get("status", "")
     cat = request.args.get("cat", "")
     q = (request.args.get("q") or "").strip()
     sql = "SELECT * FROM catalog_items WHERE active=1"
@@ -2686,7 +2792,137 @@ def items_manage():
     return render_template("items.html", reg=reg, catalog=catalog, mine=mine, archived=archived,
                            archived_claim_counts=archived_claim_counts,
                            have=have_catalog_ids, claimed=claimed, breakdown=breakdown, cat=cat, q=q,
-                           n_committed=n_committed, n_needs_link=n_needs_link, price_news=price_news)
+                           n_committed=n_committed, n_needs_link=n_needs_link, price_news=price_news,
+                           prefill=prefill, lookup_note=lookup_note)
+
+
+# ------------------------------------------------- paste a link from any store
+# Friendly store names for hosts the catalog already uses (matched on a dot boundary).
+STORE_NAMES = {
+    "ksp.co.il": "KSP",
+    "judaicawebstore.com": "Judaica WebStore",
+    "homecenter.co.il": "Home Center",
+    "payngo.co.il": "Machsanei Chashmal",
+    "heichal.co.il": "Heichal Menachem",
+    "vardinon.co.il": "Vardinon",
+    "ikea.com": "IKEA",
+    "ikea.co.il": "IKEA",
+    "zarahome.com": "Zara Home",
+    "foxhome.co.il": "Fox Home",
+    "golfco.co.il": "Golf & Co",
+    "naaman.co.il": "Naaman",
+    "hakolabait.co.il": "Hakol LaBait",
+}
+_HEBREW_RE = re.compile(r"[֐-׿]")
+LOOKUP_LIMIT = 20          # pasted-link lookups per couple per LOOKUP_PER seconds
+LOOKUP_PER = 600
+
+
+def _link_host(url):
+    try:
+        host = (urlsplit(url).hostname or "").lower().rstrip(".")
+    except ValueError:
+        return ""
+    return host[4:] if host.startswith("www.") else host
+
+
+def store_name_for(host, site_name=""):
+    """A friendly store name: the known-store table, else the page's own site name, else the
+    host's main label capitalised ("shop.example.co.il" -> "Example")."""
+    host = (host or "").lower()
+    for dom, label in STORE_NAMES.items():
+        if host == dom or host.endswith("." + dom):
+            return label
+    parts = host.split(".")
+    if "amazon" in parts[-3:-1]:
+        return "Amazon"
+    site_name = " ".join((site_name or "").split())[:120]
+    if site_name:
+        return site_name
+    labels = [p for p in parts[:-1] if p]
+    while len(labels) > 1 and labels[-1] in ("co", "com", "org", "net", "gov", "ac"):
+        labels.pop()
+    return labels[-1].capitalize() if labels else ""
+
+
+def clean_image_url(raw):
+    """A picture link we keep: https only, the app's URL check, at most 500 chars; else ''."""
+    raw = (raw or "").strip()
+    return raw if raw.startswith("https://") and len(raw) <= 500 and valid_http_url(raw) else ""
+
+
+def _lookup_price(info):
+    """(whole shekels or None, original price text or ''): ILS as is, another currency only
+    when ob_money has a rate for it (then the text is shown so the couple checks it)."""
+    try:
+        price = Decimal(str(info.get("price")).replace(",", ""))
+    except (InvalidOperation, TypeError, ValueError):
+        return None, ""
+    cur = (info.get("currency") or "").upper()
+    cur = "ILS" if cur == "NIS" else cur
+    if not price.is_finite() or price <= 0:
+        return None, ""
+    original = ""
+    if cur == "ILS":
+        ils = price
+    elif cur and ob_money.RATES.get(cur):
+        ils = price * Decimal(str(ob_money.RATES[cur]))
+        try:
+            original = ob_money.fmt_minor(ob_money.to_minor(price, cur), cur)
+        except ValueError:
+            return None, ""
+    else:
+        return None, ""
+    whole = int(ils.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    return (whole, original) if 0 < whole <= 99999 else (None, "")
+
+
+def link_prefill(link, info):
+    """Turn a lookup() result into the custom-form prefill dict (+ a `status` for the note).
+    status: ok | unread (we kept what we could) | bad (nothing usable at all)."""
+    if info.get("error") in ("bad_url", "blocked_host"):
+        return {"status": "bad"}
+    url = ""
+    pasted = link.strip()
+    if pasted and not pasted.startswith("http"):
+        pasted = "https://" + pasted
+    for cand in (info.get("url"), pasted):
+        if cand and valid_http_url(cand):
+            url = cand
+            break
+    host = _link_host(url) or _link_host(info.get("url") or "") or (info.get("host") or "")
+    out = {"status": "ok" if info.get("ok") and url else "unread", "url": url, "host": host,
+           "store": store_name_for(host, info.get("site_name") if info.get("ok") else "") if host else ""}
+    if out["status"] == "unread" and not url:
+        out["store"] = ""
+    if info.get("ok"):
+        name = " ".join((info.get("name") or "").split())[:200]
+        out["name"] = name
+        out["name_he"] = name if _HEBREW_RE.search(name) else ""
+        out["image"] = clean_image_url(info.get("image"))
+        price, original = _lookup_price(info)
+        if price:
+            out["price_nis"] = price
+            out["converted_from"] = original
+    return out
+
+
+@app.route("/registry/items/lookup", methods=["POST"])
+@login_required
+def items_lookup():
+    """Fetch the pasted store link once, stash the prefill in the session and redirect, so a
+    refresh of the items page never fetches again. Nothing is saved until the couple presses Add."""
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("registry_new"))
+    link = (request.form.get("link") or "").strip()[:2000]
+    if ob_security.rate_limited(get_db(), "lookup", f"u{session.get('uid')}", LOOKUP_LIMIT, LOOKUP_PER):
+        session["link_prefill"] = {"status": "limited"}
+    elif not link:
+        session["link_prefill"] = {"status": "bad"}
+    else:
+        session["link_prefill"] = link_prefill(link, ob_linkinfo.lookup(link))
+    return redirect(url_for("items_manage", _anchor="custom"))
 
 
 def _catalog_price_news(db, items):
@@ -2764,16 +3000,21 @@ def items_add():
         if name and not duplicate:
             db.execute(
                 "INSERT INTO registry_items (registry_id, name, name_he, category,"
-                " price_nis, store, url, kind) VALUES (?,?,?,?,?,?,?,?)",
+                " price_nis, store, url, kind, image) VALUES (?,?,?,?,?,?,?,?,?)",
                 (reg["id"], name, (f.get("name_he") or "").strip()[:200],
                  f.get("category") if f.get("category") in CATEGORIES else "home",
                  price, (f.get("store") or "").strip()[:120], url,
-                 "product" if url else "idea"))
+                 "product" if url else "idea", clean_image_url(f.get("image"))))
             _maybe_track_first_gifts(db, reg["id"])
         elif not name:
             flash(_t("form_error", current_lang()), "err")
     if request.args.get("back") == "check":
         return redirect(url_for("registry_check") + "#" + (request.args.get("sec") or "budgets")[:20])
+    if request.args.get("back") == "item":
+        # back to a catalog item page; the slug is looked up, never used as a redirect target
+        here = _catalog_by_slug(db, request.args.get("slug") or "")
+        if here:
+            return redirect(url_for("catalog_item", slug=catalog_slug(here)))
     if request.args.get("back") == "catalog":
         keep = {k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "page")
                 if request.args.get(k)}
@@ -3021,8 +3262,10 @@ def item_edit(item_id):
             qty = 1
         store = (f.get("store") or "").strip()[:120]
         brand = (f.get("brand") or "").strip()[:80]
-        new_vals = dict(name=name, url=url, store=store, brand=brand, price_nis=price,
-                        image=(f.get("image") or item["image"] or ""))
+        image = item["image"] or ""
+        if "image" in f and (f.get("image") or "").strip() != image:
+            image = clean_image_url(f.get("image"))     # https only; anything else is dropped
+        new_vals = dict(name=name, url=url, store=store, brand=brand, price_nis=price, image=image)
         overrides = set(x for x in (item["overrides"] or "").split(",") if x)
         for field in _OVERRIDABLE_FIELDS:
             old = item[field] if field in item.keys() else ""
@@ -3039,14 +3282,14 @@ def item_edit(item_id):
             db.execute(
                 "UPDATE registry_items SET name=?, name_he=?, brand=?, price_nis=?, url=?, store=?,"
                 " qty_wanted=?, priority=?, note=?, note_he=?, variant=?,"
-                " kind=?, overrides=?, chip_in=? WHERE id=?",
+                " kind=?, overrides=?, chip_in=?, image=? WHERE id=?",
                 (name, (f.get("name_he") or "").strip()[:200], brand, price, url, store, qty,
                  1 if f.get("priority") else 0, (f.get("note") or "").strip()[:1000],
                  # note_he left the form (the note is private); keep whatever an older form saved
                  ((f.get("note_he") if "note_he" in f else item["note_he"]) or "").strip()[:1000],
                  (f.get("variant") or "").strip()[:120],
                  f.get("kind") if f.get("kind") in ("product", "idea", "cash_need") else item["kind"],
-                 ",".join(sorted(overrides)), chip_in, item_id))
+                 ",".join(sorted(overrides)), chip_in, image, item_id))
         flash(_t("item_updated", lang), "ok")
         return redirect(url_for("items_manage", _anchor=f"item-{item_id}"))
     return render_template("item_edit.html", reg=reg, item=item, committed=committed,
@@ -4613,6 +4856,10 @@ def sitemap():
         u = ext_url("guide", slug=g["slug"])
         xml.append(f"<url><loc>{u}</loc><lastmod>{g['updated']}</lastmod></url>")
         xml.append(f"<url><loc>{u}?lang=he</loc><lastmod>{g['updated']}</lastmod></url>")
+    for c in get_db().execute("SELECT id, seed_key FROM catalog_items WHERE active=1 ORDER BY category, sort, id"):
+        u = ext_url("catalog_item", slug=catalog_slug(c))
+        xml.append(f"<url><loc>{u}</loc></url>")
+        xml.append(f"<url><loc>{u}?lang=he</loc></url>")
     for r in get_db().execute("SELECT slug FROM registries WHERE visibility='public' AND closed_at IS NULL"):
         xml.append(f"<url><loc>{ext_url('registry', slug=r['slug'])}</loc></url>")
     xml.append("</urlset>")
