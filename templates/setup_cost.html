@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}{{ t('setup_title') }}{% endblock %}
+{% block meta_desc %}{{ t('setup_meta') }}{% endblock %}
+{% block jsonld %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for n in [1, 2, 3, 4] %}
+    {
+      "@type": "Question",
+      "name": {{ t('setup_faq_q' ~ n) | tojson }},
+      "acceptedAnswer": { "@type": "Answer", "text": {{ t('setup_faq_a' ~ n) | tojson }} }
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+{% set est = estimate_label(total) %}
+{% set tally_tpl = t('setup_tally_none') if n_items == 0 else (t('setup_tally_one') if n_items == 1 else t('setup_tally')) %}
+<div class="home sheet-page starter-page setup-page">
+  <div class="sec-inner">
+    <header class="starter-head setup-head">
+      <p class="kicker">{{ t('setup_kicker') }}</p>
+      <h1 class="sheet-title">{{ t('setup_h1') }}</h1>
+      <p class="page-sub">{% if last_checked %}{{ tf('setup_sub', date=fmt_date(last_checked)) }}{% else %}{{ t('setup_sub_nodate') }}{% endif %}</p>
+      <div class="setup-presets" role="radiogroup" aria-label="{{ t('setup_presets_label') }}">
+        {% for key, grps in presets.items() %}
+        <a class="setup-chip" href="{{ url_for('setup_cost', start=key) }}" role="radio" aria-checked="{{ 'true' if key == preset else 'false' }}"
+           data-setup-preset data-groups="{{ grps | join(' ') }}">
+          <strong>{{ t('setup_start_' ~ key) }}</strong>
+          <span>{{ t('setup_start_' ~ key ~ '_hint') }}</span>
+        </a>
+        {% endfor %}
+      </div>
+    </header>
+
+    <form method="post" action="{{ url_for('setup_cost_start') }}" id="starter-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <h2 class="sr-only">{{ t('setup_list_title') }}</h2>
+      <div class="starter-lists">
+      {% for grp in group_order %}
+        {% if groups.get(grp) %}
+        <div class="starter-group sheet" data-group="{{ grp }}">
+          <div class="starter-group-head">
+            <h2 class="sub-title"><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ t('starter_group_' ~ grp) }}</h2>
+            <button class="btn btn-ghost btn-sm" type="button" data-starter-all hidden
+                    data-label-all="{{ t('starter_select_all') }}" data-label-none="{{ t('starter_clear_group') }}">{{ t('starter_select_all') }}</button>
+          </div>
+          <p class="hint setup-group-total bdi">{{ tf('setup_group_total', total='₪' ~ '{:,}'.format(group_totals[grp])) }}</p>
+          <div class="starter-grid">
+            {% for c in groups[grp] %}
+            {% set href = item_url(c) %}
+            <div class="starter-card">
+              <div class="starter-card-top setup-row">
+                <input type="checkbox" name="add_{{ c['id'] }}" value="1" id="setup-i-{{ c['id'] }}" aria-labelledby="setup-n-{{ c['id'] }}"
+                       data-price="{{ c['price_nis'] or 0 }}" {% if grp in checked_groups %}checked{% endif %}>
+                <span>
+                  <strong id="setup-n-{{ c['id'] }}">{% if href %}<a href="{{ href }}">{% endif %}{% if c['brand'] %}<span class="item-brand">{{ c['brand'] }}</span> {% endif %}{{ pick(c, 'name') }}{% if href %}</a>{% endif %}</strong>
+                  <span class="gift-meta bdi">{% if c['price_nis'] %}₪{{ '{:,}'.format(c['price_nis']) }}{% set _e = estimate_label(c['price_nis']) %}{% if _e %} {{ _e }}{% endif %}{% endif %}{% if c['store'] %} · {{ c['store'] }}{% endif %}{% if c['price_status'] == 'estimate' %} · {{ t('price_estimate') }}{% endif %}</span>
+                </span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      {% endfor %}
+      </div>
+      <div class="starter-bar">
+        <span class="starter-tally" id="starter-tally" aria-live="polite"
+              data-none="{{ t('setup_tally_none') }}" data-one="{{ t('setup_tally_one') }}" data-many="{{ t('setup_tally') }}"
+              {% if est_rate %}data-est-rate="{{ est_rate }}" data-est-sym="{{ est_sym }}"{% endif %}>{{ tally_tpl.replace('{n}', n_items | string).replace('{total}', '₪' ~ '{:,}'.format(total)).replace('{est}', (' ' ~ est) if est else '') }}</span>
+        <button class="btn btn-gold" type="submit">{{ t('setup_to_registry') }}</button>
+        <a class="link-arrow" href="{{ url_for('shana') }}#request">{{ t('setup_do_for_you') }} <span aria-hidden="true">{{ arrow }}</span></a>
+      </div>
+    </form>
+    {% if est %}<p class="hint setup-est-note">{{ estimate_note() }}</p>{% endif %}
+  </div>
+
+  <section class="setup-sec setup-packages">
+    <div class="sec-inner">
+      <h2 class="sec-title">{{ t('setup_pk_title') }}</h2>
+      <p class="sec-sub">{{ t('setup_pk_sub') }}</p>
+      <ul class="setup-pk-list">
+        {% for b in bundles %}
+        <li class="setup-pk">
+          <h3>{{ pick(b, 'name') }}</h3>
+          <p class="setup-pk-price bdi">{{ t('bundle_from') }} <strong>₪{{ '{:,}'.format(b['price_from']) }}</strong>{% set _e = estimate_label(b['price_from']) %}{% if _e %} <span class="usd">{{ _e }}</span>{% endif %}</p>
+          <p>{{ pick(b, 'description') }}</p>
+          <a class="link-arrow" href="{{ url_for('shana') }}#pkg-{{ b['slug'] }}">{{ t('setup_pk_link') }} <span aria-hidden="true">{{ arrow }}</span></a>
+        </li>
+        {% endfor %}
+      </ul>
+      <p class="hint">{{ t('setup_pk_note') }}</p>
+    </div>
+  </section>
+
+  <section class="setup-sec setup-leaves-out">
+    <div class="sec-inner">
+      <h2 class="sec-title">{{ t('setup_out_title') }}</h2>
+      <ul class="setup-out">
+        {% for n in [1, 2, 3, 4] %}<li>{{ t('setup_out_' ~ n) }}</li>{% endfor %}
+      </ul>
+      <p class="hint">{{ t('setup_out_note') }}</p>
+    </div>
+  </section>
+
+  <section class="faq-sec">
+    <div class="sec-inner">
+      <h2 class="sec-title">{{ t('setup_faq_title') }}</h2>
+      <ol class="faq-cols">
+        {% for n in [1, 2, 3, 4] %}
+        <li><details><summary><span class="faq-n" aria-hidden="true">{{ '%02d' % n }}</span><span>{{ t('setup_faq_q' ~ n) }}</span></summary>
+          <p>{{ t('setup_faq_a' ~ n) }}</p>
+          {% if n == 3 and appliances_guide %}<p><a class="link-arrow" href="{{ url_for('guide', slug='appliances-from-abroad-or-buy-in-israel') }}">{{ t('setup_faq_guide') }} <span aria-hidden="true">{{ arrow }}</span></a></p>{% endif %}
+        </details></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </section>
+
+  <section class="closing">
+    <h2 class="closing-title">{{ t('setup_close_t') }}</h2>
+    <p>{{ t('setup_close_b') }}</p>
+    <div class="closing-ctas"><a class="btn btn-primary btn-lg" href="{{ url_for('signup') }}">{{ t('cta_start') }}</a></div>
+  </section>
+</div>
+{% endblock %}

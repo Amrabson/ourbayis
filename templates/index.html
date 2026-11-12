@@ -139,11 +139,12 @@
           <div class="gift-grid room-grid">
             {% for c in r['items'] %}{{ gift_card(c, mode='link') }}{% endfor %}
           </div>
-          <a class="link-arrow room-all" href="{{ url_for('catalog_page', cat=r.slug) }}">{{ tf('rooms_all', n=r.count, room=cat_label(r.slug)) }} <span aria-hidden="true">{{ arrow }}</span></a>
+          <a class="link-arrow room-all" href="{{ gift_category_url(r.slug) }}">{{ tf('rooms_all', n=r.count, room=cat_label(r.slug)) }} <span aria-hidden="true">{{ arrow }}</span></a>
         </div>
         {% endfor %}
       </div>
     </div>
+    <p class="sec-links"><a class="link-arrow" href="{{ url_for('setup_cost') }}">{{ t('setup_home_link') }} <span aria-hidden="true">{{ arrow }}</span></a></p>
     {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
   </div>
 </section>

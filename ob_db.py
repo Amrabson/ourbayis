@@ -16,6 +16,7 @@ import json
 import sqlite3
 import time
 import unicodedata
+from datetime import datetime, timezone
 import re
 from pathlib import Path
 
@@ -747,7 +748,17 @@ def seed_overwrite(db, seed_items, fields, dry_run=False):
     return diffs
 
 
-def refresh_registry_links(db, dry_run=False):
+def _chip_funded_minor(db, item_id):
+    """Agorot guests have chipped in on an item: the same active-claim rule as app.item_claim_breakdown
+    (reserved and not expired, reported, received). Kept here because that helper needs a Flask request."""
+    now = datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
+    return db.execute(
+        "SELECT COALESCE(SUM(amount_minor),0) FROM claims WHERE item_id=? AND kind='chip'"
+        " AND status IN ('reserved','reported','received')"
+        " AND (expires_at IS NULL OR expires_at > ? OR status != 'reserved')", (item_id, now)).fetchone()[0]
+
+
+def refresh_registry_links(db, dry_run=False, notes=None):
     """Copy url/image/store/brand/model/notes and the stock flag
     (`availability`) from catalog_items onto registry_items that came from
     the catalog (catalog_id set), for any of those fields the couple has NOT
@@ -760,7 +771,9 @@ def refresh_registry_links(db, dry_run=False):
     unless the couple set their own price (`price_nis` in overrides). Never
     touches name/qty/priority/note or any claim — a claim's
     `price_snapshot_minor`/`amount_minor` is the guest's committed amount and
-    is left alone. Returns (registry_item_id, field, old, new)."""
+    is left alone. A price change that would drop below what guests have already chipped in on the
+    item is skipped (url/image/store/brand still update) and a line naming the item goes into
+    `notes`, if a list is passed. Returns (registry_item_id, field, old, new)."""
     diffs = []
     fields = ("url", "image", "store", "brand", "model", "model_he", "availability", "notes", "notes_he")
     price_fields = ("price_nis", "price_status", "price_checked_at")
@@ -775,7 +788,15 @@ def refresh_registry_links(db, dry_run=False):
         overrides = set(f for f in (row["overrides"] or "").split(",") if f)
         sets, params = [], []
         product_swapped = ("url" not in overrides and row["c_url"] and (row["url"] or "") != row["c_url"])
-        for field in fields + (price_fields if product_swapped and "price_nis" not in overrides else ()):
+        follow_price = product_swapped and "price_nis" not in overrides
+        if follow_price and row["c_price_nis"] != row["price_nis"]:
+            funded = _chip_funded_minor(db, row["id"])
+            if (row["c_price_nis"] or 0) * 100 < funded:
+                follow_price = False
+                if notes is not None:
+                    notes.append(f"item {row['id']} ({row['name']}): kept price NIS {row['price_nis']}, the catalog's"
+                                 f" NIS {row['c_price_nis']} is below the NIS {funded // 100} guests have chipped in")
+        for field in fields + (price_fields if follow_price else ()):
             if field in overrides and field != "availability":
                 continue
             old_val = row[field]

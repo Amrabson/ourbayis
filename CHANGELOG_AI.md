@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-12 (setup-cost calculator, category pages, cash funds)
+- **`/setup-cost`** (`setup_cost`, `setup_cost.html`): "What it costs to set up an apartment in Israel", built from
+  the starter-group catalog items (`starter_groups(db)`, now shared with the starter picker). Three presets
+  (`SETUP_PRESETS`: minimum / home / everything, `?start=`), live total through the existing starter tally JS
+  (`data-est-rate` adds the ≈ estimate), `SETUP_SKIP` leaves out the two "second, pricier version" starter items so
+  pots and knives aren't counted twice. `POST /setup-cost/start` puts the ticked items on the couple's list, or
+  queues them in `pending_add` through signup. Shana packages listed beneath with no savings claims; a "what this
+  leaves out" list; FAQPage JSON-LD. Linked from the homepage, the Shana page and the footer; in the sitemap.
+- **Category pages** `/gifts/<slug>` (`gift_category`, `GIFT_CATS`, Jinja `gift_category_url(cat)`): every item in
+  a category grouped by price band, intro (`cat_h_*`, `cat_intro_*`), the `item_know_*` lines, BreadcrumbList +
+  ItemList JSON-LD, in the sitemap. Item-page breadcrumbs and the homepage "All N gifts" links point here.
+- **Cash funds**: "Add a fund" on `/registry/items` (`POST /registry/items/fund`): a custom item with no store
+  link, `chip_in=1`, price = goal (₪100–99,999), guest note in `variant`. Needs a payment link. List check suggests
+  one when the list has pay links but nothing to chip in toward.
+- `refresh-registry-links` no longer lowers a price below what guests have chipped in (`ob_db._chip_funded_minor`);
+  the report names the items it kept.
+- `tools/export_static.py` exports item pages (`item/<slug>/`), category pages and `/setup-cost`.
+
 ## 2026-11-11 (a page per catalog item; paste a link from any store)
 - **Item pages**: `GET /catalog/<slug>` (`catalog_item`; slug = `seed_key`, else `item-<id>`; `catalog_slug()`,
   Jinja `item_url()`), template `catalog_item.html`: breadcrumb, illustration/photo, price + facts via the shared

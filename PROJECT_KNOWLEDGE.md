@@ -304,6 +304,12 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
   there (SSRF rules in its docstring). `items_lookup` → `link_prefill()` → `session["link_prefill"]` → the custom
   form in items.html. Custom items can now carry an `image` (https only).
 
+## Setup cost, category pages, funds (2026-11-12)
+- `/setup-cost` → `setup_cost` / `setup_cost_start`; items come from `starter_groups(db)` minus `SETUP_SKIP`; the
+  page reuses the starter picker's `#starter-form` tally JS and `.starter-*` CSS (change them with both in mind).
+- `/gifts/<slug>` → `gift_category`; URL slug ↔ internal category in `GIFT_CATS`; link with `gift_category_url(cat)`.
+- A fund is just a registry item with no url and `chip_in=1` (`items_fund`); there is no separate table.
+
 ## Gift ideas by budget (2026-11-07)
 `/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and
 `_band_items(db, key)` lists a band. Copy per band is `ideas_h_<key>` / `ideas_for_<key>` in i18n. Indexable

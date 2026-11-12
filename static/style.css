@@ -2588,3 +2588,44 @@ main:focus { outline: none; }
 @media (max-width: 480px) {
   .link-lookup-row .btn { width: 100%; justify-content: center; }
 }
+
+/* Category landing pages + cash funds */
+.ideas-cats { padding-block: 24px; }
+.cat-links { margin-bottom: 14px; }
+.fund-chips { margin: 10px 0 14px; }
+.fund-chips .chip { cursor: pointer; font: inherit; }
+.fund-panel .warn-note { margin: 0 0 12px; }
+.check-fund-suggest { margin-top: 10px; }
+
+/* /setup-cost calculator */
+.setup-page .setup-presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 22px; }
+.setup-page .setup-chip {
+  display: flex; flex-direction: column; gap: 2px; padding: 12px 16px; min-width: 0; text-decoration: none;
+  border: 1.5px solid rgba(135, 96, 34, .35); border-radius: 10px; background: #fff; color: var(--navy);
+}
+.setup-page .setup-chip strong { font-weight: 600; }
+.setup-page .setup-chip span { font-size: .85rem; color: var(--ink-soft); }
+.setup-page .setup-chip[aria-checked="true"] { border-color: var(--navy); box-shadow: 0 0 0 3px var(--gold-soft); background: var(--paper); }
+.setup-page .setup-chip:hover { border-color: var(--navy); }
+.setup-page .setup-group-total { margin: 0 0 4px; }
+.setup-page .setup-row { cursor: default; }
+.setup-page .setup-row a { color: inherit; text-decoration: underline; text-decoration-color: rgba(135, 96, 34, .4); text-underline-offset: 3px; }
+.setup-page .starter-card-top { flex-basis: 100%; }
+.setup-page .starter-bar .btn { white-space: normal; }
+.setup-page .setup-est-note { margin-top: 14px; }
+.setup-page .setup-sec { padding: clamp(36px, 6vw, 64px) 0 0; }
+.setup-page .setup-pk-list { list-style: none; margin: 18px 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.setup-page .setup-pk { border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 18px 20px; min-width: 0; }
+.setup-page .setup-pk h3 { margin: 0 0 4px; color: var(--navy); }
+.setup-page .setup-pk p { margin: 0 0 10px; }
+.setup-page .setup-out { margin: 14px 0; padding-inline-start: 1.2em; }
+.setup-page .setup-out li { margin: 4px 0; }
+@media (max-width: 760px) { .setup-page .setup-presets { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) {
+  .setup-page .starter-bar { padding: 10px 14px; gap: 8px 12px; }
+  .setup-page .starter-bar #starter-tally, .setup-page .starter-bar .starter-tally { font-size: 1rem; line-height: 1.3; flex-basis: 100%; margin: 0; }
+  .setup-page .starter-bar .btn { padding: 8px 14px; font-size: .9rem; }
+  .setup-page .starter-bar .link-arrow { font-size: .9rem; }
+  .setup-page .setup-presets { gap: 8px; }
+  .setup-page .setup-chip { padding-block: 10px; }
+}

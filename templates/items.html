@@ -149,6 +149,27 @@
     </form>
   </div>
 
+  <h2 class="sub-title" id="fund">{{ t('fund_h') }}</h2>
+  <div class="form-panel fund-panel">
+    <p class="hint">{{ t('fund_sub') }}</p>
+    {% if not has_pay %}<p class="warn-note">{{ t('fund_need_pay') }} <a href="{{ url_for('registry_edit') }}#rf-payment">{{ t('check_add_pay') }}</a></p>{% endif %}
+    <div class="chip-row fund-chips" role="group" aria-label="{{ t('fund_ideas') }}">
+      {% for k in ('furniture', 'sefarim', 'appliances', 'settling') %}
+      <button class="chip" type="button" data-fill="fund-name" data-fill-value="{{ t('fund_name_' ~ k) }}">{{ t('fund_name_' ~ k) }}</button>
+      {% endfor %}
+    </div>
+    <form method="post" action="{{ url_for('items_fund') }}" class="stack-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="form-2col">
+        <label>{{ t('fund_name') }} *<input id="fund-name" name="name" required maxlength="200" autocomplete="off"></label>
+        <label>{{ t('fund_goal') }} *<input name="goal" type="number" inputmode="numeric" required min="100" max="99999" step="1" placeholder="2000"></label>
+      </div>
+      <label>{{ t('fund_note') }}<input name="note" maxlength="120"></label>
+      <p class="hint">{{ t('fund_note_hint') }}</p>
+      <button class="btn btn-primary" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('fund_add_btn') }}</button>
+    </form>
+  </div>
+
   {% if archived %}
   <details class="archived-panel">
     <summary>{{ tf('archived_items_summary', n=archived|length) }}</summary>

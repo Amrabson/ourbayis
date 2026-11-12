@@ -169,7 +169,7 @@ def gzip_response(resp):
 # ---------------------------------------------------------------- security
 PUBLIC_VIEW_ENDPOINTS = {"index", "catalog_page", "registry", "sample", "shana", "how", "about",
                          "find", "advertise", "privacy", "terms", "contact", "guides", "guide", "gift_ideas",
-                         "catalog_item"}
+                         "catalog_item", "gift_category", "setup_cost"}
 
 
 @app.after_request
@@ -857,6 +857,8 @@ def gift_status(item, breakdown):
 # keyword -> item-specific line illustration (<symbol id="ill-*"> in base.html).
 # Only used when an item has no photo; falls back to the category drawing.
 _ILLUSTRATION_RULES = (
+    # cash funds ("Sefarim fund", "קרן ספרים"): the money-box drawing, ahead of every keyword rule
+    (("fund ", "קרן "), "boxes"),
     # checked before the broad rules below: "cookie sheets" must not hit "sheet" (bedding)
     (("cookie sheet", "baking pan", "baking dish", "kugel pan", "loaf", "תבנית"), "bakeware"),
     # 2026-10-25 additions, checked first: the more specific names before the broad rules below
@@ -1058,6 +1060,7 @@ def inject_globals():
         form_key=secrets.token_urlsafe(16),
         gift_routes=lambda item: item_routes(item, reg_pay_links_for_item(item)),
         item_url=item_url,
+        gift_category_url=gift_category_url,
         go_url=go_url,
         go_attrs=go_attrs,
         amazon_associate=amazon_associate_active(),
@@ -1311,7 +1314,51 @@ def gift_ideas(band):
                 "SELECT catalog_id FROM registry_items WHERE registry_id=? AND catalog_id IS NOT NULL",
                 (reg["id"],))}
     return render_template("gift_ideas.html", band=key, bands=bands, groups=groups,
-                           have=have, has_reg=bool(reg))
+                           have=have, has_reg=bool(reg), cat_links=GIFT_CATS)
+
+
+# ---------------------------------------------------------------- category landing pages
+# Indexable /gifts/<slug>, one per i18n.CATEGORIES entry (the filtered /catalog?cat= view stays noindex).
+GIFT_CATS = {  # URL slug -> internal category slug
+    "kitchen": "kitchen",
+    "appliances": "appliances",
+    "shabbos-table": "dining",
+    "bedding-and-bath": "bedding",
+    "judaica": "judaica",
+    "home-essentials": "home",
+}
+GIFT_CAT_SLUG = {v: k for k, v in GIFT_CATS.items()}
+
+
+def gift_category_url(cat):
+    """Path of a category's landing page (Jinja global); falls back to the catalog filter."""
+    slug = GIFT_CAT_SLUG.get(cat)
+    return url_for("gift_category", cat_slug=slug) if slug else url_for("catalog_page", cat=cat)
+
+
+@app.route("/gifts/<cat_slug>")
+def gift_category(cat_slug):
+    """All active catalog items of one category, grouped by price band, cheapest first."""
+    cat = GIFT_CATS.get(cat_slug)
+    if not cat:
+        abort(404)
+    db = get_db()
+    rows = db.execute("SELECT * FROM catalog_items WHERE active=1 AND category=?"
+                      " ORDER BY price_nis, sort, id", (cat,)).fetchall()
+    groups = []
+    for key, (lo, hi) in CATALOG_PRICE_BANDS.items():
+        its = [r for r in rows if (r["price_nis"] or 0) >= lo and (hi is None or (r["price_nis"] or 0) < hi)]
+        if its:
+            groups.append((key, its))
+    reg = user_registry()
+    have = set()
+    if reg:
+        have = {r["catalog_id"] for r in db.execute(
+            "SELECT catalog_id FROM registry_items WHERE registry_id=? AND catalog_id IS NOT NULL",
+            (reg["id"],))}
+    return render_template("gift_category.html", cat=cat, cat_slug=cat_slug, groups=groups, items=rows,
+                           have=have, has_reg=bool(reg), cat_links=GIFT_CATS,
+                           guide_obj=ob_guides.BY_SLUG.get(ITEM_GUIDES.get(cat, "")))
 
 
 @app.route("/guides")
@@ -2793,7 +2840,7 @@ def items_manage():
                            archived_claim_counts=archived_claim_counts,
                            have=have_catalog_ids, claimed=claimed, breakdown=breakdown, cat=cat, q=q,
                            n_committed=n_committed, n_needs_link=n_needs_link, price_news=price_news,
-                           prefill=prefill, lookup_note=lookup_note)
+                           prefill=prefill, lookup_note=lookup_note, has_pay=bool(reg_pay_links(reg)))
 
 
 # ------------------------------------------------- paste a link from any store
@@ -3015,12 +3062,56 @@ def items_add():
         here = _catalog_by_slug(db, request.args.get("slug") or "")
         if here:
             return redirect(url_for("catalog_item", slug=catalog_slug(here)))
+    if request.args.get("back") == "cat" and request.args.get("cat_slug") in GIFT_CATS:
+        return redirect(url_for("gift_category", cat_slug=request.args["cat_slug"])
+                        + (f"#c-{cat_id}" if cat_id else ""))
     if request.args.get("back") == "catalog":
-        keep = {k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "page")
+        keep ={k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "page")
                 if request.args.get(k)}
         return redirect(url_for("catalog_page", **keep) + (f"#c-{cat_id}" if cat_id else ""))
     return redirect(url_for("items_manage", cat=request.args.get("cat", ""),
                             q=request.args.get("q", "")) + ("#add-more" if cat_id else "#mine"))
+
+
+FUND_MIN, FUND_MAX = 100, 99999  # shekels: the goal of a cash fund
+
+
+@app.route("/registry/items/fund", methods=["POST"])
+@login_required
+def items_fund():
+    """A cash fund ("Sefarim fund"): a custom registry item with no store link that guests chip in
+    toward (chip_in=1, qty 1, price = the goal). It needs a working payment link, as every chip-in does.
+    The note is stored in `variant`, the field guests see as the couple's request."""
+    lang = current_lang()
+    reg = user_registry()
+    if not reg:
+        return redirect(url_for("registry_new"))
+    if not reg_pay_links(reg):
+        flash(_t("fund_need_pay", lang), "err")
+        return redirect(url_for("registry_edit", _anchor="rf-payment"))
+    f = request.form
+    name = " ".join((f.get("name") or "").split())[:200]
+    raw = (f.get("goal") or "").strip()
+    if not name:
+        flash(_t("fund_need_name", lang), "err")
+        return redirect(url_for("items_manage", _anchor="fund"))
+    if not re.fullmatch(r"[0-9]{1,6}", raw) or not FUND_MIN <= int(raw) <= FUND_MAX:
+        flash(tf("fund_bad_goal", lang, lo="{:,}".format(FUND_MIN), hi="{:,}".format(FUND_MAX)), "err")
+        return redirect(url_for("items_manage", _anchor="fund"))
+    db = get_db()
+    with ob_db.write_txn(db):
+        dup = db.execute("SELECT 1 FROM registry_items WHERE registry_id=? AND archived=0 AND chip_in=1"
+                         " AND catalog_id IS NULL AND name=? AND price_nis=?",
+                         (reg["id"], name, int(raw))).fetchone()
+        if not dup:
+            db.execute(
+                "INSERT INTO registry_items (registry_id, name, name_he, category, price_nis, store, url,"
+                " kind, image, qty_wanted, chip_in, variant, price_status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (reg["id"], name, name if re.search("[֐-׿]", name) else "", "home", int(raw),
+                 "", "", "idea", "", 1, 1, (f.get("note") or "").strip()[:120], ""))
+            _maybe_track_first_gifts(db, reg["id"])
+    flash(_t("fund_added", lang), "ok")
+    return redirect(url_for("items_manage") + "#mine")
 
 
 # ---------------------------------------------------------------- list check
@@ -3096,6 +3187,7 @@ def list_check(db, reg):
     return dict(
         items=len(items), open=sum(b["open"] for b in bands.values()),
         bands=bands, rooms=rooms, no_price=no_price, cant_give=cant_give, pay=pay, chip_suggest=chip_suggest,
+        fund_suggest=pay and not any(r["chip_in"] for r in items),
         budgets_ok=sum(1 for k in budget_keys if bands[k]["status"] == "good"), budgets_n=len(budget_keys),
         rooms_ok=sum(1 for rm in rooms.values() if rm["status"] == "listed"), rooms_n=len(rooms),
     )
@@ -3155,11 +3247,99 @@ def items_starter():
                 _maybe_track_first_gifts(db, reg["id"])
         flash(tf("starter_added", current_lang(), n=added), "ok")
         return redirect(url_for("items_manage") + "#mine")
-    groups = {g: db.execute(
-        "SELECT * FROM catalog_items WHERE active=1 AND starter_group=? ORDER BY sort", (g,)).fetchall()
-        for g in STARTER_GROUPS_ORDER}
+    groups = starter_groups(db)
     return render_template("items_starter.html", reg=reg, groups=groups,
                            group_order=STARTER_GROUPS_ORDER, have=have_catalog_ids)
+
+
+def starter_groups(db):
+    """{group: [catalog rows]} for every starter group, in STARTER_GROUPS_ORDER (shared by the
+    starter picker and the /setup-cost calculator)."""
+    return {g: db.execute(
+        "SELECT * FROM catalog_items WHERE active=1 AND starter_group=? ORDER BY sort", (g,)).fetchall()
+        for g in STARTER_GROUPS_ORDER}
+
+
+# ---------------------------------------------------------------- setup-cost calculator
+SETUP_PRESETS = {  # ?start=<key> -> starter groups ticked by default
+    "minimum": ("first_week",),
+    "home": ("first_week", "kitchen", "shabbos", "bedbath"),
+    "everything": tuple(STARTER_GROUPS_ORDER),
+}
+SETUP_DEFAULT_PRESET = "home"
+# Starter-picker options that are a second, pricier version of something already in the list (the
+# first-week pots set, the knife block): fine to offer a couple, but in a cost total they count twice.
+SETUP_SKIP = ("pots-pans-premium-10-piece-set", "chef-s-knife-professional")
+
+
+@app.route("/setup-cost")
+def setup_cost():
+    """Public, itemised cost of a first apartment from the starter-group catalog items. The preset
+    only decides which boxes are ticked and the server-rendered total; app.js (#starter-form)
+    keeps the tally live."""
+    db = get_db()
+    preset = request.args.get("start")
+    if preset not in SETUP_PRESETS:
+        preset = SETUP_DEFAULT_PRESET
+    groups = {grp: [r for r in rows if r["seed_key"] not in SETUP_SKIP]
+              for grp, rows in starter_groups(db).items()}
+    checked_groups = SETUP_PRESETS[preset]
+    group_totals = {g: sum(r["price_nis"] or 0 for r in rows) for g, rows in groups.items()}
+    total = sum(group_totals[g] for g in checked_groups)
+    n_items = sum(len(groups[g]) for g in checked_groups)
+    checked_dates = [r["price_checked_at"] for rows in groups.values() for r in rows if r["price_checked_at"]]
+    bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
+    appliances_guide = any(g["slug"] == "appliances-from-abroad-or-buy-in-israel" for g in ob_guides.GUIDES)
+    cur = (session.get("cur") or getattr(g, "display_currency", None)
+           or ("USD" if "USD" in ob_money.CURRENCIES else "ILS"))
+    est_rate = ob_money.RATES.get(cur) if cur != "ILS" else None
+    return render_template(
+        "setup_cost.html", groups=groups, group_order=STARTER_GROUPS_ORDER, presets=SETUP_PRESETS,
+        preset=preset, checked_groups=checked_groups, group_totals=group_totals, total=total,
+        n_items=n_items, last_checked=max(checked_dates) if checked_dates else "", bundles=bundles,
+        appliances_guide=appliances_guide, est_rate=est_rate,
+        est_sym=ob_money.CURRENCY_SYMBOLS.get(cur, cur + " ") if est_rate else "")
+
+
+@app.route("/setup-cost/start", methods=["POST"])
+def setup_cost_start():
+    """Turn the ticked setup-cost items into a registry: straight onto the list for a couple with
+    one (no duplicates), else queued in session['pending_add'] (cap 50, as items_add) until they
+    sign up and create a registry."""
+    if rate_limited("setup_start", limit=20, per=600):
+        abort(429)
+    if is_spam():
+        return redirect(url_for("setup_cost"))
+    lang = current_lang()
+    wanted = []
+    for key in request.form:
+        if key.startswith("add_") and key[4:].isascii() and key[4:].isdigit() and int(key[4:]) not in wanted:
+            wanted.append(int(key[4:]))
+            if len(wanted) >= 200:  # far more than the page offers; bounds the query below
+                break
+    db = get_db()
+    ids = []
+    if wanted:
+        ok = {r[0] for r in db.execute(
+            "SELECT id FROM catalog_items WHERE active=1 AND id IN (%s)" % ",".join("?" * len(wanted)),
+            wanted)}
+        ids = [i for i in wanted if i in ok][:50]
+    if not ids:
+        flash(_t("setup_none_selected", lang), "err")
+        return redirect(url_for("setup_cost"))
+    track("setup_cost_start")
+    reg = user_registry() if current_user() else None
+    if reg:
+        with ob_db.write_txn(db):
+            added = _apply_pending_add(db, reg["id"], ids)
+            if added:
+                _maybe_track_first_gifts(db, reg["id"])
+        flash(tf("starter_added", lang, n=added) if added else _t("setup_nothing_new", lang), "ok")
+        return redirect(url_for("items_manage") + "#mine")
+    pending = [i for i in (session.get("pending_add") or []) if i not in ids] + ids
+    session["pending_add"] = pending[-50:]
+    flash(_t("pending_add_signup", lang), "ok")
+    return redirect(url_for("registry_new") if current_user() else url_for("signup"))
 
 
 @app.route("/registry/items/<int:item_id>/update", methods=["POST"])
@@ -4845,8 +5025,9 @@ def robots():
 def sitemap():
     pages = [ext_url(p) for p in
              ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy", "terms",
-              "advertise", "guides", "gift_ideas")]
+              "advertise", "guides", "gift_ideas", "setup_cost")]
     pages += [ext_url("gift_ideas", band=slug) for slug in IDEAS_BANDS]
+    pages += [ext_url("gift_category", cat_slug=slug) for slug in GIFT_CATS]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in pages:

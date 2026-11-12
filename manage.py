@@ -333,7 +333,8 @@ def cmd_seed_sync(args):
 def cmd_refresh_registry_links(args):
     db = _open()
     with ob_db.write_txn(db):
-        diffs = ob_db.refresh_registry_links(db, dry_run=(not args.apply))
+        notes = []
+        diffs = ob_db.refresh_registry_links(db, dry_run=(not args.apply), notes=notes)
     if not diffs:
         print("No differences.")
     else:
@@ -342,6 +343,8 @@ def cmd_refresh_registry_links(args):
             print(f"{item_id:<10} {field:<10} {str(old)[:38]:<40} {str(new)[:38]:<40}")
     print(f"\n{len(diffs)} field(s) would change." if (not args.apply)
           else f"\n{len(diffs)} field(s) changed.")
+    for note in notes:
+        print("price kept (chip-ins): " + note)
     return 0
 
 

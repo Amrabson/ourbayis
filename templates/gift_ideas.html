@@ -42,6 +42,13 @@
   </div>
   {% endif %}
 
+  <nav class="sec-inner ideas-cats" aria-labelledby="ideas-cats-h">
+    <h2 class="item-h" id="ideas-cats-h">{{ t('cat_by_kind_h') }}</h2>
+    <div class="chip-row cat-links">
+      {% for s, c in cat_links.items() %}<a class="chip" href="{{ url_for('gift_category', cat_slug=s) }}">{{ cat_label(c) }}</a>{% endfor %}
+    </div>
+  </nav>
+
   <div class="sec-inner ideas-ctas">
     <div class="ideas-cta">
       <h2>{{ t('ideas_cta_couple_h') }}</h2>

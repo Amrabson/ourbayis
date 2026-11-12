@@ -53,8 +53,11 @@ PAGES = {  # url -> output dir (relative)
     "/gift-ideas/200-500": "gift-ideas/200-500",
     "/gift-ideas/500-1500": "gift-ideas/500-1500",
     "/gift-ideas/1500-plus": "gift-ideas/1500-plus",
+    "/setup-cost": "setup-cost",
 }
-AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new")
+# /catalog/<slug> item pages -> item/<slug>/ and /gifts/<slug> category pages -> gifts/<slug>/ are
+# added to the page list in main() (from the demo DB and A.GIFT_CATS) and mapped in page_path().
+AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new", "setup-cost/")
 
 
 def rel_prefix(out_dir):
@@ -72,6 +75,10 @@ def rewrite(html, out_dir, lang, go_map):
     def page_path(path, query):
         if path == "/":
             return ""
+        if path.startswith("/catalog/") and path.count("/") == 2:
+            return "item/" + path.rsplit("/", 1)[1] + "/"
+        if path.startswith("/gifts/") and path.count("/") == 2:
+            return "gifts/" + path.rsplit("/", 1)[1] + "/"
         if path == "/catalog":
             m = re.search(r"cat=([a-z]+)", query or "")
             pg = re.search(r"page=(\d+)", query or "")
@@ -158,6 +165,8 @@ def main():
     go_map = {}
     for cid, url in db.execute("SELECT id, url FROM catalog_items WHERE url != ''"):
         go_map[f"/go/c/{cid}"] = url
+    item_slugs = [seed_key or f"item-{cid}" for cid, seed_key in db.execute(
+        "SELECT id, seed_key FROM catalog_items WHERE active=1 ORDER BY category, sort, id")]
     n_active = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1").fetchone()[0]
     per_cat = dict(db.execute(
         "SELECT category, COUNT(*) FROM catalog_items WHERE active=1 GROUP BY category"))
@@ -175,6 +184,10 @@ def main():
     import guides as _guides
     for _g in _guides.GUIDES:
         pages[f"/guides/{_g['slug']}"] = f"guides/{_g['slug']}"
+    for _slug in item_slugs:
+        pages[f"/catalog/{_slug}"] = f"item/{_slug}"
+    for _slug in A.GIFT_CATS:
+        pages[f"/gifts/{_slug}"] = f"gifts/{_slug}"
     pages["/signup"] = "demo-only"
 
     written = 0

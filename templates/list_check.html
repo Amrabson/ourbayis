@@ -113,6 +113,9 @@
       {% if check['chip_suggest'] %}
       <p class="check-chip-suggest"><a href="{{ url_for('item_edit', item_id=check['chip_suggest']['id']) }}#chip-in">{{ tf('check_chip_suggest', item=pick(check['chip_suggest'], 'name')) }} <span aria-hidden="true">{{ arrow }}</span></a></p>
       {% endif %}
+      {% if check['fund_suggest'] %}
+      <p class="check-chip-suggest check-fund-suggest"><a href="{{ url_for('items_manage') }}#fund">{{ t('check_fund_suggest') }} <span aria-hidden="true">{{ arrow }}</span></a></p>
+      {% endif %}
       <p class="hint check-pay">{{ t('check_pay_ok') if check['pay'] else t('check_pay_missing') }}
         {% if not check['pay'] and not check['cant_give'] %}<a href="{{ url_for('registry_edit') }}#rf-payment">{{ t('check_add_pay') }}</a>{% endif %}</p>
     </section>

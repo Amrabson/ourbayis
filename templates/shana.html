@@ -44,6 +44,7 @@
   <div class="sec-inner">
     <h2 class="sec-title">{{ t('shana_packages_t') }}</h2>
     <p class="sec-sub tickets-sub">{{ t('shana_packages_sub') }}</p>
+    <p class="sec-links"><a class="link-arrow" href="{{ url_for('setup_cost') }}">{{ t('setup_shana_link') }} <span aria-hidden="true">{{ arrow }}</span></a></p>
     <div class="tickets">
       {% for b in bundles %}
       {% set tier = package_tiers.get(b['tier'], package_tiers['basic']) %}

@@ -4,6 +4,7 @@
 {% block meta_desc %}{{ meta_desc }}{% endblock %}
 {% block jsonld %}
 {%- set _url = ext_url('catalog_item', slug=slug) ~ ('?lang=he' if rtl else '') -%}
+{%- set _root = ext_url('index')[:-1] -%}
 {%- set _model = pick(item, 'model') if 'model' in item.keys() else '' -%}
 <script type="application/ld+json">
 {
@@ -13,7 +14,7 @@
     { "@type": "ListItem", "position": 1, "name": {{ t('nav_catalog') | tojson }},
       "item": {{ (ext_url('catalog_page') ~ ('?lang=he' if rtl else '')) | tojson }} },
     { "@type": "ListItem", "position": 2, "name": {{ cat_label(cat) | tojson }},
-      "item": {{ (ext_url('catalog_page') ~ '?cat=' ~ cat ~ ('&lang=he' if rtl else '')) | tojson }} },
+      "item": {{ (_root ~ gift_category_url(cat) ~ ('?lang=he' if rtl else '')) | tojson }} },
     { "@type": "ListItem", "position": 3, "name": {{ pick(item, 'name') | tojson }}, "item": {{ _url | tojson }} }
   ]
 }
@@ -53,7 +54,7 @@
     <nav class="item-crumbs" aria-label="{{ t('item_crumbs') }}">
       <ol>
         <li><a href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }}</a></li>
-        <li><a href="{{ url_for('catalog_page', cat=cat) }}">{{ cat_label(cat) }}</a></li>
+        <li><a href="{{ gift_category_url(cat) }}">{{ cat_label(cat) }}</a></li>
         <li aria-current="page" dir="auto">{{ pick(item, 'name') }}</li>
       </ol>
     </nav>

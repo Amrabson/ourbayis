@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% from "_cards.html" import gift_card with context %}
+{% block title %}{{ t('cat_h_' ~ cat) }} — {{ brand }}{% endblock %}
+{% block meta_desc %}{{ tf('cat_meta', cat=cat_label(cat)) }}{% endblock %}
+{% block jsonld %}
+{%- set _self = ext_url('gift_category', cat_slug=cat_slug) ~ ('?lang=he' if rtl else '') -%}
+{%- set _root = ext_url('index')[:-1] -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ t('nav_ideas') | tojson }},
+      "item": {{ (ext_url('gift_ideas') ~ ('?lang=he' if rtl else '')) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ cat_label(cat) | tojson }}, "item": {{ _self | tojson }} }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": {{ t('cat_h_' ~ cat) | tojson }},
+  "url": {{ _self | tojson }},
+  "numberOfItems": {{ items | length }},
+  "itemListElement": [
+    {%- for i in items %}
+    { "@type": "ListItem", "position": {{ loop.index }}, "name": {{ pick(i, 'name') | tojson }},
+      "url": {{ (_root ~ item_url(i) ~ ('?lang=he' if rtl else '')) | tojson }} }{{ ',' if not loop.last }}
+    {%- endfor %}
+  ]
+}
+</script>
+{% endblock %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+<div class="home ideas-page gift-cat-page">
+  <header class="sec-inner ideas-head">
+    <nav class="item-crumbs" aria-label="{{ t('item_crumbs') }}">
+      <ol>
+        <li><a href="{{ url_for('gift_ideas') }}">{{ t('nav_ideas') }}</a></li>
+        <li aria-current="page">{{ cat_label(cat) }}</li>
+      </ol>
+    </nav>
+    <h1 class="ideas-title">{{ t('cat_h_' ~ cat) }}</h1>
+    <p class="page-sub">{{ t('cat_intro_' ~ cat) }}</p>
+  </header>
+
+  <div class="sec-inner ideas-body">
+    {% for key, its in groups %}
+    <section class="ideas-group" aria-labelledby="cat-band-{{ key }}">
+      <h2 class="ideas-group-h" id="cat-band-{{ key }}">{{ t('price_band_' ~ key) }} <span class="list-count">{{ its | length }}</span></h2>
+      <div class="gift-grid">
+        {% for item in its %}{{ gift_card(item, mode='catalog', have=have, has_reg=has_reg, back='cat', back_args={'cat_slug': cat_slug}) }}{% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+    <p class="hint catalog-affiliate">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>
+    {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+  </div>
+
+  <section class="sec-inner item-know" aria-labelledby="cat-know-h">
+    <h2 id="cat-know-h" class="item-h">{{ t('item_know_h') }}</h2>
+    <ul class="item-know-list">
+      {% for n in (1, 2, 3) %}<li>{{ t('item_know_' ~ cat ~ '_' ~ n) }}</li>{% endfor %}
+    </ul>
+  </section>
+
+  <section class="sec-inner item-next" aria-labelledby="cat-next-h">
+    <h2 id="cat-next-h" class="item-h">{{ t('cat_other_h') }}</h2>
+    <nav class="chip-row cat-links" aria-label="{{ t('cat_other_aria') }}">
+      {% for s, c in cat_links.items() if c != cat %}
+      <a class="chip" href="{{ url_for('gift_category', cat_slug=s) }}">{{ cat_label(c) }}</a>
+      {% endfor %}
+    </nav>
+    <ul class="item-next-list">
+      {% if guide_obj %}
+      <li><a class="link-arrow" href="{{ url_for('guide', slug=guide_obj['slug']) }}">{{ gpick(guide_obj, 'title') }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+      {% endif %}
+      <li><a class="link-arrow" href="{{ url_for('catalog_page') }}">{{ t('cat_filter_link') }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+    </ul>
+  </section>
+
+  <div class="sec-inner ideas-ctas">
+    <div class="ideas-cta">
+      <h2>{{ t('ideas_cta_couple_h') }}</h2>
+      <p>{{ t('ideas_cta_couple_b') }}</p>
+      <a class="btn btn-primary" href="{{ url_for('dashboard') if user else url_for('signup') }}">{{ t('nav_dashboard') if user else t('cta_start') }}</a>
+    </div>
+    <div class="ideas-cta">
+      <h2>{{ t('ideas_cta_guest_h') }}</h2>
+      <p>{{ t('ideas_cta_guest_b') }}</p>
+      <a class="btn btn-ghost" href="{{ url_for('find') }}">{{ t('nav_find') }}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
