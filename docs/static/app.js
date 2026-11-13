@@ -249,6 +249,33 @@
     fetch(el.getAttribute("data-share-beacon"), { method: "POST", body: fd, credentials: "same-origin", keepalive: true }).catch(function () {});
   });
 
+  // direct affiliate links skip the /go/ redirect, so the click is counted with a beacon instead
+  // (the CSRF token rides in the body, like the share beacon above)
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest("a[data-go-ping]");
+    if (!a || !navigator.sendBeacon) return;
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    var fd = new FormData();
+    fd.append("csrf_token", meta ? meta.getAttribute("content") : "");
+    try { navigator.sendBeacon(a.getAttribute("data-go-ping"), fd); } catch (err) {}
+  });
+
+  // chip-in dialog: a typed amount replaces the chosen preset, picking a preset clears the typed one
+  // (without JS the server simply takes the typed amount when there is one)
+  document.addEventListener("input", function (e) {
+    var box = e.target.closest(".chip-custom input");
+    if (!box) return;
+    var form = box.closest("form");
+    if (box.value.trim() === "") return;
+    form.querySelectorAll('input[name="chip_preset"]').forEach(function (r) { r.checked = false; });
+  });
+  document.addEventListener("change", function (e) {
+    var radio = e.target.closest('input[name="chip_preset"]');
+    if (!radio) return;
+    var custom = radio.closest("form").querySelector(".chip-custom input");
+    if (custom) custom.value = "";
+  });
+
   // share kit: an edited message sends as edited (WhatsApp / email / copy follow the box)
   document.addEventListener("input", function (e) {
     var box = e.target.closest("[data-share-text]");
@@ -324,7 +351,10 @@
         total += (parseInt(cb.getAttribute("data-price"), 10) || 0) * qty;
       });
       var tpl = n === 0 ? tally.getAttribute("data-none") : tally.getAttribute(n === 1 ? "data-one" : "data-many");
-      tally.textContent = tpl.replace("{n}", n).replace("{total}", "₪" + total.toLocaleString("en-US"));
+      // /setup-cost also shows "≈ $X": data-est-rate = shekels per foreign unit, data-est-sym = its symbol
+      var rate = parseFloat(tally.getAttribute("data-est-rate")) || 0;
+      var est = rate && total ? " ≈ " + tally.getAttribute("data-est-sym") + Math.round(total / rate).toLocaleString("en-US") : "";
+      tally.textContent = tpl.replace("{n}", n).replace("{total}", "₪" + total.toLocaleString("en-US")).replace("{est}", est);
       form.querySelectorAll("[data-starter-all]").forEach(function (btn) {
         var group = boxes(btn.closest(".starter-group"));
         var all = group.length > 0 && group.every(function (cb) { return cb.checked; });
@@ -341,6 +371,21 @@
       var all = group.every(function (cb) { return cb.checked; });
       group.forEach(function (cb) { cb.checked = !all; });
       update();
+    });
+    // /setup-cost starting points: plain ?start= links that, with JS, re-tick the boxes in place
+    document.querySelectorAll("[data-setup-preset]").forEach(function (chip) {
+      chip.addEventListener("click", function (e) {
+        e.preventDefault();
+        var groups = chip.getAttribute("data-groups").split(" ");
+        form.querySelectorAll(".starter-group").forEach(function (grp) {
+          var on = groups.indexOf(grp.getAttribute("data-group")) !== -1;
+          boxes(grp).forEach(function (cb) { cb.checked = on; });
+        });
+        document.querySelectorAll("[data-setup-preset]").forEach(function (c) {
+          c.setAttribute("aria-checked", c === chip ? "true" : "false");
+        });
+        update();
+      });
     });
     update();
     // the browser may restore checked boxes when coming Back to the page
@@ -405,6 +450,22 @@
     document.querySelectorAll("[data-rail-sec]").forEach(function (sec) { io.observe(sec); });
   });
 
+  // /admin/affiliates: the preset dropdown only prefills the add-rule form
+  document.addEventListener("DOMContentLoaded", function () {
+    var sel = document.querySelector("[data-aff-preset]");
+    if (!sel) return;
+    var form = sel.closest("form");
+    sel.addEventListener("change", function () {
+      var opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) return;
+      ["host", "kind", "param", "value", "label"].forEach(function (k) {
+        var el = form.elements[k];
+        if (el) el.value = opt.getAttribute("data-" + k) || "";
+      });
+      if (form.elements.direct) form.elements.direct.checked = opt.getAttribute("data-direct") === "1";
+    });
+  });
+
   // thank-you studio: switching a note's language swaps in the other draft, and every edit keeps
   // the Copy / WhatsApp / Email buttons carrying the note as it now reads
   document.addEventListener("DOMContentLoaded", function () {
@@ -436,6 +497,16 @@
         });
       });
     });
+  });
+
+  // suggestion chips that only prefill a text box: <button data-fill="<input id>" data-fill-value="…">
+  document.addEventListener("click", function (e) {
+    var chip = e.target.closest("[data-fill]");
+    if (!chip) return;
+    var input = document.getElementById(chip.getAttribute("data-fill"));
+    if (!input) return;
+    input.value = chip.getAttribute("data-fill-value") || chip.textContent.trim();
+    input.focus();
   });
 
   // coming Back to a page from the back/forward cache would otherwise leave its buttons dead
