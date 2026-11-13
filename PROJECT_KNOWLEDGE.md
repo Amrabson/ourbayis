@@ -310,6 +310,12 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - `/gifts/<slug>` → `gift_category`; URL slug ↔ internal category in `GIFT_CATS`; link with `gift_category_url(cat)`.
 - A fund is just a registry item with no url and `chip_in=1` (`items_fund`); there is no separate table.
 
+## Insights + calculator leads (2026-11-13)
+- `/admin/insights` and `manage.py insights` both render `insights_data()`; add new headline numbers there, not in
+  the template. Funnel step counts are table cohorts; `funnel_events` counters are shown beside them.
+- `/setup-cost` → `setup_cost_request` → `session["shana_list"]` → the Shana form's `with_list` marker →
+  `shana_requests.wanted_list` [m35] (English names, prices re-read at POST). Shown on the admin lead page.
+
 ## Gift ideas by budget (2026-11-07)
 `/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and
 `_band_items(db, key)` lists a band. Copy per band is `ideas_h_<key>` / `ideas_for_<key>` in i18n. Indexable

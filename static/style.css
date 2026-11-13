@@ -2629,3 +2629,21 @@ main:focus { outline: none; }
   .setup-page .setup-presets { gap: 8px; }
   .setup-page .setup-chip { padding-block: 10px; }
 }
+
+/* ---------- homepage tools strip + calculator-list handoff ---------- */
+.home .tools-sec { padding: clamp(48px, 7vw, 88px) 0; }
+.home .tools-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 2vw, 24px); margin-top: clamp(24px, 3.5vw, 40px); }
+.home .tool-card { background: #fffdf8; border: 1px solid var(--line); border-radius: 6px; padding: clamp(22px, 3vw, 34px); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; }
+.home .tool-card h3 { font-size: clamp(1.3rem, 2vw, 1.6rem); line-height: 1.1; margin: 0; color: var(--navy); }
+.home .tool-card p { margin: 0; flex: 1; }
+@media (max-width: 860px) { .home .tools-grid { grid-template-columns: 1fr; } }
+.shana-list summary { cursor: pointer; }
+.shana-list-items { margin: 10px 0 0; padding-inline-start: 1.2em; columns: 2 220px; }
+.wanted-list { white-space: pre-wrap; margin: 0 0 12px; font: inherit; }
+
+/* admin insights */
+.ins-period { margin-bottom: 8px; }
+.ins-prev { color: var(--ink-soft); font-size: .85em; }
+.ins-sub { margin: 18px 0 8px; font-size: 1.05rem; }
+.ins-barcell { width: 40%; }
+.ins-bar { display: block; height: 10px; background: var(--gold); border-radius: 5px; min-width: 2px; }

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-13 (owner insights, calculator → Shana lead, homepage tools, five guides)
+- **`/admin/insights`** (`admin_insights`, `insights_data(db, days, today=None)`, `admin_insights.html`) and
+  `manage.py insights [--days N]`: visitors and top pages, the couples funnel (cohort counts from tables beside the
+  daily `funnel_events` counters — the page footnote says which is which), guests (reservations / cash / chip-ins
+  with ₪ pledged, reported, received), store clicks by hostname and affiliate-rule coverage, Shana leads (rush,
+  quoted, price / cost / profit, overdue next actions), catalog health, mail. `?days=7|30|90|all`. Read-only.
+- **Calculator → Shana lead**: "Have it done for you" on `/setup-cost` is now a submit (`POST /setup-cost/request`,
+  ids in `session["shana_list"]`, max 60); the Shana page shows the list above the form with a Remove button
+  (`shana_list_remove`); a lead sent with it stores the items, prices (re-read at POST) and store total in
+  `shana_requests.wanted_list` [m35], in the owner's email and on `/admin/lead/<id>` with Copy list.
+  `_setup_ticked_ids()` is the shared id parser.
+- **Homepage**: "Start with what you have" section (`.tools-sec`, `home_tools_*`): cost calculator, paste a link,
+  chip in. `step1_b` mentions pasting a link.
+- **Five guides** (16 total): for parents abroad, an eight-week timeline, telling guests about a registry,
+  registering with hand-me-downs, chanukas habayis and aliyah gifts. Written without web checks, so checkable
+  claims are deliberately general; Hebrew not read by a native speaker.
+
 ## 2026-11-12 (setup-cost calculator, category pages, cash funds)
 - **`/setup-cost`** (`setup_cost`, `setup_cost.html`): "What it costs to set up an apartment in Israel", built from
   the starter-group catalog items (`starter_groups(db)`, now shared with the starter picker). Three presets

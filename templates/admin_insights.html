@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Insights — {{ brand }}{% endblock %}
+{% macro was(p) %}{% if p is not none %} <span class="ins-prev">(before: {{ p }})</span>{% endif %}{% endmacro %}
+{% macro pc(p) %}{% if p is none %}–{% else %}{{ p }}%{% endif %}{% endmacro %}
+{% block content %}
+{% set period = 'all time' if d.days is none else 'last ' ~ d.days ~ ' days' %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Insights</h1>
+    <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+  </div>
+  <nav class="dash-actions ins-period" aria-label="Period">
+    {% for key, label in (('7', 'Last 7 days'), ('30', 'Last 30 days'), ('90', 'Last 90 days'), ('all', 'All time')) %}
+    <a class="btn {{ 'btn-primary' if choice == key else 'btn-ghost' }}" href="{{ url_for('admin_insights', days=key) }}"{% if choice == key %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+  </nav>
+  <p class="hint">Showing {{ period }}{% if d.days %} (since {{ d.since }}); muted figures are the same-length period before it{% endif %}. Visitor and click counts exclude bots, admins and couples viewing their own registry.</p>
+
+  <h2 class="sub-title">1. Visitors and pages</h2>
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ d.views_total }}</strong><span>public page views{{ was(d.views_prev) }}</span></div>
+  </div>
+  <table class="admin-table">
+    <thead><tr><th scope="col">Page</th><th scope="col">Views</th></tr></thead>
+    <tbody>
+    {% for p in d.key_pages %}
+      <tr><td>{{ p.name }}</td><td>{{ p.n }}{{ was(p.prev) }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <h3 class="ins-sub">Top 10 pages</h3>
+  {% if d.top_pages %}
+  <table class="admin-table">
+    <thead><tr><th scope="col">Page</th><th scope="col">Views</th><th scope="col"></th></tr></thead>
+    <tbody>
+    {% for p in d.top_pages %}
+      <tr><td>{{ p.name }}</td><td>{{ p.n }}{{ was(p.prev) }}</td>
+        <td class="ins-barcell"><span class="ins-bar" style="width: {{ (p.n * 100 // d.top_pages[0].n) if d.top_pages[0].n else 0 }}%"></span></td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="hint">No page views yet.</p>{% endif %}
+
+  <h2 class="sub-title">2. Couples funnel</h2>
+  <table class="admin-table">
+    <thead><tr><th scope="col">Step</th><th scope="col">Couples</th><th scope="col">From previous step</th><th scope="col">Daily counter</th></tr></thead>
+    <tbody>
+    {% for s in d.funnel %}
+      <tr><td>{{ s.label }}</td><td>{{ s.n }}</td><td>{{ pc(s.pct) }}</td><td>{{ s.ev }}{{ was(s.ev_prev) }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="hint">Couples = table counts: users and registries created in the period, then registries from that group with 5 or more gifts, that were shared (opened by someone, or the share button used), and that have a reservation or gift. Each step only counts registries that passed the one before. "Daily counter" = the no-PII funnel_events tally for the same period (signup, registry_created, first_gifts, share_click, reservation), which counts events, not the same couples, so the two columns can differ.</p>
+
+  <h2 class="sub-title">3. Guests</h2>
+  {% set g = d.guests %}
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ g.reservations }}</strong><span>reservations</span></div>
+    <div class="stat-card"><strong>{{ g.cash.n }}</strong><span>cash gifts</span></div>
+    <div class="stat-card"><strong>{{ g.chip.n }}</strong><span>chip-ins</span></div>
+    <div class="stat-card"><strong>{{ g.brachos }}</strong><span>brachos</span></div>
+    <div class="stat-card"><strong>{{ g.avg_per_registry }}</strong><span>reservations per active registry ({{ g.active_registries }})</span></div>
+  </div>
+  <table class="admin-table">
+    <thead><tr><th scope="col">Money (₪, in the period)</th><th scope="col">Count</th><th scope="col">Pledged</th><th scope="col">Reported</th><th scope="col">Received</th></tr></thead>
+    <tbody>
+      <tr><td>Cash gifts</td><td>{{ g.cash.n }}</td><td>₪{{ '{:,}'.format(g.cash.pledged) }}</td><td>₪{{ '{:,}'.format(g.cash.reported) }}</td><td>₪{{ '{:,}'.format(g.cash.received) }}</td></tr>
+      <tr><td>Chip-ins</td><td>{{ g.chip.n }}</td><td>₪{{ '{:,}'.format(g.chip.pledged) }}</td><td>₪{{ '{:,}'.format(g.chip.reported) }}</td><td>₪{{ '{:,}'.format(g.chip.received) }}</td></tr>
+    </tbody>
+  </table>
+  <p class="hint">From claims created in the period (cancelled ones left out). Pledged = reserved, not yet reported; reported = guest says it was sent; received = couple confirmed. The site never handles the money.</p>
+
+  <h2 class="sub-title">4. Store clicks (affiliate)</h2>
+  {% set c = d.clicks %}
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ c.period[0] }}</strong><span>outbound clicks in the period{{ was(c.period[1]) }}</span></div>
+    <div class="stat-card"><strong>{{ c.tagged[0] }}</strong><span>of them tagged with an affiliate rule{{ was(c.tagged[1]) }}</span></div>
+    <div class="stat-card"><strong>{{ pc(c.covered_pct) }}</strong><span>of lifetime clicks covered by an active rule</span></div>
+  </div>
+  <p class="hint">Click counters on items and hosts below are lifetime totals, not limited to the period. Only the two figures above come from daily counters. Tagged clicks are those sent through /go/ with a rule; "linked directly" rules are not counted there.</p>
+  <h3 class="ins-sub">Lifetime clicks by store ({{ c.lifetime }} total)</h3>
+  {% if c.hosts %}
+  <table class="admin-table">
+    <thead><tr><th scope="col">Host</th><th scope="col">Clicks</th><th scope="col">Covered by a rule?</th></tr></thead>
+    <tbody>
+    {% for h in c.hosts %}
+      <tr><td dir="ltr">{{ h.host }}</td><td>{{ h.clicks }}</td>
+        <td>{% if h.rule %}{{ 'Yes' if h.rule['active'] else 'Rule is off' }}{% else %}No{% endif %}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="hint"><a href="{{ url_for('admin_affiliates') }}">All hosts and rules</a></p>
+  {% else %}<p class="hint">No outbound clicks recorded yet.</p>{% endif %}
+  <h3 class="ins-sub">Top 10 catalog items by lifetime clicks</h3>
+  {% if c.top_items %}
+  <table class="admin-table">
+    <thead><tr><th scope="col">Item</th><th scope="col">Clicks</th></tr></thead>
+    <tbody>
+    {% for i in c.top_items %}
+      <tr><td><a href="{{ url_for('admin_catalog_edit', item_id=i.id) }}">{{ i.name }}</a></td><td>{{ i.clicks }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="hint">Nothing yet.</p>{% endif %}
+
+  <h2 class="sub-title">5. Shana Rishonah leads</h2>
+  {% set l = d.leads %}
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ l.total }}</strong><span>leads</span></div>
+    <div class="stat-card"><strong>{{ l.rush }}</strong><span>rush (arrival inside the lead time)</span></div>
+    <div class="stat-card"><strong>{{ l.quotes }}</strong><span>with a quote</span></div>
+    <div class="stat-card"><strong>{{ pc(l.avg_margin | round | int if l.avg_margin is not none else none) }}</strong><span>average margin</span></div>
+  </div>
+  {% if l.by_status %}
+  <p class="hint">By status: {% for s, n in l.by_status %}{{ s }} {{ n }}{{ ', ' if not loop.last }}{% endfor %}</p>
+  {% else %}<p class="hint">No leads in this period.</p>{% endif %}
+  <table class="admin-table">
+    <thead><tr><th scope="col">Quoted leads ({{ l.quotes }})</th><th scope="col">Quoted price</th><th scope="col">Cost</th><th scope="col">Profit</th></tr></thead>
+    <tbody><tr><td>Total</td><td>₪{{ '{:,}'.format(l.price) }}</td><td>₪{{ '{:,}'.format(l.cost) }}</td><td>₪{{ '{:,}'.format(l.profit) }}</td></tr></tbody>
+  </table>
+  <h3 class="ins-sub">Next action overdue (any date)</h3>
+  {% if l.overdue %}
+  <table class="admin-table">
+    <thead><tr><th scope="col">Lead</th><th scope="col">Next action</th><th scope="col">Was due</th></tr></thead>
+    <tbody>
+    {% for o in l.overdue %}
+      <tr><td><a href="{{ url_for('admin_lead', lead_id=o.id) }}">{{ o.name }}</a></td><td>{{ o.next_action or '–' }}</td><td>{{ o.date }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="hint">Nothing overdue.</p>{% endif %}
+
+  <h2 class="sub-title">6. Catalog health</h2>
+  {% set k = d.catalog %}
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ k.active }}</strong><span>active items</span></div>
+    <div class="stat-card"><strong>{{ k.with_link }}</strong><span>with a store link</span></div>
+    <div class="stat-card"><strong>{{ k.verified }}</strong><span>with a verified price</span></div>
+    <div class="stat-card"><strong>{{ k.stale }}</strong><span>verified prices over 30 days old</span></div>
+    <div class="stat-card"><strong>{{ k.zero_clicks }}</strong><span>items with zero clicks</span></div>
+    <div class="stat-card"><strong>{{ k.hosts_without_rule }}</strong><span>store hosts with no affiliate rule</span></div>
+  </div>
+  <p class="hint"><a href="{{ url_for('admin_catalog', stale=1) }}">Review stale prices</a> · <a href="{{ url_for('admin_affiliates') }}">Affiliate rules</a></p>
+
+  <h2 class="sub-title">7. Mail</h2>
+  <div class="stat-row">
+    <div class="stat-card"><strong>{{ d.mail.queued }}</strong><span>queued</span></div>
+    <div class="stat-card"><strong>{{ d.mail.failed }}</strong><span>failed</span></div>
+    <div class="stat-card"><strong>{{ 'Yes' if d.mail.smtp else 'No' }}</strong><span>SMTP configured</span></div>
+  </div>
+  <p class="hint"><a href="{{ url_for('admin_outbox') }}">Open the outbox</a></p>
+</div>
+{% endblock %}

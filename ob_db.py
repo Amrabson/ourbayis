@@ -835,6 +835,12 @@ def bundle_sync(db, bundles):
              b.get("items_text", ""), b.get("items_text_he", ""), i))
 
 
+def _m035_shana_wanted_list(db):
+    """The itemised list a visitor carried over from /setup-cost into a Shana Rishonah request
+    (plain text, English names + store prices, written by the server)."""
+    _add_column(db, "shana_requests", "wanted_list TEXT DEFAULT ''")
+
+
 MIGRATIONS = [
     _m001_initial_schema,
     _m002_brand_backfill,
@@ -870,6 +876,7 @@ MIGRATIONS = [
     _m032_affiliate_rules,
     _m033_chip_in,
     _m034_affiliate_direct,
+    _m035_shana_wanted_list,
 ]
 
 

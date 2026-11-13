@@ -1203,6 +1203,660 @@ GUIDES = [
         ],
         "cta": "start",
     },
+    {
+        "slug": "helping-your-children-set-up-a-home-in-israel",
+        "icon": "i-house",
+        "updated": "2026-11-12",
+        "title": "For parents abroad: helping your children set up a home in Israel",
+        "title_he": "להורים בחו״ל: לעזור לילדים להקים בית בישראל",
+        "summary": "Your son or daughter is setting up an apartment in Israel and you are an ocean away. "
+                   "What helps most from a distance, and what tends to cause more work than it saves.",
+        "summary_he": "הבן או הבת שלכם מקימים דירה בישראל ואתם רחוקים מעבר לים. מה עוזר הכי הרבה "
+                      "מרחוק, ומה נוטה ליצור יותר עבודה ממה שהוא חוסך.",
+        "sections": [
+            {
+                "h": "Agree the plan before anyone buys anything",
+                "h_he": "להסכים על התוכנית לפני שמישהו קונה משהו",
+                "p": ["The most useful conversation happens early and costs nothing: what is the "
+                      "overall budget, what will you cover, and what will the couple cover or leave to "
+                      "other relatives. Parents who say “we would like to buy the big appliances” or "
+                      "“we will cover the bed and linen” give the couple something to plan around. "
+                      "Parents who just say “let us know what you need” often get a long list later, "
+                      "or silence out of politeness.",
+                      "Decide who owns each decision. If the couple is choosing the fridge, let them "
+                      "choose it, and treat your role as paying for it, not picking it. They are the "
+                      "ones who know the kitchen, the lift and the landlord."],
+                "p_he": ["השיחה הכי שימושית קורית מוקדם ולא עולה כלום: מה התקציב הכולל, מה אתם "
+                         "מכסים, ומה הזוג מכסה בעצמו או משאיר לקרובים אחרים. הורים שאומרים ״נשמח "
+                         "לקנות את המכשירים הגדולים״ או ״אנחנו נכסה את המיטה והמצעים״ נותנים לזוג משהו "
+                         "לתכנן סביבו. הורים שאומרים רק ״תגידו לנו מה אתם צריכים״ מקבלים לא פעם רשימה "
+                         "ארוכה מאוחר יותר, או שתיקה מתוך נימוס.",
+                         "החליטו של מי כל החלטה. אם הזוג בוחר את המקרר, תנו להם לבחור, והתפקיד שלכם "
+                         "הוא לשלם עליו ולא לבחור אותו. הם אלה שמכירים את המטבח, את המעלית ואת בעל "
+                         "הדירה."],
+                "list": ["Agree a total, and whether it is a gift, a loan or a mix",
+                         "Split by category, such as big appliances, bed and linen, kitchen, Shabbos",
+                         "Say plainly what you are not planning to buy, so nobody waits for it",
+                         "Revisit it once the apartment is chosen, since the lease changes the list"],
+                "list_he": ["סכמו על סכום כולל, והאם זו מתנה, הלוואה או שילוב",
+                            "חלקו לפי קטגוריות, כמו מכשירים גדולים, מיטה ומצעים, מטבח, שבת",
+                            "אמרו בפשטות מה אתם לא מתכננים לקנות, כדי שאף אחד לא יחכה לזה",
+                            "חזרו לזה אחרי שנבחרה הדירה, כי החוזה משנה את הרשימה"],
+            },
+            {
+                "h": "A registry, so relatives do not double up",
+                "h_he": "רשימת מתנות, כדי שקרובים לא יקנו כפול",
+                "p": ["When aunts, grandparents and family friends all want to help, someone buys a "
+                      "kettle and someone else buys the same kettle. A single shared list that shows "
+                      "what has been taken ends that. It also gives relatives who ask “what do they "
+                      "need?” a link to send instead of a guess.",
+                      "Help the couple make the list useful: a spread of small and large items, the "
+                      "mattress measurements before anyone buys linen, and a note on what the apartment "
+                      "already has. Our guide on building a registry covers how to choose what goes on "
+                      "it."],
+                "p_he": ["כשדודות, סבים וחברי משפחה כולם רוצים לעזור, מישהו קונה קומקום ומישהו אחר "
+                         "קונה את אותו קומקום. רשימה משותפת אחת שמראה מה כבר נלקח מסיימת את זה. היא "
+                         "גם נותנת לקרובים ששואלים ״מה הם צריכים?״ קישור לשלוח במקום ניחוש.",
+                         "עזרו לזוג להפוך את הרשימה לשימושית: פיזור של פריטים קטנים וגדולים, מידות "
+                         "המזרן לפני שמישהו קונה מצעים, והערה על מה שכבר יש בדירה. המדריך שלנו על "
+                         "בניית רשימת מתנות מסביר איך בוחרים מה נכנס אליה."],
+            },
+            {
+                "h": "Paying Israeli stores from abroad",
+                "h_he": "לשלם לחנויות ישראליות מחו״ל",
+                "p": ["Many Israeli online stores accept foreign credit cards, but not all do, and "
+                      "some checkouts are only in Hebrew. Some may also ask for an Israeli ID number or "
+                      "an Israeli phone number for delivery updates, which a parent abroad does not "
+                      "have. We have not tested every store, so do not assume.",
+                      "The practical approach is to try the checkout before the day you need it, and "
+                      "if it will not accept your card, you have two easy ways round it. You can send "
+                      "the money to the couple and let them order, or ask the couple to put their own "
+                      "phone number and delivery details on the order. Your bank may also add a "
+                      "foreign-currency fee, so a larger single payment is often less hassle than "
+                      "several small ones."],
+                "p_he": ["הרבה חנויות אונליין ישראליות מקבלות כרטיסי אשראי זרים, אבל לא כולן, ובחלק "
+                         "מהקופות הכול רק בעברית. חלקן גם עשויות לבקש מספר תעודת זהות ישראלי או מספר "
+                         "טלפון ישראלי לעדכוני משלוח, ולהורה בחו״ל אין. לא בדקנו כל חנות, אז אל "
+                         "תניחו.",
+                         "הגישה המעשית היא לנסות את הקופה הרבה לפני היום שבו צריך, ואם היא לא מקבלת "
+                         "את הכרטיס שלכם, יש שתי דרכים קלות לעקוף. אפשר לשלוח את הכסף לזוג ולתת להם "
+                         "להזמין, או לבקש מהם לרשום בהזמנה את הטלפון ופרטי המשלוח שלהם. הבנק שלכם אולי "
+                         "גם יוסיף עמלת מט״ח, ולכן תשלום אחד גדול יותר הוא לרוב פחות טרחה מכמה קטנים."],
+            },
+            {
+                "h": "Delivery before the couple arrives",
+                "h_he": "משלוח לפני שהזוג מגיע",
+                "p": ["If you want the bed and fridge in place before they land, someone has to be "
+                      "there to receive them. Ask whether a relative, a friend or the landlord can "
+                      "hold the keys on the delivery day, and confirm the time window with the store "
+                      "the week before. Our guide on sizes, plugs and delivery explains what to ask a "
+                      "store.",
+                      "Big deliveries often arrive in boxes, and assembly is usually separate. Arriving "
+                      "to an apartment full of flat-pack boxes is not always the welcome you imagined, "
+                      "so ask the store about assembly, or arrange it with the couple."],
+                "p_he": ["אם אתם רוצים שהמיטה והמקרר יהיו במקום לפני שהם נוחתים, מישהו חייב להיות "
+                         "שם לקבל אותם. שאלו אם קרוב משפחה, חבר או בעל הדירה יכולים להחזיק את המפתחות "
+                         "ביום המשלוח, ואשרו את חלון הזמן מול החנות שבוע לפני. המדריך שלנו על מידות, "
+                         "תקעים ומשלוחים מסביר מה לשאול חנות.",
+                         "משלוחים גדולים מגיעים לא פעם בקרטונים, וההרכבה בדרך כלל נפרדת. להגיע לדירה "
+                         "מלאה בקרטונים של רהיטים לא תמיד מרגיש כמו קבלת הפנים שדמיינתם, אז שאלו את "
+                         "החנות על הרכבה, או תאמו אותה עם הזוג."],
+            },
+            {
+                "h": "What not to ship",
+                "h_he": "מה לא לשלוח",
+                "p": ["Shipping from abroad costs freight, may involve customs handling, and the "
+                      "goods may not suit Israeli electricity or sizes. For most household things it "
+                      "is simpler to buy in Israel. Our guide on bringing appliances or buying them "
+                      "here goes through the electricity side in detail.",
+                      "Keep the suitcase for what is small, personal and hard to find here."],
+                "p_he": ["משלוח מחו״ל עולה בהובלה, עשוי לכלול טיפול במכס, והמוצרים אולי לא מתאימים "
+                         "לחשמל או למידות בישראל. לרוב דברי הבית פשוט יותר לקנות בארץ. המדריך שלנו על "
+                         "להביא מכשירי חשמל או לקנות כאן עובר על עניין החשמל בפירוט.",
+                         "השאירו את המזוודה למה שקטן, אישי וקשה למצוא כאן."],
+                "list": ["Large appliances and anything with a heating element or a motor",
+                         "Bed linen and mattresses, whose sizes differ here",
+                         "Heavy or breakable items that cost more to send than to buy locally",
+                         "Anything you have not checked against the apartment, such as a lamp for a "
+                         "different socket",
+                         "Food, unless you have asked the family first, since kashrus standards differ"],
+                "list_he": ["מכשירי חשמל גדולים וכל מה שיש בו גוף חימום או מנוע",
+                            "מצעים ומזרנים, שהמידות שלהם כאן שונות",
+                            "פריטים כבדים או שבירים ששליחתם עולה יותר מקנייתם כאן",
+                            "כל דבר שלא בדקתם מול הדירה, כמו מנורה לשקע אחר",
+                            "אוכל, אלא אם שאלתם קודם את המשפחה, כי רמות הכשרות שונות"],
+            },
+            {
+                "h": "Two things OurBayis offers",
+                "h_he": "שני דברים ש-OurBayis מציע",
+                "p": ["OurBayis is a registry where each gift can be bought at an Israeli store or "
+                      "paid for through the couple's own payment link. The site never holds the "
+                      "money.",
+                      "There is also a separate Shana Rishonah setup service, for couples arriving in "
+                      "Israel: the basics are ordered and delivered to the apartment before they "
+                      "land, for a quoted price. Details are on its own page."],
+                "p_he": ["OurBayis הוא רשימת מתנות שבה כל מתנה אפשר לקנות בחנות ישראלית או לשלם "
+                         "עליה דרך קישור התשלום של הזוג עצמו. האתר אף פעם לא מחזיק את הכסף.",
+                         "יש גם שירות נפרד, הקמה לשנה ראשונה, לזוגות שמגיעים לארץ: הדברים "
+                         "הבסיסיים מוזמנים ומגיעים לדירה לפני הנחיתה, לפי הצעת מחיר. הפרטים בעמוד שלו."],
+            },
+        ],
+        "cta": "start",
+    },
+    {
+        "slug": "eight-week-timeline-engagement-to-working-apartment",
+        "icon": "i-star",
+        "updated": "2026-11-12",
+        "title": "An eight-week timeline: from engagement to a working apartment",
+        "title_he": "ציר זמן של שמונה שבועות: מהאירוסין לדירה שעובדת",
+        "summary": "A week-by-week order of work for the weeks between finding an apartment and "
+                   "living in it, so the long-lead items start early and the last week is only "
+                   "cleaning and food.",
+        "summary_he": "סדר עבודה שבוע אחר שבוע לשבועות שבין מציאת דירה לחיים בה, כך שהפריטים עם זמן "
+                      "אספקה ארוך מתחילים מוקדם והשבוע האחרון הוא רק ניקיון ואוכל.",
+        "sections": [
+            {
+                "h": "How to use this",
+                "h_he": "איך להשתמש בזה",
+                "p": ["Eight weeks is a frame, not a rule. If you have longer, spread it out; if you "
+                      "have less, do the first two steps at once. The order matters more than the "
+                      "dates: the apartment decides the list, and the biggest items take the longest "
+                      "to arrive.",
+                      "This guide is only the order of work. For what goes in each room, see our "
+                      "first apartment checklist."],
+                "p_he": ["שמונה שבועות זו מסגרת ולא כלל. אם יש לכם יותר זמן, פזרו; אם פחות, עשו "
+                         "את שני השלבים הראשונים במקביל. הסדר חשוב יותר מהתאריכים: הדירה קובעת את "
+                         "הרשימה, והפריטים הגדולים לוקחים הכי הרבה זמן להגיע.",
+                         "המדריך הזה הוא רק סדר העבודה. מה נכנס לכל חדר מופיע ברשימת הציוד לדירה "
+                         "ראשונה שלנו."],
+            },
+            {
+                "h": "Weeks 8 and 7: the lease and the measurements",
+                "h_he": "שבועות 8 ו-7: החוזה והמידות",
+                "p": ["Sign the lease, then ask the landlord in writing what stays: fridge, oven, "
+                      "washing machine, air conditioning, curtains, lights. Check that each works. "
+                      "Everything on that answer changes what you buy.",
+                      "Measure while you can still get in: the kitchen gaps for a fridge and a "
+                      "washing machine, the width of the door and the stairwell or lift, the "
+                      "mattress if the beds stay, and the balcony if you plan a sukkah. Write the "
+                      "numbers somewhere you will find them."],
+                "p_he": ["חתמו על החוזה, ואז שאלו את בעל הדירה בכתב מה נשאר: מקרר, תנור, מכונת "
+                         "כביסה, מיזוג, וילונות, תאורה. בדקו שכל אחד עובד. כל מה שבתשובה הזו משנה "
+                         "מה קונים.",
+                         "מדדו כל עוד אפשר להיכנס: הנישות במטבח למקרר ולמכונת כביסה, רוחב הדלת "
+                         "וחדר המדרגות או המעלית, המזרן אם המיטות נשארות, והמרפסת אם מתכננים סוכה. "
+                         "רשמו את המספרים במקום שתמצאו."],
+                "list": ["Fridge, oven and washing machine: what stays and what you buy",
+                         "Gap widths and heights for each appliance",
+                         "Door, stairwell and lift widths for large items",
+                         "Mattress size, if beds stay"],
+                "list_he": ["מקרר, תנור ומכונת כביסה: מה נשאר ומה קונים",
+                            "רוחב וגובה הנישה לכל מכשיר",
+                            "רוחב דלת, חדר מדרגות ומעלית לפריטים גדולים",
+                            "מידת המזרן, אם המיטות נשארות"],
+            },
+            {
+                "h": "Weeks 6 and 5: big appliances and their lead times",
+                "h_he": "שבועות 6 ו-5: מכשירים גדולים וזמני אספקה",
+                "p": ["Order the large items now. Delivery can take a week or more depending on the "
+                      "store, the item and the season, so ask the store for the actual window rather "
+                      "than assuming. If you want installation, ask whether it is included and who "
+                      "does it. Where is the right place to buy? Our guide on where to shop for a home "
+                      "in Israel gives the landscape.",
+                      "Decide who will be in the apartment on delivery day. If you are not in Israel "
+                      "yet, this is the week to line up a relative or a friend."],
+                "p_he": ["הזמינו עכשיו את הפריטים הגדולים. אספקה יכולה לקחת שבוע או יותר, תלוי "
+                         "בחנות, בפריט ובעונה, אז שאלו את החנות מה החלון בפועל ואל תניחו. אם אתם "
+                         "רוצים התקנה, שאלו אם היא כלולה ומי עושה אותה. איפה קונים? המדריך שלנו על "
+                         "איפה קונים לבית בישראל נותן את המפה.",
+                         "החליטו מי יהיה בדירה ביום המשלוח. אם אתם עוד לא בארץ, זה השבוע לסדר קרוב "
+                         "משפחה או חבר."],
+            },
+            {
+                "h": "Week 4: the registry and telling guests",
+                "h_he": "שבוע 4: רשימת המתנות והודעה לאורחים",
+                "p": ["With the apartment known, build the registry: the first-week items at the "
+                      "top, a spread of prices, and a note on what you already have. Then send the "
+                      "link. See our guide on telling guests about a registry for wording.",
+                      "Guests who plan ahead like to buy early, and some items on the list need time "
+                      "to arrive, so a link sent in week four helps both sides."],
+                "p_he": ["כשהדירה ידועה, בנו את הרשימה: פריטי השבוע הראשון למעלה, פיזור של מחירים, "
+                         "והערה על מה שכבר יש לכם. ואז שלחו את הקישור. נוסח אפשרי מופיע במדריך שלנו "
+                         "על איך מספרים לאורחים על רשימת מתנות.",
+                         "אורחים שמתכננים מראש אוהבים לקנות מוקדם, ופריטים מסוימים ברשימה צריכים זמן "
+                         "להגיע, אז קישור שנשלח בשבוע הרביעי עוזר לשני הצדדים."],
+            },
+            {
+                "h": "Week 3 and week 2: kitchen, Shabbos and linen",
+                "h_he": "שבוע 3 ושבוע 2: מטבח, שבת ומצעים",
+                "p": ["In week three, settle the kitchen: your two colours, the pots and knives "
+                      "worth doing properly, and the Shabbos basics such as a platta, an urn and a "
+                      "Shabbos clock. If you are bringing a set from home, ask your rav about it now, "
+                      "not the night before Shabbos. Our guides on the kosher kitchen and Shabbos "
+                      "equipment cover the choices.",
+                      "In week two, once you know the bed size and the mattress, buy the linen: "
+                      "fitted sheets to the measurement, a mattress protector, duvet, pillows and "
+                      "towels. Buying earlier risks sheets that do not fit."],
+                "p_he": ["בשבוע השלישי סוגרים את המטבח: שני הצבעים שלכם, הסירים והסכינים ששווה "
+                         "לעשות כמו שצריך, והבסיס לשבת כמו פלטה, מיחם ושעון שבת. אם מביאים סט מהבית, "
+                         "שאלו את הרב עכשיו ולא בליל שבת. המדריכים שלנו על מטבח כשר ועל ציוד מטבח "
+                         "לשבת מסבירים את האפשרויות.",
+                         "בשבוע השני, כשמידת המיטה והמזרן ידועה, קונים את המצעים: סדינים מצוידים לפי "
+                         "המידה, מגן מזרן, שמיכה, כריות ומגבות. קנייה מוקדמת יותר מסכנת סדינים שלא "
+                         "מתאימים."],
+                "list": ["Kitchen: pots, a pan, knives, plates and cutlery in both colours",
+                         "Shabbos: platta, urn, clock, candlesticks, challah board",
+                         "Linen: fitted sheets, protector, duvet, pillows, towels"],
+                "list_he": ["מטבח: סירים, מחבת, סכינים, צלחות וסכו״ם בשני הצבעים",
+                            "שבת: פלטה, מיחם, שעון, פמוטים, מגש חלה",
+                            "מצעים: סדינים מצוידים, מגן מזרן, שמיכה, כריות, מגבות"],
+            },
+            {
+                "h": "The last week: clean, stock up, set up",
+                "h_he": "השבוע האחרון: מנקים, ממלאים מלאי, מסדרים",
+                "p": ["Clean before the boxes arrive, while the rooms are empty. Then stock the "
+                      "basics: cleaning supplies, bin bags, light bulbs, toilet paper, a first-aid "
+                      "kit, and food for the first week such as bread, eggs, oil, tea and whatever "
+                      "you cook from without thinking.",
+                      "Remind yourselves of the set-up jobs that do not happen by themselves: "
+                      "internet, electricity, water and arnona accounts, and the gas if there is "
+                      "any. Ask the landlord who the account holder is and what the previous tenant "
+                      "closed. Do not assume any of it is transferred."],
+                "p_he": ["מנקים לפני שהקרטונים מגיעים, כשהחדרים ריקים. אחר כך ממלאים מלאי בסיסי: "
+                         "חומרי ניקוי, שקיות אשפה, נורות, נייר טואלט, ערכת עזרה ראשונה, ואוכל לשבוע "
+                         "הראשון כמו לחם, ביצים, שמן, תה ומה שמבשלים ממנו בלי לחשוב.",
+                         "תזכירו לעצמכם את סידורי ההקמה שלא קורים לבד: אינטרנט, חשמל, מים וארנונה, "
+                         "וגז אם יש. שאלו את בעל הדירה על שם מי החשבונות ומה הדייר הקודם סגר. אל "
+                         "תניחו שמשהו מזה עובר מעצמו."],
+                "list": ["Cleaning supplies, bin bags, bulbs, toilet paper",
+                         "First-week food and Shabbos food",
+                         "Internet, electricity, water and arnona: who holds each account",
+                         "Keys, building committee contact and the lift or parking arrangements"],
+                "list_he": ["חומרי ניקוי, שקיות אשפה, נורות, נייר טואלט",
+                            "אוכל לשבוע הראשון ואוכל לשבת",
+                            "אינטרנט, חשמל, מים וארנונה: על שם מי כל חשבון",
+                            "מפתחות, איש קשר בוועד הבית והסדרי מעלית או חניה"],
+            },
+        ],
+        "cta": "start",
+    },
+    {
+        "slug": "how-to-tell-guests-about-a-registry",
+        "icon": "i-gift",
+        "updated": "2026-11-12",
+        "title": "How to tell guests about a registry without it feeling awkward",
+        "title_he": "איך מספרים לאורחים על רשימת מתנות בלי שזה יהיה מביך",
+        "summary": "Registries are more familiar in some communities than others. How to share one "
+                   "kindly, who should say it, example wording, and how to handle guests who would "
+                   "rather give their own gift.",
+        "summary_he": "רשימות מתנות מוכרות יותר בקהילות מסוימות מאחרות. איך משתפים אחת בעדינות, מי "
+                      "צריך להגיד את זה, נוסחים לדוגמה, ואיך מתנהלים עם אורחים שמעדיפים לתת מתנה משלהם.",
+        "sections": [
+            {
+                "h": "Why it can feel awkward, and why it usually is not",
+                "h_he": "למה זה יכול להרגיש מביך, ולמה בדרך כלל זה לא",
+                "p": ["In many families abroad, a registry is routine and guests often ask for one. "
+                      "In Israel, most guests give money, and some may not have seen a registry "
+                      "before. Neither habit is wrong. The awkwardness usually comes from guessing "
+                      "what the other side expects.",
+                      "A registry is an offer, not an instruction. Guests who like it will use it, "
+                      "and guests who do not will give as they always would. Practice differs between "
+                      "families and communities, so what follows are suggestions and not rules."],
+                "p_he": ["במשפחות רבות בחו״ל רשימת מתנות היא שגרה, ואורחים מבקשים אחת לא פעם. "
+                         "בישראל רוב האורחים נותנים כסף, וחלקם אולי לא ראו רשימה קודם. אף אחד מההרגלים "
+                         "אינו שגוי. המבוכה באה בדרך כלל מניחוש של מה שהצד השני מצפה לו.",
+                         "רשימה היא הצעה, לא הוראה. אורחים שאוהבים אותה ישתמשו בה, ואורחים שלא "
+                         "ייתנו כמו שהם תמיד נותנים. המנהגים שונים בין משפחות וקהילות, ולכן מה "
+                         "שכתוב כאן הוא הצעות ולא כללים."],
+            },
+            {
+                "h": "Who tells whom",
+                "h_he": "מי מספר למי",
+                "p": ["Often the gentlest route is through someone other than the couple. Parents "
+                      "can mention it to relatives who ask what the couple needs, and a sibling or "
+                      "friend organising a shower or a Shabbos kallah can include the link in the "
+                      "invitation. Hearing it from a third person who says “they set one up in case "
+                      "it helps” is easier than a couple asking for gifts directly.",
+                      "When guests ask you directly, that is the easiest moment of all. Answering a "
+                      "question is not asking for something."],
+                "p_he": ["לא פעם הדרך העדינה ביותר היא דרך מישהו אחר ולא הזוג. הורים יכולים להזכיר "
+                         "את זה לקרובים ששואלים מה הזוג צריך, ואח, אחות או חברה שמארגנים מקלחת מתנות "
+                         "או שבת כלה יכולים לכלול את הקישור בהזמנה. לשמוע את זה מצד שלישי שאומר ״הם "
+                         "הקימו רשימה למקרה שזה עוזר״ קל יותר מזוג שמבקש מתנות ישירות.",
+                         "כשאורחים שואלים אתכם ישירות, זה הרגע הקל מכולם. להשיב לשאלה זה לא לבקש "
+                         "משהו."],
+            },
+            {
+                "h": "Wording that has worked for others",
+                "h_he": "נוסחים שאנשים משתמשים בהם",
+                "p": ["Keep it short, warm and optional. Put the thanks and the invitation first and "
+                      "the link last. Here are three examples to adapt, one for a WhatsApp message to "
+                      "friends abroad, one for an invitation insert, and one for word of mouth in "
+                      "Israel."],
+                "p_he": ["שמרו על קצר, חם ולא מחייב. שימו את התודה וההזמנה קודם ואת הקישור בסוף. "
+                         "הנה שלוש דוגמאות להתאמה, אחת להודעת וואטסאפ לחברים בחו״ל, אחת לדף הוספה "
+                         "להזמנה, ואחת לשיחה בעל פה בישראל."],
+                "list": ["WhatsApp, abroad: “So happy you will be with us. Several people asked what "
+                         "we need, so we made a small list at this link. Completely optional, and "
+                         "your being there is the real gift.”",
+                         "Invitation insert: “For those who have asked, we have set up a gift list "
+                         "at the address below. Cash gifts are equally welcome.”",
+                         "In person, in Israel: “If you want to help us set up, we put together a "
+                         "list of what we still need. And if you prefer to give in the usual way, "
+                         "that is wonderful too.”"],
+                "list_he": ["וואטסאפ, בחו״ל: ״כל כך שמחים שתהיו איתנו. כמה אנשים שאלו מה אנחנו "
+                            "צריכים, אז הכנו רשימה קטנה בקישור הזה. זה לגמרי אופציונלי, והנוכחות שלכם "
+                            "היא המתנה האמיתית.״",
+                            "דף הוספה להזמנה: ״למי ששאל, הקמנו רשימת מתנות בכתובת שלמטה. מתנות "
+                            "בכסף מתקבלות באותה שמחה.״",
+                            "בעל פה, בישראל: ״אם בא לכם לעזור לנו להקים את הבית, הכנו רשימה של מה "
+                            "שעוד חסר לנו. ואם אתם מעדיפים לתת כמו שנהוג, זה מצוין גם כן.״"],
+            },
+            {
+                "h": "Cash and registry, side by side",
+                "h_he": "כסף ורשימה, זה לצד זה",
+                "p": ["You do not have to pick one. Many couples welcome cash and also keep a "
+                      "registry for the guests who like a specific item. Saying so plainly takes the "
+                      "pressure off: guests who prefer to give money will not feel they are doing the "
+                      "wrong thing.",
+                      "If you will use cash for something particular, such as a fridge, you can say "
+                      "so. Guests who give toward it see where it goes. That is a decision for you "
+                      "and for your family, and there is no wrong answer."],
+                "p_he": ["אין חובה לבחור אחד. הרבה זוגות מקבלים בשמחה כסף ושומרים גם רשימה לאורחים "
+                         "שאוהבים פריט מסוים. להגיד את זה בפשטות מוריד לחץ: אורחים שמעדיפים לתת כסף "
+                         "לא ירגישו שהם עושים משהו לא נכון.",
+                         "אם תשתמשו בכסף למשהו מסוים, כמו מקרר, אפשר להגיד את זה. אורחים שנותנים "
+                         "לקראתו רואים לאן זה הולך. זו החלטה שלכם ושל המשפחה, ואין תשובה לא נכונה."],
+            },
+            {
+                "h": "Guests who prefer their own gift",
+                "h_he": "אורחים שמעדיפים מתנה משלהם",
+                "p": ["Some guests will bring something they chose themselves, such as a sefer, a "
+                      "set of candlesticks, a painting or a family item. Receive it with thanks. "
+                      "A registry is not a ban on everything else.",
+                      "If you worry about duplicates, a quiet note is enough, for example by marking "
+                      "something as already received. Do not return or exchange a personal gift "
+                      "without being sure the giver would not mind."],
+                "p_he": ["חלק מהאורחים יביאו משהו שבחרו בעצמם, כמו ספר, פמוטים, ציור או פריט "
+                         "משפחתי. קבלו אותו בתודה. רשימה היא לא איסור על כל השאר.",
+                         "אם אתם חוששים מכפילויות, די בהערה שקטה, למשל לסמן פריט כמי שכבר התקבל. "
+                         "אל תחזירו ואל תחליפו מתנה אישית בלי להיות בטוחים שהנותן לא יפגע."],
+            },
+            {
+                "h": "Saying thank you",
+                "h_he": "להגיד תודה",
+                "p": ["Write thank-yous soon after, while you still remember who gave what, and name "
+                      "the gift. Guests abroad in particular like to know it arrived. A few lines is "
+                      "enough, and a photo of the item in use is a pleasant extra.",
+                      "For cash or a transfer, a short thanks that says what you plan to do with it "
+                      "is warmer than only acknowledging the amount."],
+                "p_he": ["כתבו תודות זמן קצר אחרי, כל עוד אתם זוכרים מי נתן מה, וציינו את המתנה "
+                         "בשמה. במיוחד אורחים בחו״ל אוהבים לדעת שהיא הגיעה. כמה שורות מספיקות, ותמונה "
+                         "של הפריט בשימוש היא תוספת נעימה.",
+                         "על כסף או העברה, תודה קצרה שאומרת מה מתכננים לעשות איתו חמה יותר "
+                         "מאישור של הסכום בלבד."],
+            },
+        ],
+        "cta": "sample",
+    },
+    {
+        "slug": "registry-when-you-already-have-hand-me-downs",
+        "icon": "i-pot",
+        "updated": "2026-11-12",
+        "title": "What to put on a registry when you already have hand-me-downs",
+        "title_he": "מה לשים ברשימת מתנות כשכבר קיבלתם דברים יד שנייה מהמשפחה",
+        "summary": "Parents, grandparents and friends have handed you plates, pots and a bed frame. "
+                   "How to take stock, what is worth buying new, what is fine as it is, and how to "
+                   "build a list around the gaps.",
+        "summary_he": "הורים, סבים וחברים נתנו לכם צלחות, סירים ומסגרת מיטה. איך עושים מלאי, מה כדאי "
+                      "לקנות חדש, מה בסדר כמו שהוא, ואיך בונים רשימה סביב החסרים.",
+        "sections": [
+            {
+                "h": "Take stock first",
+                "h_he": "קודם עושים מלאי",
+                "p": ["Before adding anything to a registry, put everything you have been given in one "
+                      "place and go room by room. Note what works, what is worn, and what is missing "
+                      "entirely. A short written inventory takes an hour and prevents a lot of "
+                      "duplicates.",
+                      "Include the date and who gave it, if you can. You may want to thank them "
+                      "later, and it helps when a relative asks what you still need."],
+                "p_he": ["לפני שמוסיפים משהו לרשימה, שימו את כל מה שקיבלתם במקום אחד ועברו חדר "
+                         "חדר. רשמו מה עובד, מה בלוי, ומה חסר לגמרי. מלאי כתוב קצר לוקח שעה וחוסך "
+                         "הרבה כפילויות.",
+                         "הוסיפו תאריך ומי נתן, אם אפשר. אולי תרצו להודות להם אחר כך, וזה עוזר "
+                         "כשקרוב שואל מה עוד חסר לכם."],
+                "list": ["Walk through the kitchen, bathroom, bedroom and living area",
+                         "Mark each item as good, worn or missing",
+                         "Write down sizes for anything that must fit, such as mattresses",
+                         "Keep the list handy for relatives who ask"],
+                "list_he": ["עברו על המטבח, האמבטיה, חדר השינה והסלון",
+                            "סמנו כל פריט כטוב, בלוי או חסר",
+                            "רשמו מידות לכל מה שצריך להתאים, כמו מזרנים",
+                            "שמרו את הרשימה בהישג יד לקרובים ששואלים"],
+            },
+            {
+                "h": "What is worth buying new",
+                "h_he": "מה כדאי לקנות חדש",
+                "p": ["The usual advice is to buy new what touches your body or gets used every day, "
+                      "and what wears out. Things people tend to replace include:"],
+                "p_he": ["העצה הרגילה היא לקנות חדש את מה שנוגע בגוף או משמש כל יום, ואת מה "
+                         "שמתבלה. דברים שאנשים נוטים להחליף כוללים:"],
+                "list": ["Mattress protectors and pillows",
+                         "Towels and sheets in the right sizes",
+                         "A good chef's knife and a sharpener",
+                         "The one or two pots and a pan you will use daily",
+                         "Any pan with a scratched or flaking non-stick coating",
+                         "Sponges, scrubbers and cutting boards that have seen heavy use"],
+                "list_he": ["מגני מזרן וכריות",
+                            "מגבות ומצעים במידות הנכונות",
+                            "סכין שף טובה ומשחיז",
+                            "סיר אחד או שניים ומחבת שמשתמשים בהם כל יום",
+                            "כל מחבת עם ציפוי נון-סטיק שרוט או מתקלף",
+                            "ספוגים, מקרצפים וקרשי חיתוך שעברו שימוש קשה"],
+            },
+            {
+                "h": "What is fine second-hand",
+                "h_he": "מה בסדר יד שנייה",
+                "p": ["Plenty of things last for decades and lose nothing by being used: solid "
+                      "furniture, a table and chairs, baking trays, glass and ceramic dishes, a "
+                      "platter, cast iron, a bookcase. These are worth keeping even if they do not "
+                      "match.",
+                      "Be more careful with electrical items. Test them before you rely on them, "
+                      "check the voltage on the label if they came from abroad, and ask whether the "
+                      "giver has a receipt or a warranty. Our guide on bringing appliances from abroad "
+                      "covers voltage."],
+                "p_he": ["הרבה דברים מחזיקים עשרות שנים ולא מפסידים משימוש: רהיטים מוצקים, שולחן "
+                         "וכיסאות, תבניות אפייה, כלי זכוכית וקרמיקה, מגש הגשה, ברזל יצוק, ארון ספרים. "
+                         "שווה לשמור אותם גם אם הם לא תואמים.",
+                         "היזהרו יותר עם מוצרי חשמל. בדקו אותם לפני שמסתמכים עליהם, בדקו את המתח "
+                         "בתווית אם הגיעו מחו״ל, ושאלו אם לנותן יש קבלה או אחריות. המדריך שלנו על "
+                         "מכשירי חשמל מחו״ל עוסק במתח."],
+            },
+            {
+                "h": "A mixed kitchen set",
+                "h_he": "סט מטבח מעורב",
+                "p": ["If you inherit dishes or pots from a family that kept kosher differently, or "
+                      "that used the same set for everything, you may end up with items whose history "
+                      "you do not know. Whether they can be used, kashered, or must be set aside is a "
+                      "halachic question. Ask your rav before you use or register around any of it.",
+                      "The two-set question also affects the registry. If you will use two colours for "
+                      "milchig and fleishig, check what each inherited item already is, and list only "
+                      "what is missing in each colour. Our kosher kitchen guide explains the colour "
+                      "system."],
+                "p_he": ["אם ירשתם כלים או סירים ממשפחה ששמרה כשרות בצורה אחרת, או שהשתמשה באותו סט "
+                         "לכול, אולי יש לכם פריטים שההיסטוריה שלהם לא ידועה לכם. אם אפשר להשתמש בהם, "
+                         "להכשיר אותם או שצריך לשים אותם בצד, זו שאלה הלכתית. שאלו את הרב שלכם לפני "
+                         "שמשתמשים או בונים סביבם את הרשימה.",
+                         "שאלת שני הסטים משפיעה גם על הרשימה. אם תשתמשו בשני צבעים לחלבי ולבשרי, "
+                         "בדקו מה כל פריט שירשתם כבר, ורשמו רק מה שחסר בכל צבע. מדריך המטבח הכשר "
+                         "שלנו מסביר את שיטת הצבעים."],
+            },
+            {
+                "h": "Balance the price points",
+                "h_he": "לאזן את טווחי המחירים",
+                "p": ["Once you know the gaps, you may find the list is mostly small things. That "
+                      "is fine, but remember that some guests want to give something larger. Keep "
+                      "a few mid-range and bigger items so that every guest finds something that fits "
+                      "their budget and closeness.",
+                      "Quantities help too. If you need four towels, list four, so more than one "
+                      "guest can give toward it."],
+                "p_he": ["אחרי שאתם יודעים מה חסר, אולי תגלו שהרשימה היא בעיקר דברים קטנים. זה "
+                         "בסדר, אבל זכרו שחלק מהאורחים רוצים לתת משהו גדול יותר. השאירו כמה פריטים "
+                         "בינוניים וגדולים יותר, כדי שכל אורח ימצא משהו שמתאים לתקציב ולקרבה שלו.",
+                         "גם כמויות עוזרות. אם צריך ארבע מגבות, רשמו ארבע, כדי שיותר מאורח אחד "
+                         "יוכל לתת מהן."],
+            },
+            {
+                "h": "Big items as group gifts or funds",
+                "h_he": "פריטים גדולים כמתנה קבוצתית או קרן",
+                "p": ["A bed, a couch or a washing machine is a lot for one guest. Offering it as "
+                      "something several relatives can contribute to, or as a general home fund "
+                      "through your own payment link, lets people give what they can toward it. "
+                      "Be clear in the description what the fund is for.",
+                      "Because the site never holds the money, a contribution goes straight to your "
+                      "payment link. Keep track of what has come in so you know when you can order."],
+                "p_he": ["מיטה, ספה או מכונת כביסה זה הרבה לאורח אחד. להציע אותם כמשהו שכמה "
+                         "קרובים יכולים לתרום אליו, או כקרן כללית לבית דרך קישור התשלום שלכם, נותן "
+                         "לאנשים לתת מה שהם יכולים. כתבו בתיאור בבירור למה הקרן מיועדת.",
+                         "מכיוון שהאתר לא מחזיק את הכסף, תרומה עוברת ישירות לקישור התשלום שלכם. "
+                         "עקבו אחרי מה שהגיע כדי לדעת מתי אפשר להזמין."],
+            },
+        ],
+        "cta": "catalog",
+    },
+    {
+        "slug": "chanukas-habayis-and-aliyah-gifts",
+        "icon": "i-candles",
+        "updated": "2026-11-12",
+        "title": "Chanukas habayis and aliyah gifts: what to bring a family in a new home",
+        "title_he": "חנוכת בית ומתנות לעולים: מה מביאים למשפחה בבית חדש",
+        "summary": "For guests and friends: useful gifts for a family who has just moved in, customs "
+                   "people mention, how to give from abroad, and a note for families who have just "
+                   "made aliyah.",
+        "summary_he": "לאורחים ולחברים: מתנות שימושיות למשפחה שזה עתה נכנסה, מנהגים שאנשים מזכירים, "
+                      "איך לתת מחו״ל, והערה למשפחות שזה עתה עלו.",
+        "sections": [
+            {
+                "h": "Useful beats decorative",
+                "h_he": "שימושי עדיף על קישוטי",
+                "p": ["A family in a new home usually has more ornaments than they can place and "
+                      "fewer practical things than they need. Something they will use this week is "
+                      "usually more welcome than something for a shelf. If you can, ask a family "
+                      "member or the couple what is missing. If they have a registry, it will tell "
+                      "you.",
+                      "Keep in mind that a kosher home often has two of many things, so check which "
+                      "colour or set before buying kitchenware. A general item such as a platter or "
+                      "a challah cover is an easier choice than a pot, and Shabbos equipment is best "
+                      "bought after asking."],
+                "p_he": ["למשפחה בבית חדש יש בדרך כלל יותר קישוטים ממה שהיא מצליחה למקם ופחות דברים "
+                         "מעשיים ממה שהיא צריכה. משהו שישתמשו בו השבוע מתקבל לרוב טוב יותר ממשהו "
+                         "למדף. אם אפשר, שאלו בן משפחה או את הזוג מה חסר. אם יש להם רשימת מתנות, היא "
+                         "תגיד לכם.",
+                         "זכרו שבבית כשר יש לא פעם שניים מדברים רבים, אז בדקו איזה צבע או סט לפני "
+                         "שקונים כלי מטבח. פריט כללי כמו מגש הגשה או כיסוי חלה הוא בחירה קלה יותר מסיר, "
+                         "ואת ציוד השבת עדיף לקנות אחרי ששואלים."],
+            },
+            {
+                "h": "Customs people mention",
+                "h_he": "מנהגים שאנשים מזכירים",
+                "p": ["Some people bring bread and salt, or honey, or a bottle of wine or juice, to "
+                      "a new home. Others bring a plant, or a sefer or a mezuzah. These are customs "
+                      "that vary from community to community, and some families will not know them "
+                      "at all.",
+                      "If you want to follow a custom, do it simply and with a few kind words. If you "
+                      "are not sure what the family would appreciate, a practical gift with a warm "
+                      "note is always fine. A mezuzah is a question for the family and their rav, "
+                      "since it has to be a kosher one and be put up in a certain way."],
+                "p_he": ["יש אנשים שמביאים לחם ומלח, או דבש, או בקבוק יין או מיץ, לבית חדש. אחרים "
+                         "מביאים צמח, או ספר או מזוזה. אלה מנהגים שמשתנים בין קהילות, ויש משפחות "
+                         "שלא מכירות אותם בכלל.",
+                         "אם רוצים לנהוג לפי מנהג, עושים את זה בפשטות ועם כמה מילים טובות. אם אתם "
+                         "לא בטוחים מה המשפחה תעריך, מתנה מעשית עם ברכה חמה תמיד בסדר. מזוזה היא "
+                         "שאלה למשפחה ולרב שלהם, כי היא חייבת להיות כשרה ולהיות מוצבת בדרך מסוימת."],
+                "list": ["Bread and salt, honey, or a bottle of wine or juice",
+                         "A plant or flowers, if the family keeps a garden or a balcony",
+                         "A sefer or a framed blessing, if you know the family well",
+                         "Always check that food and drink carry a hechsher the family accepts"],
+                "list_he": ["לחם ומלח, דבש, או בקבוק יין או מיץ",
+                            "צמח או פרחים, אם למשפחה יש גינה או מרפסת",
+                            "ספר או ברכה ממוסגרת, אם אתם מכירים את המשפחה היטב",
+                            "תמיד בדקו שמאכלים ומשקאות עם הכשר שהמשפחה מקבלת"],
+            },
+            {
+                "h": "Practical gifts by budget",
+                "h_he": "מתנות מעשיות לפי תקציב",
+                "p": ["We do not give prices, because what feels right depends on your closeness to "
+                      "the family and your own situation. In general terms, here is how the choices "
+                      "tend to group."],
+                "p_he": ["אנחנו לא נותנים מחירים, כי מה שנכון תלוי בקרבה שלכם למשפחה ובמצב שלכם. "
+                         "באופן כללי, כך האפשרויות נוטות להתקבץ."],
+                "list": ["Smaller: a dish towel set, a challah cover, a spice rack, a plant, a "
+                         "well-chosen sefer, or food for the first Shabbos",
+                         "Middle: a good serving platter, a cutting board, a set of baking trays, "
+                         "a lamp, a set of glasses",
+                         "Larger, usually together with others: a platta, an urn, a small appliance "
+                         "the family has asked for, or a contribution toward a big item",
+                         "Anywhere in the range: a gift card for a store they use, if you are unsure"],
+                "list_he": ["קטן: סט מגבות מטבח, כיסוי חלה, מתקן תבלינים, צמח, ספר שנבחר היטב, או "
+                            "אוכל לשבת הראשונה",
+                            "בינוני: מגש הגשה טוב, קרש חיתוך, סט תבניות אפייה, מנורה, סט כוסות",
+                            "גדול, בדרך כלל יחד עם אחרים: פלטה, מיחם, מכשיר קטן שהמשפחה ביקשה, או "
+                            "תרומה לפריט גדול",
+                            "בכל טווח: שובר לחנות שהם משתמשים בה, אם אינכם בטוחים"],
+            },
+            {
+                "h": "Giving from abroad",
+                "h_he": "לתת מחו״ל",
+                "p": ["If you live abroad, an Israeli store that delivers in Israel is usually "
+                      "simpler than shipping something yourself. Ask the family for a delivery address "
+                      "and a phone number for the courier, and check the store accepts your card, since "
+                      "some checkouts are in Hebrew only. Our guide on giving a gift to a couple in "
+                      "Israel from abroad explains the routes.",
+                      "Or send a transfer through whatever method the family tells you they use, and "
+                      "add a note. Money is always a practical gift in a new home."],
+                "p_he": ["אם אתם גרים בחו״ל, חנות ישראלית שמשלחת בישראל היא לרוב פשוטה יותר ממשלוח "
+                         "עצמאי. בקשו מהמשפחה כתובת למשלוח וטלפון לשליח, ובדקו שהחנות מקבלת את הכרטיס "
+                         "שלכם, כי חלק מהקופות רק בעברית. המדריך שלנו על לתת מתנה לזוג בישראל מחו״ל "
+                         "מסביר את הדרכים.",
+                         "או שלחו העברה בכל שיטה שהמשפחה אומרת שהיא משתמשת בה, והוסיפו ברכה. כסף הוא "
+                         "תמיד מתנה מעשית בבית חדש."],
+            },
+            {
+                "h": "A note for a family that has just made aliyah",
+                "h_he": "הערה למשפחה שזה עתה עלתה",
+                "p": ["A family that has just arrived may not yet have its lift, the shipping "
+                      "container with its belongings, which can arrive weeks or more after they do. "
+                      "In the meantime they may be living with very little. Things that help right "
+                      "away tend to be better than anything for later: a few days of food, basic "
+                      "bedding, towels, a kettle, cleaning supplies, and an invitation for Shabbos.",
+                      "Ask what they actually have before you buy. Do not bring things that would "
+                      "duplicate a container full of belongings. Your time, a ride, help with a "
+                      "form, or a seat at your table is often worth more than an object."],
+                "p_he": ["משפחה שזה עתה הגיעה אולי עדיין אין לה את הליפט, המכולה עם החפצים שלה, "
+                         "שיכולה להגיע שבועות או יותר אחריה. בינתיים היא אולי חיה עם מעט מאוד. דברים "
+                         "שעוזרים מיד טובים יותר מכל דבר למאוחר: אוכל לכמה ימים, מצעים בסיסיים, מגבות, "
+                         "קומקום, חומרי ניקוי, והזמנה לשבת.",
+                         "שאלו מה יש להם בפועל לפני שקונים. אל תביאו דברים שיכפילו מכולה מלאה "
+                         "בחפצים. הזמן שלכם, טרמפ, עזרה עם טופס או מקום ליד השולחן שלכם שווים לא פעם "
+                         "יותר מחפץ."],
+            },
+            {
+                "h": "Before you visit",
+                "h_he": "לפני שמגיעים",
+                "p": ["Check the time with the family, and keep Shabbos and Yom Tov in mind. A new "
+                      "home may still be full of boxes, so a short visit, or leaving the gift with a "
+                      "word and a smile, is often appreciated.",
+                      "Bring a note that says who it is from, since gifts arrive from many people in "
+                      "the first weeks and it is easy to lose track."],
+                "p_he": ["תאמו עם המשפחה שעה, ושימו לב לשבת ולחג. בבית חדש עדיין יכולים להיות "
+                         "קרטונים, אז ביקור קצר, או השארת המתנה עם מילה וחיוך, מתקבלים לא פעם "
+                         "בהערכה.",
+                         "הביאו פתק שאומר ממי זה, כי מתנות מגיעות מהרבה אנשים בשבועות הראשונים וקל "
+                         "לאבד את הספירה."],
+            },
+        ],
+        "cta": "catalog",
+    },
 ]
 
 BY_SLUG = {g["slug"]: g for g in GUIDES}

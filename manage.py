@@ -303,6 +303,41 @@ def cmd_stats(args):
     return 0
 
 
+def insights_lines(d):
+    """Plain-text headline numbers from app.insights_data() (same figures as /admin/insights)."""
+    def pc(p):
+        return "-" if p is None else f"{p}%"
+    g, c, l, k, m = d["guests"], d["clicks"], d["leads"], d["catalog"], d["mail"]
+    out = [f"Insights: {'all time' if d['days'] is None else 'last %d days' % d['days']}",
+           f"page views: {d['views_total']}"]
+    out += [f"  {s['label']}: {s['n']} ({pc(s['pct'])} of previous step)" for s in d["funnel"]]
+    out += [f"reservations: {g['reservations']} (avg {g['avg_per_registry']} per active registry)",
+            f"cash gifts: {g['cash']['n']} (pledged {g['cash']['pledged']}, reported {g['cash']['reported']},"
+            f" received {g['cash']['received']} ILS)",
+            f"chip-ins: {g['chip']['n']} (pledged {g['chip']['pledged']}, reported {g['chip']['reported']},"
+            f" received {g['chip']['received']} ILS)",
+            f"brachos: {g['brachos']}",
+            f"store clicks: {c['period'][0]} (tagged {c['tagged'][0]}); lifetime {c['lifetime']},"
+            f" covered by a rule {pc(c['covered_pct'])}",
+            f"shana leads: {l['total']} (rush {l['rush']}, quoted {l['quotes']}, price {l['price']},"
+            f" cost {l['cost']}, profit {l['profit']}, overdue {len(l['overdue'])})",
+            f"catalog: {k['active']} active, {k['with_link']} linked, {k['verified']} verified,"
+            f" {k['stale']} stale, {k['zero_clicks']} zero-click, {k['hosts_without_rule']} hosts without a rule",
+            f"mail: {m['queued']} queued, {m['failed']} failed, SMTP {'configured' if m['smtp'] else 'not configured'}"]
+    return out
+
+
+def cmd_insights(args):
+    """Read-only business headline numbers (the /admin/insights page, as text)."""
+    import app as A
+    with A.app.test_request_context("/"):
+        db = _open()
+        A.g.db = db
+        d = A.insights_data(db, args.days if args.days and args.days > 0 else None)
+    print("\n".join(insights_lines(d)))
+    return 0
+
+
 def cmd_seed_sync(args):
     import json
     seed_path = BASE / "seed_catalog.json"
@@ -398,6 +433,10 @@ def main():
 
     sp = sub.add_parser("stats")
     sp.set_defaults(fn=cmd_stats)
+
+    sp = sub.add_parser("insights", help="print the /admin/insights headline numbers")
+    sp.add_argument("--days", type=int, default=30, help="period length in days (default 30; 0 = all time)")
+    sp.set_defaults(fn=cmd_insights)
 
     sp = sub.add_parser("seed-sync")
     sp.add_argument("--apply", action="store_true",

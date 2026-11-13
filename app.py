@@ -3301,6 +3301,54 @@ def setup_cost():
         est_sym=ob_money.CURRENCY_SYMBOLS.get(cur, cur + " ") if est_rate else "")
 
 
+def _setup_ticked_ids(db, cap):
+    """Ids of the ACTIVE catalog items ticked on the /setup-cost form (ascii-digit `add_<id>` keys
+    only), in form order, at most `cap`."""
+    wanted = []
+    for key in request.form:
+        if key.startswith("add_") and key[4:].isascii() and key[4:].isdigit() and int(key[4:]) not in wanted:
+            wanted.append(int(key[4:]))
+            if len(wanted) >= 200:  # far more than the page offers; bounds the query below
+                break
+    if not wanted:
+        return []
+    ok = {r[0] for r in db.execute(
+        "SELECT id FROM catalog_items WHERE active=1 AND id IN (%s)" % ",".join("?" * len(wanted)),
+        wanted)}
+    return [i for i in wanted if i in ok][:cap]
+
+
+@app.route("/setup-cost/request", methods=["POST"])
+def setup_cost_request():
+    """"Have it done for you": carry the ticked list (ids only, max 60) in the session to the Shana
+    Rishonah request form, which attaches it to the lead if the visitor sends it."""
+    if rate_limited("setup_request", limit=20, per=600):
+        abort(429)
+    if is_spam():
+        return redirect(url_for("setup_cost"))
+    ids = _setup_ticked_ids(get_db(), 60)
+    if ids:
+        session["shana_list"] = ids
+        track("setup_cost_request")
+    return redirect(url_for("shana") + "#request")
+
+
+@app.route("/shana-rishonah/list/remove", methods=["POST"])
+def shana_list_remove():
+    session.pop("shana_list", None)
+    return redirect(url_for("shana") + "#request")
+
+
+def _shana_list_items(db):
+    """Active catalog rows for the session's carried list, in saved order (prices read fresh)."""
+    ids = [i for i in (session.get("shana_list") or []) if isinstance(i, int)][:60]
+    if not ids:
+        return []
+    rows = {r["id"]: r for r in db.execute(
+        "SELECT * FROM catalog_items WHERE active=1 AND id IN (%s)" % ",".join("?" * len(ids)), ids)}
+    return [rows[i] for i in ids if i in rows]
+
+
 @app.route("/setup-cost/start", methods=["POST"])
 def setup_cost_start():
     """Turn the ticked setup-cost items into a registry: straight onto the list for a couple with
@@ -3311,19 +3359,8 @@ def setup_cost_start():
     if is_spam():
         return redirect(url_for("setup_cost"))
     lang = current_lang()
-    wanted = []
-    for key in request.form:
-        if key.startswith("add_") and key[4:].isascii() and key[4:].isdigit() and int(key[4:]) not in wanted:
-            wanted.append(int(key[4:]))
-            if len(wanted) >= 200:  # far more than the page offers; bounds the query below
-                break
     db = get_db()
-    ids = []
-    if wanted:
-        ok = {r[0] for r in db.execute(
-            "SELECT id FROM catalog_items WHERE active=1 AND id IN (%s)" % ",".join("?" * len(wanted)),
-            wanted)}
-        ids = [i for i in wanted if i in ok][:50]
+    ids = _setup_ticked_ids(db, 50)
     if not ids:
         flash(_t("setup_none_selected", lang), "err")
         return redirect(url_for("setup_cost"))
@@ -4234,9 +4271,18 @@ def shana():
                 days_left = None
             # sooner than the package's planning lead time (a past date may just mean "already here")
             rush = days_left is not None and 0 <= days_left < lead_weeks * 7
+            wanted_list = ""
+            if f.get("with_list"):
+                # prices and names are re-read from the catalog now; the owner reads English
+                items = _shana_list_items(db)
+                if items:
+                    wanted_list = "\n".join(
+                        f"{r['name']} — ₪{r['price_nis'] or 0:,} ({r['store'] or 'store'})" for r in items
+                    ) + f"\nTotal at store prices: ₪{sum(r['price_nis'] or 0 for r in items):,}" \
+                        f"\nItems: {len(items)}"
             db.execute(
                 "INSERT INTO shana_requests (name, email, whatsapp, arrival, city, neighborhood,"
-                " furnishing, budget, bundle_slug, notes, lang) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+                " furnishing, budget, bundle_slug, notes, lang, wanted_list) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
                 (name, email, (f.get("whatsapp") or "").strip()[:40],
                  (f.get("arrival") or "").strip()[:40],
                  (f.get("city") or "").strip()[:120],
@@ -4245,7 +4291,7 @@ def shana():
                      ("unknown", "empty", "partly", "furnished") else "unknown",
                  f.get("budget") if f.get("budget") in SHANA_BUDGETS else "",
                  bundle_slug,
-                 (f.get("notes") or "").strip()[:2000], lang))
+                 (f.get("notes") or "").strip()[:2000], lang, wanted_list))
             send_mail(
                 NOTIFY_EMAIL,
                 f"{'[RUSH] ' if rush else ''}New shana rishonah lead: {name} ({bundle_slug})",
@@ -4255,8 +4301,12 @@ def shana():
                 + f"\nCity: {f.get('city', '')}\n"
                 f"Neighborhood: {f.get('neighborhood', '')}\nFurnishing: {f.get('furnishing', '')}\n"
                 f"Budget: {budget_label(f.get('budget'))}\nBundle: {bundle_slug}\n"
-                f"Notes: {f.get('notes', '')}\n\nAdmin: {ext_url('admin_home')}",
+                f"Notes: {f.get('notes', '')}\n"
+                + (f"\nList from the cost calculator:\n{wanted_list}\n" if wanted_list else "")
+                + f"\nAdmin: {ext_url('admin_home')}",
                 reply_to=email)
+            if f.get("with_list"):
+                session.pop("shana_list", None)
             track("concierge_inquiry")
             flash(_t("sr_done_t", lang) + " " + _t("sr_done_b", lang), "ok")
             if rush:
@@ -4265,8 +4315,10 @@ def shana():
             return redirect(url_for("shana"))
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
     # a rejected POST re-renders with what was typed (up to 2000 chars of notes) instead of blanking it
+    list_items = _shana_list_items(db)
     return render_template("shana.html", bundles=bundles, package_tiers=PACKAGE_TIERS,
-                           shana_budgets=SHANA_BUDGETS,
+                           shana_budgets=SHANA_BUDGETS, list_items=list_items,
+                           list_total=sum(r["price_nis"] or 0 for r in list_items),
                            form=request.form if request.method == "POST" else _shana_prefill())
 
 
@@ -4935,6 +4987,199 @@ def admin_affiliate_toggle(rule_id):
 def admin_affiliate_delete(rule_id):
     get_db().execute("DELETE FROM affiliate_rules WHERE id=?", (rule_id,))
     return redirect(url_for("admin_affiliates"))
+
+
+# ---------------------------------------------------------------- admin insights (read-only business view)
+INSIGHT_ENDPOINT_NAMES = {
+    "index": "Home", "catalog_page": "Catalog", "registry": "Registry pages (guest view)",
+    "sample": "Sample registry", "shana": "Shana Rishonah", "how": "How it works", "about": "About",
+    "find": "Find a registry", "advertise": "Advertise", "privacy": "Privacy", "terms": "Terms",
+    "contact": "Contact", "guides": "Guides index", "guide": "Guide articles",
+    "gift_ideas": "Gift ideas", "catalog_item": "Item pages", "gift_category": "Category pages",
+    "setup_cost": "Setup cost calculator",
+}
+
+
+def insights_days(raw):
+    """?days= value -> 7, 30, 90 or None (all time); anything else is 30."""
+    raw = (raw or "").strip().lower()
+    if raw == "all":
+        return None
+    return int(raw) if raw in ("7", "30", "90") else 30
+
+
+def _pct(part, whole):
+    """Whole-number percentage, or None when there is nothing to divide by."""
+    return round(part * 100 / whole) if whole else None
+
+
+def insights_data(db, days=30, today=None):
+    """Everything the /admin/insights page and `manage.py insights` show. Needs only a DB handle
+    (no request). days=None means all time (no previous-period figures). Daily funnel_events
+    are compared with the equally long period before; table counts use created_at."""
+    today = today or datetime.now(timezone.utc).date()
+    since = (today - timedelta(days=days - 1)).isoformat() if days else ""
+    prev_since = (today - timedelta(days=2 * days - 1)).isoformat() if days else None
+    d = dict(days=days, since=since, today=today.isoformat())
+
+    def ev(names, lo, hi=None):
+        sql = f"SELECT COALESCE(SUM(n),0) FROM funnel_events WHERE name IN ({','.join('?' * len(names))})"
+        args = list(names)
+        if lo:
+            sql += " AND day>=?"
+            args.append(lo)
+        if hi:
+            sql += " AND day<?"
+            args.append(hi)
+        return db.execute(sql, args).fetchone()[0]
+
+    def pair(*names):
+        """(this period, previous period or None)"""
+        return ev(names, since), (ev(names, prev_since, since) if days else None)
+
+    def views(lo, hi=None):
+        sql = "SELECT name, SUM(n) AS n FROM funnel_events WHERE name LIKE 'view:%'"
+        args = []
+        if lo:
+            sql += " AND day>=?"
+            args.append(lo)
+        if hi:
+            sql += " AND day<?"
+            args.append(hi)
+        return {r["name"][5:]: r["n"] for r in db.execute(sql + " GROUP BY name", args)}
+
+    def made(table, extra=""):
+        sql = f"SELECT COUNT(*) FROM {table} WHERE substr(created_at,1,10)>=?{extra}"
+        return db.execute(sql, (since,)).fetchone()[0]
+
+    # 1. visitors and pages
+    cur_v = views(since)
+    prev_v = views(prev_since, since) if days else {}
+    d["views_total"] = sum(cur_v.values())
+    d["views_prev"] = sum(prev_v.values()) if days else None
+    d["top_pages"] = [dict(name=INSIGHT_ENDPOINT_NAMES.get(k, k), n=n, prev=(prev_v.get(k, 0) if days else None))
+                      for k, n in sorted(cur_v.items(), key=lambda kv: (-kv[1], kv[0]))[:10]]
+    d["key_pages"] = [dict(name=INSIGHT_ENDPOINT_NAMES[k], n=cur_v.get(k, 0), prev=(prev_v.get(k, 0) if days else None))
+                      for k in ("setup_cost", "gift_ideas", "guides", "guide", "catalog_item", "gift_category")]
+
+    # 2. couples funnel (cohorts by created_at, each step a subset of the one before)
+    regs = db.execute(
+        "SELECT r.id, (r.views>0 OR COALESCE(r.preferences_json,'') LIKE '%\"shared_at\"%') AS shared,"
+        " (SELECT COUNT(*) FROM registry_items i WHERE i.registry_id=r.id AND i.archived=0) AS n_items,"
+        " EXISTS(SELECT 1 FROM claims c WHERE c.registry_id=r.id AND c.status!='cancelled') AS has_claim"
+        " FROM registries r WHERE substr(r.created_at,1,10)>=?", (since,)).fetchall()
+    five = [r for r in regs if r["n_items"] >= 5]
+    shared = [r for r in five if r["shared"]]
+    reserved = [r for r in shared if r["has_claim"]]
+    steps = [("Signed up", made("users"), pair("signup")),
+             ("Created a registry", len(regs), pair("registry_created")),
+             ("Has 5+ gifts", len(five), pair("first_gifts")),
+             ("Shared it", len(shared), pair("share_click")),
+             ("Got a first reservation", len(reserved), pair("reservation"))]
+    d["funnel"] = [dict(label=label, n=n, pct=(_pct(n, steps[i - 1][1]) if i else None), ev=e[0], ev_prev=e[1])
+                   for i, (label, n, e) in enumerate(steps)]
+
+    # 3. guests
+    live = "status IN ('reserved','reported','received')"
+    cl = {}
+    for kind in ("item", "cash", "chip"):
+        row = db.execute(
+            f"SELECT COUNT(*) AS n,"
+            f" COALESCE(SUM(CASE WHEN status='reserved' THEN amount_minor END),0) AS pledged,"
+            f" COALESCE(SUM(CASE WHEN status='reported' THEN amount_minor END),0) AS reported,"
+            f" COALESCE(SUM(CASE WHEN status='received' THEN amount_minor END),0) AS received"
+            f" FROM claims WHERE kind=? AND {live} AND substr(created_at,1,10)>=?"
+            f" AND COALESCE(currency,'ILS')='ILS'", (kind, since)).fetchone()
+        cl[kind] = dict(n=row["n"], pledged=row["pledged"] // 100, reported=row["reported"] // 100,
+                        received=row["received"] // 100)
+    active_regs = db.execute(
+        f"SELECT COUNT(DISTINCT registry_id) FROM claims WHERE kind='item' AND {live}"
+        " AND substr(created_at,1,10)>=?", (since,)).fetchone()[0]
+    d["guests"] = dict(
+        reservations=cl["item"]["n"], cash=cl["cash"], chip=cl["chip"], brachos=made("brachos"),
+        active_registries=active_regs,
+        avg_per_registry=round(cl["item"]["n"] / active_regs, 1) if active_regs else 0)
+
+    # 4. store clicks
+    hosts = _outbound_click_hosts(db)
+    total_c = sum(h["clicks"] for h in hosts)
+    covered = sum(h["clicks"] for h in hosts if h["rule"] is not None and h["rule"]["active"])
+    top_items = db.execute(
+        "SELECT id, name, clicks FROM catalog_items WHERE clicks>0 ORDER BY clicks DESC, name LIMIT 10").fetchall()
+    d["clicks"] = dict(
+        period=pair("handoff_click"), tagged=pair("handoff_click_tagged"),
+        hosts=hosts[:10], lifetime=total_c, covered=covered, covered_pct=_pct(covered, total_c),
+        top_items=[dict(id=r["id"], name=r["name"], clicks=r["clicks"]) for r in top_items])
+
+    # 5. Shana Rishonah leads
+    tiers = {r["slug"]: r["tier"] for r in db.execute("SELECT slug, tier FROM bundles")}
+    leads = db.execute("SELECT * FROM shana_requests WHERE substr(created_at,1,10)>=?", (since,)).fetchall()
+    by_status = {}
+    rush = 0
+    q_n = q_price = q_cost = q_profit = 0
+    margins = []
+    for l in leads:
+        by_status[l["status"]] = by_status.get(l["status"], 0) + 1
+        try:
+            left = (datetime.strptime((l["arrival"] or "")[:10], "%Y-%m-%d").date()
+                    - datetime.strptime(l["created_at"][:10], "%Y-%m-%d").date()).days
+            weeks = PACKAGE_TIERS.get(tiers.get(l["bundle_slug"], "basic"), PACKAGE_TIERS["basic"])["lead_weeks"]
+            rush += 1 if 0 <= left < weeks * 7 else 0
+        except (ValueError, TypeError):
+            pass
+        try:
+            q = json.loads(l["quote_json"] or "{}")
+            price = float(q.get("quoted_price") or 0)
+        except (ValueError, TypeError, AttributeError):
+            continue
+        if price > 0:
+            q_n += 1
+            q_price += price
+            q_cost += float(q.get("total_cost") or 0)
+            q_profit += float(q.get("profit") or 0)
+            margins.append(float(q.get("margin_pct") or 0))
+    overdue = db.execute(
+        "SELECT id, name, next_action, next_action_date FROM shana_requests"
+        " WHERE next_action_date!='' AND substr(next_action_date,1,10)<? AND status NOT IN ('completed','cancelled')"
+        " ORDER BY next_action_date", (today.isoformat(),)).fetchall()
+    d["leads"] = dict(
+        total=len(leads), by_status=[(s, by_status[s]) for s in LEAD_STATUSES if s in by_status],
+        rush=rush, quotes=q_n, price=round(q_price), cost=round(q_cost), profit=round(q_profit),
+        avg_margin=round(sum(margins) / len(margins), 1) if margins else None,
+        overdue=[dict(id=r["id"], name=r["name"], next_action=r["next_action"], date=r["next_action_date"][:10])
+                 for r in overdue])
+
+    # 6. catalog health
+    def n(where):
+        return db.execute(f"SELECT COUNT(*) FROM catalog_items WHERE active=1{where}").fetchone()[0]
+    rules = db.execute("SELECT host FROM affiliate_rules WHERE active=1").fetchall()
+    bare = set()
+    for r in db.execute("SELECT url FROM catalog_items WHERE active=1 AND url!=''"):
+        try:
+            host = (urlsplit(r["url"]).hostname or "").lower()
+        except ValueError:
+            continue
+        host = host[4:] if host.startswith("www.") else host
+        if host and not any(ob_affiliate.host_matches(host, x["host"]) for x in rules):
+            bare.add(host)
+    d["catalog"] = dict(
+        active=n(""), with_link=n(" AND url!=''"), verified=n(" AND price_status='verified'"),
+        stale=n(" AND " + STALE_PRICE_SQL), zero_clicks=n(" AND COALESCE(clicks,0)=0"),
+        hosts_without_rule=len(bare))
+
+    # 7. mail
+    counts = ob_mail.outbox_counts(db)
+    d["mail"] = dict(queued=counts.get("queued", 0), failed=counts.get("failed", 0),
+                     smtp=ob_mail.configured())
+    return d
+
+
+@app.route("/admin/insights")
+@admin_required
+def admin_insights():
+    days = insights_days(request.args.get("days"))
+    return render_template("admin_insights.html", d=insights_data(get_db(), days),
+                           choice=("all" if days is None else str(days)))
 
 
 @app.route("/admin/password", methods=["POST"])

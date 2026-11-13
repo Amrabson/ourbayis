@@ -10,3 +10,5 @@ backups/
 instance/
 _preview_tmp/
 shots/
+# owner-only research notes (personal tax/registration details): never commit
+AFFILIATE_PROGRAMS.md

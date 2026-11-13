@@ -40,6 +40,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   Associates, Awin; paste each ID as a rule in `/admin/affiliates`. Email Home Center to ask which network runs theirs.
 - [ ] Once KSP approves: note its link format, add a rule for `ksp.co.il`, and try it in "Test a link".
 - [x] A page per catalog item, `/catalog/<slug>` (2026-11-11); static export covers them (2026-11-12).
+- [x] Owner insights `/admin/insights` + `manage.py insights`; calculator list travels with a Shana request;
+  homepage tools section; five more guides (2026-11-13). [ ] Native Hebrew read of all 11 new guides.
 - [x] Setup-cost calculator `/setup-cost`, category pages `/gifts/<slug>`, cash funds (2026-11-12).
 - [x] Paste a link from any store on the custom-gift form (2026-11-11).
 - [x] **Owner decision 2026-11-11: keep pictures from pasted links.** A pasted link prefills the store's own

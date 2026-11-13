@@ -116,6 +116,34 @@
   </div>
 </section>
 
+{# ============ 2b. the tools: cost calculator, paste-a-link, chip-in ============ #}
+<section class="tools-sec reveal">
+  <div class="sec-inner">
+    <h2 class="sec-title">{{ t('home_tools_title') }}</h2>
+    <div class="tools-grid">
+      <article class="tool-card">
+        <h3>{{ t('home_tools_cost_t') }}</h3>
+        <p>{{ t('home_tools_cost_b') }}</p>
+        <a class="link-arrow" href="{{ url_for('setup_cost') }}">{{ t('home_tools_cost_l') }} <span aria-hidden="true">{{ arrow }}</span></a>
+      </article>
+      <article class="tool-card">
+        <h3>{{ t('home_tools_link_t') }}</h3>
+        <p>{{ t('home_tools_link_b') }}</p>
+        {% if user %}
+        <a class="link-arrow" href="{{ url_for('items_manage') }}">{{ t('home_tools_link_l_in') }} <span aria-hidden="true">{{ arrow }}</span></a>
+        {% else %}
+        <a class="link-arrow" href="{{ url_for('signup') }}">{{ t('home_tools_link_l') }} <span aria-hidden="true">{{ arrow }}</span></a>
+        {% endif %}
+      </article>
+      <article class="tool-card">
+        <h3>{{ t('home_tools_fund_t') }}</h3>
+        <p>{{ t('home_tools_fund_b') }}</p>
+        <a class="link-arrow" href="{{ url_for('sample') }}">{{ t('home_tools_fund_l') }} <span aria-hidden="true">{{ arrow }}</span></a>
+      </article>
+    </div>
+  </div>
+</section>
+
 {# ============ 3. room by room ============ #}
 {% if rooms %}
 <section class="rooms-sec reveal">

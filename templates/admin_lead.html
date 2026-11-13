@@ -22,6 +22,14 @@
     <p class="hint">Opens a first message in their language with their package, date and city filled in — edit before sending.</p>
   </div>
 
+  {% if lead['wanted_list'] %}
+  <div class="panel">
+    <h2 class="sub-title">List from the cost calculator</h2>
+    <pre class="wanted-list" dir="ltr">{{ lead['wanted_list'] }}</pre>
+    <button class="btn btn-ghost btn-sm" type="button" data-copy="{{ lead['wanted_list'] }}" data-copied-label="Copied">Copy list</button>
+  </div>
+  {% endif %}
+
   {% if dupes %}
   <div class="notice-panel">
     <strong>Possible duplicate contact:</strong>

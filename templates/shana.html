@@ -98,8 +98,22 @@
     {% with msgs = get_flashed_messages(with_categories=true) %}
       {% for cat, m in msgs %}<div class="flash flash-{{ cat }}" role="{{ 'alert' if cat == 'err' else 'status' }}">{{ m }}</div>{% endfor %}
     {% endwith %}
+    {% if list_items %}
+    <div class="panel shana-list">
+      <details>
+        <summary><strong>{{ tf('shana_list_summary', n=list_items | length, total='₪' ~ '{:,}'.format(list_total)) }}</strong></summary>
+        <ul class="shana-list-items">{% for r in list_items %}<li>{{ pick(r, 'name') }}</li>{% endfor %}</ul>
+      </details>
+      <p class="hint">{{ t('shana_list_hint') }}</p>
+      <form method="post" action="{{ url_for('shana_list_remove') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ t('shana_list_remove') }}</button>
+      </form>
+    </div>
+    {% endif %}
     <form method="post" action="{{ url_for('shana') }}#request" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      {% if list_items %}<input type="hidden" name="with_list" value="1">{% endif %}
       <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
       <label class="selected-pkg">{{ t('sr_bundle') }}
         <select name="bundle" id="bundle-select">
