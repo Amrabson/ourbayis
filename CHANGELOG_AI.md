@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-11-13 (review pass: security review + visual QA of the week's features)
+Security review of everything since f5c2198 (read-only agent, findings judged by the lead): no high-severity issue.
+- **Fixed: "I've sent it" on a chip-in returned a 500** and the couple's email was never sent — `guest_report` passed
+  `item` to `notify_owner` twice. `notify_owner` now takes `item_label=` for a ready-made label (general cash gift,
+  chip-in). Regression test in tests/test_chip_in.py.
+- **Fixed: a 34-digit `add_<id>` key crashed `/setup-cost/start` and `/setup-cost/request`** (`_setup_ticked_ids`
+  now ignores ids longer than 9 digits). Test in tests/test_setup_request.py.
+- Left as is, on purpose: a guest whose chip-in reservation expired can still report it late (flagged `late`), which
+  can put an item above its goal — refusing would be wrong if the money was sent; the progress bar caps at 100%.
+- Checked and sound: admin/registry authorization, CSRF, redirects built from `url_for`, autoescaping and JSON-LD,
+  stored URL validation, affiliate rules, `ob_linkinfo` SSRF rules (about 40 bypass strings), chip-in arithmetic, SQL.
+Visual QA (about 150 screenshots in git-ignored `shots/qa-2026-11-13/`, EN/HE, 390px and 1280px), fixed:
+- `/setup-cost`: the "Have it done for you" button was navy on the navy bar (invisible); packages subtitle spacing.
+- Registry / sample cards on phones: the status stamp covered the gift title; it now sits under the thumbnail.
+- Item pages: section rules ran wider than the content; a wrapped breadcrumb began with "/".
+- Hebrew: "Open PayPal →" / "Buy at … →" arrows pointed the wrong way (guest page, registry, dashboard); the
+  custom-gift name and link inputs clipped Latin text (`dir="auto"` / `dir="ltr"`).
+- Admin lead page: gap above the calculator list. New markup tests cover the new public pages (test_a11y,
+  test_site_quality).
+
 ## 2026-11-13 (owner insights, calculator → Shana lead, homepage tools, five guides)
 - **`/admin/insights`** (`admin_insights`, `insights_data(db, days, today=None)`, `admin_insights.html`) and
   `manage.py insights [--days N]`: visitors and top pages, the couples funnel (cohort counts from tables beside the

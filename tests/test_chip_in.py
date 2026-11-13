@@ -356,3 +356,15 @@ def test_store_option_goes_once_someone_chipped_in(client, app_module):
     assert 'value="store"' not in page and "The rest" in page
     _chip(app_module, slug, item_id, preset="store", name="Aunt Miri")
     assert _db().execute("SELECT COUNT(*) FROM claims WHERE kind='item'").fetchone()[0] == 0
+
+
+def test_guest_can_report_a_chip_and_the_couple_is_told(client, app_module):
+    slug, item_id = _setup(client)
+    guest, r = _chip(app_module, slug, item_id, amount=180)
+    page = guest.get(r.headers["Location"]).get_data(as_text=True)
+    token = r.headers["Location"].rsplit("/", 1)[-1]
+    r2 = guest.post(f"/g/{token}/report", data=dict(csrf_token=get_csrf(page)))
+    assert r2.status_code == 302
+    assert _chips()[0]["status"] == "reported"
+    bodies = " ".join(m["body"] for m in _db().execute("SELECT body FROM mail_outbox"))
+    assert "toward Fridge" in bodies

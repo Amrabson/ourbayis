@@ -4,6 +4,7 @@ one h1, no skipped heading levels, unique ids, every visible form field labelled
 no unnamed icon-only buttons/links. Public pages are covered in test_p2."""
 import collections
 import os
+import re
 import sqlite3
 from html.parser import HTMLParser
 
@@ -95,3 +96,26 @@ def test_admin_password_form_matches_server_minimum(client, app_module):
     admin_login(client)
     html = client.get("/admin").get_data(as_text=True)
     assert 'minlength="12"' in html and "10+" not in html
+
+
+def test_new_public_pages_markup(client, app_module):
+    """Calculator, category landing pages, item pages, the homepage tools strip (2026-11-11..13):
+    one h1, no skipped levels, unique ids, labelled fields, no unnamed links, lang/dir set."""
+    with app_module.app.app_context():
+        rows = app_module.get_db().execute("SELECT * FROM catalog_items WHERE active=1 ORDER BY id").fetchall()
+        priced = next(r for r in rows if r["url"] and r["price_nis"])
+        bare = next((r for r in rows if not r["url"]), rows[-1])
+        slugs = [app_module.catalog_slug(priced), app_module.catalog_slug(bare)]
+    paths = ["/", "/setup-cost", "/setup-cost?start=minimum", "/setup-cost?start=everything",
+             "/gifts/kitchen", "/gifts/shabbos-table", "/gift-ideas"] + [f"/catalog/{s}" for s in slugs]
+    for lang in ("en", "he"):
+        for path in paths:
+            resp = client.get(path + ("&" if "?" in path else "?") + f"lang={lang}")
+            _check(path + f" [{lang}]", resp)
+            html = resp.get_data(as_text=True)
+            assert f'<html lang="{lang}" dir="{"rtl" if lang == "he" else "ltr"}">' in html, path
+            assert "<img" not in html or all(" alt=" in tag for tag in re.findall(r"<img\b[^>]*>", html)), path
+    # the homepage "Start with what you have" strip is present and has no raw i18n keys
+    home = client.get("/?lang=en").get_data(as_text=True)
+    assert 'class="sec tools-sec' in home or "tools-sec" in home
+    assert not re.search(r"\bhome_tools_[a-z_]+\b", home)

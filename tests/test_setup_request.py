@@ -153,3 +153,10 @@ def test_dashboard_prefill_still_works(client, app_module):
     create_registry(client)
     html = client.get("/shana-rishonah").get_data(as_text=True)
     assert 'value="a@b.com"' in html
+
+
+def test_absurdly_long_id_is_ignored_not_a_500(client, app_module):
+    page = client.get("/setup-cost").get_data(as_text=True)
+    data = {"csrf_token": get_csrf(page), "add_" + "9" * 34: "on", "add_" + "9" * 5000: "on"}
+    assert client.post("/setup-cost/request", data=data).status_code == 302
+    assert client.post("/setup-cost/start", data=data).status_code == 302

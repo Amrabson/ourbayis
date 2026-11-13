@@ -53,7 +53,7 @@
   <div class="flash flash-ok buy-next">
     <strong>{{ pick(bought_item, 'name') }}</strong> —
     <a href="{{ go_url(bought_item) }}"{{ go_attrs(bought_item) }} target="_blank" rel="nofollow sponsored noopener">
-      {{ tf('buy_at', store=bought_item['store']) if bought_item['store'] else t('buy_link') }} →</a>
+      {{ tf('buy_at', store=bought_item['store']) if bought_item['store'] else t('buy_link') }} {{ '←' if rtl else '→' }}</a>
   </div>
   {% endif %}
 

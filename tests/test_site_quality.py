@@ -6,10 +6,21 @@ import sqlite3
 
 
 def test_every_page_has_a_skip_link_to_main(client):
-    for url in ("/?lang=en", "/catalog?lang=he", "/gift-ideas"):
+    for url in ("/?lang=en", "/catalog?lang=he", "/gift-ideas", "/setup-cost", "/setup-cost?lang=he",
+                "/gifts/kitchen", "/gifts/shabbos-table?lang=he"):
         html = client.get(url).get_data(as_text=True)
         assert 'class="skip-link" href="#main"' in html and '<main id="main"' in html
     assert "דילוג לתוכן" in client.get("/?lang=he").get_data(as_text=True)
+
+
+def test_item_pages_have_skip_link_and_canonical(client, app_module):
+    with app_module.app.app_context():
+        row = app_module.get_db().execute("SELECT * FROM catalog_items WHERE active=1 ORDER BY id").fetchone()
+        slug = app_module.catalog_slug(row)
+    for lang in ("en", "he"):
+        html = client.get(f"/catalog/{slug}?lang={lang}").get_data(as_text=True)
+        assert 'class="skip-link" href="#main"' in html and '<main id="main"' in html
+        assert 'rel="canonical"' in html
 
 
 def test_css_and_js_go_out_compressed(client):

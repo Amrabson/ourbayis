@@ -1092,6 +1092,9 @@ select.cur-toggle { width: auto; min-height: 0; margin: 0; padding: 5px 28px 5px
   .gift-card > .gift-ph.ill-box svg { width: 52%; height: 52%; }
   .gift-card > .gift-body { padding: 14px; gap: 4px; }
   .gift-body .btn, .gift-body .gifted-tag, .gift-body .sample-btn-disabled, .gift-body form { margin-top: 8px; }
+  /* the stamp sits under the thumbnail instead of over the title it would cover */
+  .gift-card > .stamp { top: 114px; inset-inline-end: auto; inset-inline-start: 10px; padding: 4px 8px 3px; font-size: .6rem; letter-spacing: .1em; }
+  html[dir="rtl"] .gift-card > .stamp { font-size: .72rem; letter-spacing: .02em; }
 }
 @media (max-width: 430px) {
   .header-inner { gap: 8px; }
@@ -2547,7 +2550,7 @@ main:focus { outline: none; }
 .item-page .item-head { padding-top: 28px; padding-bottom: 12px; }
 .item-crumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 0; margin: 0 0 22px; padding: 0; font-size: .9rem; color: var(--ink-soft); }
 .item-crumbs li { min-width: 0; }
-.item-crumbs li + li::before { content: "/"; padding-inline: 8px; color: var(--gold-bright); }
+.item-crumbs li:not(:last-child)::after { content: "/"; padding-inline: 8px; color: var(--gold-bright); }  /* after, so a wrapped last crumb never starts with a stray slash */
 .item-crumbs a { color: inherit; text-decoration: none; border-bottom: 1px solid transparent; }
 .item-crumbs a:hover { border-bottom-color: currentColor; }
 .item-crumbs li[aria-current] { color: var(--navy); font-weight: 700; overflow-wrap: anywhere; }
@@ -2563,7 +2566,9 @@ main:focus { outline: none; }
 .item-notes { color: var(--ink-soft); max-width: 56ch; margin: 12px 0 0; line-height: 1.6; }
 .item-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 22px 0 14px; }
 .item-actions form { margin: 0; }
-.item-page .item-know, .item-page .item-next, .item-page .item-more { padding-block: 28px; border-top: 1px solid var(--line); margin-top: 20px; }
+.item-page .item-know, .item-page .item-next, .item-page .item-more { padding-block: 0 28px; margin-top: 20px; }
+/* the rule is drawn inside the padding so it lines up with the content, not the section edge */
+.item-page .item-know::before, .item-page .item-next::before, .item-page .item-more::before { content: ""; display: block; border-top: 1px solid var(--line); margin-bottom: 28px; }
 .item-h { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.5rem, 3vw, 2rem); color: var(--navy); margin: 0 0 14px; }
 .item-know-list { list-style: none; padding: 0; margin: 0; max-width: 720px; border-top: 1px dashed rgba(135, 96, 34, .3); }
 .item-know-list li { position: relative; padding: 11px 0; padding-inline-start: 30px; border-bottom: 1px dashed rgba(135, 96, 34, .3); line-height: 1.65; }
@@ -2612,8 +2617,13 @@ main:focus { outline: none; }
 .setup-page .setup-row a { color: inherit; text-decoration: underline; text-decoration-color: rgba(135, 96, 34, .4); text-underline-offset: 3px; }
 .setup-page .starter-card-top { flex-basis: 100%; }
 .setup-page .starter-bar .btn { white-space: normal; }
+/* the ghost button is navy on the navy bar: draw it in paper ink */
+.setup-page .starter-bar .btn-ghost { color: var(--paper); border-color: var(--paper); }
+.setup-page .starter-bar :focus-visible { outline-color: var(--gold-bright); box-shadow: none; }  /* navy ring would vanish on the navy bar */
+.setup-page .starter-bar .btn-ghost:hover,.setup-page .starter-bar .btn-ghost:focus-visible { background: rgba(255, 255, 255, .14); color: #fff; }
 .setup-page .setup-est-note { margin-top: 14px; }
 .setup-page .setup-sec { padding: clamp(36px, 6vw, 64px) 0 0; }
+.setup-page .setup-sec .sec-sub { margin-top: 12px; }
 .setup-page .setup-pk-list { list-style: none; margin: 18px 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .setup-page .setup-pk { border: 1px solid var(--line); border-radius: 10px; background: #fff; padding: 18px 20px; min-width: 0; }
 .setup-page .setup-pk h3 { margin: 0 0 4px; color: var(--navy); }
@@ -2640,6 +2650,7 @@ main:focus { outline: none; }
 .shana-list summary { cursor: pointer; }
 .shana-list-items { margin: 10px 0 0; padding-inline-start: 1.2em; columns: 2 220px; }
 .wanted-list { white-space: pre-wrap; margin: 0 0 12px; font: inherit; }
+.panel:has(> .wanted-list) > .sub-title { margin-top: 0; }  /* no 2.2em gap above the first heading in a panel */
 
 /* admin insights */
 .ins-period { margin-bottom: 8px; }

@@ -39,7 +39,7 @@
       <div class="pay-btn-row">
         {% for key, url in pay_links %}
         <a class="btn btn-gold pay-btn" href="{{ url }}" target="_blank" rel="noopener">
-          <span>{{ t('guest_open_provider') }} {{ t(key) }} →</span>
+          <span>{{ t('guest_open_provider') }} {{ t(key) }} {{ '←' if rtl else '→' }}</span>
           <small class="bdi">{{ url | replace('https://', '') | replace('http://', '') | truncate(40, True) }}</small>
         </a>
         {% endfor %}

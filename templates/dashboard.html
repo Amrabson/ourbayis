@@ -163,7 +163,7 @@
           {% if gft['kind'] == 'cash' and gft['item_url'] %}
           <a class="btn btn-gold btn-sm order-link" href="{{ gft['item_url'] }}" target="_blank" rel="noopener">
             <svg class="ic ic-sm"><use href="#i-link"/></svg>
-            {{ tf('buy_at', store=gft['item_store']) if gft['item_store'] else t('buy_link') }} →</a>
+            {{ tf('buy_at', store=gft['item_store']) if gft['item_store'] else t('buy_link') }} {{ '←' if rtl else '→' }}</a>
           {% endif %}
         </div>
         <div class="mine-actions">

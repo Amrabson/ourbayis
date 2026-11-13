@@ -265,7 +265,7 @@ def send_mail(to, subject, body, reply_to=""):
     return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH, reply_to=reply_to)
 
 
-def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False, **kw):
+def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False, item_label=None, **kw):
     """`<key>_subj` / `<key>_body` to the registry owner — and, with `to_helpers` (the gift emails),
     to every helper who turned them on — each in their own language (users.lang; falls back to the
     current reader's), with the registry title / item name in that language and a dashboard link."""
@@ -286,6 +286,8 @@ def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False
         if item is not None:
             name = item["name_he"] if he and item["name_he"] else item["name"]
             words["item"] = f"{name} ×{qty}" if qty > 1 else name
+        elif item_label:  # a ready-made label: a general cash gift, or a chip-in ("₪180 toward Fridge")
+            words["item"] = item_label
         body = (_t(key + "_body", lang).format(**words) + "\n\n"
                 + _t("mail_owner_footer", lang).format(link=ext_url("dashboard")))
         send_mail(person["email"], _t(key + "_subj", lang).format(**words), body)
@@ -2126,12 +2128,15 @@ def guest_report(token):
                 if claim["item_id"] else None)
     owner_lang = (db.execute("SELECT lang FROM users WHERE id=?", (reg["user_id"],)).fetchone() or {"lang": ""})["lang"]
     owner_lang = owner_lang if owner_lang in ("en", "he") else lang
-    extra = {} if item else {"item": _t("gift_cash", owner_lang)}
-    if item and claim["kind"] == "chip":
-        extra = {"item": chip_label(claim["amount_minor"], item["name"], item["name_he"], owner_lang)}
-        item = None
-    notify_owner(db, reg, "mail_reported", lang, to_helpers=True, item=item, qty=claim["qty"] or 1, name=claim["guest_name"],
-                 note=_t("mail_reported_note", owner_lang).format(note=note) if note else "", **extra)
+    # the item row (its name is localised per reader), or a ready label via `item_label`
+    if not item:
+        mail_item = {"item_label": _t("gift_cash", owner_lang)}
+    elif claim["kind"] == "chip":
+        mail_item = {"item_label": chip_label(claim["amount_minor"], item["name"], item["name_he"], owner_lang)}
+    else:
+        mail_item = {"item": item}
+    notify_owner(db, reg, "mail_reported", lang, to_helpers=True, qty=claim["qty"] or 1, name=claim["guest_name"],
+                 note=_t("mail_reported_note", owner_lang).format(note=note) if note else "", **mail_item)
     track("guest_report", owner_uid=reg["user_id"])
     flash(_t("guest_report_done", lang), "ok")
     return redirect(url_for("guest_manage", token=token))
@@ -3306,7 +3311,8 @@ def _setup_ticked_ids(db, cap):
     only), in form order, at most `cap`."""
     wanted = []
     for key in request.form:
-        if key.startswith("add_") and key[4:].isascii() and key[4:].isdigit() and int(key[4:]) not in wanted:
+        if (key.startswith("add_") and len(key) <= 13 and key[4:].isascii() and key[4:].isdigit()
+                and int(key[4:]) not in wanted):  # ≤ 9 digits: fits SQLite's integer, as the item-<id> slugs do
             wanted.append(int(key[4:]))
             if len(wanted) >= 200:  # far more than the page offers; bounds the query below
                 break
