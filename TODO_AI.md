@@ -79,7 +79,12 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   the old text to its `replaces` list. Any pre-git wording not in that list: edit in `/admin/bundles`.
 - [x] **Starting prices** ₪2,450 / ₪6,900 / ₪17,900 — confirmed by the owner 2026-09-22. Copy now says
   "Starting price — final quote after we talk" (no longer "indicative").
-- [ ] **Product photos.** 0 of 117 catalog items have an image; cards use item-specific line drawings
+- [x] **Product photos — owner decision 2026-11-15: show the stores' own pictures.** 106 of 129 active items now
+  hot-link the linked store's product picture (KSP, Heichal Menachem, Judaica WebStore, Home Center), credited as
+  "Photo: <store>" on the item page. The 23 without one (no store link, or a store that blocks reading) keep the
+  drawing. To remove a picture: clear `image` in `/admin/catalog`. Joining the stores' affiliate programs is what
+  normally grants the right to use their pictures. Earlier note, kept for history:
+  0 of 117 catalog items have an image; cards use item-specific line drawings
   labelled as illustrations. If you want photos for the 8 featured items, add only images you have the
   right to use via `/admin/catalog` (`image` + `image_credit`); the card, homepage strip, registry and
   dialog all pick them up automatically and fall back to the drawing on error.
@@ -107,7 +112,7 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   active items still have no URL (combos, no single matching product, or no in-stock listing found — list in that entry): use `/admin/catalog` (filter "missing store link") or extend
   `seed_catalog.json` the same way. Sign up for Amazon Associates (works from Israel/SA) and any
   other affiliate programs; paste links per item.
-- [ ] **Images** — only add a product photo URL you have the right to use (the store's own listing
+- [x] **Images** — superseded 2026-11-15 (see "Product photos" above). Original note: only add a product photo URL you have the right to use (the store's own listing
   image, or one you purchased/shot). `image_credit` field exists in the catalog admin form for
   attribution if needed. Until then the category SVG placeholder is used.
 - [ ] **Payment provider setup** — couples paste their own PayPal.me/Stripe Payment Link/Bit/

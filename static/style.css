@@ -2658,3 +2658,11 @@ main:focus { outline: none; }
 .ins-sub { margin: 18px 0 8px; font-size: 1.05rem; }
 .ins-barcell { width: 40%; }
 .ins-bar { display: block; height: 10px; background: var(--gold); border-radius: 5px; min-width: 2px; }
+
+/* Store product pictures (2026-11-15): shown whole on white, like the store's own listing */
+.gift-img { background: #fff; }
+.gift-img img.gift-img-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; padding: 6%; box-sizing: border-box; }
+.gift-ph-sm.gift-img img.gift-img-img { padding: 2px; }
+.item-media .gift-img img.gift-img-img { object-fit: contain; padding: 4%; }
+.item-photo-credit { margin: 6px 2px 0; font-size: .78rem; color: var(--ink-soft); }
+.gift-card.is-gifted .gift-img { filter: saturate(.5) opacity(.8); }

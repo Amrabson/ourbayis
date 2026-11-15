@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../static/style.css?v=1a1d3a9834a">
+<link rel="stylesheet" href="../static/style.css?v=1a1dccb08c8">
 
 
 
@@ -292,6 +292,9 @@
 </svg>
       <div class="room-hits" id="room-hits">
         
+        <button type="button" class="room-hit room-hit-entry" data-room="entry" data-room-name="Entrance" aria-pressed="false"
+                aria-label="Entrance: 1 of 2 given. Show these gifts"></button>
+        
         <button type="button" class="room-hit room-hit-kitchen" data-room="kitchen" data-room-name="Kitchen" aria-pressed="false"
                 aria-label="Kitchen: 3 of 9 given. Show these gifts"></button>
         
@@ -300,9 +303,6 @@
         
         <button type="button" class="room-hit room-hit-bedroom" data-room="bedroom" data-room-name="Bedroom" aria-pressed="false"
                 aria-label="Bedroom: 2 of 3 given. Show these gifts"></button>
-        
-        <button type="button" class="room-hit room-hit-entry" data-room="entry" data-room-name="Entrance" aria-pressed="false"
-                aria-label="Entrance: 1 of 2 given. Show these gifts"></button>
         
       </div>
     </div></div>
@@ -319,8 +319,9 @@
     
     id="item-s1" data-cat="appliances" data-room="kitchen" data-price="144" data-available="1"
     >
-    <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Shabbos hot plate (platta) — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-platta"/></svg>
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/340575.jpg" alt="Shabbos hot plate (platta)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-platta"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 01</span><span class="badge badge-gold"><svg class="ic ic-sm"><use href="#i-star"/></svg> Most wanted</span><h3 dir="auto">Shabbos hot plate (platta)</h3>
       <p class="gift-price bdi"><strong>₪144</strong> <span class="usd bdi">≈ $46</span></p>
@@ -334,8 +335,9 @@
     
     id="item-s2" data-cat="appliances" data-room="kitchen" data-price="462" data-available="1"
     >
-    <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Shabbos urn (meicham) — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-urn"/></svg>
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/117602.jpg" alt="Shabbos urn (meicham)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-urn"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 02</span><h3 dir="auto">Shabbos urn (meicham)</h3>
       <p class="gift-price bdi"><strong>₪462</strong> <span class="usd bdi">≈ $149</span></p>
@@ -365,8 +367,9 @@
     
     id="item-s4" data-cat="appliances" data-room="kitchen" data-price="129" data-available="0"
     >
-    <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Slow cooker (for cholent!) — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-slowcooker"/></svg>
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/124966.jpg" alt="Slow cooker (for cholent!)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-slowcooker"/></svg>
   </div>
     <span class="stamp stamp-reported" aria-hidden="true">On its way</span>
     <div class="gift-body"><span class="lot-no">No. 04</span><h3 dir="auto">Slow cooker (for cholent!)</h3>
@@ -412,8 +415,9 @@
     
     id="item-s7" data-cat="judaica" data-room="salon" data-price="300" data-available="1"
     >
-    <div class="gift-ph ph-judaica ill-box " role="img" aria-label="Shabbos candlesticks — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-candlesticks"/></svg>
+    <div class="gift-ph gift-img ph-judaica ">
+    <img class="gift-img-img" src="https://www.heichal.co.il/th/420x420/pics/4268/1646848678_707254387.jpg" alt="Shabbos candlesticks" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-candlesticks"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 07</span><h3 dir="auto">Shabbos candlesticks</h3>
       <p class="gift-price bdi"><strong>₪300</strong> <span class="usd bdi">≈ $97</span></p>
@@ -427,8 +431,9 @@
     
     id="item-s8" data-cat="home" data-room="entry" data-price="128" data-available="1"
     >
-    <div class="gift-ph ph-home ill-box " role="img" aria-label="Folding table for Shabbos guests (180 cm) — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-table"/></svg>
+    <div class="gift-ph gift-img ph-home ">
+    <img class="gift-img-img" src="https://cdn.shopify.com/s/files/1/0671/9979/5447/files/1747685036002-3_f8dacad2-76c8-4168-914e-0e2ceb7cd1df.jpg?v=1777367506" alt="Folding table for Shabbos guests (180 cm)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-table"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 08</span><h3 dir="auto">Folding table for Shabbos guests (180 cm)</h3>
       <p class="gift-price bdi"><strong>₪128</strong> <span class="usd bdi">≈ $41</span></p>
@@ -442,8 +447,9 @@
     
     id="item-s9" data-cat="appliances" data-room="kitchen" data-price="1861" data-available="1"
     >
-    <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Washing machine — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-washer"/></svg>
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/398950.jpg" alt="Washing machine" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-washer"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 09</span><h3 dir="auto">Washing machine</h3>
       <p class="gift-price bdi"><strong>₪1,861</strong> <span class="usd bdi">≈ $599</span></p>
@@ -462,8 +468,9 @@
     
     id="item-s10" data-cat="appliances" data-room="kitchen" data-price="64" data-available="1"
     >
-    <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Electric kettle — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-kettle"/></svg>
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/156363.jpg" alt="Electric kettle" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-kettle"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 10</span><h3 dir="auto">Electric kettle</h3>
       <p class="gift-price bdi"><strong>₪64</strong> <span class="usd bdi">≈ $21</span></p>
@@ -477,8 +484,9 @@
     
     id="item-s11" data-cat="appliances" data-room="kitchen" data-price="229" data-available="1"
     >
-    <div class="gift-ph ph-appliances ill-box " role="img" aria-label="Toaster oven — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-oven"/></svg>
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/64458.jpg" alt="Toaster oven" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-oven"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 11</span><h3 dir="auto">Toaster oven</h3>
       <p class="gift-price bdi"><strong>₪229</strong> <span class="usd bdi">≈ $74</span></p>
@@ -492,8 +500,9 @@
     
     id="item-s12" data-cat="bedding" data-room="bedroom" data-price="48" data-available="0"
     >
-    <div class="gift-ph ph-bedding ill-box " role="img" aria-label="Sleeping pillows (×2) — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-bedding"/></svg>
+    <div class="gift-ph gift-img ph-bedding ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/273832.jpg" alt="Sleeping pillows (×2)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
     <span class="stamp stamp-reserved" aria-hidden="true">Reserved</span>
     <div class="gift-body"><span class="lot-no">No. 12</span><h3 dir="auto">Sleeping pillows (×2)</h3>
@@ -508,8 +517,9 @@
     
     id="item-s13" data-cat="bedding" data-room="bedroom" data-price="59" data-available="1"
     >
-    <div class="gift-ph ph-bedding ill-box " role="img" aria-label="Summer duvet (double) — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-bedding"/></svg>
+    <div class="gift-ph gift-img ph-bedding ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/481093.jpg" alt="Summer duvet (double)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 13</span><h3 dir="auto">Summer duvet (double)</h3>
       <p class="gift-price bdi"><strong>₪59</strong> <span class="usd bdi">≈ $19</span></p>
@@ -523,8 +533,9 @@
     
     id="item-s14" data-cat="dining" data-room="salon" data-price="139" data-available="1"
     >
-    <div class="gift-ph ph-dining ill-box " role="img" aria-label="Dinnerware set — milchig — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-dinnerware"/></svg>
+    <div class="gift-ph gift-img ph-dining ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/370719.jpg" alt="Dinnerware set — milchig" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-dinnerware"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 14</span><h3 dir="auto">Dinnerware set — milchig</h3>
       <p class="gift-price bdi"><strong>₪139</strong> <span class="usd bdi">≈ $45</span></p>
@@ -538,8 +549,9 @@
     
     id="item-s15" data-cat="dining" data-room="salon" data-price="310" data-available="1"
     >
-    <div class="gift-ph ph-dining ill-box " role="img" aria-label="Cutlery sets — milchig &amp; fleishig — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-cutlery"/></svg>
+    <div class="gift-ph gift-img ph-dining ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/493776.jpg" alt="Cutlery sets — milchig &amp; fleishig" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-cutlery"/></svg>
   </div>
     <div class="gift-body"><span class="lot-no">No. 15</span><h3 dir="auto">Cutlery sets — milchig &amp; fleishig</h3>
       <p class="gift-price bdi"><strong>₪310</strong> <span class="usd bdi">≈ $100</span></p>
@@ -553,8 +565,9 @@
     
     id="item-s16" data-cat="home" data-room="entry" data-price="699" data-available="0"
     >
-    <div class="gift-ph ph-home ill-box " role="img" aria-label="Bookcase for sefarim — illustration, not a product photo">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-books"/></svg>
+    <div class="gift-ph gift-img ph-home ">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/440132.jpg" alt="Bookcase for sefarim" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-books"/></svg>
   </div>
     <span class="stamp stamp-received" aria-hidden="true">Received</span>
     <div class="gift-body"><span class="lot-no">No. 16</span><h3 dir="auto">Bookcase for sefarim</h3>

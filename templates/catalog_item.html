@@ -60,7 +60,9 @@
     </nav>
 
     <div class="item-hero">
-      <div class="item-media">{{ gift_media(item) }}</div>
+      <div class="item-media">{{ gift_media(item) }}
+        {% if item['image'] and item['image_credit'] %}<p class="item-photo-credit">{{ tf('photo_credit', store=item['image_credit']) }}</p>{% endif %}
+      </div>
       <div class="item-main">
         <p class="kicker">{{ cat_label(cat) }}</p>
         <h1 class="item-title" dir="auto">{{ pick(item, 'name') }}</h1>

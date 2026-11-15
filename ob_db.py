@@ -644,6 +644,9 @@ _ADOPT_FIELDS = {
     "availability": "unknown",
     "notes": "",
     "notes_he": "",
+    # store pictures (owner decision 2026-11-15): filled on a live DB only while still empty
+    "image": "",
+    "image_credit": "",
 }
 
 
@@ -718,6 +721,9 @@ def seed_sync(db, seed_items, dry_run=False):
                  it.get("price_source", ""), it.get("model", ""), it.get("model_he", ""), it.get("variant", ""),
                  it.get("availability", "unknown"), it.get("notes", ""), it.get("notes_he", ""),
                  0 if it.get("active") is False else 1))
+            if it.get("image"):
+                db.execute("UPDATE catalog_items SET image=?, image_credit=? WHERE seed_key=?",
+                           (it["image"], it.get("image_credit", ""), key))
     return counters
 
 

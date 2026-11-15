@@ -380,7 +380,11 @@ messages, delivery note, lead notes) is either `dir="auto"` (whole block, quotes
 - `registry_items.variant` is the couple's colour/size/model request, shown to guests as "They'd like:"
   by `gift_facts` (only when the row has `registry_id`). `note`/`note_he` stay private to the couple.
 - `illustration_for(item)` picks an `ill-*` symbol from `_ILLUSTRATION_RULES` (keyword on name/seed_key)
-  or the category drawing. No catalog row has a photo today.
+  or the category drawing. Since 2026-11-15, 106 seed items carry `image` (the store's own picture, hot-linked;
+  KSP pattern `https://ksp.co.il/shop/items/512/<item id>.jpg`) and `image_credit`; both are `_ADOPT_FIELDS`, so a
+  live DB picks them up on start while still empty. `gift_media` shows the photo whole on white (`.gift-img`,
+  absolutely positioned `contain`) and falls back to the drawing on error. Registry items copied before that date
+  get pictures from `manage.py refresh-registry-links --apply`.
 - Catalog: `CATALOG_PRICE_BANDS`, `CATALOG_SORTS`, `CATALOG_PAGE_SIZE=24`; filters live in the URL.
 - Shana packages: `PACKAGE_TIERS` in app.py (per tier delivery/setup/appliances/lead weeks) + i18n
   `pkg_*`/`shana_term_*`; goods lists stay in `bundles.items_text` (admin-editable, insert-only sync).

@@ -136,7 +136,8 @@ def test_product_json_ld_offers_only_for_a_verified_item_with_a_url(client):
     verified = _item("price_status='verified' AND url != '' AND price_nis > 0")
     html = client.get(f"/catalog/{verified['seed_key']}").get_data(as_text=True)
     prod = _ld(html, "Product")
-    assert prod["name"] == verified["name"] and "image" not in prod
+    # the store's picture goes in the markup only when the item has one
+    assert prod["name"] == verified["name"] and prod.get("image", "").startswith("https://") == bool(verified["image"])
     offer = prod["offers"]
     assert offer["price"] == verified["price_nis"] and offer["priceCurrency"] == "ILS"
     assert offer["url"].endswith(f"/catalog/{verified['seed_key']}")

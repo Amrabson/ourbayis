@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-15 (store product pictures)
+Owner asked for real product pictures. 106 of 129 active catalog items now show the linked store's own picture,
+hot-linked (nothing is copied or downloaded): all 80 KSP items via its image path
+`ksp.co.il/shop/items/512/<id>.jpg`, plus Heichal Menachem (14), Judaica WebStore (9) and Home Center (3) from each
+product page's preview picture (`ob_linkinfo.lookup`). Every URL was loaded in a browser as an `<img>` with no
+referrer and eyeballed on a contact sheet before going into seed_catalog.json (`image`, `image_credit`).
+- `image` / `image_credit` are `_ADOPT_FIELDS` and are set on fresh inserts.
+- Pictures show whole on white (`.gift-img img` absolutely positioned, `contain`; they were being cropped), with
+  "Photo: <store>" under the item-page picture (`photo_credit`). Product JSON-LD includes the image when there is one.
+- Not covered: 20 items with no store link and 3 whose stores block reading (Payngo, Vardinon, Hakol LaBait).
+
 ## 2026-11-13 (review pass: security review + visual QA of the week's features)
 Security review of everything since f5c2198 (read-only agent, findings judged by the lead): no high-severity issue.
 - **Fixed: "I've sent it" on a chip-in returned a 500** and the couple's email was never sent — `guest_report` passed
