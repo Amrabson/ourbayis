@@ -1256,7 +1256,7 @@ def test_catalog_search_puts_the_obvious_match_first(client, q, first, later):
 
 def test_empty_catalog_search_offers_a_way_forward(client):
     html = client.get("/catalog", query_string={"q": "kettle", "cat": "judaica"}).get_data(as_text=True)
-    assert "See all 2 results for “kettle”" in html and 'href="/catalog?q=kettle"' in html
+    assert "See all 4 results for “kettle”" in html and 'href="/catalog?q=kettle"' in html
     html = client.get("/catalog", query_string={"q": "trampoline"}).get_data(as_text=True)
     assert "Couples can add any gift from any store" in html and 'href="/signup"' in html
     assert "See all" not in html

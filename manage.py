@@ -25,6 +25,7 @@ from pathlib import Path
 
 import ob_db
 import ob_mail
+import ob_mailhtml
 import ob_money
 import ob_security
 from werkzeug.security import generate_password_hash
@@ -95,8 +96,9 @@ def cmd_test_mail(args):
     host, port, user, _ = ob_mail._smtp_config()
     print(f"SMTP: host={host or '(unset)'} port={port} user={user or '(unset)'}")
     try:
-        ob_mail.send_now(args.to, "OurBayis test email",
-                         "If you can read this, OurBayis email is working.\n")
+        test_text = "If you can read this, OurBayis email is working.\n"
+        ob_mail.send_now(args.to, "OurBayis test email", test_text,
+                         html=ob_mailhtml.safe_html("en", [test_text.strip()]))
     except Exception as e:  # noqa: BLE001 — show whatever smtplib raised
         print(f"FAILED: {type(e).__name__}: {e}")
         return 1
@@ -142,7 +144,7 @@ def cmd_remind_claims(args):
         return 1
     rows = db.execute(
         "SELECT c.id, c.guest_email, c.token_hash, c.expires_at, c.kind, c.lang, c.amount_minor,"
-        " ri.name AS item_name, ri.name_he AS item_name_he, r.title AS reg_title,"
+        " ri.image AS item_image, ri.name AS item_name, ri.name_he AS item_name_he, r.title AS reg_title,"
         " r.title_he AS reg_title_he, r.slug FROM claims c"
         " JOIN registries r ON r.id = c.registry_id"
         " LEFT JOIN registry_items ri ON ri.id = c.item_id"
@@ -169,14 +171,26 @@ def cmd_remind_claims(args):
         words = {"en": dict(item=item, title=r["reg_title"], link=link),
                  "he": dict(item=item_he, title=title_he, link=link + "?lang=he")}
         subject = i18n.t("mail_remind_subj", langs[0]).format(item=words[langs[0]]["item"])
-        body = "\n\n— — —\n\n".join(
-            i18n.t("mail_remind_body", lg).format(until=i18n.format_date(r["expires_at"], lg), **words[lg])
-            for lg in langs)
+        texts = {lg: i18n.t("mail_remind_body", lg).format(until=i18n.format_date(r["expires_at"], lg), **words[lg])
+                 for lg in langs}
+        body = "\n\n— — —\n\n".join(texts[lg] for lg in langs)
+        secs = []
+        for lg in langs:
+            img = (r["item_image"] or "").strip()
+            nm = (r["item_name_he"] if lg == "he" and r["item_name_he"] else r["item_name"]) or ""
+            secs.append(dict(
+                lang=lg, paragraphs=ob_mailhtml.split_body(texts[lg])[0],
+                button=(i18n.t("mail_btn_registry", lg), words[lg]["link"]),
+                item={"name": nm, "image": img} if img and nm else None,
+                typed=(words[lg]["item"], words[lg]["title"])))
+        html = ob_mailhtml.safe_html(secs[0]["lang"], secs[0]["paragraphs"], button=secs[0]["button"],
+                                     item=secs[0]["item"], typed=secs[0]["typed"],
+                                     also=secs[1] if len(secs) > 1 else None)
         with ob_db.write_txn(db):
             # mark first, then queue — a crash between the two loses one nudge, never repeats it
             db.execute("UPDATE claims SET reminded_at=? WHERE id=? AND reminded_at IS NULL",
                        (now, r["id"]))
-            ob_mail.enqueue(db, r["guest_email"], subject, body)
+            ob_mail.enqueue(db, r["guest_email"], subject, body, html=html)
         sent += 1
     print(f"Queued {sent} reminder(s).")
     return 0

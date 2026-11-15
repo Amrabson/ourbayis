@@ -647,7 +647,11 @@ _ADOPT_FIELDS = {
     # store pictures (owner decision 2026-11-15): filled on a live DB only while still empty
     "image": "",
     "image_credit": "",
+    # options + quality tiers (2026-11-15)
+    "option_group": "",
+    "tier": "standard",
 }
+TIERS = ("basic", "standard", "premium")
 
 
 def seed_sync(db, seed_items, dry_run=False):
@@ -672,6 +676,8 @@ def seed_sync(db, seed_items, dry_run=False):
                       db.execute("SELECT id, name FROM catalog_items WHERE seed_key IS NULL")}
     for i, it in enumerate(seed_items):
         key = it["seed_key"]
+        if it.get("tier") not in TIERS:  # unknown / missing tier -> the default
+            it = dict(it, tier="standard")
         if key in have_keys:
             # Already keyed (migration 12 assigns seed_keys to legacy rows by
             # slugified name, so real installs land here, not in "adopt").
@@ -724,6 +730,9 @@ def seed_sync(db, seed_items, dry_run=False):
             if it.get("image"):
                 db.execute("UPDATE catalog_items SET image=?, image_credit=? WHERE seed_key=?",
                            (it["image"], it.get("image_credit", ""), key))
+            if it.get("option_group") or it["tier"] != "standard":
+                db.execute("UPDATE catalog_items SET option_group=?, tier=? WHERE seed_key=?",
+                           ((it.get("option_group") or "").strip()[:60], it["tier"], key))
     return counters
 
 
@@ -847,6 +856,20 @@ def _m035_shana_wanted_list(db):
     _add_column(db, "shana_requests", "wanted_list TEXT DEFAULT ''")
 
 
+def _m036_catalog_options(db):
+    """Options and quality tiers (2026-11-15): items that are alternatives for the same need share an
+    `option_group` slug ('' = no alternatives); `tier` is basic|standard|premium, meaningful only
+    inside a group. Both are _ADOPT_FIELDS, filled from the seed while still at the default."""
+    _add_column(db, "catalog_items", "option_group TEXT DEFAULT ''")
+    _add_column(db, "catalog_items", "tier TEXT DEFAULT 'standard'")
+
+
+def _m037_mail_body_html(db):
+    """Designed emails (2026-11-15): the HTML alternative of a queued message, beside the text
+    `body`. NULL on older rows, which still send as plain text."""
+    _add_column(db, "mail_outbox", "body_html TEXT")
+
+
 MIGRATIONS = [
     _m001_initial_schema,
     _m002_brand_backfill,
@@ -883,6 +906,8 @@ MIGRATIONS = [
     _m033_chip_in,
     _m034_affiliate_direct,
     _m035_shana_wanted_list,
+    _m036_catalog_options,
+    _m037_mail_body_html,
 ]
 
 

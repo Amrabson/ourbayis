@@ -21,7 +21,9 @@
       "model_he": "Food Appeal Flexi — סט כלי בישול, 7 חלקים",
       "availability": "in_stock",
       "notes": "A 7-piece starter set in normal stock at check. Most couples buy two sets over time (milchig and fleishig) — this is one.",
-      "notes_he": "סט של 7 חלקים שהיה במלאי רגיל בזמן הבדיקה. רוב הזוגות קונים עם הזמן שני סטים (חלבי ובשרי) — זה סט אחד."
+      "notes_he": "סט של 7 חלקים שהיה במלאי רגיל בזמן הבדיקה. רוב הזוגות קונים עם הזמן שני סטים (חלבי ובשרי) — זה סט אחד.",
+      "option_group": "pots-set",
+      "tier": "basic"
     },
     {
       "name": "Knife set with block",
@@ -275,7 +277,9 @@
       "model_he": "Gold Line ATL-2707W — 1.7 ל׳, רשום כפטור מטבילה",
       "availability": "in_stock",
       "notes": "KSP lists this kettle as exempt from tevilah — confirm with your rav. A basic, cheap everyday kettle; KSP also carries Tefal, Bosch and Philips kettles at ₪150–₪400 if you want something nicer.",
-      "notes_he": "ב-KSP הקומקום מתואר כפטור מטבילה — כדאי לברר עם הרב. קומקום בסיסי וזול לשימוש יומיומי; ב-KSP יש גם קומקומים של Tefal, Bosch ו-Philips ב-₪150–₪400 למי שמעדיף משהו מהודר יותר."
+      "notes_he": "ב-KSP הקומקום מתואר כפטור מטבילה — כדאי לברר עם הרב. קומקום בסיסי וזול לשימוש יומיומי; ב-KSP יש גם קומקומים של Tefal, Bosch ו-Philips ב-₪150–₪400 למי שמעדיף משהו מהודר יותר.",
+      "option_group": "kettle",
+      "tier": "basic"
     },
     {
       "name": "Shabbos hot plate (platta)",
@@ -321,7 +325,9 @@
       "model_he": "Hidurit — מיחם שבת בטיחותי, 60 כוסות (10 ל׳)",
       "availability": "in_stock",
       "notes": "60-cup model. Hidurit's 40-cup urn is a separate item.",
-      "notes_he": "דגם 60 כוסות. מיחם 40 הכוסות של הידורית הוא פריט נפרד."
+      "notes_he": "דגם 60 כוסות. מיחם 40 הכוסות של הידורית הוא פריט נפרד.",
+      "option_group": "shabbos-urn",
+      "tier": "premium"
     },
     {
       "name": "Toaster oven",
@@ -388,7 +394,9 @@
       "model_he": "KitchenAid Artisan 5KSM125 — 4.8 ל׳, קערת נירוסטה",
       "availability": "in_stock",
       "notes": "Black (5KSM125IOB/EOB). Other colours of the same model are on the same site at similar prices.",
-      "notes_he": "שחור (5KSM125IOB/EOB). צבעים נוספים של אותו דגם באותו אתר במחירים דומים."
+      "notes_he": "שחור (5KSM125IOB/EOB). צבעים נוספים של אותו דגם באותו אתר במחירים דומים.",
+      "option_group": "stand-mixer",
+      "tier": "premium"
     },
     {
       "name": "Immersion blender",
@@ -480,7 +488,9 @@
       "model_he": "Samsung SC4540 — שואב אבק ציקלוני עם כבל, 1800 וואט",
       "availability": "in_stock",
       "notes": "Corded canister vacuum, a year's official Samsung warranty. Cordless stick vacuums (Xiaomi, Dyson, Shark) cost more at KSP.",
-      "notes_he": "שואב אבק ציקלוני נגרר עם חוט, שנה אחריות יבואן רשמי. שואבים אלחוטיים (Xiaomi, Dyson, Shark) יקרים יותר ב-KSP."
+      "notes_he": "שואב אבק ציקלוני נגרר עם חוט, שנה אחריות יבואן רשמי. שואבים אלחוטיים (Xiaomi, Dyson, Shark) יקרים יותר ב-KSP.",
+      "option_group": "vacuum",
+      "tier": "basic"
     },
     {
       "name": "Microwave",
@@ -547,7 +557,9 @@
       "model_he": "Luminarc — סט זכוכית מחוסמת, 18 חלקים ל-6 סועדים (6 שטוחות, 6 קינוח, 6 מרק), טורקיז",
       "availability": "in_stock",
       "notes": "Pick a clearly different colour for the milchig set so the two are easy to tell apart. Luminarc Diwali white 18-piece sets are ₪149–₪300 at other Israeli shops.",
-      "notes_he": "כדאי לבחור צבע שונה בבירור לסט החלבי כדי שיהיה קל להבדיל. סטים לבנים של Luminarc Diwali נמכרים ב-₪149–₪300 בחנויות אחרות."
+      "notes_he": "כדאי לבחור צבע שונה בבירור לסט החלבי כדי שיהיה קל להבדיל. סטים לבנים של Luminarc Diwali נמכרים ב-₪149–₪300 בחנויות אחרות.",
+      "option_group": "dinnerware-fleishig",
+      "tier": "basic"
     },
     {
       "name": "Dinnerware set — milchig",
@@ -570,7 +582,9 @@
       "model_he": "Soltam Opal — סט זכוכית מחוסמת, 18 חלקים ל-6 סועדים, לבן",
       "availability": "in_stock",
       "notes": "White tempered glass, 18 pieces for six. The catalog's fleishig set is turquoise, so the two are easy to tell apart. KSP showed a lower member price at check.",
-      "notes_he": "זכוכית מחוסמת לבנה, 18 חלקים לשישה סועדים. הסט הבשרי בקטלוג בצבע טורקיז, כך שקל להבדיל ביניהם. בזמן הבדיקה הוצג ב-KSP גם מחיר מועדון נמוך יותר."
+      "notes_he": "זכוכית מחוסמת לבנה, 18 חלקים לשישה סועדים. הסט הבשרי בקטלוג בצבע טורקיז, כך שקל להבדיל ביניהם. בזמן הבדיקה הוצג ב-KSP גם מחיר מועדון נמוך יותר.",
+      "option_group": "dinnerware-milchig",
+      "tier": "basic"
     },
     {
       "name": "Cutlery sets — milchig & fleishig",
@@ -593,7 +607,9 @@
       "model_he": "Soltam Berlin — סט סכו״ם 26 חלקים (₪155 לסט; המחיר הוא לשני סטים)",
       "availability": "in_stock",
       "notes": "The link is to one 26-piece set at ₪155; the price here is for two (milchig and fleishig). Many couples buy two different designs so the sets never get mixed up.",
-      "notes_he": "הקישור הוא לסט אחד של 26 חלקים ב-₪155; המחיר כאן הוא לשני סטים (חלבי ובשרי). זוגות רבים קונים שני עיצובים שונים כדי שהסטים לא יתערבבו."
+      "notes_he": "הקישור הוא לסט אחד של 26 חלקים ב-₪155; המחיר כאן הוא לשני סטים (חלבי ובשרי). זוגות רבים קונים שני עיצובים שונים כדי שהסטים לא יתערבבו.",
+      "option_group": "cutlery",
+      "tier": "standard"
     },
     {
       "name": "Glassware set",
@@ -724,8 +740,8 @@
       "seed_key": "sleeping-pillows-2",
       "image": "https://ksp.co.il/shop/items/512/273832.jpg",
       "image_credit": "KSP",
-      "name": "Sleeping pillows (×2)",
-      "name_he": "כריות שינה (2)",
+      "name": "Pillows (×2) — medium (hollowfibre)",
+      "name_he": "כריות (2) — בינוניות (סיבים חלולים)",
       "category": "bedding",
       "starter_group": "bedbath",
       "featured": false,
@@ -741,7 +757,12 @@
       "price_status": "verified",
       "price_checked_at": "2026-10-19",
       "availability": "in_stock",
-      "price_source": "ksp.co.il item 273832, regular price re-checked 2026-10-19, add-to-cart present (₪24 per pillow ×2)"
+      "price_source": "ksp.co.il item 273832, regular price re-checked 2026-10-19, add-to-cart present (₪24 per pillow ×2)",
+      "option_group": "pillow",
+      "tier": "basic",
+      "legacy_names": [
+        "Sleeping pillows (×2)"
+      ]
     },
     {
       "seed_key": "summer-duvet",
@@ -764,7 +785,9 @@
       "price_status": "verified",
       "price_checked_at": "2026-10-19",
       "availability": "in_stock",
-      "price_source": "ksp.co.il item 481093, ₪59 regular price, add-to-cart present, 2026-10-19 (item 472268 out of stock)"
+      "price_source": "ksp.co.il item 481093, ₪59 regular price, add-to-cart present, 2026-10-19 (item 472268 out of stock)",
+      "option_group": "duvet",
+      "tier": "basic"
     },
     {
       "name": "Sheet sets (x2)",
@@ -787,7 +810,9 @@
       "model_he": "Arige Gad Ekko Cotton — סט מצעים זוגי 100% כותנה, 160×200 (₪109 לסט; המחיר הוא לשניים)",
       "availability": "in_stock",
       "notes": "The link is to one set at ₪109; the price here is for two. 160×200 is the common Israeli double — check your mattress size and pick the matching listing.",
-      "notes_he": "הקישור הוא לסט אחד ב-₪109; המחיר כאן הוא לשניים. 160×200 הוא הגודל הזוגי הנפוץ בישראל — בדקו את מידת המזרן ובחרו את המוצר המתאים."
+      "notes_he": "הקישור הוא לסט אחד ב-₪109; המחיר כאן הוא לשניים. 160×200 הוא הגודל הזוגי הנפוץ בישראל — בדקו את מידת המזרן ובחרו את המוצר המתאים.",
+      "option_group": "sheet-set",
+      "tier": "basic"
     },
     {
       "name": "Towel set",
@@ -808,7 +833,9 @@
       "model_he": "Vardinon ESTER — סט 4 מגבות ג׳קקארד (2 רחצה 70×130 + 2 ידיים 50×90), 100% כותנה",
       "availability": "in_stock",
       "notes": "Sale price at check; Vardinon rotates its '4 towels for ₪199.90' promotion between designs.",
-      "notes_he": "מחיר מבצע בזמן הבדיקה; ורדינון מחליפה את מבצע '4 מגבות ב-₪199.90' בין דגמים."
+      "notes_he": "מחיר מבצע בזמן הבדיקה; ורדינון מחליפה את מבצע '4 מגבות ב-₪199.90' בין דגמים.",
+      "option_group": "towels",
+      "tier": "basic"
     },
     {
       "name": "Mattress protectors",
@@ -831,7 +858,9 @@
       "model_he": "Arige Gad — מגן מזרן סטנדרטי, זוגי 160×200",
       "availability": "in_stock",
       "notes": "Price is for one double-bed protector; set a quantity if you have two beds.",
-      "notes_he": "המחיר הוא למגן מזרן זוגי אחד; אפשר לקבוע כמות אם יש שתי מיטות."
+      "notes_he": "המחיר הוא למגן מזרן זוגי אחד; אפשר לקבוע כמות אם יש שתי מיטות.",
+      "option_group": "mattress-protector",
+      "tier": "basic"
     },
     {
       "name": "Winter blankets",
@@ -954,7 +983,9 @@
       "model_he": "זוג, 36 ס״מ, בסגנון עתיק, ציפוי לכה כסף/זהב (לא כסף סטרלינג)",
       "availability": "in_stock",
       "notes": "Plated, not sterling silver. The same shop has pairs from ₪90 (17 cm) to ₪320 (crystal). Candlesticks are personal — many couples prefer to choose their own.",
-      "notes_he": "מצופה, לא כסף טהור. באותה חנות זוגות מ-₪90 (17 ס״מ) עד ₪320 (קריסטל). פמוטים הם עניין אישי — זוגות רבים מעדיפים לבחור בעצמם."
+      "notes_he": "מצופה, לא כסף טהור. באותה חנות זוגות מ-₪90 (17 ס״מ) עד ₪320 (קריסטל). פמוטים הם עניין אישי — זוגות רבים מעדיפים לבחור בעצמם.",
+      "option_group": "candlesticks",
+      "tier": "standard"
     },
     {
       "name": "Kiddush cup (silver plated)",
@@ -976,7 +1007,9 @@
       "model_he": "גביע קידוש עם תחתית, 8.5 ס״מ, מצופה כסף 925 (לא כסף מלא)",
       "availability": "in_stock",
       "notes": "Silver-plated, not solid silver — the catalog's sterling cup is a separate item. Check that the cup holds a revi'is for your minhag.",
-      "notes_he": "מצופה כסף, לא כסף מלא — גביע כסף טהור מופיע בקטלוג כפריט נפרד. כדאי לוודא שהגביע מחזיק רביעית לפי המנהג שלכם."
+      "notes_he": "מצופה כסף, לא כסף מלא — גביע כסף טהור מופיע בקטלוג כפריט נפרד. כדאי לוודא שהגביע מחזיק רביעית לפי המנהג שלכם.",
+      "option_group": "kiddush-cup",
+      "tier": "standard"
     },
     {
       "name": "Havdalah set",
@@ -1020,7 +1053,9 @@
       "model_he": "קרש חלה מבמבוק עם סכין, 41×28 ס״מ",
       "availability": "in_stock",
       "notes": "Board and knife together. Heichal Menachem also has mango-wood boards with a knife from about ₪400.",
-      "notes_he": "מגש וסכין יחד. בהיכל מנחם יש גם מגשי עץ מנגו עם סכין החל מכ-₪400."
+      "notes_he": "מגש וסכין יחד. בהיכל מנחם יש גם מגשי עץ מנגו עם סכין החל מכ-₪400.",
+      "option_group": "challah-board",
+      "tier": "basic"
     },
     {
       "name": "Challah cover",
@@ -1064,7 +1099,9 @@
       "model_he": "חנוכייה ״יהלום״ צפויה ניקל, 28 ס״מ",
       "availability": "in_stock",
       "notes": "Nickel-plated metal. Menorahs are personal — the same shop lists others from about ₪79 up to ₪1,089 in its Hanukkah section.",
-      "notes_he": "מתכת מצופה ניקל. חנוכייה היא עניין אישי — באותה חנות, בקטגוריית חנוכה, יש חנוכיות מכ-₪79 ועד ₪1,089."
+      "notes_he": "מתכת מצופה ניקל. חנוכייה היא עניין אישי — באותה חנות, בקטגוריית חנוכה, יש חנוכיות מכ-₪79 ועד ₪1,089.",
+      "option_group": "menorah",
+      "tier": "standard"
     },
     {
       "name": "Mezuzah cases (set of 5)",
@@ -1233,7 +1270,9 @@
       "starter_group": "",
       "price_status": "estimate",
       "price_checked_at": "",
-      "price_source": ""
+      "price_source": "",
+      "option_group": "iron",
+      "tier": "basic"
     },
     {
       "name": "Fans (x2)",
@@ -1393,7 +1432,9 @@
       "model_he": "Ninja NeverStick Ceramic Pro — סט סירים ומחבתות 10 חלקים, ציפוי קרמי",
       "availability": "in_stock",
       "notes": "Ceramic-coated 10-piece set. Check oven/induction compatibility on the product page if you need it.",
-      "notes_he": "סט של 10 חלקים בציפוי קרמי. אם חשוב לכם שימוש בתנור או על אינדוקציה, כדאי לבדוק בעמוד המוצר."
+      "notes_he": "סט של 10 חלקים בציפוי קרמי. אם חשוב לכם שימוש בתנור או על אינדוקציה, כדאי לבדוק בעמוד המוצר.",
+      "option_group": "pots-set",
+      "tier": "premium"
     },
     {
       "name": "Ceramic frying pan (26 cm)",
@@ -1442,7 +1483,9 @@
       "model_he": "Victorinox Swibo — סכין שף 21 ס״מ",
       "availability": "in_stock",
       "notes": "Swiss-made 21 cm chef's knife. KSP showed a lower member price at check.",
-      "notes_he": "סכין שף 21 ס\"מ מתוצרת שווייץ. בזמן הבדיקה הוצג ב-KSP גם מחיר מועדון נמוך יותר."
+      "notes_he": "סכין שף 21 ס\"מ מתוצרת שווייץ. בזמן הבדיקה הוצג ב-KSP גם מחיר מועדון נמוך יותר.",
+      "option_group": "chef-knife",
+      "tier": "standard"
     },
     {
       "name": "Glass baking dishes (set of 3)",
@@ -1636,7 +1679,9 @@
       "model_he": "Bosch DesignLine TWK4P440 — קומקום נירוסטה 1.7 ל׳, 2400 וואט",
       "availability": "in_stock",
       "notes": "Two-year official Bosch warranty. Check with your rav whether it needs tevilah.",
-      "notes_he": "שנתיים אחריות יבואן רשמי של בוש. כדאי לברר עם הרב לגבי טבילה."
+      "notes_he": "שנתיים אחריות יבואן רשמי של בוש. כדאי לברר עם הרב לגבי טבילה.",
+      "option_group": "kettle",
+      "tier": "premium"
     },
     {
       "name": "Shabbos hot plate — large family size",
@@ -1682,7 +1727,9 @@
       "model_he": "Hidurit — מיחם שבת 40 כוסות, שחור",
       "availability": "in_stock",
       "notes": "A 40-cup urn for hosting. The stainless version was out of stock at this check; KSP marked the black one as the last unit (a rose-gold one was ₪449). Check the listing for its Shabbos/Tzomet details before ordering.",
-      "notes_he": "מיחם 40 כוסות לאירוח. גרסת הנירוסטה הייתה חסרה במלאי בבדיקה; ב-KSP סומן השחור כיחידה אחרונה (גרסה בצבע רוז גולד עלתה ₪449). כדאי לבדוק בעמוד המוצר את פרטי השבת/צומת לפני ההזמנה."
+      "notes_he": "מיחם 40 כוסות לאירוח. גרסת הנירוסטה הייתה חסרה במלאי בבדיקה; ב-KSP סומן השחור כיחידה אחרונה (גרסה בצבע רוז גולד עלתה ₪449). כדאי לבדוק בעמוד המוצר את פרטי השבת/צומת לפני ההזמנה.",
+      "option_group": "shabbos-urn",
+      "tier": "standard"
     },
     {
       "name": "Coffee machine",
@@ -1705,7 +1752,9 @@
       "model_he": "Philips 1200 Series EP1200/00 — מכונת אספרסו עם מטחנה מובנית",
       "availability": "in_stock",
       "notes": "Grinds fresh beans. Capsule machines (e.g. Nespresso) cost less up front but more per cup — both are fine gifts.",
-      "notes_he": "טוחנת פולים טריים. מכונות קפסולות (כמו נספרסו) זולות יותר בקנייה ויקרות יותר לכל כוס — שתיהן מתנה טובה."
+      "notes_he": "טוחנת פולים טריים. מכונות קפסולות (כמו נספרסו) זולות יותר בקנייה ויקרות יותר לכל כוס — שתיהן מתנה טובה.",
+      "option_group": "coffee-machine",
+      "tier": "standard"
     },
     {
       "name": "Milk frother",
@@ -1774,7 +1823,9 @@
       "model_he": "Ninja AF500EU — אייר פרייר כפול, 10.4 ל׳, 2470 וואט",
       "availability": "in_stock",
       "notes": "Two baskets, so two dishes cook at once. A smaller Gold Line 5.4 L was ₪265 at the same check (last unit).",
-      "notes_he": "שתי מגירות — אפשר לבשל שני דברים בבת אחת. דגם קטן יותר של Gold Line (5.4 ליטר) עלה ₪265 באותה בדיקה (יחידה אחרונה)."
+      "notes_he": "שתי מגירות — אפשר לבשל שני דברים בבת אחת. דגם קטן יותר של Gold Line (5.4 ליטר) עלה ₪265 באותה בדיקה (יחידה אחרונה).",
+      "option_group": "fryer",
+      "tier": "standard"
     },
     {
       "name": "Blender — full size",
@@ -1843,7 +1894,9 @@
       "model_he": "Xiaomi S40C — שואב אבק רובוטי שוטף",
       "availability": "in_stock",
       "notes": "Vacuums and mops — handy with Israeli stone floors. Two-year official warranty.",
-      "notes_he": "שואב ושוטף — שימושי במיוחד עם רצפות אבן. שנתיים אחריות יבואן רשמי."
+      "notes_he": "שואב ושוטף — שימושי במיוחד עם רצפות אבן. שנתיים אחריות יבואן רשמי.",
+      "option_group": "vacuum",
+      "tier": "standard"
     },
     {
       "name": "Clothes dryer",
@@ -1984,7 +2037,9 @@
       "notes_he": "סט פורצלן ניו בון צ׳יינה לשישה סועדים; ל-12 סועדים קונים שניים. כדאי לבחור דגם שונה בבירור לסט החלבי כדי שיהיה קל להבדיל.",
       "legacy_names": [
         "Porcelain dinnerware — premium fleishig"
-      ]
+      ],
+      "option_group": "dinnerware-fleishig",
+      "tier": "premium"
     },
     {
       "name": "Bone china dinnerware — milchig",
@@ -2010,7 +2065,9 @@
       "notes_he": "סט פורצלן ניו בון צ׳יינה לשישה סועדים; ל-12 סועדים קונים שניים. כדאי לבחור דגם שונה בבירור לסט הבשרי כדי שיהיה קל להבדיל.",
       "legacy_names": [
         "Porcelain dinnerware — premium milchig"
-      ]
+      ],
+      "option_group": "dinnerware-milchig",
+      "tier": "premium"
     },
     {
       "name": "Wine glasses (12)",
@@ -2166,7 +2223,9 @@
       "model_he": "Homestyle Infinity — סט סאטן 100% כותנה, 180×200",
       "availability": "in_stock",
       "notes": "This listing is 180×200; if your mattress is 160×200, choose that size on KSP before buying.",
-      "notes_he": "המוצר בקישור במידה 180×200; אם המזרן שלכם 160×200, בחרו את המידה הזו ב-KSP לפני הקנייה."
+      "notes_he": "המוצר בקישור במידה 180×200; אם המזרן שלכם 160×200, בחרו את המידה הזו ב-KSP לפני הקנייה.",
+      "option_group": "sheet-set",
+      "tier": "premium"
     },
     {
       "name": "Towel set — 8 pieces (2 packs of 4)",
@@ -2192,7 +2251,9 @@
       "model_he": "Homestyle London — 4 מגבות (2 רחצה + 2 פנים), 100% כותנה (₪149 למארז; המחיר הוא לשניים)",
       "notes": "The link is to one 4-towel pack at ₪149; the price here is for two packs. Colours vary on the page.",
       "notes_he": "הקישור הוא למארז אחד של 4 מגבות ב-₪149; המחיר כאן לשני מארזים. יש כמה צבעים בעמוד.",
-      "availability": "in_stock"
+      "availability": "in_stock",
+      "option_group": "towels",
+      "tier": "premium"
     },
     {
       "name": "Winter-weight duvet",
@@ -2215,11 +2276,13 @@
       "model_he": "Vardinon Benjamin — שמיכת חורף, זוגית 200×220",
       "availability": "in_stock",
       "notes": "A double winter duvet from Vardinon, sold through KSP.",
-      "notes_he": "שמיכת חורף זוגית של ורדינון, נמכרת ב-KSP."
+      "notes_he": "שמיכת חורף זוגית של ורדינון, נמכרת ב-KSP.",
+      "option_group": "duvet",
+      "tier": "standard"
     },
     {
-      "name": "Memory foam pillows (2)",
-      "name_he": "כריות ויסקו (2)",
+      "name": "Pillows (×2) — firm (memory foam)",
+      "name_he": "כריות (2) — מוצקות (ויסקו)",
       "category": "bedding",
       "price_nis": 758,
       "store": "KSP",
@@ -2238,7 +2301,12 @@
       "model_he": "Dr.Gav דגם COOL TOUCH — כרית שינה אורתופדית מויסקו אלסטי עם שכבת ג׳ל מקרר, 60×40 ס״מ — ₪379 ליחידה, 2 כריות",
       "availability": "in_stock",
       "notes": "Sold singly at ₪379, so the price is for two. Pillows are personal — many couples prefer to choose their own; gel viscoelastic pillows from Homestyle cost ₪75–₪85 at the same shop.",
-      "notes_he": "נמכרת ביחידות ב-₪379, והמחיר הוא לשתי כריות. כריות הן עניין אישי — זוגות רבים מעדיפים לבחור בעצמם; כריות ויסקו ג׳ל של Homestyle עולות ₪75–₪85 באותה חנות."
+      "notes_he": "נמכרת ביחידות ב-₪379, והמחיר הוא לשתי כריות. כריות הן עניין אישי — זוגות רבים מעדיפים לבחור בעצמם; כריות ויסקו ג׳ל של Homestyle עולות ₪75–₪85 באותה חנות.",
+      "option_group": "pillow",
+      "tier": "premium",
+      "legacy_names": [
+        "Memory foam pillows (2)"
+      ]
     },
     {
       "name": "Bathrobe set — his & hers",
@@ -2308,7 +2376,9 @@
       "starter_group": "",
       "price_status": "estimate",
       "price_checked_at": "",
-      "price_source": ""
+      "price_source": "",
+      "option_group": "candlesticks",
+      "tier": "premium"
     },
     {
       "name": "Kiddush cup — sterling silver",
@@ -2330,7 +2400,9 @@
       "model_he": "גביע קידוש מכסף 925, בגודל רביעית, כ-40 גרם נטו, 120 מ״ל — הדגם נבחר בדף המוצר",
       "availability": "in_stock",
       "notes": "The design is picked on the product page. A matching saucer can be added for an extra charge.",
-      "notes_he": "את הדגם בוחרים בדף המוצר. אפשר להוסיף תחתית תואמת בתוספת תשלום."
+      "notes_he": "את הדגם בוחרים בדף המוצר. אפשר להוסיף תחתית תואמת בתוספת תשלום.",
+      "option_group": "kiddush-cup",
+      "tier": "premium"
     },
     {
       "name": "Challah knife — engraved",
@@ -2868,6 +2940,525 @@
       "availability": "in_stock",
       "notes": "Priced in US dollars by the store (list price $25), so the shekel figure is an estimate. The store lists Israel delivery by Express Mail for a flat $9.95; import VAT and duty are not included.",
       "notes_he": "החנות מציגה מחיר בדולרים (25$), לכן הסכום בשקלים הוא הערכה. החנות מציעה משלוח לישראל בדואר אקספרס בעלות קבועה של 9.95$; מע״מ ומכס ייבוא אינם כלולים."
+    },
+    {
+      "name": "Pillow — soft (down-like)",
+      "name_he": "כרית — רכה (דמוית פוך)",
+      "category": "bedding",
+      "price_nis": 75,
+      "store": "Vardinon",
+      "url": "https://www.vardinon.co.il/3174994",
+      "brand": "Vardinon",
+      "seed_key": "pillow-soft-down-like",
+      "image": "https://www.vardinon.co.il/pub/media/catalog/product/cache/07c27feb0b57ff821c444b41a5827060/3/1/3174994-1787228097143941.jpg",
+      "image_credit": "Vardinon",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "vardinon.co.il product page 3174994, read with the page reader 2026-11-15: ₪74.90 (November sale price on the page; regular ₪169.90)",
+      "model": "Vardinon Frost classic sleep pillow, 50×70 cm — hollofibre fill that imitates down, 100% cotton cover with down-proof treatment, soft",
+      "model_he": "Vardinon Frost — כרית שינה קלאסית 50×70 ס״מ, מילוי הולופייבר דמוי פוך, כיסוי כותנה 100% — רכה",
+      "availability": "unknown",
+      "notes": "Priced per single pillow (the two older pillow items are priced per pair). Vardinon sale prices move often; the page shows a 'check stock in stores' button but no stock figure. Feel label (soft) follows the page's own wording.",
+      "notes_he": "המחיר ליחידה אחת (שני פריטי הכריות הישנים מתומחרים לזוג). מחירי המבצע של ורדינון משתנים; בדף יש כפתור בדיקת מלאי בחנויות בלי כמות. תיאור ה'רכה' לפי הנוסח בדף.",
+      "option_group": "pillow",
+      "tier": "standard"
+    },
+    {
+      "name": "Pillow — soft (natural down & feather)",
+      "name_he": "כרית — רכה (פלומה ונוצות טבעיות)",
+      "category": "bedding",
+      "price_nis": 250,
+      "store": "Vardinon",
+      "url": "https://www.vardinon.co.il/3072146",
+      "brand": "Vardinon",
+      "seed_key": "pillow-soft-natural-down",
+      "image": "https://www.vardinon.co.il/pub/media/catalog/product/cache/07c27feb0b57ff821c444b41a5827060/3/0/3072146-1787229006271357.jpg",
+      "image_credit": "Vardinon",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "vardinon.co.il product page 3072146, read with the page reader 2026-11-15: ₪249.90 (November sale price on the page; regular ₪629.90)",
+      "model": "Vardinon Royal Pillow, 50×70 cm — 60% goose feather / 40% goose down fill (1,050 g), 20 cm high, 100% cotton cover, soft and full",
+      "model_he": "Vardinon Royal Pillow — 50×70 ס״מ, מילוי 60% נוצות אווז ו-40% פלומת אווז (1,050 ג׳), גובה 20 ס״מ, כיסוי כותנה 100% — תפוחה ורכה",
+      "availability": "unknown",
+      "notes": "Priced per single pillow. Natural-down pillow: not suitable for anyone who wants an allergen-free fill; the synthetic soft option is the Frost pillow above. Sale price; regular price on the page is ₪629.90.",
+      "notes_he": "המחיר ליחידה אחת. כרית פלומה טבעית — מי שמחפש מילוי סינתטי יכול לבחור בכרית Frost. מחיר מבצע; המחיר הרגיל בדף ₪629.90.",
+      "option_group": "pillow",
+      "tier": "premium"
+    },
+    {
+      "name": "Pillow — medium-firm (memory-foam flakes)",
+      "name_he": "כרית — בינונית-מוצקה (פתיתי ויסקו)",
+      "category": "bedding",
+      "price_nis": 152,
+      "store": "Vardinon",
+      "url": "https://www.vardinon.co.il/3129710",
+      "brand": "Vardinon",
+      "seed_key": "pillow-medium-firm-memory-foam-flakes",
+      "image": "https://www.vardinon.co.il/pub/media/catalog/product/cache/07c27feb0b57ff821c444b41a5827060/3/1/3129710-1787228414383640.jpg",
+      "image_credit": "Vardinon",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "vardinon.co.il product page 3129710, read with the page reader 2026-11-15: ₪151.96 (November sale price on the page; regular ₪379.90)",
+      "model": "Vardinon Mellow sleep pillow, 50×70 cm — shredded memory-foam (visco) flakes, 1,300 g fill, about 14 cm high, thick-stitched microfibre cover, washable to 40°C",
+      "model_he": "Vardinon Mellow — כרית שינה 50×70 ס״מ, פתיתי ויסקו (Memory Foam), 1,300 ג׳ מילוי, גובה כ-14 ס״מ, כיסוי מיקרופייבר בתפירה עבה, כביסה עד 40°",
+      "availability": "unknown",
+      "notes": "Priced per single pillow. The page gives no firmness grade; 'medium-firm' is our description of a flake-filled pillow. Page also shows a shelf-price field of ₪0.00 (page glitch).",
+      "notes_he": "המחיר ליחידה אחת. הדף לא מציין דרגת קשיחות; 'בינונית-מוצקה' הוא התיאור שלנו לכרית עם פתיתי ויסקו.",
+      "option_group": "pillow",
+      "tier": "standard"
+    },
+    {
+      "name": "Shabbos kettle (urn-style, 2.2 L)",
+      "name_he": "קומקום שבת (מיחם שבת, 2.2 ל׳)",
+      "category": "appliances",
+      "price_nis": 159,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%A7%D7%95%D7%9E%D7%A7%D7%95%D7%9D-%D7%A9%D7%91%D7%AA-22-%D7%9C%D7%99%D7%98%D7%A8-%D7%9B%D7%95%D7%9C%D7%9C-%D7%9E%D7%A6%D7%91-%D7%A9%D7%9E%D7%99%D7%A8%D7%AA-%D7%97%D7%95%D7%9D-or-le-shabat-93188530",
+      "brand": "Or Le Shabat",
+      "seed_key": "shabbos-kettle-or-le-shabat",
+      "image": "https://www.lastprice.co.il/uploadimages/21691w(1).jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (SKU 93188530), read with the page reader and in the page text 2026-11-15: ₪159, add-to-cart present, delivery 7 business days",
+      "model": "Or Le Shabat EL-2207 — 2.2 L kettle that works as a regular kettle on weekdays and as a hot-water urn with a keep-warm mode, 1,700 W, dry-boil cut-off; listed by the store as approved for Shabbos and Yom Tov and not needing tevilah (Rav Eliyahu HaKohen Rosenberg)",
+      "model_he": "Or Le Shabat EL-2207 — קומקום 2.2 ל׳ שפועל כקומקום רגיל בימות החול וכמיחם עם מצב שמירת חום בשבת, 1,700 וואט, ניתוק בהרתחה יבשה; לפי החנות מאושר לשבת וחג ואינו מצריך טבילה (הרב אליהו הכהן רוזנברג)",
+      "availability": "in_stock",
+      "notes": "Shabbos kettle (kettle form factor), not a large urn: 2.2 L holds far less than the 40/60-cup Hidurit urns. Set it to Shabbos mode before Shabbos per the manufacturer's instructions and confirm with your rav. Same model sold in other colours (black / green / light blue) under other Bug SKUs; the light-blue one showed as temporarily unavailable in search results. Image is Bug's (hosted on its sister site lastprice.co.il).",
+      "notes_he": "קומקום שבת בצורת קומקום ולא מיחם גדול: 2.2 ל׳ מכילים הרבה פחות ממיחמי הידורית של 40/60 כוסות. יש להעביר למצב שבת לפני שבת לפי הוראות היצרן ולהתייעץ עם הרב. אותו דגם נמכר גם בצבעים אחרים (שחור / ירוק / תכלת) במק״טים אחרים של באג.",
+      "option_group": "shabbos-urn",
+      "tier": "basic"
+    },
+    {
+      "name": "Shabbos kettle (urn-style, 1.8 L)",
+      "name_he": "קומקום שבת (מיחם שבת, 1.8 ל׳)",
+      "category": "appliances",
+      "price_nis": 219,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%A7%D7%95%D7%9E%D7%A7%D7%95%D7%9D-%D7%9E%D7%99%D7%97%D7%9D-%D7%A9%D7%91%D7%AA-18-%D7%9C%D7%99%D7%98%D7%A8-topson-925645570",
+      "brand": "Topson",
+      "seed_key": "shabbos-kettle-topson",
+      "image": "https://www.lastprice.co.il/uploadimages/FEP38_Z_P_7290020162090_1.jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (SKU 925645570), read with the page reader and in the page text 2026-11-15: ₪219, add-to-cart present, delivery 7 business days",
+      "model": "Topson TP-892 — 1.8 L Shabbos kettle, white; three-position switch (boil / keep warm / off), locks to its base, double wall, concealed element; listed by the store as not needing tevilah, approved by Rav Shlomo Didi",
+      "model_he": "Topson TP-892 — קומקום מיחם שבת 1.8 ל׳, לבן; מתג בעל שלושה מצבים (הרתחה / שמירת חום / כיבוי), ננעל אל הבסיס, דופן כפולה, גוף חימום נסתר; לפי החנות אינו מצריך טבילה, באישור הרב שלמה דידי",
+      "availability": "in_stock",
+      "notes": "Second Shabbos-kettle option, different brand and approval from the Or Le Shabat kettle. Black version has its own Bug SKU (925645571, ₪219). Confirm Shabbos-mode use with your rav. Image is Bug's (hosted on lastprice.co.il).",
+      "notes_he": "אפשרות שנייה לקומקום שבת, מותג ואישור שונים מקומקום Or Le Shabat. יש גם גרסה שחורה במק״ט נפרד (925645571, ₪219). יש להתייעץ עם הרב לגבי שימוש במצב שבת.",
+      "option_group": "shabbos-urn",
+      "tier": "standard"
+    },
+    {
+      "name": "Deep fryer — 3.5 L",
+      "name_he": "סיר טיגון שמן עמוק — 3.5 ל׳",
+      "category": "appliances",
+      "price_nis": 199,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%A1%D7%99%D7%A8-%D7%98%D7%99%D7%92%D7%95%D7%9F-35-%D7%9C%D7%99%D7%98%D7%A8-gold-line-955652841",
+      "brand": "Gold Line",
+      "seed_key": "deep-fryer-3-5-l",
+      "image": "https://www.lastprice.co.il/uploadimages/3543(74).jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Gold Line ATL-9933), read with the page reader 2026-11-15: ₪199, add-to-cart present",
+      "model": "Gold Line ATL-9933 — 3.5 L electric deep fryer, 2,000 W, stainless casing, removable enamel oil pot, charcoal filter, clear lid",
+      "model_he": "Gold Line ATL-9933 — סיר טיגון חשמלי 3.5 ל׳, 2,000 וואט, גוף נירוסטה, מיכל שמן אמייל נשלף, פילטר פחם, מכסה שקוף",
+      "availability": "in_stock",
+      "notes": "Chosen over the Sauter DF4100 (₪219), which showed 'temporarily unavailable' on Bug on 2026-11-15. Use separate oil for fleishig and milchig/pareve if the couple cooks both.",
+      "notes_he": "נבחר על פני Sauter DF4100 (₪219) שהופיע ב-Bug כחסר זמנית ב-15.11.2026. כדאי להפריד שמן לבשרי ולחלבי/פרווה אם מבשלים את שניהם.",
+      "option_group": "fryer",
+      "tier": "basic"
+    },
+    {
+      "name": "Cordless stick vacuum",
+      "name_he": "שואב אבק אלחוטי (מוט)",
+      "category": "appliances",
+      "price_nis": 1499,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%A9%D7%95%D7%90%D7%91-%D7%90%D7%91%D7%A7-%D7%90%D7%9C%D7%97%D7%95%D7%98%D7%99-%D7%9B%D7%95%D7%9C%D7%9C-%D7%9E%D7%95%D7%98-%D7%9E%D7%AA%D7%A7%D7%A4%D7%9C-bosch-9157874511",
+      "brand": "Bosch",
+      "seed_key": "stick-vacuum-cordless-bosch",
+      "image": "https://www.lastprice.co.il/uploadimages/17774324_BBS712A_STP_def.jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Bosch BBS712A), read with the page reader 2026-11-15: ₪1,499, add-to-cart present, delivery 7 business days",
+      "model": "Bosch Unlimited Serie 7 BBS712A — cordless stick vacuum with two 18 V 3 Ah batteries (up to 40 min in eco mode without the electric brush), flex pole, 24-month importer warranty",
+      "model_he": "Bosch Unlimited Serie 7 BBS712A — שואב אבק אלחוטי עם שתי סוללות 18V 3Ah (עד 40 דקות במצב חסכוני בלי מברשת חשמלית), מוט גמיש, אחריות יבואן 24 חודשים",
+      "availability": "in_stock",
+      "notes": "Page lists no HEPA filter and no charging stand. The Shark Detect Pro IW1613 (₪999) was 'temporarily unavailable' on Bug on 2026-11-15, so it is not listed.",
+      "notes_he": "לפי הדף אין פילטר HEPA ואין תחנת טעינה. Shark Detect Pro IW1613 (₪999) הופיע חסר זמנית ב-Bug ב-15.11.2026 ולכן לא נוסף.",
+      "option_group": "vacuum",
+      "tier": "premium"
+    },
+    {
+      "name": "Steam iron — pressurised (steam station)",
+      "name_he": "מגהץ קיטור — לחץ (תחנת גיהוץ)",
+      "category": "appliances",
+      "price_nis": 1088,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%9E%D7%92%D7%94%D7%A5-%D7%A7%D7%99%D7%98%D7%95%D7%A8-tefal-88052211gv9230",
+      "brand": "Tefal",
+      "seed_key": "steam-station-iron-tefal-gv9230",
+      "image": "https://www.lastprice.co.il/uploadimages/TF_GV92_B.jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Tefal GV9230), read with the page reader 2026-11-15: ₪1,088, add-to-cart present, delivery 10 business days",
+      "model": "Tefal Pro Express Protect GV9230 — pressurised steam generator iron, 7.5 bar, 1.8 L removable tank (refill while ironing)",
+      "model_he": "Tefal Pro Express Protect GV9230 — מגהץ קיטור עם מיכל לחץ, 7.5 בר, מיכל נשלף 1.8 ל׳ (מילוי תוך כדי גיהוץ)",
+      "availability": "in_stock",
+      "notes": "Page quotes both 2,000 W and 2,600 W for the power. A big step up from a basic iron; most couples only need the compact model below.",
+      "notes_he": "הדף מציין גם 2,000 וואט וגם 2,600 וואט. שדרוג משמעותי ממגהץ רגיל; לרוב הזוגות מספיק הדגם הקומפקטי שלמטה.",
+      "option_group": "iron",
+      "tier": "premium"
+    },
+    {
+      "name": "Steam iron — pressurised, compact",
+      "name_he": "מגהץ קיטור — לחץ, קומפקטי",
+      "category": "appliances",
+      "price_nis": 449,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%9E%D7%92%D7%94%D7%A5-%D7%A7%D7%99%D7%98%D7%95%D7%A8-%D7%9E%D7%A7%D7%A6%D7%95%D7%A2%D7%99-14-%D7%9C%D7%99%D7%98%D7%A8-tefal-88052211sv611al3",
+      "brand": "Tefal",
+      "seed_key": "steam-iron-pressurised-tefal-sv611",
+      "image": "https://www.lastprice.co.il/uploadimages/3452452(418).jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Tefal SV611AL3), read with the page reader 2026-11-15: ₪449, add-to-cart present, delivery 7 business days",
+      "model": "Tefal Express Essential SV611AL3 — pressurised steam iron, 5 bar, 1.4 L tank, 2,200 W",
+      "model_he": "Tefal Express Essential SV611AL3 — מגהץ קיטור עם לחץ, 5 בר, מיכל 1.4 ל׳, 2,200 וואט",
+      "availability": "in_stock",
+      "notes": "Mid-point between a plain iron and the steam station.",
+      "notes_he": "אמצע הדרך בין מגהץ רגיל לתחנת גיהוץ.",
+      "option_group": "iron",
+      "tier": "standard"
+    },
+    {
+      "name": "Capsule coffee machine + milk frother",
+      "name_he": "מכונת קפה קפסולות + מקציף חלב",
+      "category": "appliances",
+      "price_nis": 599,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%9E%D7%9B%D7%95%D7%A0%D7%AA-%D7%90%D7%A1%D7%A4%D7%A8%D7%A1%D7%95-%D7%9B%D7%95%D7%9C%D7%9C-%D7%9E%D7%A7%D7%A6%D7%99%D7%A3-nespresso-91204008",
+      "brand": "Nespresso",
+      "seed_key": "coffee-machine-capsule-nespresso-inissia",
+      "image": "https://www.lastprice.co.il/uploadimages/54947_a_Inissia_Black_1.jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Nespresso Inissia D40 + Aeroccino 3), read with the page reader 2026-11-15: ₪599, add-to-cart present",
+      "model": "Nespresso Inissia D40 (black) + Aeroccino 3 milk frother — compact capsule machine, 19 bar, uses Nespresso Original capsules",
+      "model_he": "Nespresso Inissia D40 (שחור) + מקציף Aeroccino 3 — מכונת קפסולות קומפקטית, 19 בר, משתמשת בקפסולות Nespresso Original",
+      "availability": "in_stock",
+      "notes": "Page gives two tank sizes (0.7 L in the details, up to 1 L in the summary table). Capsules are bought separately from Nespresso.",
+      "notes_he": "בדף מצוינים שני נפחי מיכל (0.7 ל׳ בפירוט, עד 1 ל׳ בטבלת הסיכום). הקפסולות נרכשות בנפרד מ-Nespresso.",
+      "option_group": "coffee-machine",
+      "tier": "basic"
+    },
+    {
+      "name": "Capsule coffee machine — steam wand & milk jug",
+      "name_he": "מכונת קפה קפסולות — צינור קיטור וקנקן חלב",
+      "category": "appliances",
+      "price_nis": 1629,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%9E%D7%9B%D7%95%D7%A0%D7%AA-%D7%A7%D7%A4%D7%94-%D7%9B%D7%95%D7%9C%D7%9C-%D7%9E%D7%A7%D7%A6%D7%99%D7%A3-%D7%97%D7%9C%D7%91-%D7%9E%D7%95%D7%91%D7%A0%D7%94-nespresso-91204009",
+      "brand": "Nespresso",
+      "seed_key": "coffee-machine-capsule-nespresso-creatista",
+      "image": "https://www.lastprice.co.il/uploadimages/Creatista_Plus_8.jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Nespresso Creatista Plus J520), read with the page reader 2026-11-15: ₪1,629, add-to-cart present",
+      "model": "Nespresso Creatista Plus J520 — capsule machine with steam wand, ~350 ml stainless milk jug and 11 milk-temperature settings, 1.5 L tank",
+      "model_he": "Nespresso Creatista Plus J520 — מכונת קפסולות עם צינור קיטור, קנקן חלב מנירוסטה כ-350 מ״ל ו-11 דרגות טמפרטורת חלב, מיכל 1.5 ל׳",
+      "availability": "in_stock",
+      "notes": "Page is inconsistent about whether frothing is manual or automatic through the steam wand. Capsules bought separately.",
+      "notes_he": "בדף יש אי-התאמה לגבי הקצפה ידנית או אוטומטית דרך צינור הקיטור. הקפסולות נרכשות בנפרד.",
+      "option_group": "coffee-machine",
+      "tier": "premium"
+    },
+    {
+      "name": "Bread maker (digital, 1.35 kg)",
+      "name_he": "אופה לחם דיגיטלי (1.35 ק״ג)",
+      "category": "appliances",
+      "price_nis": 491,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/brand/morphyrichards/bread/maker/48297",
+      "brand": "Morphy Richards",
+      "seed_key": "bread-maker-morphy-richards-48297",
+      "image": "https://cdn.bug.co.il/images/site/products/ppf_d7f78bcd-bb03-45e4-a1df-a37101774206_prvdsk.webp",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Morphy Richards 48297), read with the page reader 2026-11-15: ₪491 (search listing earlier showed ₪569), add-to-cart present",
+      "model": "Morphy Richards Digital XL 48297 — bread maker, 14 automatic programmes plus 2 quick programmes, loaves up to 1,350 g",
+      "model_he": "Morphy Richards Digital XL 48297 — אופה לחם דיגיטלי, 14 תוכניות אוטומטיות ועוד 2 מהירות, כיכר עד 1,350 גרם",
+      "availability": "in_stock",
+      "notes": "Useful for challah dough as well as bread. No alternative listed, so no option group.",
+      "notes_he": "מתאים גם לבצק חלות. אין חלופה ברשימה ולכן אין קבוצת אפשרויות."
+    },
+    {
+      "name": "Stand mixer — 5 L",
+      "name_he": "מיקסר עומד — 5 ל׳",
+      "category": "appliances",
+      "price_nis": 999,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%9E%D7%99%D7%A7%D7%A1%D7%A8-%D7%9E%D7%A7%D7%A6%D7%95%D7%A2%D7%99-5-%D7%9C%D7%99%D7%98%D7%A8-kenwood-95685967",
+      "brand": "Kenwood",
+      "seed_key": "stand-mixer-kenwood-kmix-kmx753",
+      "image": "https://www.lastprice.co.il/uploadimages/11(1559).jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Kenwood kMix KMX753, black), read with the page reader 2026-11-15: ₪999, add-to-cart present",
+      "model": "Kenwood kMix KMX753 (black) — stand mixer, 5 L bowl, 1,000 W",
+      "model_he": "Kenwood kMix KMX753 (שחור) — מיקסר עומד, קערה 5 ל׳, 1,000 וואט",
+      "availability": "in_stock",
+      "notes": "Lower-priced alternative to the KitchenAid already in the catalog. Also sold in red, cream and white under other Bug SKUs.",
+      "notes_he": "חלופה זולה יותר ל-KitchenAid שכבר בקטלוג. נמכר גם באדום, קרם ולבן במק״טים אחרים של באג.",
+      "option_group": "stand-mixer",
+      "tier": "standard"
+    },
+    {
+      "name": "Toaster — 4 slice, retro style",
+      "name_he": "טוסטר קופץ — 4 פרוסות, עיצוב רטרו",
+      "category": "appliances",
+      "price_nis": 1249,
+      "store": "Bug",
+      "url": "https://www.bug.co.il/%D7%9E%D7%A6%D7%A0%D7%9D-4-%D7%A4%D7%A8%D7%95%D7%A1%D7%95%D7%AA-%D7%91%D7%A2%D7%99%D7%A6%D7%95%D7%91-%D7%A8%D7%98%D7%A8%D7%95-smeg-935568893",
+      "brand": "Smeg",
+      "seed_key": "toaster-4-slice-smeg-tsf03",
+      "image": "https://www.lastprice.co.il/uploadimages/3452(492).jpg",
+      "image_credit": "Bug",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "bug.co.il product page (Smeg TSF03BLEU), read with the page reader 2026-11-15: ₪1,249, add-to-cart present, delivery 7 business days",
+      "model": "Smeg TSF03BLEU (black) — 4-slot pop-up toaster, 6 browning levels, 3 automatic programmes (defrost / bagel / centring)",
+      "model_he": "Smeg TSF03BLEU (שחור) — טוסטר קופץ ל-4 פרוסות, 6 דרגות קלייה, 3 תוכניות אוטומטיות (הפשרה / בייגל / מירכוז)",
+      "availability": "in_stock",
+      "notes": "A design-led gift. The page lists the power as '2000' with no unit. Caso Classico T4 (₪379) was out of stock on Bug, so no cheaper alternative is listed.",
+      "notes_he": "מתנת עיצוב. בדף ההספק מופיע '2000' בלי יחידה. Caso Classico T4 (₪379) הופיע כחסר ב-Bug ולכן אין חלופה זולה יותר ברשימה."
+    },
+    {
+      "name": "Stainless pot set — 4 pots with lids",
+      "name_he": "סט 4 סירי נירוסטה עם מכסים",
+      "category": "kitchen",
+      "price_nis": 620,
+      "store": "Hakol LaBait",
+      "url": "https://www.hakolabait.co.il/product/%D7%A1%D7%98-4-%D7%A1%D7%99%D7%A8%D7%99%D7%9D-%D7%A0%D7%99%D7%A8%D7%95%D7%A1%D7%98%D7%94-%D7%A1%D7%93%D7%A8%D7%AA-%D7%90%D7%9C%D7%95%D7%9F",
+      "brand": "Alon",
+      "seed_key": "stainless-pot-set-alon-4-piece",
+      "image": "https://www.hakolabait.co.il/images/itempics/165006.jpg",
+      "image_credit": "Hakol LaBait",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "hakolabait.co.il product page, read with the page reader 2026-11-15: ₪620; structured data shows in stock",
+      "model": "Alon series 4-pot stainless-steel set with lids (2.5 L / 20 cm, 4.5 L / 24 cm, 6 L / 26 cm, 7 L / 24 cm), 3-layer bonded base",
+      "model_he": "סט 4 סירי נירוסטה סדרת אלון עם מכסים (2.5 ל׳ / 20 ס״מ, 4.5 ל׳ / 24 ס״מ, 6 ל׳ / 26 ס״מ, 7 ל׳ / 24 ס״מ), תחתית משולשת מולחמת",
+      "availability": "in_stock",
+      "notes": "Brand: the store titles the line 'Alon series' (אלון); the page text was partly garbled, so confirm the brand and induction compatibility on the page. The WMF 5-pot sets at the same store (₪949–1,150) have no readable product URL.",
+      "notes_he": "המותג: החנות מכנה את הסדרה 'אלון'; טקסט הדף היה מקולקל בחלקו ולכן כדאי לוודא מותג ותאימות לאינדוקציה בדף. סטי WMF של 5 סירים באותה חנות (₪949–1,150) ללא כתובת מוצר קריאה.",
+      "option_group": "pots-set",
+      "tier": "standard"
+    },
+    {
+      "name": "Cast-iron pot with lid (Dutch oven), 26 cm",
+      "name_he": "סיר לחם יציקת ברזל עם מכסה, 26 ס״מ",
+      "category": "kitchen",
+      "price_nis": 280,
+      "store": "Hakol LaBait",
+      "url": "https://www.hakolabait.co.il/product/%D7%A1%D7%99%D7%A8-%D7%9C%D7%97%D7%9D-%D7%99%D7%A6%D7%99%D7%A7%D7%AA-%D7%91%D7%A8%D7%96%D7%9C-26-%D7%A1%D7%9E-heritage-%D7%9C%D7%91%D7%9F-%D7%A4%D7%95%D7%93-%D7%90%D7%A4%D7%99%D7%9C",
+      "brand": "Food Appeal",
+      "seed_key": "cast-iron-pot-dutch-oven-26cm",
+      "image": "https://www.hakolabait.co.il/images/itempics/7290119837243_20052025112613.jpg",
+      "image_credit": "Hakol LaBait",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "hakolabait.co.il product page, read with the page reader 2026-11-15: ₪280; structured data shows in stock",
+      "model": "Food Appeal Heritage — 26 cm cast-iron bread pot, white",
+      "model_he": "Food Appeal Heritage — סיר לחם יציקת ברזל 26 ס״מ, לבן",
+      "availability": "in_stock",
+      "notes": "Wanted an enamelled cast-iron Dutch oven: the Staub 26 cm (₪999) on LastPrice and the Carne oval on KSP both showed as unavailable, so this Heritage pot is the in-stock option. Page text was partly garbled — enamel, capacity and induction not confirmed.",
+      "notes_he": "חיפשנו קוקוט יציקת ברזל מצופה אמייל: Staub 26 ס״מ (₪999) ב-LastPrice ו-Carne אובלי ב-KSP הופיעו כלא זמינים, ולכן זו האפשרות הזמינה. טקסט הדף היה מקולקל בחלקו — אמייל, נפח ואינדוקציה לא אומתו."
+    },
+    {
+      "name": "Chef's knife — 20 cm (Global G-2)",
+      "name_he": "סכין שף — 20 ס״מ (Global G-2)",
+      "category": "kitchen",
+      "price_nis": 449,
+      "store": "Hakol LaBait",
+      "url": "https://www.hakolabait.co.il/product/%D7%A1%D7%9B%D7%99%D7%9F-%D7%A9%D7%A3-%D7%A8%D7%97%D7%91%D7%94-20-%D7%A1%D7%9E-global",
+      "brand": "Global",
+      "seed_key": "chef-knife-global-g2-20cm",
+      "image": "https://www.hakolabait.co.il/images/itempics/362.jpg",
+      "image_credit": "Hakol LaBait",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "hakolabait.co.il product page, read with the page reader 2026-11-15: ₪449; structured data shows in stock",
+      "model": "Global G-2 — 20 cm chef's knife, Cromova 18 stainless blade (about RC 56–58), 120 g",
+      "model_he": "Global G-2 — סכין שף 20 ס״מ, להב נירוסטה Cromova 18 (כ-RC 56–58), 120 גרם",
+      "availability": "in_stock",
+      "notes": "Japanese-made one-piece steel knife; the existing Victorinox chef's knife (₪199) is the everyday option. Needs hand-washing.",
+      "notes_he": "סכין פלדה יפנית מחתיכה אחת; סכין השף של Victorinox שבקטלוג (₪199) היא האפשרות היומיומית. מומלץ לשטוף ביד.",
+      "option_group": "chef-knife",
+      "tier": "premium"
+    },
+    {
+      "name": "Cutlery set — 24 pieces (18/10 stainless)",
+      "name_he": "סט סכו״ם 24 חלקים (נירוסטה 18/10)",
+      "category": "dining",
+      "price_nis": 675,
+      "store": "Hakol LaBait",
+      "url": "https://www.hakolabait.co.il/product/%D7%93%D7%92%D7%9D-250---%D7%A0%D7%99%D7%A8%D7%95%D7%A1%D7%98%D7%94",
+      "brand": "Salvinelli",
+      "seed_key": "cutlery-set-24-piece-salvinelli-250",
+      "image": "https://www.hakolabait.co.il/images/itempics/240914.jpg",
+      "image_credit": "Hakol LaBait",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "hakolabait.co.il product page, read with the page reader 2026-11-15: ₪675; structured data shows in stock",
+      "model": "Salvinelli model 250 — 24-piece cutlery set (6 of each of four pieces), 18/10 stainless steel, formal square-edge design",
+      "model_he": "Salvinelli דגם 250 — סט סכו״ם 24 חלקים (6 מכל סוג מארבעה סוגים), נירוסטה 18/10, עיצוב רשמי עם קצה מרובע",
+      "availability": "in_stock",
+      "notes": "Price is for one set. A couple keeping milchig and fleishig separate would need two sets. The page's text was partly garbled; steel grade and piece count are from the listing.",
+      "notes_he": "המחיר לסט אחד. זוג ששומר חלבי ובשרי בנפרד יזדקק לשני סטים. טקסט הדף היה מקולקל בחלקו; סוג הנירוסטה ומספר החלקים לפי רישום המוצר.",
+      "option_group": "cutlery",
+      "tier": "premium"
+    },
+    {
+      "name": "Mattress protector — quilted cotton",
+      "name_he": "מגן מזרן קווילט — כותנה",
+      "category": "bedding",
+      "price_nis": 164,
+      "store": "Vardinon",
+      "url": "https://www.vardinon.co.il/7215063",
+      "brand": "Vardinon",
+      "seed_key": "mattress-protector-quilted-vardinon",
+      "image": "https://www.vardinon.co.il/pub/media/catalog/product/cache/07c27feb0b57ff821c444b41a5827060/9/9/9902_101-1780490163114059.jpg",
+      "image_credit": "Vardinon",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "estimate",
+      "price_checked_at": "",
+      "price_source": "vardinon.co.il product page 7215063, read with the page reader 2026-11-15, showed ₪163.96 — the entry price of a multi-size listing, not confirmed for 160×200",
+      "model": "Vardinon quilted mattress protector (cotton) — pick the 160×200 size on the page",
+      "model_he": "Vardinon — מגן מזרן קווילט מכותנה — יש לבחור בדף מידה 160×200",
+      "availability": "unknown",
+      "notes": "Price is the figure the page showed for the default size; check the price for your mattress size before ordering. Vardinon's cheaper Guardian protector (₪95.96) has a liquid-resistant lining.",
+      "notes_he": "המחיר הוא זה שהוצג בדף למידת ברירת המחדל; כדאי לבדוק את המחיר למידת המזרן לפני ההזמנה. מגן Guardian הזול יותר של ורדינון (₪95.96) כולל שכבה עמידה בנוזלים.",
+      "option_group": "mattress-protector",
+      "tier": "standard"
+    },
+    {
+      "name": "Chanukah menorah — 36 cm, silver colour (Diamond)",
+      "name_he": "חנוכייה מהודרת ״יהלום״ — 36 ס״מ, צבע כסף",
+      "category": "judaica",
+      "price_nis": 499,
+      "store": "Heichal Menachem",
+      "url": "https://www.heichal.co.il/products/%D7%97%D7%A0%D7%95%D7%9B%D7%99%D7%99%D7%94_%D7%9E%D7%94%D7%95%D7%93%D7%A8%D7%AA_%D7%99%D7%94%D7%9C%D7%95%D7%9D_%D7%A6%D7%91%D7%A2_%D7%9B%D7%A1%D7%A3_36_%D7%A1%D7%9E/772443",
+      "brand": null,
+      "seed_key": "menorah-chanukah-diamond-36cm-silver-colour",
+      "image": "https://www.heichal.co.il/th/420x420/pics/772443/710615774_975687766.jpg",
+      "image_credit": "Heichal Menachem",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "heichal.co.il product 772443, read with the page reader 2026-11-15: ₪499 (regular ₪540 on the listing); category page showed it in stock",
+      "model": "'Diamond' menorah, 36 cm, silver colour",
+      "model_he": "חנוכייה מהודרת ״יהלום״, 36 ס״מ, צבע כסף",
+      "availability": "in_stock",
+      "notes": "Larger upgrade on the 28 cm nickel-plated Diamond menorah already in the catalog (₪255). The 925-silver-plated 24×32 cm menorah (₪519) showed as out of stock.",
+      "notes_he": "שדרוג גדול יותר לחנוכיית ״יהלום״ מצופה ניקל 28 ס״מ שכבר בקטלוג (₪255). החנוכייה בציפוי כסף 925 (₪519) הופיעה כחסרה במלאי.",
+      "option_group": "menorah",
+      "tier": "premium"
+    },
+    {
+      "name": "Challah board — mango wood with marble-handle knife",
+      "name_he": "מגש חלה עץ מנגו עם סכין שיש",
+      "category": "judaica",
+      "price_nis": 310,
+      "store": "Heichal Menachem",
+      "url": "https://www.heichal.co.il/products/%D7%9E%D7%92%D7%A9_%D7%97%D7%9C%D7%94_%D7%A2%D7%A5_%D7%9E%D7%A0%D7%92%D7%95_%D7%98%D7%91%D7%A2%D7%99_%2B_%D7%A1%D7%9B%D7%99%D7%9F_%D7%A2%D7%9D_%D7%A9%D7%99%D7%A9_%D7%9B%D7%A1%D7%A3_41X27_%D7%A1%D7%9E/771562",
+      "brand": null,
+      "seed_key": "challah-board-mango-wood-marble-knife",
+      "image": "https://www.heichal.co.il/th/420x420/pics/771562/1828973215_1811778203.jpg",
+      "image_credit": "Heichal Menachem",
+      "kind": "product",
+      "featured": false,
+      "starter_group": "",
+      "price_status": "verified",
+      "price_checked_at": "2026-11-15",
+      "price_source": "heichal.co.il product 771562, read with the page reader 2026-11-15: ₪310 (listed as reduced from ₪539); category page showed it in stock",
+      "model": "Natural mango-wood challah board with knife (marble detail, 'silver' version), 41×27 cm",
+      "model_he": "מגש חלה מעץ מנגו טבעי עם סכין עם שיש (גרסת ״כסף״), 41×27 ס״מ",
+      "availability": "in_stock",
+      "notes": "Also sold with a 'gold' marble detail (SKU 771561, same price). The sale price may revert to the listed regular price.",
+      "notes_he": "נמכר גם בגרסת ״זהב״ (771561, אותו מחיר). מחיר המבצע עשוי לחזור למחיר הרגיל.",
+      "option_group": "challah-board",
+      "tier": "standard"
     }
   ],
   "bundles": [

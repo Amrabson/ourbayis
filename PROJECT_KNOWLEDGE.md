@@ -316,6 +316,12 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 - `/setup-cost` → `setup_cost_request` → `session["shana_list"]` → the Shana form's `with_list` marker →
   `shana_requests.wanted_list` [m35] (English names, prices re-read at POST). Shown on the admin lead page.
 
+## Options and tiers (2026-11-15)
+`catalog_items.option_group` (slug shared by alternatives) + `tier` [m36]. `option_group_items(db, item)` (≥2 active
+members, tier then price) feeds the item page's `#options`; `option_count(item)` (cached per request) feeds the card
+line. Set both in `seed_catalog.json` when adding an alternative; the catalog `model` line is public — keep research
+caveats in `notes` (internal).
+
 ## Gift ideas by budget (2026-11-07)
 `/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and
 `_band_items(db, key)` lists a band. Copy per band is `ideas_h_<key>` / `ideas_for_<key>` in i18n. Indexable

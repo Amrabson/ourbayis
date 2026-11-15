@@ -12,6 +12,7 @@ import csv
 import gzip
 import io
 import json
+import mimetypes
 import os
 import re
 import secrets
@@ -20,7 +21,7 @@ import unicodedata
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from datetime import date, datetime, timedelta, timezone
 from functools import wraps
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, quote, urlencode, urlsplit, urlunsplit
 from pathlib import Path
 
 from flask import (Flask, abort, flash, g, redirect, render_template,
@@ -37,6 +38,7 @@ import ob_db
 import ob_hebcal
 import ob_linkinfo
 import ob_mail
+import ob_mailhtml
 import ob_money
 import ob_search
 import ob_security
@@ -56,6 +58,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get("OB_ALLOWED_HOSTS", "").split
 # Optional SMTP — leave unset and the site works fine, mail just stays queued.
 NOTIFY_EMAIL = os.environ.get("OB_NOTIFY_EMAIL", "")  # owner: shana leads + contact msgs
 
+mimetypes.add_type("application/manifest+json", ".webmanifest")  # Flask's static route guesses from this
 app = Flask(__name__)
 if ob_security.env_bool("OB_TRUST_PROXY"):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
@@ -96,7 +99,7 @@ CONTENT_SECURITY_POLICY = (
 NO_STORE_ENDPOINTS = {
     "dashboard", "registry_new", "registry_edit", "items_manage",
     "guest_manage", "admin_home", "admin_login", "reset_password", "forgot",
-    "dashboard_thanks", "dashboard_keepsake", "registry_people", "join_registry", "registry_check", "digest_off",
+    "dashboard_thanks", "dashboard_keepsake", "registry_people", "join_registry", "registry_check", "digest_off", "add_from_link",
 }
 
 # SPEC_V3 "Privacy / SEO": private/account/admin pages are never indexed.
@@ -106,7 +109,7 @@ NOINDEX_ENDPOINTS = {
     "dashboard_claims_csv", "dashboard_thanks", "dashboard_keepsake", "registry_new", "registry_edit", "items_manage",
     "items_add", "items_starter", "item_edit", "guest_manage", "account",
     "account_export", "account_delete", "admin_home", "admin_login",
-    "reset_password", "forgot", "signup", "login", "registry_people", "join_registry", "registry_check", "digest_off",
+    "reset_password", "forgot", "signup", "login", "registry_people", "join_registry", "registry_check", "digest_off", "add_from_link",
 }
 
 
@@ -261,8 +264,32 @@ def rate_limited(bucket, limit=20, per=600):
     return ob_security.rate_limited(get_db(), bucket, request.remote_addr, limit, per)
 
 
-def send_mail(to, subject, body, reply_to=""):
-    return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH, reply_to=reply_to)
+def send_mail(to, subject, body, reply_to="", html=None):
+    return ob_mail.enqueue(get_db(), to, subject, body, db_path=DB_PATH, reply_to=reply_to, html=html)
+
+
+def mail_html(lang, body, button=None, item=None, footer=None, typed=(), also=None):
+    """The designed HTML twin of a finished text `body` (same paragraphs; `footer` lifted off the end;
+    `button` = (label, url) or a list; `item` = registry/catalog row, pictured only when it has an https
+    image). Never raises: on any failure the email simply goes out as text only."""
+    try:
+        paras, foot = ob_mailhtml.split_body(body, footer)
+        return ob_mailhtml.safe_html(lang, paras, button=button, item=mail_item_pic(item, lang),
+                                     footer=foot, typed=typed, also=also)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def mail_item_pic(item, lang="en"):
+    """{"name", "image"} for an item row with a picture, else None (no picture, no item block)."""
+    try:
+        image = (item["image"] or "").strip()
+        if not image.startswith("https://"):
+            return None
+        name = item["name_he"] if lang == "he" and item["name_he"] else item["name"]
+        return {"name": name, "image": image}
+    except (KeyError, IndexError, TypeError):
+        return None
 
 
 def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False, item_label=None, **kw):
@@ -288,9 +315,14 @@ def notify_owner(db, reg, key, fallback_lang, item=None, qty=1, to_helpers=False
             words["item"] = f"{name} ×{qty}" if qty > 1 else name
         elif item_label:  # a ready-made label: a general cash gift, or a chip-in ("₪180 toward Fridge")
             words["item"] = item_label
-        body = (_t(key + "_body", lang).format(**words) + "\n\n"
-                + _t("mail_owner_footer", lang).format(link=ext_url("dashboard")))
-        send_mail(person["email"], _t(key + "_subj", lang).format(**words), body)
+        dash = ext_url("dashboard")
+        footer = _t("mail_owner_footer", lang).format(link=dash)
+        body = _t(key + "_body", lang).format(**words) + "\n\n" + footer
+        html = mail_html(lang, body, button=(_t("mail_btn_dashboard", lang), dash), footer=footer,
+                         item=item,
+                         typed=(words.get("name"), kw.get("guest_message"), kw.get("message"),
+                                words.get("item"), words.get("title"), kw.get("note_raw")))
+        send_mail(person["email"], _t(key + "_subj", lang).format(**words), body, html=html)
 
 
 def chip_label(amount_minor, item_name, item_name_he, lang):
@@ -306,10 +338,11 @@ def notify_guest(db, claim, key):
     if not claim["guest_email"]:
         return False
     reg = db.execute("SELECT * FROM registries WHERE id=?", (claim["registry_id"],)).fetchone()
-    item = (db.execute("SELECT name, name_he FROM registry_items WHERE id=?", (claim["item_id"],)).fetchone()
+    item = (db.execute("SELECT name, name_he, image FROM registry_items WHERE id=?", (claim["item_id"],)).fetchone()
             if claim["item_id"] else None)
     langs = [claim["lang"]] if claim["lang"] in ("en", "he") else ["en", "he"]
     parts = []
+    htmls = []
     for lang in langs:
         he = lang == "he"
         kw = dict(couple=(reg["couple_names_he"] if he and reg["couple_names_he"] else reg["couple_names"]) or _t("the_couple", lang),
@@ -318,8 +351,17 @@ def notify_guest(db, claim, key):
                   link=ext_url("registry", slug=reg["slug"]) + ("?lang=he" if he else ""))
         if claim["kind"] == "chip" and item:
             kw["item"] = chip_label(claim["amount_minor"], item["name"], item["name_he"], lang)
-        parts.append((_t(key + "_subj", lang).format(**kw), _t(key + "_body", lang).format(**kw)))
-    send_mail(claim["guest_email"], parts[0][0], "\n\n— — —\n\n".join(b for _, b in parts))
+        text = _t(key + "_body", lang).format(**kw)
+        parts.append((_t(key + "_subj", lang).format(**kw), text))
+        # a button only when the text itself carries the registry link
+        btn = (_t("mail_btn_registry", lang), kw["link"]) if kw["link"] in text else None
+        paras, _foot = ob_mailhtml.split_body(text)
+        htmls.append(dict(lang=lang, paragraphs=paras, button=btn, item=mail_item_pic(item, lang),
+                          typed=(kw["couple"], kw["item"], kw["title"])))
+    html = ob_mailhtml.safe_html(htmls[0]["lang"], htmls[0]["paragraphs"], button=htmls[0]["button"],
+                                 item=htmls[0]["item"], typed=htmls[0]["typed"],
+                                 also=htmls[1] if len(htmls) > 1 else None)
+    send_mail(claim["guest_email"], parts[0][0], "\n\n— — —\n\n".join(b for _, b in parts), html=html)
     return True
 
 
@@ -340,6 +382,7 @@ def send_guest_link(db, claim_id, token, to, lang):
     else:
         item_label = _t("gift_cash", lang)
     kw = dict(couple=couple, item=item_label, link=ext_url("guest_manage", token=token))
+    store_btn = None
     if c["status"] != "reserved":  # a general cash gift is recorded as already reported
         body = _t("mail_guest_cash_body", lang).format(**kw)
     else:
@@ -357,12 +400,18 @@ def send_guest_link(db, claim_id, token, to, lang):
                 store_part=store_part, store_link=ext_url("go_item", item_id=item["id"]),
                 address=(_t("mail_guest_address", lang).format(address=address) if address
                          else _t("mail_guest_no_address", lang)))
+            store_btn = (_t("mail_btn_store", lang).format(store=store) if store
+                         else _t("mail_btn_store_plain", lang), ext_url("go_item", item_id=item["id"]))
         else:
             nxt = _t("mail_guest_next_plain", lang)
         held = (_t("mail_guest_held", lang).format(date=format_date(c["expires_at"][:10], lang))
                 if c["expires_at"] else "")
         body = _t("mail_guest_manage_body", lang).format(next=nxt, held=held, **kw)
-    send_mail(to, _t("mail_guest_manage_subj", lang).format(**kw), body)
+    buttons = ([store_btn] if store_btn else []) + [(_t("mail_btn_gift_page", lang), kw["link"])]
+    html = mail_html(lang, body, button=buttons, item=item,
+                     typed=(couple, item_label, (item["store"] if item is not None else ""),
+                            (reg["delivery_note_he"] if he and reg["delivery_note_he"] else reg["delivery_note"])))
+    send_mail(to, _t("mail_guest_manage_subj", lang).format(**kw), body, html=html)
 
 
 # ---------------------------------------------------------------- database
@@ -899,12 +948,12 @@ _ILLUSTRATION_RULES = (
     (("dinnerware", "plates", "porcelain", "צלחות", "כלי אוכל"), "dinnerware"),
     (("cutlery", "knife", "knives", "סכו", "סכין"), "cutlery"),
     (("glassware", "wine", "pitcher", "carafe", "כוסות", "יין"), "glassware"),
-    (("pots", "frying pan", "סירים", "מחבת"), "pots"),
+    (("pots", "frying pan", "cast-iron", "cast iron", "dutch", "deep fryer", "סירים", "מחבת", "סיר לחם", "סיר טיגון"), "pots"),
     (("table", "chairs", "שולחן", "כיסא"), "table"),
     (("sheet", "duvet", "blanket", "pillow", "bedspread", "mattress", "linen", "מצעים", "שמיכ", "כרית"), "bedding"),
     (("fridge", "freezer", "מקרר", "מקפיא"), "fridge"),
     (("washing", "washer", "dryer", "dishwasher", "מכונת כביסה", "מדיח", "מייבש"), "washer"),
-    (("oven", "microwave", "toaster", "air fryer", "תנור", "מיקרוגל", "טוסטר"), "oven"),
+    (("oven", "microwave", "toaster", "air fryer", "bread maker", "תנור", "מיקרוגל", "טוסטר", "אופה לחם"), "oven"),
     (("blender", "food processor", "בלנדר", "מעבד מזון"), "blender"),
     (("coffee", "frother", "קפה"), "coffee"),
     (("vacuum", "sponja", "broom", "שואב", "ספונג"), "cleaning"),
@@ -1072,6 +1121,7 @@ def inject_globals():
         guide_cta=guide_cta,
         gift_status=gift_status,
         illustration_for=illustration_for,
+        option_count=option_count,
         fmt_date=lambda iso: fmt_date(iso, lang),
         canonical_url=canonical_url,
         alt_urls=alt_urls,
@@ -1399,6 +1449,7 @@ def catalog_page():
     price = request.args.get("price", "")
     kind = request.args.get("kind", "")
     sort = request.args.get("sort", "")
+    tier = request.args.get("tier", "")
     try:
         page = max(1, int(request.args.get("page", 1)))
     except ValueError:
@@ -1426,6 +1477,11 @@ def catalog_page():
         params.append(kind)
     else:
         kind = ""
+    if tier in ob_db.TIERS:
+        sql += " AND tier=?"
+        params.append(tier)
+    else:
+        tier = ""
     order = CATALOG_SORTS.get(sort)
     if order is None:
         sort, order = "", CATALOG_SORTS[""]
@@ -1443,15 +1499,15 @@ def catalog_page():
             "SELECT catalog_id FROM registry_items WHERE registry_id=?"
             " AND catalog_id IS NOT NULL", (reg["id"],))}
     filters = dict(cat=cat or None, q=q or None, price=price or None, kind=kind or None,
-                   sort=sort or None)
+                   sort=sort or None, tier=tier or None)
     # nothing found because of a filter on top of the search: offer the matches without it
     unfiltered = 0
-    if q and not total and (cat or price or kind):
+    if q and not total and (cat or price or kind or tier):
         clause, qparams = ob_search.search_clause(q)
         unfiltered = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1" + clause,
                                 qparams).fetchone()[0]
     return render_template("catalog.html", items=items, cat=cat, q=q, price=price, kind=kind,
-                           unfiltered=unfiltered,
+                           tier=tier, tiers=ob_db.TIERS, unfiltered=unfiltered,
                            sort=sort, page=page, pages=pages, total=total, filters=filters,
                            price_bands=CATALOG_PRICE_BANDS, have=have, has_reg=bool(reg))
 
@@ -1528,6 +1584,37 @@ def _item_description(item, lang):
     return out[:ITEM_DESC_MAX]
 
 
+_TIER_RANK = {t_: i for i, t_ in enumerate(ob_db.TIERS)}
+
+
+def option_group_items(db, item):
+    """Active catalog rows that are alternatives to `item` (same non-empty option_group), the item
+    itself included, ordered basic -> standard -> premium, then by price. [] when there are none."""
+    grp = (item["option_group"] if "option_group" in item.keys() else "") or ""
+    if not grp:
+        return []
+    rows = db.execute("SELECT * FROM catalog_items WHERE active=1 AND option_group=?", (grp,)).fetchall()
+    rows.sort(key=lambda r: (_TIER_RANK.get(r["tier"], 1), r["price_nis"] or 0, r["sort"] or 0, r["id"]))
+    return rows if len(rows) > 1 and any(r["id"] == item["id"] for r in rows) else []
+
+
+def option_count(item):
+    """How many active catalog items are alternatives for `item` (itself included); 0 when it has
+    none. Jinja global for the card line "1 of N options"; one grouped query per request."""
+    try:
+        grp = item["option_group"] if "option_group" in item.keys() else ""
+    except (AttributeError, TypeError):
+        return 0
+    if not grp:
+        return 0
+    if not hasattr(g, "_option_counts"):
+        g._option_counts = {r[0]: r[1] for r in get_db().execute(
+            "SELECT option_group, COUNT(*) FROM catalog_items WHERE active=1 AND option_group != ''"
+            " GROUP BY option_group")}
+    n = g._option_counts.get(grp, 0)
+    return n if n > 1 else 0
+
+
 @app.route("/catalog/<slug>")
 def catalog_item(slug):
     db = get_db()
@@ -1540,9 +1627,12 @@ def catalog_item(slug):
     band_key = _band_of(price) if price else None
     band_slug = next((s for s, k in IDEAS_BANDS.items() if k == band_key), None)
     guide_obj = ob_guides.BY_SLUG.get(ITEM_GUIDES.get(cat, ""))
+    options = option_group_items(db, item)
+    shown = [r["id"] for r in options] or [item["id"]]
     more = db.execute(
-        "SELECT * FROM catalog_items WHERE active=1 AND category=? AND id != ?"
-        " ORDER BY ABS(price_nis - ?), sort, id LIMIT 4", (item["category"], item["id"], price)).fetchall()
+        "SELECT * FROM catalog_items WHERE active=1 AND category=? AND id NOT IN (%s)"
+        " ORDER BY ABS(price_nis - ?), sort, id LIMIT 4" % ",".join("?" * len(shown)),
+        (item["category"], *shown, price)).fetchall()
     reg = user_registry()
     have = set()
     if reg:
@@ -1551,7 +1641,7 @@ def catalog_item(slug):
             (reg["id"],))}
     return render_template(
         "catalog_item.html", item=item, slug=catalog_slug(item), cat=cat, band_key=band_key,
-        band_slug=band_slug, guide_obj=guide_obj, more=more, have=have, has_reg=bool(reg),
+        band_slug=band_slug, guide_obj=guide_obj, more=more, options=options, have=have, has_reg=bool(reg),
         meta_desc=_item_description(item, lang),
         offer_ok=(item["price_status"] == "verified" and bool(item["url"]) and price > 0))
 
@@ -1737,12 +1827,16 @@ def contact():
                 ((request.form.get("name") or "").strip()[:120],
                  (request.form.get("email") or "").strip()[:200],
                  (request.form.get("topic") or "general")[:40], body[:4000]))
+            c_from = f"From: {request.form.get('name', '')} <{request.form.get('email', '')}>"
             send_mail(
                 NOTIFY_EMAIL,
                 f"OurBayis contact: {(request.form.get('topic') or 'general')}",
-                f"From: {request.form.get('name', '')} <{request.form.get('email', '')}>\n\n"
+                f"{c_from}\n\n"
                 f"{body[:4000]}\n\nAdmin: {ext_url('admin_home')}",
-                reply_to=(request.form.get("email") or "").strip())
+                reply_to=(request.form.get("email") or "").strip(),
+                html=ob_mailhtml.safe_html(
+                    "en", [c_from, body[:4000]], button=(_t("mail_btn_admin", "en"), ext_url("admin_home")),
+                    typed=(request.form.get("name"), request.form.get("email"), body[:4000])))
             flash(_t("contact_done", current_lang()), "ok")
             return redirect(url_for("contact"))
     return render_template("contact.html")
@@ -2188,7 +2282,7 @@ def signup():
                 cur = db.execute(
                     "INSERT INTO users (email, pw_hash, name) VALUES (?,?,?)",
                     (email, generate_password_hash(pw), name))
-                _fresh_session("pending_add", "pending_join")
+                _fresh_session("pending_add", "pending_join", "pending_link")
                 session["uid"] = cur.lastrowid
                 session["sv"] = 1
                 db.execute("UPDATE users SET lang=? WHERE id=?", (current_lang(), cur.lastrowid))
@@ -2213,7 +2307,7 @@ def login():
         row = get_db().execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
         if row and check_password_hash(row["pw_hash"], pw):
             nxt = ob_security.safe_next(request.form.get("next") or request.args.get("next", ""))
-            _fresh_session("pending_join")
+            _fresh_session("pending_join", "pending_link")
             session["uid"] = row["id"]
             session["sv"] = row["session_ver"]
             get_db().execute("UPDATE users SET lang=? WHERE id=?", (current_lang(), row["id"]))
@@ -2253,8 +2347,10 @@ def forgot():
                 db.execute(
                     "INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES (?,?,?)",
                     (user["id"], ob_security.hash_token(token), expires_at))
-            send_mail(email, _t("mail_reset_subj", lang),
-                      _t("mail_reset_body", lang).format(link=ext_url("reset_password", token=token)))
+            reset_link = ext_url("reset_password", token=token)
+            reset_body = _t("mail_reset_body", lang).format(link=reset_link)
+            send_mail(email, _t("mail_reset_subj", lang), reset_body,
+                      html=mail_html(lang, reset_body, button=(_t("mail_btn_reset", lang), reset_link)))
         # same message either way, so the form can't be used to probe for accounts
         flash(_t("forgot_sent", lang), "ok")
         return redirect(url_for("login"))
@@ -2776,9 +2872,10 @@ def _save_registry(reg):
             if owner and owner["email"]:
                 links = ("\n".join(u for u in (pay["paypal_url"], pay["stripe_url"], pay["bit_url"]) if u)
                          or _t("mail_paylinks_none", lang))
-                send_mail(owner["email"], _t("mail_paylinks_subj", lang),
-                          _t("mail_paylinks_body", lang).format(links=links,
-                                                                 contact=ext_url("contact")))
+                pl_body = _t("mail_paylinks_body", lang).format(links=links, contact=ext_url("contact"))
+                send_mail(owner["email"], _t("mail_paylinks_subj", lang), pl_body,
+                          html=mail_html(lang, pl_body,
+                                         button=(_t("mail_btn_contact", lang), ext_url("contact"))))
         flash(_t("r_saved", lang), "ok")
         _flash_date_note(event_type, event_date, reg["event_date"], lang)
         return redirect(url_for("dashboard"))
@@ -2803,6 +2900,9 @@ def _save_registry(reg):
     track("registry_created")
     flash(_t("r_created", lang), "ok")
     _flash_date_note(event_type, event_date, "", lang)
+    pending_link = session.pop("pending_link", None)  # they came from an "Add to OurBayis" button/share
+    if pending_link:
+        return redirect(url_for("add_from_link", url=pending_link))
     return redirect(url_for("items_manage"))
 
 
@@ -2977,6 +3077,57 @@ def items_lookup():
     return redirect(url_for("items_manage", _anchor="custom"))
 
 
+_SHARE_URL_RE = re.compile(r"https?://[^\s<>\"'`]+", re.I)
+_WHOLE_URL_RE = re.compile(r"https?://\S+", re.I)
+
+
+def link_from_share(url="", text="", title=""):
+    """The product link from /add's query: `url` when it is one web address on its own, else the
+    first http(s) address inside `url`/`text`/`title` (Android share sheets often put the link in
+    `text` with words around it). '' when there is none. It is only ever shown escaped and carried
+    in a hidden field; the fetch (and its SSRF checks) happens in ob_linkinfo on the POST."""
+    url = (url or "").strip()
+    if len(url) <= 2000 and _WHOLE_URL_RE.fullmatch(url):
+        return url
+    for part in (url, text, title):
+        m = _SHARE_URL_RE.search((part or "")[:4000])
+        if m:
+            return m.group(0).rstrip(".,;:!?")[:2000]
+    return ""
+
+
+@app.route("/add")
+def add_from_link():
+    """Landing page for the "Add to OurBayis" bookmarklet and the phone share sheet. GET only
+    shows a confirmation (nothing is fetched here); its button POSTs the link to items_lookup.
+    The link rides through login / signup / registry creation in session['pending_link']
+    (login_required's `next` keeps only the path, not the query)."""
+    link = link_from_share(request.args.get("url"), request.args.get("text"), request.args.get("title"))
+    if not link and current_user() and session.get("pending_link"):
+        return redirect(url_for("add_from_link", url=session.pop("pending_link")))
+    if not current_user():
+        if link:
+            session["pending_link"] = link
+        return redirect(url_for("login", next=url_for("add_from_link")))
+    session.pop("pending_link", None)
+    if not user_registry():
+        if link:
+            session["pending_link"] = link
+        return redirect(url_for("registry_new"))
+    return render_template("add_link.html", link=link)
+
+
+def bookmarklet_href():
+    """javascript: bookmark that opens /add for the page being viewed, in a new tab. Percent-encoded
+    so it is a valid href; dragged to the bookmarks bar, a browser stores the decoded script."""
+    code = ("(function(){window.open('" + ext_url("add_from_link") +
+            "?url='+encodeURIComponent(location.href),'_blank','noopener')})()")
+    return "javascript:" + quote(code, safe="(){}'+/:.?=,;_-")
+
+
+app.jinja_env.globals["bookmarklet_href"] = bookmarklet_href
+
+
 def _catalog_price_news(db, items):
     """{registry_item_id: catalog row} for items whose catalog product (same link) has a newer
     checked price than the one on the couple's list. The registry price is the couple's
@@ -3071,7 +3222,7 @@ def items_add():
         return redirect(url_for("gift_category", cat_slug=request.args["cat_slug"])
                         + (f"#c-{cat_id}" if cat_id else ""))
     if request.args.get("back") == "catalog":
-        keep ={k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "page")
+        keep ={k: request.args.get(k) for k in ("cat", "q", "price", "kind", "sort", "tier", "page")
                 if request.args.get(k)}
         return redirect(url_for("catalog_page", **keep) + (f"#c-{cat_id}" if cat_id else ""))
     return redirect(url_for("items_manage", cat=request.args.get("cat", ""),
@@ -4122,7 +4273,7 @@ def digest_lines(db, reg, lang, since):
 
 
 def digest_mail(db, user, reg, now):
-    """(subject, body) of one person's weekly summary, or None when there's nothing to say."""
+    """(subject, text body, html) of one person's weekly summary, or None when there's nothing to say."""
     lang = user["lang"] if user["lang"] in ("en", "he") else "en"
     week_ago = (now - timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
     since = max(user["digest_at"] or week_ago, week_ago)
@@ -4134,10 +4285,16 @@ def digest_mail(db, user, reg, now):
     head = _t("digest_intro", lang)
     if days is not None and 0 < days <= DIGEST_SOON_DAYS:
         head += " " + (_t("digest_days_one", lang) if days == 1 else tf("digest_days", lang, n=days))
+    dash, thanks = ext_url("dashboard") + q, ext_url("dashboard_thanks") + q
+    off = tf("digest_off", lang, link=ext_url("digest_off", token=_digest_signer().dumps(user["id"])) + q)
     body = "\n".join([head, ""] + ["• " + ln for ln in lines] + [
-        "", tf("digest_links", lang, dashboard=ext_url("dashboard") + q, thanks=ext_url("dashboard_thanks") + q),
-        "", tf("digest_off", lang, link=ext_url("digest_off", token=_digest_signer().dumps(user["id"])) + q)])
-    return tf("digest_subj", lang, title=title), body
+        "", tf("digest_links", lang, dashboard=dash, thanks=thanks), "", off])
+    # the two "Your dashboard / Thank-you notes" links become the buttons, so the paragraphs skip that block
+    html = ob_mailhtml.safe_html(
+        lang, [head, "\n".join("• " + ln for ln in lines)],
+        button=[(_t("mail_btn_dashboard", lang), dash), (_t("mail_btn_thanks", lang), thanks)],
+        footer=off)
+    return tf("digest_subj", lang, title=title), body, html
 
 
 def send_digests(db, now=None):
@@ -4159,7 +4316,7 @@ def send_digests(db, now=None):
             continue
         with ob_db.write_txn(db):  # mark first, then queue: a crash loses one summary, never repeats it
             db.execute("UPDATE users SET digest_at=? WHERE id=?", (now.strftime("%Y-%m-%d %H:%M:%S"), person["id"]))
-            ob_mail.enqueue(db, person["email"], *mail)
+            ob_mail.enqueue(db, person["email"], mail[0], mail[1], html=mail[2])
         sent += 1
     return sent
 
@@ -4298,9 +4455,9 @@ def shana():
                  f.get("budget") if f.get("budget") in SHANA_BUDGETS else "",
                  bundle_slug,
                  (f.get("notes") or "").strip()[:2000], lang, wanted_list))
-            send_mail(
-                NOTIFY_EMAIL,
-                f"{'[RUSH] ' if rush else ''}New shana rishonah lead: {name} ({bundle_slug})",
+            lead_subject = f"{'[RUSH] ' if rush else ''}New shana rishonah lead: {name} ({bundle_slug})"
+            lead_admin = ext_url('admin_home')
+            lead_text = (
                 f"Name: {name}\nWhatsApp: {f.get('whatsapp', '')}\nEmail: {email}\n"
                 f"Arrival: {f.get('arrival', '')}"
                 + (f" — {days_left} days away (package lead time {lead_weeks} weeks)" if rush else "")
@@ -4309,8 +4466,12 @@ def shana():
                 f"Budget: {budget_label(f.get('budget'))}\nBundle: {bundle_slug}\n"
                 f"Notes: {f.get('notes', '')}\n"
                 + (f"\nList from the cost calculator:\n{wanted_list}\n" if wanted_list else "")
-                + f"\nAdmin: {ext_url('admin_home')}",
-                reply_to=email)
+                + f"\nAdmin: {lead_admin}")
+            send_mail(NOTIFY_EMAIL, lead_subject, lead_text, reply_to=email,
+                      html=ob_mailhtml.safe_html(
+                          "en", [lead_text.replace(f"\nAdmin: {lead_admin}", "")],
+                          button=(_t("mail_btn_admin", "en"), lead_admin),
+                          typed=(name, email, f.get("notes"), f.get("city"), f.get("neighborhood"))))
             if f.get("with_list"):
                 session.pop("shana_list", None)
             track("concierge_inquiry")
@@ -4640,7 +4801,9 @@ def _catalog_form_values(f):
             (f.get("price_checked_at") or "").strip()[:20], (f.get("price_source") or "").strip()[:200],
             f.get("availability") if f.get("availability") in CATALOG_AVAILABILITY else "unknown",
             (f.get("notes") or "").strip()[:1000], (f.get("notes_he") or "").strip()[:1000],
-            f.get("starter_group") or "", (f.get("model_he") or "").strip()[:160])
+            f.get("starter_group") or "", (f.get("model_he") or "").strip()[:160],
+            re.sub(r"[^a-z0-9-]+", "-", (f.get("option_group") or "").strip().lower()).strip("-")[:60],
+            f.get("tier") if f.get("tier") in ob_db.TIERS else "standard")
     if not vals[0]:
         errors.append("Name is required")
     return vals, errors
@@ -4667,7 +4830,7 @@ def admin_catalog_edit(item_id=None):
                 "UPDATE catalog_items SET name=?, name_he=?, brand=?, category=?, price_nis=?,"
                 " store=?, url=?, image=?, active=?, featured=?, sort=?, kind=?, model=?, variant=?,"
                 " image_credit=?, price_status=?, price_checked_at=?, price_source=?, availability=?,"
-                " notes=?, notes_he=?, starter_group=?, model_he=?, updated_at=? WHERE id=?",
+                " notes=?, notes_he=?, starter_group=?, model_he=?, option_group=?, tier=?, updated_at=? WHERE id=?",
                 vals + (datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S"), item_id))
             if n_registry_refs:
                 flash("Changes here don't rewrite gifts already copied to registries — "
@@ -4677,8 +4840,8 @@ def admin_catalog_edit(item_id=None):
             db.execute(
                 "INSERT INTO catalog_items (name, name_he, brand, category, price_nis, store, url,"
                 " image, active, featured, sort, kind, model, variant, image_credit, price_status,"
-                " price_checked_at, price_source, availability, notes, notes_he, starter_group, model_he, seed_key)"
-                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals + (None,))
+                " price_checked_at, price_source, availability, notes, notes_he, starter_group, model_he, option_group, tier, seed_key)"
+                " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", vals + (None,))
             return redirect(url_for("admin_catalog"))
     return render_template("admin_catalog_form.html", row=row, n_registry_refs=n_registry_refs)
 
@@ -4704,7 +4867,7 @@ def admin_catalog_csv():
     w = csv.writer(buf)
     cols = ("seed_key", "id", "name", "name_he", "brand", "category", "price_nis", "store", "url",
            "image", "kind", "active", "featured", "sort", "price_status", "price_checked_at",
-           "price_source", "starter_group")
+           "price_source", "starter_group", "option_group", "tier")
     w.writerow(cols)
     for r in get_db().execute("SELECT * FROM catalog_items ORDER BY category, sort"):
         w.writerow([csv_safe(r[c]) for c in cols])
@@ -4716,7 +4879,7 @@ def admin_catalog_csv():
 
 _CSV_IMPORT_FIELDS = ("name", "name_he", "brand", "category", "price_nis", "store", "url", "image",
                       "kind", "active", "featured", "sort", "price_status", "price_checked_at",
-                      "price_source", "starter_group")
+                      "price_source", "starter_group", "option_group", "tier")
 
 
 @app.route("/admin/catalog/import", methods=["GET", "POST"])
@@ -4786,6 +4949,10 @@ def _catalog_csv_diff(db, reader, write):
                     continue
             elif field in ("active", "featured"):
                 new_val = 1 if str(new_val).strip() in ("1", "true", "True") else 0
+            elif field == "tier":
+                new_val = new_val.strip().lower() if new_val.strip().lower() in ob_db.TIERS else "standard"
+            elif field == "option_group":
+                new_val = re.sub(r"[^a-z0-9-]+", "-", new_val.strip().lower()).strip("-")[:60]
             old_val = existing[field] if field in existing.keys() else None
             if old_val != new_val:
                 diffs.append((existing["id"], existing["name"], field, old_val, new_val))
@@ -5224,6 +5391,110 @@ def _mask_email(addr):
         return "***"
     local, _, domain = addr.partition("@")
     return (local[:1] or "*") + "***@" + domain
+
+
+MAIL_PREVIEW_KINDS = [
+    ("reserved_item", "Couple: a gift was reserved"), ("reserved_cash", "Couple: a gift reserved, guest will send money"),
+    ("reserved_chip", "Couple: a chip-in was pledged"), ("reported", "Couple: guest says the gift is on its way"),
+    ("cash", "Couple: a cash gift was sent"), ("bracha", "Couple: a bracha arrived"),
+    ("member_joined", "Owner: a helper joined"), ("owner_moved", "New owner: ownership moved to you"),
+    ("guest_manage", "Guest: reservation with a store link"), ("guest_cash", "Guest: cash gift thank-you"),
+    ("guest_received", "Guest: your gift arrived"), ("guest_released", "Guest: reservation released"),
+    ("remind", "Guest: gentle reminder"), ("reset", "Password reset"), ("paylinks", "Payment links changed"),
+    ("digest", "Weekly summary"), ("lead", "Site owner: new shana lead"), ("contact", "Site owner: contact message"),
+]
+
+
+def _mail_preview_html(db, kind, lang):
+    """The designed HTML of one email type filled with sample data (nothing is sent or stored)."""
+    he = lang == "he"
+    pic = db.execute("SELECT * FROM catalog_items WHERE image LIKE 'https://%' ORDER BY id LIMIT 1").fetchone()
+    row = dict(pic) if pic else {"name": "Electric kettle", "name_he": "קומקום חשמלי", "image": "", "store": "KSP"}
+    store = (row.get("store") or "KSP").strip() or "KSP"
+    iname = row["name_he"] if he and row.get("name_he") else row["name"]
+    guest, couple, title = ("דינה" if he else "Aunt Malka"), ("דינה ויוסי" if he else "Dina & Yossi"), ("הבית שלנו" if he else "Our Home")
+    dash, reg_link = ext_url("dashboard"), ext_url("registry", slug="sample") + ("?lang=he" if he else "")
+    gm = "מזל טוב מכולנו!" if he else "Mazel tov from all of us!"
+    kw = dict(name=guest, item=iname, title=title, couple=couple, link=reg_link, msg=_t("mail_reserved_msg", lang).format(msg=gm),
+              note=_t("mail_reported_note", lang).format(note=gm), amount=ob_money.fmt_minor(18000, "ILS", lang),
+              message=gm, email="helper@example.com")
+    if kind in ("reserved_item", "reserved_cash", "reserved_chip", "reported", "cash", "bracha", "member_joined", "owner_moved"):
+        key = {"reserved_item": "mail_reserved_item", "reserved_cash": "mail_reserved_cash", "reserved_chip": "mail_reserved_chip",
+               "reported": "mail_reported", "cash": "mail_cash", "bracha": "mail_bracha",
+               "member_joined": "mail_member_joined", "owner_moved": "mail_owner_moved"}[kind]
+        footer = _t("mail_owner_footer", lang).format(link=dash)
+        body = _t(key + "_body", lang).format(**kw) + "\n\n" + footer
+        has_item = kind in ("reserved_item", "reserved_cash", "reserved_chip", "reported")
+        return mail_html(lang, body, button=(_t("mail_btn_dashboard", lang), dash), footer=footer,
+                         item=row if has_item else None, typed=(guest, iname, gm, title))
+    if kind in ("guest_received", "guest_released", "guest_cash"):
+        body = _t({"guest_received": "mail_guest_received_body", "guest_released": "mail_guest_released_body",
+                   "guest_cash": "mail_guest_cash_body"}[kind] + "", lang).format(**kw)
+        if kind == "guest_cash":
+            gl = ext_url("guest_manage", token="sample")
+            body = _t("mail_guest_cash_body", lang).format(couple=couple, link=gl)
+            return mail_html(lang, body, button=(_t("mail_btn_gift_page", lang), gl), typed=(couple,))
+        btn = (_t("mail_btn_registry", lang), reg_link) if reg_link in body else None
+        return mail_html(lang, body, button=btn, item=row, typed=(couple, iname, title))
+    if kind == "guest_manage":
+        gl, sl = ext_url("guest_manage", token="sample"), ext_url("go_item", item_id=1)
+        store_part = f" ב-{store}" if he else f" from {store}"
+        nxt = _t("mail_guest_next_store", lang).format(
+            store_part=store_part, store_link=sl,
+            address=_t("mail_guest_address", lang).format(address="Nachal Dolev 12, Ramat Beit Shemesh"))
+        held = _t("mail_guest_held", lang).format(date=format_date("2026-12-25", lang))
+        body = _t("mail_guest_manage_body", lang).format(next=nxt, held=held, couple=couple, item=iname, link=gl)
+        return mail_html(lang, body, button=[(_t("mail_btn_store", lang).format(store=store), sl),
+                                             (_t("mail_btn_gift_page", lang), gl)], item=row, typed=(couple, iname, store))
+    if kind == "remind":
+        body = _t("mail_remind_body", lang).format(item=iname, title=title, link=reg_link,
+                                                    until=format_date("2026-12-25", lang))
+        return mail_html(lang, body, button=(_t("mail_btn_registry", lang), reg_link), item=row, typed=(iname, title))
+    if kind == "reset":
+        rl = ext_url("reset_password", token="sample")
+        return mail_html(lang, _t("mail_reset_body", lang).format(link=rl), button=(_t("mail_btn_reset", lang), rl))
+    if kind == "paylinks":
+        cl = ext_url("contact")
+        body = _t("mail_paylinks_body", lang).format(links="https://paypal.me/sample", contact=cl)
+        return mail_html(lang, body, button=(_t("mail_btn_contact", lang), cl))
+    if kind == "digest":
+        lines = [tf("digest_new_gifts", lang, n=3), _t("digest_brachos_one", lang), tf("digest_confirm", lang, n=2)]
+        off = tf("digest_off", lang, link=ext_url("digest_off", token="sample"))
+        return ob_mailhtml.safe_html(
+            lang, [_t("digest_intro", lang) + " " + tf("digest_days", lang, n=12), "\n".join("• " + x for x in lines)],
+            button=[(_t("mail_btn_dashboard", lang), dash), (_t("mail_btn_thanks", lang), ext_url("dashboard_thanks"))],
+            footer=off)
+    if kind == "lead":
+        return ob_mailhtml.safe_html(
+            "en", ["Name: Rivka Levi\nWhatsApp: +1 555 0100\nEmail: rivka@example.com\nArrival: 2027-01-10\nCity: Jerusalem\n"
+                   "Budget: up to ₪15,000\nBundle: starter-apartment\nNotes: Two bedrooms, arriving with two kids."],
+            button=(_t("mail_btn_admin", "en"), ext_url("admin_home")))
+    if kind == "contact":
+        return ob_mailhtml.safe_html(
+            "en", ["From: Rivka Levi <rivka@example.com>", "Hi, how do I add a gift from a store you don't list?"],
+            button=(_t("mail_btn_admin", "en"), ext_url("admin_home")))
+    return None
+
+
+@app.route("/admin/mail-preview")
+@admin_required
+def admin_mail_preview():
+    return render_template("admin_mail_preview.html", kinds=MAIL_PREVIEW_KINDS)
+
+
+@app.route("/admin/mail-preview/<kind>")
+@admin_required
+def admin_mail_preview_kind(kind):
+    if kind not in dict(MAIL_PREVIEW_KINDS):
+        abort(404)
+    lang = "he" if request.args.get("lang") == "he" else "en"
+    html = _mail_preview_html(get_db(), kind, lang)
+    if not html:
+        abort(404)
+    resp = app.make_response(html)
+    resp.headers["Content-Type"] = "text/html; charset=utf-8"
+    resp.headers["X-Robots-Tag"] = "noindex"
+    return resp
 
 
 @app.route("/admin/outbox/<int:mail_id>/retry", methods=["POST"])

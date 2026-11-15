@@ -1,0 +1,19 @@
+{
+  "name": "OurBayis",
+  "short_name": "OurBayis",
+  "description": "A gift registry for setting up a home in Israel.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf6ec",
+  "theme_color": "#223354",
+  "icons": [
+    {"src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ],
+  "share_target": {
+    "action": "/add",
+    "method": "GET",
+    "params": {"url": "url", "text": "text", "title": "title"}
+  }
+}

@@ -57,6 +57,14 @@
             {% endfor %}
           </select>
         </label>
+        <label>Option group (slug shared by alternatives, e.g. pillow)<input name="option_group" maxlength="60" value="{{ row['option_group'] if row and 'option_group' in row.keys() else '' }}"></label>
+        <label>Tier (only meaningful inside a group)
+          <select name="tier">
+            {% for tr in ('basic','standard','premium') %}
+            <option value="{{ tr }}" {% if (row['tier'] if row and 'tier' in row.keys() else 'standard') == tr %}selected{% endif %}>{{ tr }}</option>
+            {% endfor %}
+          </select>
+        </label>
       </div>
       <label>Store link<input name="url" maxlength="500" placeholder="https://…" value="{{ row['url'] if row else '' }}"></label>
       <label>Image URL (optional)<input name="image" maxlength="500" placeholder="https://…" value="{{ row['image'] if row else '' }}"></label>

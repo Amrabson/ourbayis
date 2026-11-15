@@ -31,19 +31,29 @@ def configured():
     return bool(host and user and pw)
 
 
-def send_now(to, subject, body, reply_to=""):
-    """Send one message synchronously; raises on any SMTP/socket error.
-    Port 465 uses implicit TLS, anything else STARTTLS (587 is the default)."""
-    host, port, user, pw = _smtp_config()
-    if not (host and user and pw):
-        raise RuntimeError("SMTP not configured (OB_SMTP_HOST / OB_SMTP_USER / OB_SMTP_PASS)")
+def build_message(sender, to, subject, body, reply_to="", html=None):
+    """The EmailMessage for one send (no socket): the text body always, plus a designed HTML
+    alternative (multipart/alternative) when `html` is given. Rows queued before HTML existed
+    have none and go out as plain text."""
     msg = EmailMessage()
-    msg["From"] = formataddr((os.environ.get("OB_MAIL_FROM_NAME", "OurBayis"), user))
+    msg["From"] = formataddr((os.environ.get("OB_MAIL_FROM_NAME", "OurBayis"), sender))
     msg["To"] = to
     msg["Subject"] = subject
     if reply_to and ob_security.valid_email(reply_to):
         msg["Reply-To"] = reply_to
     msg.set_content(body)
+    if html:
+        msg.add_alternative(html, subtype="html")
+    return msg
+
+
+def send_now(to, subject, body, reply_to="", html=None):
+    """Send one message synchronously; raises on any SMTP/socket error.
+    Port 465 uses implicit TLS, anything else STARTTLS (587 is the default)."""
+    host, port, user, pw = _smtp_config()
+    if not (host and user and pw):
+        raise RuntimeError("SMTP not configured (OB_SMTP_HOST / OB_SMTP_USER / OB_SMTP_PASS)")
+    msg = build_message(user, to, subject, body, reply_to, html)
     if port == 465:
         with smtplib.SMTP_SSL(host, port, timeout=15) as s:
             s.login(user, pw)
@@ -59,10 +69,11 @@ def _now_iso():
     return datetime.now(timezone.utc).replace(tzinfo=None).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def enqueue(db, to, subject, body, db_path=None, reply_to=""):
+def enqueue(db, to, subject, body, db_path=None, reply_to="", html=None):
     """Insert a queued row and, if SMTP is configured, kick off a best-effort
     background attempt on its own connection. Returns the row id (None if `to`
-    isn't one valid address). `reply_to` is kept only if it's one valid address."""
+    isn't one valid address). `reply_to` is kept only if it's one valid address. `html` is the
+    optional designed version, stored in `body_html` and sent beside the text."""
     to = (to or "").strip()
     if not ob_security.valid_email(to):
         return None  # empty, or not exactly one address — never queue a multi-recipient send
@@ -72,9 +83,9 @@ def enqueue(db, to, subject, body, db_path=None, reply_to=""):
         reply_to = ""
     with ob_db.write_txn(db):
         cur = db.execute(
-            "INSERT INTO mail_outbox (to_addr, subject, body, status, next_attempt_at, reply_to)"
-            " VALUES (?,?,?, 'queued', ?, ?)",
-            (to, subject, body, _now_iso(), reply_to))
+            "INSERT INTO mail_outbox (to_addr, subject, body, status, next_attempt_at, reply_to, body_html)"
+            " VALUES (?,?,?, 'queued', ?, ?, ?)",
+            (to, subject, body, _now_iso(), reply_to, html or None))
         row_id = cur.lastrowid
     host, port, user, pw = _smtp_config()
     if host and user and pw:
@@ -111,7 +122,8 @@ def attempt(db, row_id):
         return
     try:
         send_now(row["to_addr"], row["subject"], row["body"],
-                 reply_to=row["reply_to"] if "reply_to" in row.keys() else "")
+                 reply_to=row["reply_to"] if "reply_to" in row.keys() else "",
+                 html=row["body_html"] if "body_html" in row.keys() else None)
         with ob_db.write_txn(db):
             db.execute("UPDATE mail_outbox SET status='sent', sent_at=?, last_error='' WHERE id=?",
                        (_now_iso(), row_id))

@@ -126,7 +126,16 @@
       {%- endif -%}
       <h3 dir="auto">{% if _page and mode == 'catalog' %}<a class="gift-name-link" href="{{ _page }}">{{ pick(item, 'name') }}</a>{% else %}{{ pick(item, 'name') }}{% endif %}</h3>
       {{ price_line(item) }}
+      {%- if mode in ('catalog', 'link') -%}
+        {%- set _on = option_count(item) -%}
+        {%- if _on -%}
+        <p class="gift-options">{% if _page and mode == 'catalog' %}<a href="{{ _page }}#options" aria-label="{{ tf('opt_count_aria', n=_on) }}">{{ tf('opt_count', n=_on) }}</a>{% else %}{{ tf('opt_count', n=_on) }}{% endif %}</p>
+        {%- endif -%}
+      {%- endif -%}
       {{ gift_facts(item) }}
+      {%- if mode in ('catalog', 'link') and 'tier' in item.keys() and item['tier'] in ('premium', 'basic') %}
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-{{ item['tier'] }}">{{ t('tier_' ~ item['tier']) }}</span></p>
+      {%- endif -%}
       {%- if st %}{{ qty_line(st) }}{% endif -%}
       {%- if st and st.chip and mode in ('registry', 'sample') %}{{ chip_progress(st) }}{% endif -%}
 

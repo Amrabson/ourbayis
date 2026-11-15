@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-11-16 (designed emails; add from any store)
+- **HTML emails**: every email now has an HTML part beside the unchanged text (multipart/alternative).
+  `ob_mail.enqueue(..., html=)` → `mail_outbox.body_html` [m37] → `ob_mail.build_message()`; old rows send text-only.
+  Layout `templates/email/base.html` (tables, inline styles, navy header, gift picture when the item has an https
+  image, one button per action with the plain link under it, RTL for Hebrew); `ob_mailhtml.render_mail_html()` /
+  `safe_html()` never raise (text-only fallback); `mail_html()` in app.py splits a finished text body into paragraphs
+  and lifts the action URL into a button (`mail_btn_*`); a leftover "The registry:" lead-in is dropped. Button gold
+  darkened to #8a5f1e (5.6:1 with white). Admin preview of all 18 kinds: `/admin/mail-preview` (nothing is sent).
+  `digest_mail` returns (subject, body, html).
+- **Add from any store**: `GET /add?url=` (or `text=` with a link inside; `add_from_link`) shows a confirm page and
+  never fetches on GET; its button posts to `items_lookup`. The link survives login, signup and registry creation
+  (`session["pending_link"]`). Bookmarklet on `/registry/items` (`bookmarklet_href()`; clicking it on our page shows
+  "drag it instead"). `static/manifest.webmanifest` with a Web Share Target to `/add` (Android; iPhone Safari has no
+  share targets) and new 192/512 icons from `tools/make_icons.py`.
+
+## 2026-11-15 (options and quality tiers; pillows, Shabbos kettles, deep fryer, premium items)
+Owner asked for several pillow options by firmness, a Shabbos kettle, an oil deep fryer and more higher-quality options.
+- **21 new catalog items** (150 active), each from a store page read on 2026-11-15 with price and picture: three
+  Vardinon pillows (soft down-like, natural down & feather, medium-firm memory-foam flakes), two Shabbos kettles
+  (Or Le Shabat EL-2207, Topson TP-892 — approvals "as listed by the store"), Gold Line deep fryer, Bosch cordless
+  stick vacuum, Tefal steam iron and steam station, two Nespresso machines, Morphy Richards bread maker, Kenwood kMix
+  mixer, Smeg toaster, a stainless pot set, cast-iron pot, Global chef's knife, Salvinelli 18/10 cutlery, Vardinon
+  mattress protector (estimate: multi-size listing), a 36 cm menorah, mango-wood challah board. New stores: Bug
+  (pictures hosted on lastprice.co.il / cdn.bug.co.il), Vardinon, Hakol LaBait. Research on the Shabbos-kettle brand:
+  Hidurit is the reference for large urns but sells no kettle; no single kettle brand dominates, so two were added.
+- **Option groups and tiers** (migration 36: `catalog_items.option_group`, `tier` basic|standard|premium; seed fields,
+  `_ADOPT_FIELDS`, admin form, CSV). 25 groups tagged (pillow, shabbos-urn, pots-set, kettle, vacuum, iron, fryer,
+  sheet-set, duvet, towels, dinnerware, kiddush-cup, candlesticks, menorah…). Item pages show "Other options"
+  (`#options`, `option_group_items()`), cards a Premium/Basic tag and "1 of N options" (`option_count()`), `/catalog`
+  a Quality filter (`tier=`). Two pillow items renamed with their feel (`legacy_names` kept) — on an existing DB the
+  name is admin-owned and stays as it was.
+- Polish: card buttons line up across a row; "More gifts under ₪200" wording; insights tables scroll on phones;
+  homepage room links in one row; catalog filter summary no longer shows "· ·"; research-note wording removed from
+  new product descriptions.
+
 ## 2026-11-15 (store product pictures)
 Owner asked for real product pictures. 106 of 129 active catalog items now show the linked store's own picture,
 hot-linked (nothing is copied or downloaded): all 80 KSP items via its image path

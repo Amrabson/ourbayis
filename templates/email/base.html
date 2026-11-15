@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="{{ lang }}" dir="{{ dir }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>OurBayis</title>
+</head>
+<body style="margin:0;padding:0;background-color:#faf6ec;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#faf6ec" style="background-color:#faf6ec;">
+<tr><td align="center" style="padding:24px 12px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" lang="{{ lang }}" dir="{{ dir }}" style="max-width:600px;width:100%;border:1px solid #e6dcc6;background-color:#ffffff;">
+<tr><td align="center" bgcolor="#223354" style="background-color:#223354;padding:20px 24px;border-bottom:3px solid #a5762a;">
+<span dir="ltr" style="font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:32px;color:#faf6ec;letter-spacing:0.5px;">Our<span style="color:#a5762a;font-style:italic;">Bayis</span></span>
+</td></tr>
+{% for s in sections %}
+<tr><td dir="{{ s.dir }}" lang="{{ s.lang }}" align="{{ 'right' if s.dir == 'rtl' else 'left' }}" style="padding:24px 28px 8px 28px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:#223354;text-align:{{ 'right' if s.dir == 'rtl' else 'left' }};{% if not loop.first %}border-top:1px solid #e6dcc6;{% endif %}">
+{% if s.item_name or s.item_image %}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" dir="{{ s.dir }}" style="margin:0 0 16px 0;border:1px solid #e6dcc6;background-color:#faf6ec;">
+<tr>
+{% if s.item_image %}
+<td width="176" valign="middle" align="center" style="padding:8px;width:176px;">
+<img src="{{ s.item_image }}" alt="{{ s.item_name }}" width="160" height="160" style="display:block;max-width:160px;max-height:160px;width:auto;height:auto;border:0;margin:0 auto;">
+</td>
+{% endif %}
+{% if s.item_name %}
+<td valign="middle" dir="{{ s.dir }}" align="{{ 'right' if s.dir == 'rtl' else 'left' }}" style="padding:12px 16px;font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:26px;color:#223354;text-align:{{ 'right' if s.dir == 'rtl' else 'left' }};"><bdi>{{ s.item_name }}</bdi></td>
+{% endif %}
+</tr>
+</table>
+{% endif %}
+{% for b in s.blocks %}
+{% if b.html is defined %}
+<p dir="{{ s.dir }}" style="margin:0 0 16px 0;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:24px;color:#223354;text-align:{{ 'right' if s.dir == 'rtl' else 'left' }};">{{ b.html }}</p>
+{% else %}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="{{ 'right' if s.dir == 'rtl' else 'left' }}" style="margin:4px 0 8px 0;">
+<tr><td align="center" bgcolor="#8a5f1e" style="background-color:#8a5f1e;border-radius:6px;">
+<a href="{{ b.button[1] }}" style="display:inline-block;padding:13px 26px;font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:6px;">{{ b.button[0] }}</a>
+</td></tr>
+</table>
+<div style="clear:both;height:0;line-height:0;font-size:0;">&nbsp;</div>
+<p dir="ltr" style="margin:0 0 20px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#6b6b6b;text-align:{{ 'right' if s.dir == 'rtl' else 'left' }};"><a href="{{ b.button[1] }}" style="color:#6b6b6b;word-break:break-all;">{{ b.button[1] }}</a></p>
+{% endif %}
+{% endfor %}
+</td></tr>
+{% endfor %}
+{% if footer %}
+<tr><td dir="{{ dir }}" align="{{ 'right' if dir == 'rtl' else 'left' }}" style="padding:16px 28px 22px 28px;border-top:1px solid #e6dcc6;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#777777;text-align:{{ 'right' if dir == 'rtl' else 'left' }};">{{ footer }}</td></tr>
+{% endif %}
+</table>
+</td></tr>
+</table>
+</body>
+</html>

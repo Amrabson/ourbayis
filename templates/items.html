@@ -127,6 +127,13 @@
       </div>
       <p class="hint" id="paste-link-help">{{ t('lookup_help') }}</p>
     </form>
+    <details class="add-anywhere">
+      <summary>{{ t('addlink_details') }}</summary>
+      <p>{{ t('addlink_bm_text') }}</p>
+      <p><a class="btn btn-ghost" href="{{ bookmarklet_href() }}" data-bookmarklet>{{ t('addlink_bm_btn') }}</a></p>
+      <p class="hint add-anywhere-hint" data-bookmarklet-hint hidden>{{ t('addlink_bm_hint') }}</p>
+      <p class="hint">{{ t('addlink_phone') }}</p>
+    </details>
     <form method="post" action="{{ url_for('items_add') }}" class="stack-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <div class="form-2col">

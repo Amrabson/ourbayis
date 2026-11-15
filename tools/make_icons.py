@@ -47,7 +47,11 @@ def main():
     # iOS rounds the corners itself and ignores transparency, so a full navy tile
     touch = draw_mark(180, GOLD, NAVY_DEEP, bg=NAVY, inset=0.16)
     touch.convert("RGB").save(STATIC / "apple-touch-icon.png", optimize=True)
-    print("wrote favicon.svg, favicon.ico, apple-touch-icon.png")
+    # home-screen / share-target icons for static/manifest.webmanifest (same navy tile as the touch icon)
+    for px in (192, 512):
+        draw_mark(px, GOLD, NAVY_DEEP, bg=NAVY, inset=0.16).convert("RGB").save(
+            STATIC / f"icon-{px}.png", optimize=True)
+    print("wrote favicon.svg, favicon.ico, apple-touch-icon.png, icon-192.png, icon-512.png")
 
 
 if __name__ == "__main__":

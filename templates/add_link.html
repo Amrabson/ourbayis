@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ t('addlink_title') }} — {{ brand }}{% endblock %}
+{% block robots %}<meta name="robots" content="noindex,nofollow">{% endblock %}
+{% block content %}
+<div class="home sheet-page">
+  <div class="sec-inner sheet-grid sheet-solo">
+    <div class="sheet add-link-sheet">
+      <p class="kicker">{{ t('addlink_kicker') }}</p>
+      {% if link %}
+        <h1 class="sheet-title">{{ t('addlink_title') }}</h1>
+        <p class="add-link-url" dir="ltr">{{ link }}</p>
+        <p class="page-sub">{{ t('addlink_sub') }}</p>
+        <form method="post" action="{{ url_for('items_lookup') }}" class="join-actions">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="link" value="{{ link }}">
+          <button class="btn btn-primary" type="submit">{{ t('addlink_btn') }}</button>
+          <a class="link-arrow" href="{{ url_for('items_manage') }}">{{ t('addlink_cancel') }}</a>
+        </form>
+      {% else %}
+        <h1 class="sheet-title">{{ t('addlink_none_title') }}</h1>
+        <p class="page-sub">{{ t('addlink_none') }}</p>
+        <p class="auth-alt sheet-stub"><a class="link-arrow" href="{{ url_for('items_manage', _anchor='custom') }}">{{ t('addlink_none_link') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a></p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block ad %}{% endblock %}

@@ -97,6 +97,47 @@
         {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
       </div>
     </div>
+
+    {% if options %}
+    <section class="item-options" id="options" aria-labelledby="options-h">
+      <h2 id="options-h" class="item-h">{{ t('opt_h') }}</h2>
+      <p class="hint item-options-sub">{{ t('opt_sub') }}</p>
+      <ul class="opt-list">
+        {% for o in options %}
+        <li class="opt-row{% if o['id'] == item['id'] %} is-current{% endif %}"{% if o['id'] == item['id'] %} aria-current="true"{% endif %}>
+          <div class="opt-pic">{{ gift_media(o, small=True) }}</div>
+          <div class="opt-text">
+            <p class="opt-name" dir="auto">{% if o['id'] == item['id'] %}<strong>{{ pick(o, 'name') }}</strong> <span class="badge badge-gold opt-this">{{ t('opt_this') }}</span>{% else %}<a class="gift-name-link" href="{{ item_url(o) }}">{{ pick(o, 'name') }}</a>{% endif %}</p>
+            {% if o['model'] %}<p class="gift-model bdi">{{ pick(o, 'model') }}</p>{% endif %}
+            <span class="badge badge-plain tier-tag tier-{{ o['tier'] }}">{{ t('tier_' ~ (o['tier'] if o['tier'] in ('basic', 'premium') else 'standard')) }}</span>
+          </div>
+          <div class="opt-buy">
+            {{ price_line(o, 'opt-price') }}
+            {% if has_reg %}
+              {% if o['id'] in have %}
+              <span class="gifted-tag state-added"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>
+              {% else %}
+              <form method="post" action="{{ url_for('items_add', back='item', slug=slug) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="catalog_id" value="{{ o['id'] }}">
+                <button class="btn btn-primary btn-sm" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
+              </form>
+              {% endif %}
+            {% elif user %}
+              <a class="btn btn-primary btn-sm" href="{{ url_for('registry_new') }}">{{ t('dash_create') }}</a>
+            {% else %}
+              <form method="post" action="{{ url_for('items_add', back='item', slug=slug) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="catalog_id" value="{{ o['id'] }}">
+                <button class="btn btn-primary btn-sm" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('catalog_signup_add') }}</button>
+              </form>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
   </header>
 
   <section class="sec-inner item-know" aria-labelledby="item-know-h">
@@ -111,7 +152,7 @@
     <h2 id="item-next-h" class="item-h">{{ t('item_next_h') }}</h2>
     <ul class="item-next-list">
       {% if band_slug %}
-      <li><a class="link-arrow" href="{{ url_for('gift_ideas', band=band_slug) }}">{{ tf('item_more_band', band=t('price_band_' ~ band_key)) }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+      <li><a class="link-arrow" href="{{ url_for('gift_ideas', band=band_slug) }}">{{ t('item_more_band_' ~ band_key) }} <span aria-hidden="true">{{ arrow }}</span></a></li>
       {% endif %}
       {% if guide_obj %}
       <li><a class="link-arrow" href="{{ url_for('guide', slug=guide_obj['slug']) }}">{{ gpick(guide_obj, 'title') }} <span aria-hidden="true">{{ arrow }}</span></a></li>

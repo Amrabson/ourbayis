@@ -19,11 +19,12 @@
 <link rel="icon" href="../../../static/favicon.svg?v=1a0cad465ff" type="image/svg+xml">
 <link rel="icon" href="../../../static/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="../../../static/apple-touch-icon.png?v=1a0cad4662d">
+<link rel="manifest" href="../../../static/manifest.webmanifest?v=1a1e0e0294b">
 <meta name="theme-color" content="#223354">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../../static/style.css?v=1a1dccb08c8">
+<link rel="stylesheet" href="../../../static/style.css?v=1a1e0e0fad4">
 
 
 
@@ -176,6 +177,11 @@
           <option value="product" >מוצרים מדויקים בלבד</option>
           <option value="idea" >רעיונות למתנה בלבד</option>
         </select></label>
+      <label class="ctl"><span class="ctl-label">רמת איכות</span>
+        <select name="tier" data-autosubmit>
+          <option value="">כל הרמות</option>
+          <option value="basic" >בסיסי</option><option value="standard" >סטנדרטי</option><option value="premium" >פרימיום</option>
+        </select></label>
       <label class="ctl"><span class="ctl-label">מיון</span>
         <select name="sort" data-autosubmit>
           <option value="">מומלץ</option>
@@ -186,7 +192,7 @@
       <button class="btn btn-ghost" type="submit"><svg class="ic"><use href="#i-search"/></svg> חיפוש</button>
     </form>
     <p class="filter-summary" aria-live="polite">
-      <strong>129 מתנות</strong>
+      <strong>150 מתנות</strong>
       
     </p>
   </div>
@@ -213,8 +219,7 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-fridge"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/fridge-large-family-size/">מקרר גדול למשפחה</a></h3>
-      <p class="gift-price bdi"><strong>₪3,570</strong> <span class="usd bdi">≈ $1,149</span></p>
-      <p class="gift-sub"><span class="item-brand">Sharp</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Sharp SJ-8420-SL — 4 דלתות, 421 ל׳, אינוורטר, מקפיא תחתון</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪3,570</strong> <span class="usd bdi">≈ $1,149</span></p><p class="gift-sub"><span class="item-brand">Sharp</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Sharp SJ-8420-SL — 4 דלתות, 421 ל׳, אינוורטר, מקפיא תחתון</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="88">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -229,8 +234,7 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-fridge"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/small-freezer/">מקפיא קטן</a></h3>
-      <p class="gift-price bdi"><strong>₪799</strong> <span class="usd bdi">≈ $257</span></p>
-      <p class="gift-sub"><span class="item-brand">Galanz</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Galanz — מקפיא 97 ל׳, 3 מגירות, הפשרה ידנית</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪799</strong> <span class="usd bdi">≈ $257</span></p><p class="gift-sub"><span class="item-brand">Galanz</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Galanz — מקפיא 97 ל׳, 3 מגירות, הפשרה ידנית</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="89">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -245,9 +249,179 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-oven"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/oven/">תנור אפייה</a></h3>
-      <p class="gift-price bdi"><strong>₪2,299</strong> <span class="usd bdi">≈ $740</span></p>
-      <p class="gift-sub"><span class="item-brand">AEG</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">AEG ABU51229M — תנור בנוי, 71 ל׳, עם מצב שבת</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪2,299</strong> <span class="usd bdi">≈ $740</span></p><p class="gift-sub"><span class="item-brand">AEG</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">AEG ABU51229M — תנור בנוי, 71 ל׳, עם מצב שבת</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="90">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-136">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/21691w(1).jpg" alt="קומקום שבת (מיחם שבת, 2.2 ל׳)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-urn"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/shabbos-kettle-or-le-shabat/">קומקום שבת (מיחם שבת, 2.2 ל׳)</a></h3>
+      <p class="gift-price bdi"><strong>₪159</strong> <span class="usd bdi">≈ $51</span></p><p class="gift-options"><a href="../../../he/item/shabbos-kettle-or-le-shabat/#options" aria-label="לכל 4 האפשרויות למתנה הזו">אחת מתוך 4 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Or Le Shabat</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Or Le Shabat EL-2207 — קומקום 2.2 ל׳ שפועל כקומקום רגיל בימות החול וכמיחם עם מצב שמירת חום בשבת, 1,700 וואט, ניתוק בהרתחה יבשה; לפי החנות מאושר לשבת וחג ואינו מצריך טבילה (הרב אליהו הכהן רוזנברג)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="136">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-137">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/FEP38_Z_P_7290020162090_1.jpg" alt="קומקום שבת (מיחם שבת, 1.8 ל׳)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-urn"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/shabbos-kettle-topson/">קומקום שבת (מיחם שבת, 1.8 ל׳)</a></h3>
+      <p class="gift-price bdi"><strong>₪219</strong> <span class="usd bdi">≈ $70</span></p><p class="gift-options"><a href="../../../he/item/shabbos-kettle-topson/#options" aria-label="לכל 4 האפשרויות למתנה הזו">אחת מתוך 4 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Topson</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Topson TP-892 — קומקום מיחם שבת 1.8 ל׳, לבן; מתג בעל שלושה מצבים (הרתחה / שמירת חום / כיבוי), ננעל אל הבסיס, דופן כפולה, גוף חימום נסתר; לפי החנות אינו מצריך טבילה, באישור הרב שלמה דידי</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="137">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-138">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/3543(74).jpg" alt="סיר טיגון שמן עמוק — 3.5 ל׳" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-pots"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/deep-fryer-3-5-l/">סיר טיגון שמן עמוק — 3.5 ל׳</a></h3>
+      <p class="gift-price bdi"><strong>₪199</strong> <span class="usd bdi">≈ $64</span></p><p class="gift-options"><a href="../../../he/item/deep-fryer-3-5-l/#options" aria-label="לכל 2 האפשרויות למתנה הזו">אחת מתוך 2 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Gold Line</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Gold Line ATL-9933 — סיר טיגון חשמלי 3.5 ל׳, 2,000 וואט, גוף נירוסטה, מיכל שמן אמייל נשלף, פילטר פחם, מכסה שקוף</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="138">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-139">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/17774324_BBS712A_STP_def.jpg" alt="שואב אבק אלחוטי (מוט)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-cleaning"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/stick-vacuum-cordless-bosch/">שואב אבק אלחוטי (מוט)</a></h3>
+      <p class="gift-price bdi"><strong>₪1,499</strong> <span class="usd bdi">≈ $482</span></p><p class="gift-options"><a href="../../../he/item/stick-vacuum-cordless-bosch/#options" aria-label="לכל 3 האפשרויות למתנה הזו">אחת מתוך 3 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Bosch</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Bosch Unlimited Serie 7 BBS712A — שואב אבק אלחוטי עם שתי סוללות 18V 3Ah (עד 40 דקות במצב חסכוני בלי מברשת חשמלית), מוט גמיש, אחריות יבואן 24 חודשים</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-premium">פרימיום</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="139">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-140">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/TF_GV92_B.jpg" alt="מגהץ קיטור — לחץ (תחנת גיהוץ)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-iron"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/steam-station-iron-tefal-gv9230/">מגהץ קיטור — לחץ (תחנת גיהוץ)</a></h3>
+      <p class="gift-price bdi"><strong>₪1,088</strong> <span class="usd bdi">≈ $350</span></p><p class="gift-options"><a href="../../../he/item/steam-station-iron-tefal-gv9230/#options" aria-label="לכל 3 האפשרויות למתנה הזו">אחת מתוך 3 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Tefal</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Tefal Pro Express Protect GV9230 — מגהץ קיטור עם מיכל לחץ, 7.5 בר, מיכל נשלף 1.8 ל׳ (מילוי תוך כדי גיהוץ)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-premium">פרימיום</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="140">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-141">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/3452452(418).jpg" alt="מגהץ קיטור — לחץ, קומפקטי" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-iron"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/steam-iron-pressurised-tefal-sv611/">מגהץ קיטור — לחץ, קומפקטי</a></h3>
+      <p class="gift-price bdi"><strong>₪449</strong> <span class="usd bdi">≈ $144</span></p><p class="gift-options"><a href="../../../he/item/steam-iron-pressurised-tefal-sv611/#options" aria-label="לכל 3 האפשרויות למתנה הזו">אחת מתוך 3 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Tefal</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Tefal Express Essential SV611AL3 — מגהץ קיטור עם לחץ, 5 בר, מיכל 1.4 ל׳, 2,200 וואט</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="141">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-142">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/54947_a_Inissia_Black_1.jpg" alt="מכונת קפה קפסולות + מקציף חלב" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-coffee"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/coffee-machine-capsule-nespresso-inissia/">מכונת קפה קפסולות + מקציף חלב</a></h3>
+      <p class="gift-price bdi"><strong>₪599</strong> <span class="usd bdi">≈ $193</span></p><p class="gift-options"><a href="../../../he/item/coffee-machine-capsule-nespresso-inissia/#options" aria-label="לכל 3 האפשרויות למתנה הזו">אחת מתוך 3 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Nespresso</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Nespresso Inissia D40 (שחור) + מקציף Aeroccino 3 — מכונת קפסולות קומפקטית, 19 בר, משתמשת בקפסולות Nespresso Original</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="142">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-143">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/Creatista_Plus_8.jpg" alt="מכונת קפה קפסולות — צינור קיטור וקנקן חלב" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-coffee"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/coffee-machine-capsule-nespresso-creatista/">מכונת קפה קפסולות — צינור קיטור וקנקן חלב</a></h3>
+      <p class="gift-price bdi"><strong>₪1,629</strong> <span class="usd bdi">≈ $524</span></p><p class="gift-options"><a href="../../../he/item/coffee-machine-capsule-nespresso-creatista/#options" aria-label="לכל 3 האפשרויות למתנה הזו">אחת מתוך 3 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Nespresso</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Nespresso Creatista Plus J520 — מכונת קפסולות עם צינור קיטור, קנקן חלב מנירוסטה כ-350 מ״ל ו-11 דרגות טמפרטורת חלב, מיכל 1.5 ל׳</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-premium">פרימיום</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="143">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-144">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://cdn.bug.co.il/images/site/products/ppf_d7f78bcd-bb03-45e4-a1df-a37101774206_prvdsk.webp" alt="אופה לחם דיגיטלי (1.35 ק״ג)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-oven"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/bread-maker-morphy-richards-48297/">אופה לחם דיגיטלי (1.35 ק״ג)</a></h3>
+      <p class="gift-price bdi"><strong>₪491</strong> <span class="usd bdi">≈ $158</span></p><p class="gift-sub"><span class="item-brand">Morphy Richards</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Morphy Richards Digital XL 48297 — אופה לחם דיגיטלי, 14 תוכניות אוטומטיות ועוד 2 מהירות, כיכר עד 1,350 גרם</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="144">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-145">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/11(1559).jpg" alt="מיקסר עומד — 5 ל׳" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-mixer"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/stand-mixer-kenwood-kmix-kmx753/">מיקסר עומד — 5 ל׳</a></h3>
+      <p class="gift-price bdi"><strong>₪999</strong> <span class="usd bdi">≈ $321</span></p><p class="gift-options"><a href="../../../he/item/stand-mixer-kenwood-kmix-kmx753/#options" aria-label="לכל 2 האפשרויות למתנה הזו">אחת מתוך 2 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Kenwood</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Kenwood kMix KMX753 (שחור) — מיקסר עומד, קערה 5 ל׳, 1,000 וואט</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="145">
+            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
+          </form></div>
+  </article>
+    
+      <article class="gift-card  "
+    
+    
+    id="c-146">
+    <div class="gift-ph gift-img ph-appliances ">
+    <img class="gift-img-img" src="https://www.lastprice.co.il/uploadimages/3452(492).jpg" alt="טוסטר קופץ — 4 פרוסות, עיצוב רטרו" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-oven"/></svg>
+  </div>
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/toaster-4-slice-smeg-tsf03/">טוסטר קופץ — 4 פרוסות, עיצוב רטרו</a></h3>
+      <p class="gift-price bdi"><strong>₪1,249</strong> <span class="usd bdi">≈ $402</span></p><p class="gift-sub"><span class="item-brand">Smeg</span> · <span class="bdi">Bug</span></p><p class="gift-model bdi">Smeg TSF03BLEU (שחור) — טוסטר קופץ ל-4 פרוסות, 6 דרגות קלייה, 3 תוכניות אוטומטיות (הפשרה / בייגל / מירכוז)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-15 בנובמבר 2026</span></p><form method="post" action="../../../he/demo-only/">
+            <input type="hidden" name="catalog_id" value="146">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
   </article>
@@ -257,12 +431,12 @@
     
     id="c-34">
     <div class="gift-ph gift-img ph-bedding ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/273832.jpg" alt="כריות שינה (2)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
+    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/273832.jpg" alt="כריות (2) — בינוניות (סיבים חלולים)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/sleeping-pillows-2/">כריות שינה (2)</a></h3>
-      <p class="gift-price bdi"><strong>₪48</strong> <span class="usd bdi">≈ $15</span></p>
-      <p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad — כרית סיבים חלולים 50×70, תמיכה בינונית (₪24 ליחידה; המחיר הוא לשתיים)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/sleeping-pillows-2/">כריות (2) — בינוניות (סיבים חלולים)</a></h3>
+      <p class="gift-price bdi"><strong>₪48</strong> <span class="usd bdi">≈ $15</span></p><p class="gift-options"><a href="../../../he/item/sleeping-pillows-2/#options" aria-label="לכל 5 האפשרויות למתנה הזו">אחת מתוך 5 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad — כרית סיבים חלולים 50×70, תמיכה בינונית (₪24 ליחידה; המחיר הוא לשתיים)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="34">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -277,8 +451,8 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/summer-duvet/">שמיכת קיץ זוגית</a></h3>
-      <p class="gift-price bdi"><strong>₪59</strong> <span class="usd bdi">≈ $19</span></p>
-      <p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad — שמיכת קיץ פיקה, 100% כותנה, 200×220, לבן</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪59</strong> <span class="usd bdi">≈ $19</span></p><p class="gift-options"><a href="../../../he/item/summer-duvet/#options" aria-label="לכל 2 האפשרויות למתנה הזו">אחת מתוך 2 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad — שמיכת קיץ פיקה, 100% כותנה, 200×220, לבן</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="35">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -293,8 +467,8 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/sheet-sets-x2/">סטי מצעים (2)</a></h3>
-      <p class="gift-price bdi"><strong>₪218</strong> <span class="usd bdi">≈ $70</span></p>
-      <p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad Ekko Cotton — סט מצעים זוגי 100% כותנה, 160×200 (₪109 לסט; המחיר הוא לשניים)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪218</strong> <span class="usd bdi">≈ $70</span></p><p class="gift-options"><a href="../../../he/item/sheet-sets-x2/#options" aria-label="לכל 2 האפשרויות למתנה הזו">אחת מתוך 2 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad Ekko Cotton — סט מצעים זוגי 100% כותנה, 160×200 (₪109 לסט; המחיר הוא לשניים)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="36">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -308,8 +482,8 @@
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-towel"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/towel-set/">סט מגבות</a></h3>
-      <p class="gift-price bdi"><strong>₪200</strong> <span class="usd bdi">≈ $64</span></p>
-      <p class="gift-sub"><span class="item-brand">Vardinon</span></p><p class="gift-model bdi">Vardinon ESTER — סט 4 מגבות ג׳קקארד (2 רחצה 70×130 + 2 ידיים 50×90), 100% כותנה</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪200</strong> <span class="usd bdi">≈ $64</span></p><p class="gift-options"><a href="../../../he/item/towel-set/#options" aria-label="לכל 2 האפשרויות למתנה הזו">אחת מתוך 2 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Vardinon</span></p><p class="gift-model bdi">Vardinon ESTER — סט 4 מגבות ג׳קקארד (2 רחצה 70×130 + 2 ידיים 50×90), 100% כותנה</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="37">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -324,8 +498,8 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/mattress-protectors/">מגני מזרן</a></h3>
-      <p class="gift-price bdi"><strong>₪45</strong> <span class="usd bdi">≈ $14</span></p>
-      <p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad — מגן מזרן סטנדרטי, זוגי 160×200</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪45</strong> <span class="usd bdi">≈ $14</span></p><p class="gift-options"><a href="../../../he/item/mattress-protectors/#options" aria-label="לכל 2 האפשרויות למתנה הזו">אחת מתוך 2 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Arige Gad</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arige Gad — מגן מזרן סטנדרטי, זוגי 160×200</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-basic">בסיסי</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="38">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -340,8 +514,7 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/winter-blankets/">שמיכות חורף</a></h3>
-      <p class="gift-price bdi"><strong>₪159</strong> <span class="usd bdi">≈ $51</span></p>
-      <p class="gift-sub"><span class="item-brand">Vardinon</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Vardinon Brooks — שמיכת חורף אקרילית, זוגית 200×220</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪159</strong> <span class="usd bdi">≈ $51</span></p><p class="gift-sub"><span class="item-brand">Vardinon</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Vardinon Brooks — שמיכת חורף אקרילית, זוגית 200×220</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="39">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -355,8 +528,7 @@
     <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-hamper"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/laundry-hamper-drying-rack/">סל כביסה ומתקן ייבוש</a></h3>
-      <p class="gift-price bdi"><strong>₪150</strong> <span class="usd bdi">≈ $48</span></p>
-      <p class="gift-sub"><span class="bdi">Home Center</span></p><p class="gift-tags"><span class="badge badge-plain">מחיר משוער</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪150</strong> <span class="usd bdi">≈ $48</span></p><p class="gift-sub"><span class="bdi">Home Center</span></p><p class="gift-tags"><span class="badge badge-plain">מחיר משוער</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="40">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -371,8 +543,7 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-towel"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/bath-mat-non-slip/">משטח מונע החלקה לאמבטיה</a></h3>
-      <p class="gift-price bdi"><strong>₪49</strong> <span class="usd bdi">≈ $16</span></p>
-      <p class="gift-sub"><span class="item-brand">Nino</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Nino — שטיחון אמבטיה מונע החלקה 40×70 ס״מ, גלים בצבע קרם</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪49</strong> <span class="usd bdi">≈ $16</span></p><p class="gift-sub"><span class="item-brand">Nino</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Nino — שטיחון אמבטיה מונע החלקה 40×70 ס״מ, גלים בצבע קרם</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="42">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -387,8 +558,7 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-towel"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/shower-shelf/">מדף למקלחת</a></h3>
-      <p class="gift-price bdi"><strong>₪59</strong> <span class="usd bdi">≈ $19</span></p>
-      <p class="gift-sub"><span class="item-brand">Aquila</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Aquila — מדף מקלחת דו-קומתי, לתלייה בשתי דרכים</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪59</strong> <span class="usd bdi">≈ $19</span></p><p class="gift-sub"><span class="item-brand">Aquila</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Aquila — מדף מקלחת דו-קומתי, לתלייה בשתי דרכים</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="43">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
@@ -403,182 +573,9 @@
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
   </div>
     <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/sheet-set-premium-sateen/">סט מצעים סאטן — פרימיום</a></h3>
-      <p class="gift-price bdi"><strong>₪287</strong> <span class="usd bdi">≈ $92</span></p>
-      <p class="gift-sub"><span class="item-brand">Homestyle</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Homestyle Infinity — סט סאטן 100% כותנה, 180×200</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
+      <p class="gift-price bdi"><strong>₪287</strong> <span class="usd bdi">≈ $92</span></p><p class="gift-options"><a href="../../../he/item/sheet-set-premium-sateen/#options" aria-label="לכל 2 האפשרויות למתנה הזו">אחת מתוך 2 אפשרויות</a></p><p class="gift-sub"><span class="item-brand">Homestyle</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Homestyle Infinity — סט סאטן 100% כותנה, 180×200</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p>
+      <p class="gift-tags"><span class="badge badge-plain tier-tag tier-premium">פרימיום</span></p><form method="post" action="../../../he/demo-only/">
             <input type="hidden" name="catalog_id" value="99">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-100">
-    <div class="gift-ph gift-img ph-bedding ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/425193.jpg" alt="סט מגבות — 8 חלקים (2 מארזים של 4)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-towel"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/towel-set-luxury-8-piece/">סט מגבות — 8 חלקים (2 מארזים של 4)</a></h3>
-      <p class="gift-price bdi"><strong>₪298</strong> <span class="usd bdi">≈ $96</span></p>
-      <p class="gift-sub"><span class="item-brand">Homestyle</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Homestyle London — 4 מגבות (2 רחצה + 2 פנים), 100% כותנה (₪149 למארז; המחיר הוא לשניים)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="100">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-101">
-    <div class="gift-ph gift-img ph-bedding ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/495344.jpg" alt="שמיכת פוך חורפית" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/winter-weight-duvet/">שמיכת פוך חורפית</a></h3>
-      <p class="gift-price bdi"><strong>₪229</strong> <span class="usd bdi">≈ $74</span></p>
-      <p class="gift-sub"><span class="item-brand">Vardinon</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Vardinon Benjamin — שמיכת חורף, זוגית 200×220</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="101">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-102">
-    <div class="gift-ph gift-img ph-bedding ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/369590.jpg" alt="כריות ויסקו (2)" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/memory-foam-pillows-2/">כריות ויסקו (2)</a></h3>
-      <p class="gift-price bdi"><strong>₪758</strong> <span class="usd bdi">≈ $244</span></p>
-      <p class="gift-sub"><span class="item-brand">Dr. Gav</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Dr.Gav דגם COOL TOUCH — כרית שינה אורתופדית מויסקו אלסטי עם שכבת ג׳ל מקרר, 60×40 ס״מ — ₪379 ליחידה, 2 כריות</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-20 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="102">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-103">
-    <div class="gift-ph ph-bedding ill-box " role="img" aria-label="סט חלוקי רחצה — איור, לא תמונת מוצר">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-towel"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/bathrobe-set-his-hers/">סט חלוקי רחצה</a></h3>
-      <p class="gift-price bdi"><strong>₪450</strong> <span class="usd bdi">≈ $145</span></p>
-      <p class="gift-sub"><span class="item-brand">Vardinon</span> · <span class="bdi">Fox Home</span></p><p class="gift-tags"><span class="badge badge-plain">מחיר משוער</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="103">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-104">
-    <div class="gift-ph gift-img ph-bedding ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/494500.jpg" alt="סט מצעים לאורחים" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bedding"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/guest-linen-set/">סט מצעים לאורחים</a></h3>
-      <p class="gift-price bdi"><strong>₪79</strong> <span class="usd bdi">≈ $25</span></p>
-      <p class="gift-sub"><span class="item-brand">Homestyle</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Homestyle Pastel — סט מיקרופייבר 3 חלקים, יחיד 90×200</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="104">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-105">
-    <div class="gift-ph ph-bedding ill-box " role="img" aria-label="כיסוי מיטה — איור, לא תמונת מוצר">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-bedding"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/quilted-bedspread/">כיסוי מיטה</a></h3>
-      <p class="gift-price bdi"><strong>₪300</strong> <span class="usd bdi">≈ $97</span></p>
-      <p class="gift-sub"><span class="item-brand">Vardinon</span></p><p class="gift-tags"><span class="badge badge-plain">מחיר משוער</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="105">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-25">
-    <div class="gift-ph ph-dining ill-box " role="img" aria-label="סט כלי אוכל — בשרי — איור, לא תמונת מוצר">
-    <svg class="ic ic-lg" aria-hidden="true"><use href="#ill-dinnerware"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/dinnerware-set-fleishig/">סט כלי אוכל — בשרי</a></h3>
-      <p class="gift-price bdi"><strong>₪199</strong> <span class="usd bdi">≈ $64</span></p>
-      <p class="gift-sub"><span class="item-brand">Luminarc</span> · <span class="bdi">Hakol LaBait</span></p><p class="gift-model bdi">Luminarc — סט זכוכית מחוסמת, 18 חלקים ל-6 סועדים (6 שטוחות, 6 קינוח, 6 מרק), טורקיז</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="25">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-26">
-    <div class="gift-ph gift-img ph-dining ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/370719.jpg" alt="סט כלי אוכל — חלבי" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-dinnerware"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/dinnerware-set-milchig/">סט כלי אוכל — חלבי</a></h3>
-      <p class="gift-price bdi"><strong>₪139</strong> <span class="usd bdi">≈ $45</span></p>
-      <p class="gift-sub"><span class="item-brand">Soltam</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Soltam Opal — סט זכוכית מחוסמת, 18 חלקים ל-6 סועדים, לבן</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="26">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-27">
-    <div class="gift-ph gift-img ph-dining ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/493776.jpg" alt="סטי סכו״ם — חלבי ובשרי" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-cutlery"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/cutlery-sets-milchig-fleishig/">סטי סכו״ם — חלבי ובשרי</a></h3>
-      <p class="gift-price bdi"><strong>₪310</strong> <span class="usd bdi">≈ $100</span></p>
-      <p class="gift-sub"><span class="item-brand">Soltam</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Soltam Berlin — סט סכו״ם 26 חלקים (₪155 לסט; המחיר הוא לשני סטים)</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-19 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="27">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-28">
-    <div class="gift-ph gift-img ph-dining ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/503957.jpg" alt="סט כוסות זכוכית" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-glassware"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/glassware-set/">סט כוסות זכוכית</a></h3>
-      <p class="gift-price bdi"><strong>₪86</strong> <span class="usd bdi">≈ $28</span></p>
-      <p class="gift-sub"><span class="item-brand">Arcosteel</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Arcosteel סדרת Tea For Two — 6 כוסות שתייה מזכוכית מחוסמת, 350 מ״ל</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-20 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="28">
-            <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
-          </form></div>
-  </article>
-    
-      <article class="gift-card  "
-    
-    
-    id="c-29">
-    <div class="gift-ph gift-img ph-dining ">
-    <img class="gift-img-img" src="https://ksp.co.il/shop/items/512/475976.jpg" alt="מגשי וקערות הגשה" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="240" height="180">
-    <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-bowls"/></svg>
-  </div>
-    <div class="gift-body"><h3 dir="auto"><a class="gift-name-link" href="../../../he/item/serving-platters-bowls/">מגשי וקערות הגשה</a></h3>
-      <p class="gift-price bdi"><strong>₪89</strong> <span class="usd bdi">≈ $29</span></p>
-      <p class="gift-sub"><span class="item-brand">Food Appeal</span> · <span class="bdi">KSP</span></p><p class="gift-model bdi">Food Appeal דגם Osaka — סט הגשה מפורצלן 6 חלקים: מגש 28 ס״מ, קערה 21 ס״מ, 4 קעריות 12 ס״מ</p><p class="gift-tags"><span class="badge badge-plain">המחיר נבדק ב-20 באוקטובר 2026</span></p><form method="post" action="../../../he/demo-only/">
-            <input type="hidden" name="catalog_id" value="29">
             <button class="btn btn-primary btn-block" type="submit"><svg class="ic"><use href="#i-plus"/></svg> הירשמו כדי להוסיף</button>
           </form></div>
   </article>
@@ -588,7 +585,7 @@
   
   <nav class="pager" aria-label="עמודי הקטלוג">
     <a class="btn btn-ghost btn-sm" href="../../../he/catalog/" rel="prev">→ הקודם</a>
-    <span class="pager-status">עמוד 2 מתוך 6</span>
+    <span class="pager-status">עמוד 2 מתוך 7</span>
     <a class="btn btn-ghost btn-sm" href="../../../he/catalog/page-3/" rel="next">הבא ←</a>
   </nav>
   
@@ -645,7 +642,7 @@
   <div class="wrap footer-legal">© 2026 OurBayis · כל הזכויות שמורות.</div>
 </footer>
 
-<script src="../../../static/app.js?v=1a1d0f220f7"></script>
+<script src="../../../static/app.js?v=1a1e0e0ea90"></script>
 
 <script src="../../../demo.js"></script></body>
 </html>

@@ -2667,4 +2667,59 @@ main:focus { outline: none; }
 .item-photo-credit { margin: 6px 2px 0; font-size: .78rem; color: var(--ink-soft); }
 .gift-card.is-gifted .gift-img { filter: saturate(.5) opacity(.8); }
 
+/* ---------- options + quality tiers; card button alignment; insights/homepage polish (2026-11-15) ---------- */
+.tier-tag { text-transform: none; letter-spacing: .2px; font-size: .74rem; padding: 2px 9px; }
+.gift-options { margin: 0; font-size: .82rem; color: var(--ink-soft); }
+.gift-options a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.gift-options a:hover { color: var(--navy); }
+.item-options { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); scroll-margin-top: 90px; }
+.item-options .item-h { margin-bottom: 4px; }
+.item-options-sub { margin: 0 0 14px; }
+.opt-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.opt-row { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 8px 14px; align-items: center;
+  padding: 10px 12px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.opt-row.is-current { border-color: var(--gold-bright); background: var(--paper-deep); }
+.opt-text { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; min-width: 0; }
+.opt-text p { margin: 0; }
+.opt-name { font-weight: 700; overflow-wrap: anywhere; }
+.opt-this { margin-inline-start: 6px; text-transform: none; letter-spacing: .2px; font-size: .72rem; padding: 1px 8px; }
+.opt-buy { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px 14px; }
+.opt-buy .opt-price { margin: 0; white-space: nowrap; }
+.opt-buy form { margin: 0; }
+@media (max-width: 560px) {
+  .opt-row { grid-template-columns: 54px minmax(0, 1fr); }
+  .opt-buy { grid-column: 1 / -1; justify-content: space-between; }
+}
+/* card buttons line up across a desktop row: the action sits at the bottom of the (stretched) card */
+@media (min-width: 561px) {
+  .gift-body > form, .gift-body > .card-more, .gift-body > .sample-btn-disabled, .gift-body > .idea-note { margin-top: auto; }
+}
+/* /admin/insights: wide tables scroll inside their panel; "(before: N)" stays on one line */
+.ins-scroll { overflow-x: auto; }
+.ins-prev { white-space: nowrap; }
+/* homepage rooms: "All N gifts" and the setup-cost link share one row */
+.room-links { display: flex; flex-wrap: wrap; gap: 12px 30px; margin-top: 22px; }
+.room-links .room-all { margin-top: 0; }
+.rooms:not(.is-tabbed) .room-panel:not(:last-child) .room-setup { display: none; }
+@media (max-width: 560px) { .room-links { flex-direction: column; gap: 12px; } }
+/* options block: bigger, square thumbnails so the alternatives can be told apart (2026-11-15) */
+.opt-row { grid-template-columns: 76px minmax(0, 1fr) auto; }
+.opt-row .gift-ph-sm { width: 76px; height: 76px; aspect-ratio: 1; }
+@media (max-width: 560px) {
+  .opt-row { grid-template-columns: 64px minmax(0, 1fr); }
+  .opt-row .gift-ph-sm { width: 64px; height: 64px; }
+}
+
+/* "Add to OurBayis" (bookmarklet details on /registry/items, /add confirmation page) */
+.add-link-url { margin: 10px 0 14px; padding: 10px 12px; background: rgba(34, 51, 84, .05); border-radius: 8px;
+  font-size: .92rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  word-break: break-all; text-align: left; }
+.add-anywhere { margin: 14px 0 4px; }
+.add-anywhere summary { cursor: pointer; font-weight: 600; }
+.add-anywhere p { margin: 8px 0; }
+.add-anywhere .btn { max-width: 100%; }
+.add-anywhere-hint { color: #8a5a00; }
+@media (max-width: 480px) { .add-link-sheet .join-actions { flex-direction: column; align-items: stretch; } }
+.add-anywhere-hint[hidden] { display: none; }
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}

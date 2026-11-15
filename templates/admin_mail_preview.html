@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Email previews — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Email previews</h1>
+    <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+  </div>
+  <p class="hint">Every email the site sends, drawn with sample data. Nothing is sent from here.</p>
+  <table class="admin-table">
+    <thead><tr><th>email</th><th>English</th><th>Hebrew</th></tr></thead>
+    <tbody>
+      {% for kind, label in kinds %}
+      <tr>
+        <td>{{ label }}</td>
+        <td><a href="{{ url_for('admin_mail_preview_kind', kind=kind, lang='en') }}" target="_blank" rel="noopener">EN</a></td>
+        <td>{% if kind not in ('lead', 'contact') %}<a href="{{ url_for('admin_mail_preview_kind', kind=kind, lang='he') }}" target="_blank" rel="noopener">HE</a>{% else %}<span class="hint">English only</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -34,6 +34,11 @@
           <option value="product" {% if kind == 'product' %}selected{% endif %}>{{ t('filter_kind_product') }}</option>
           <option value="idea" {% if kind == 'idea' %}selected{% endif %}>{{ t('filter_kind_idea') }}</option>
         </select></label>
+      <label class="ctl"><span class="ctl-label">{{ t('tier_filter') }}</span>
+        <select name="tier" data-autosubmit>
+          <option value="">{{ t('tier_filter_any') }}</option>
+          {% for tr in tiers %}<option value="{{ tr }}" {% if tier == tr %}selected{% endif %}>{{ t('tier_' ~ tr) }}</option>{% endfor %}
+        </select></label>
       <label class="ctl"><span class="ctl-label">{{ t('filter_sort') }}</span>
         <select name="sort" data-autosubmit>
           <option value="">{{ t('sort_default') }}</option>
@@ -45,8 +50,14 @@
     </form>
     <p class="filter-summary" aria-live="polite">
       <strong>{{ tf('result_count', n=total) }}</strong>
-      {% if cat or q or price or kind %}
-        · {% if cat %}{{ cat_label(cat) }}{% endif %}{% if q %} “<bdi>{{ q }}</bdi>”{% endif %}{% if price %} · {{ t('price_band_' ~ price) }}{% endif %}{% if kind %} · {{ t('filter_kind_' ~ kind) }}{% endif %}
+      {% if cat or q or price or kind or tier %}
+        {%- set _parts = [] -%}
+        {%- if cat %}{% set _ = _parts.append(('text', cat_label(cat))) %}{% endif -%}
+        {%- if q %}{% set _ = _parts.append(('query', q)) %}{% endif -%}
+        {%- if price %}{% set _ = _parts.append(('text', t('price_band_' ~ price))) %}{% endif -%}
+        {%- if kind %}{% set _ = _parts.append(('text', t('filter_kind_' ~ kind))) %}{% endif -%}
+        {%- if tier %}{% set _ = _parts.append(('text', t('tier_' ~ tier))) %}{% endif %}
+        {% for _k, _v in _parts %} · {% if _k == 'query' %}“<bdi>{{ _v }}</bdi>”{% else %}{{ _v }}{% endif %}{% endfor %}
         — <a class="filter-reset" href="{{ url_for('catalog_page') }}">{{ t('filter_reset') }}</a>
       {% endif %}
     </p>

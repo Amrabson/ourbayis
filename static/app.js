@@ -509,6 +509,16 @@
     input.focus();
   });
 
+  // the "Add to OurBayis" bookmarklet is meant to be dragged to the bookmarks bar, not clicked here
+  // (our CSP would block the javascript: URL anyway) — say so instead of doing nothing
+  document.addEventListener("click", function (e) {
+    var bm = e.target.closest("[data-bookmarklet]");
+    if (!bm) return;
+    e.preventDefault();
+    var hint = document.querySelector("[data-bookmarklet-hint]");
+    if (hint) hint.hidden = false;
+  });
+
   // coming Back to a page from the back/forward cache would otherwise leave its buttons dead
   window.addEventListener("pageshow", function (e) {
     if (!e.persisted) return;
