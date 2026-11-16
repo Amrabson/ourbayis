@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026-11-16 (build-my-list quiz, comparison pages, bedding)
+- **`/build-my-list`** (`list_quiz`, `list_quiz_start`; rules in `ob_quiz.py`, `quiz_pick`/`quiz_build`): six GET
+  questions (start, bed, host, kitchen, quality, yomtov) → a draft list from active catalog items, one member per
+  option group chosen by quality, quantities ×2 for two single beds (`pending_qty` survives signup), 2–4 "why these"
+  notes, live total via the starter tally JS. Start → `_start_registry_from_ids()` (shared with `/setup-cost`);
+  "Have it done for you" → `/setup-cost/request`. Linked from the homepage tools (fourth card), setup-cost, signup,
+  dashboard. In the static export the form is demo-only.
+- **`/compare` and `/compare/<group>`** (`compare_index`, `compare_group`, `compare_groups(db)`): every option group
+  with ≥2 active items, a real `<table>` on desktop and stacked cards ≤760px, `cmp_name_*`/`cmp_intro_*` per group
+  (title-cased fallback for new groups), BreadcrumbList + ItemList JSON-LD, add buttons return via
+  `back=compare&grp=`. Linked from item pages ("Compare side by side"), category pages and the catalog header.
+- **Preconnect** to the picture hosts present on a page (`preconnect_links`, ≤4, no crossorigin); item page's main
+  picture loads eagerly with `fetchpriority="high"`.
+- **Seven Vardinon bedding items**: 160×200 percale and sateen sheet sets, three two-singles 90×200 sets (new group
+  `sheet-set-singles`, priced for two sets), a premium hollofibre duvet and a natural-down duvet. Not found at a
+  readable store: latex pillow, mattress topper, mid-range towel set.
+
 ## 2026-11-16 (designed emails; add from any store)
 - **HTML emails**: every email now has an HTML part beside the unchanged text (multipart/alternative).
   `ob_mail.enqueue(..., html=)` → `mail_outbox.body_html` [m37] → `ob_mail.build_message()`; old rows send text-only.

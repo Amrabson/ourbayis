@@ -2,6 +2,7 @@
 {% from "_cards.html" import gift_card, gift_media, price_line, gift_facts with context %}
 {% block title %}{{ tf('item_title', name=pick(item, 'name'), brand=brand) }}{% endblock %}
 {% block meta_desc %}{{ meta_desc }}{% endblock %}
+{% block head_extra %}{{ preconnect_links(item, options, more) }}{% endblock %}
 {% block jsonld %}
 {%- set _url = ext_url('catalog_item', slug=slug) ~ ('?lang=he' if rtl else '') -%}
 {%- set _root = ext_url('index')[:-1] -%}
@@ -60,7 +61,7 @@
     </nav>
 
     <div class="item-hero">
-      <div class="item-media">{{ gift_media(item) }}
+      <div class="item-media">{{ gift_media(item, hero=True) }}
         {% if item['image'] and item['image_credit'] %}<p class="item-photo-credit">{{ tf('photo_credit', store=item['image_credit']) }}</p>{% endif %}
       </div>
       <div class="item-main">
@@ -102,6 +103,7 @@
     <section class="item-options" id="options" aria-labelledby="options-h">
       <h2 id="options-h" class="item-h">{{ t('opt_h') }}</h2>
       <p class="hint item-options-sub">{{ t('opt_sub') }}</p>
+      <p class="item-options-compare"><a class="link-arrow" href="{{ compare_url(item['option_group']) }}">{{ t('cmp_more_link') }} <span aria-hidden="true">{{ arrow }}</span></a></p>
       <ul class="opt-list">
         {% for o in options %}
         <li class="opt-row{% if o['id'] == item['id'] %} is-current{% endif %}"{% if o['id'] == item['id'] %} aria-current="true"{% endif %}>

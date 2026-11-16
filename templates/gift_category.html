@@ -2,6 +2,7 @@
 {% from "_cards.html" import gift_card with context %}
 {% block title %}{{ t('cat_h_' ~ cat) }} — {{ brand }}{% endblock %}
 {% block meta_desc %}{{ tf('cat_meta', cat=cat_label(cat)) }}{% endblock %}
+{% block head_extra %}{{ preconnect_links(items) }}{% endblock %}
 {% block jsonld %}
 {%- set _self = ext_url('gift_category', cat_slug=cat_slug) ~ ('?lang=he' if rtl else '') -%}
 {%- set _root = ext_url('index')[:-1] -%}
@@ -73,6 +74,12 @@
       <a class="chip" href="{{ url_for('gift_category', cat_slug=s) }}">{{ cat_label(c) }}</a>
       {% endfor %}
     </nav>
+    {% if cmp_groups %}
+    <h2 id="cat-cmp-h" class="item-h">{{ t('cmp_cat_h') }}</h2>
+    <nav class="chip-row cat-links cat-compare" aria-labelledby="cat-cmp-h">
+      {% for s, rows in cmp_groups %}<a class="chip" href="{{ url_for('compare_group', slug=s) }}">{{ compare_name(s) }} <span class="list-count">{{ rows | length }}</span></a>{% endfor %}
+    </nav>
+    {% endif %}
     <ul class="item-next-list">
       {% if guide_obj %}
       <li><a class="link-arrow" href="{{ url_for('guide', slug=guide_obj['slug']) }}">{{ gpick(guide_obj, 'title') }} <span aria-hidden="true">{{ arrow }}</span></a></li>

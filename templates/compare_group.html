@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% from "_cards.html" import gift_media, price_line, gift_facts with context %}
+{% block title %}{{ tf('cmp_title', name=name, brand=brand) }}{% endblock %}
+{% block meta_desc %}{{ meta_desc }}{% endblock %}
+{% block head_extra %}{{ preconnect_links(items) }}{% endblock %}
+{% block jsonld %}
+{%- set _suffix = '?lang=he' if rtl else '' -%}
+{%- set _root = ext_url('index')[:-1] -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ t('nav_catalog') | tojson }},
+      "item": {{ (ext_url('catalog_page') ~ _suffix) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ t('cmp_crumb') | tojson }},
+      "item": {{ (ext_url('compare_index') ~ _suffix) | tojson }} },
+    { "@type": "ListItem", "position": 3, "name": {{ name | tojson }},
+      "item": {{ (ext_url('compare_group', slug=slug) ~ _suffix) | tojson }} }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": {{ tf('cmp_h', name=name) | tojson }},
+  "url": {{ (ext_url('compare_group', slug=slug) ~ _suffix) | tojson }},
+  "numberOfItems": {{ items | length }},
+  "itemListElement": [
+    {%- for i in items %}
+    { "@type": "ListItem", "position": {{ loop.index }}, "name": {{ pick(i, 'name') | tojson }},
+      "url": {{ (_root ~ item_url(i) ~ _suffix) | tojson }} }{{ ',' if not loop.last }}
+    {%- endfor %}
+  ]
+}
+</script>
+{% endblock %}
+{% macro add_form(o, cls) -%}
+  {%- if has_reg -%}
+    {%- if o['id'] in have -%}
+    <span class="gifted-tag state-added"><svg class="ic"><use href="#i-check"/></svg> {{ t('added_btn') }}</span>
+    {%- else -%}
+    <form method="post" action="{{ url_for('items_add', back='compare', grp=slug) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="catalog_id" value="{{ o['id'] }}">
+      <button class="btn btn-primary {{ cls }}" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('add_btn') }}</button>
+    </form>
+    {%- endif -%}
+  {%- elif user -%}
+    <a class="btn btn-primary {{ cls }}" href="{{ url_for('registry_new') }}">{{ t('dash_create') }}</a>
+  {%- else -%}
+    <form method="post" action="{{ url_for('items_add', back='compare', grp=slug) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="catalog_id" value="{{ o['id'] }}">
+      <button class="btn btn-primary {{ cls }}" type="submit"><svg class="ic"><use href="#i-plus"/></svg> {{ t('catalog_signup_add') }}</button>
+    </form>
+  {%- endif -%}
+{%- endmacro %}
+{% macro tier_tag(o) -%}
+  <span class="badge badge-plain tier-tag tier-{{ o['tier'] }}">{{ t('tier_' ~ (o['tier'] if o['tier'] in ('basic', 'premium') else 'standard')) }}</span>
+{%- endmacro %}
+{% macro status_tag(o) -%}
+  {%- if o['price_nis'] and o['price_status'] -%}
+    {%- if o['price_status'] == 'verified' and o['price_checked_at'] -%}
+    <span class="badge badge-plain">{{ tf('price_checked_tag', date=fmt_date(o['price_checked_at'])) }}</span>
+    {%- else -%}
+    <span class="badge badge-plain">{{ t('price_estimate_tag') }}</span>
+    {%- endif -%}
+  {%- endif -%}
+{%- endmacro %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+<article class="home item-page compare-page">
+  <header class="sec-inner item-head">
+    <nav class="item-crumbs" aria-label="{{ t('item_crumbs') }}">
+      <ol>
+        <li><a href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }}</a></li>
+        <li><a href="{{ url_for('compare_index') }}">{{ t('cmp_crumb') }}</a></li>
+        <li aria-current="page">{{ name }}</li>
+      </ol>
+    </nav>
+    <h1 class="ideas-title">{{ tf('cmp_h', name=name) }}</h1>
+    <p class="page-sub cmp-intro">{{ intro }}</p>
+  </header>
+
+  <section class="sec-inner cmp-body" aria-label="{{ tf('cmp_h', name=name) }}">
+    <div class="cmp-wrap">
+      <table class="cmp-table">
+        <caption class="sr-only">{{ tf('cmp_table_caption', name=name) }}</caption>
+        <thead>
+          <tr>
+            <td class="cmp-corner"><span class="sr-only">{{ t('cmp_row_name') }}</span></td>
+            {% for o in items %}<th scope="col" class="cmp-name" dir="auto"><a class="gift-name-link" href="{{ item_url(o) }}">{{ pick(o, 'name') }}</a></th>{% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">{{ t('cmp_row_pic') }}</th>{% for o in items %}<td class="cmp-pic">{{ gift_media(o) }}</td>{% endfor %}</tr>
+          <tr><th scope="row">{{ t('cmp_row_tier') }}</th>{% for o in items %}<td>{{ tier_tag(o) }}</td>{% endfor %}</tr>
+          <tr><th scope="row">{{ t('cmp_row_price') }}</th>{% for o in items %}<td>{{ price_line(o, 'cmp-price') }}</td>{% endfor %}</tr>
+          <tr><th scope="row">{{ t('cmp_row_store') }}</th>{% for o in items %}<td>{{ gift_facts(o, show_model=False, show_tags=False) }}</td>{% endfor %}</tr>
+          <tr><th scope="row">{{ t('cmp_row_model') }}</th>{% for o in items %}<td>{% if o['model'] %}<p class="gift-model bdi">{{ pick(o, 'model') }}</p>{% endif %}</td>{% endfor %}</tr>
+          <tr><th scope="row">{{ t('cmp_row_checked') }}</th>{% for o in items %}<td>{{ status_tag(o) }}</td>{% endfor %}</tr>
+          <tr><th scope="row">{{ t('cmp_row_add') }}</th>{% for o in items %}<td class="cmp-add">{{ add_form(o, 'btn-sm') }}</td>{% endfor %}</tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ul class="cmp-cards" aria-label="{{ t('cmp_cards_aria') }}">
+      {% for o in items %}
+      <li class="cmp-card">
+        <div class="cmp-card-pic">{{ gift_media(o, small=True) }}</div>
+        <div class="cmp-card-text">
+          <p class="opt-name" dir="auto"><a class="gift-name-link" href="{{ item_url(o) }}">{{ pick(o, 'name') }}</a></p>
+          <p class="gift-tags">{{ tier_tag(o) }} {{ status_tag(o) }}</p>
+          {{ price_line(o, 'opt-price') }}
+          {{ gift_facts(o, show_tags=False) }}
+        </div>
+        <div class="cmp-card-add">{{ add_form(o, 'btn-sm') }}</div>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="hint catalog-affiliate">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>
+    {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+  </section>
+
+  <section class="sec-inner item-know" aria-labelledby="cmp-know-h">
+    <h2 id="cmp-know-h" class="item-h">{{ t('item_know_h') }}</h2>
+    <ul class="item-know-list">
+      {% for n in (1, 2, 3) %}<li>{{ t('item_know_' ~ cat ~ '_' ~ n) }}</li>{% endfor %}
+    </ul>
+  </section>
+
+  <section class="sec-inner item-next" aria-labelledby="cmp-next-h">
+    <h2 id="cmp-next-h" class="item-h">{{ t('item_next_h') }}</h2>
+    <ul class="item-next-list">
+      {% if guide_obj %}
+      <li><a class="link-arrow" href="{{ url_for('guide', slug=guide_obj['slug']) }}">{{ gpick(guide_obj, 'title') }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+      {% endif %}
+      <li><a class="link-arrow" href="{{ gift_category_url(cat) }}">{{ tf('cmp_category_link', cat=cat_label(cat)) }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+      <li><a class="link-arrow" href="{{ url_for('compare_index') }}">{{ t('cmp_all_link') }} <span aria-hidden="true">{{ arrow }}</span></a></li>
+    </ul>
+  </section>
+
+  <section class="closing">
+    <svg class="closing-motif" viewBox="0 0 220 96" aria-hidden="true" fill="none">
+      <g stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M40 94V26M180 94V26"/><path d="M24 28q86-28 172 0"/>
+        <path d="M24 28q21 14 43 0q21 14 43 0q21 14 43 0q21 14 43 0"/>
+      </g>
+    </svg>
+    <h2 class="closing-title">{{ t('final_cta_title') }}</h2>
+    <p>{{ t('final_cta_body') }}</p>
+    <div class="closing-ctas">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') if user else url_for('signup') }}">{{ t('nav_dashboard') if user else t('cta_start') }}</a>
+      <a class="link-arrow" href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }} <span aria-hidden="true">{{ arrow }}</span></a>
+    </div>
+  </section>
+</article>
+{% endblock %}

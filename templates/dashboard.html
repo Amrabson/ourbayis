@@ -44,7 +44,8 @@
         <h2>{{ t('next_' ~ _next ~ '_t') }}</h2>
         <p>{{ t('next_' ~ _next ~ '_b') }}</p>
         <p class="dash-next-actions"><a class="btn btn-gold" href="{{ _next_url }}">{{ t('next_' ~ _next ~ '_btn') }}</a>
-          {% if _next == 'gifts' %}<a class="link-arrow" href="{{ url_for('items_manage', _anchor='add-more') }}">{{ t('next_gifts_alt') }} {{ arrow }}</a>{% endif %}</p>
+          {% if _next == 'gifts' %}<a class="link-arrow" href="{{ url_for('items_manage', _anchor='add-more') }}">{{ t('next_gifts_alt') }} {{ arrow }}</a>
+          <a class="link-arrow" href="{{ url_for('list_quiz') }}">{{ t('quiz_link_dash') }} {{ arrow }}</a>{% endif %}</p>
       </div>
       {% endif %}
       <div class="dash-actions">

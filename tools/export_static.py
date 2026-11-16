@@ -54,10 +54,11 @@ PAGES = {  # url -> output dir (relative)
     "/gift-ideas/500-1500": "gift-ideas/500-1500",
     "/gift-ideas/1500-plus": "gift-ideas/1500-plus",
     "/setup-cost": "setup-cost",
+    "/build-my-list": "build-my-list",
 }
 # /catalog/<slug> item pages -> item/<slug>/ and /gifts/<slug> category pages -> gifts/<slug>/ are
 # added to the page list in main() (from the demo DB and A.GIFT_CATS) and mapped in page_path().
-AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new", "setup-cost/")
+AUTH_STUBS = ("signup", "login", "forgot", "dashboard", "account", "registry/new", "setup-cost/", "build-my-list/")
 
 
 def rel_prefix(out_dir):
@@ -79,6 +80,8 @@ def rewrite(html, out_dir, lang, go_map):
             return "item/" + path.rsplit("/", 1)[1] + "/"
         if path.startswith("/gifts/") and path.count("/") == 2:
             return "gifts/" + path.rsplit("/", 1)[1] + "/"
+        if path == "/compare" or (path.startswith("/compare/") and path.count("/") == 2):
+            return "compare/" + (path.rsplit("/", 1)[1] + "/" if path != "/compare" else "")
         if path == "/catalog":
             m = re.search(r"cat=([a-z]+)", query or "")
             pg = re.search(r"page=(\d+)", query or "")
@@ -188,6 +191,11 @@ def main():
         pages[f"/catalog/{_slug}"] = f"item/{_slug}"
     for _slug in A.GIFT_CATS:
         pages[f"/gifts/{_slug}"] = f"gifts/{_slug}"
+    with A.app.app_context():
+        _cmp = A.compare_groups(A.get_db())
+    pages["/compare"] = "compare"
+    for _slug in _cmp:
+        pages[f"/compare/{_slug}"] = f"compare/{_slug}"
     pages["/signup"] = "demo-only"
 
     written = 0

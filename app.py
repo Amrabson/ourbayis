@@ -39,6 +39,7 @@ import ob_hebcal
 import ob_linkinfo
 import ob_mail
 import ob_mailhtml
+import ob_quiz
 import ob_money
 import ob_search
 import ob_security
@@ -172,7 +173,7 @@ def gzip_response(resp):
 # ---------------------------------------------------------------- security
 PUBLIC_VIEW_ENDPOINTS = {"index", "catalog_page", "registry", "sample", "shana", "how", "about",
                          "find", "advertise", "privacy", "terms", "contact", "guides", "guide", "gift_ideas",
-                         "catalog_item", "gift_category", "setup_cost"}
+                         "catalog_item", "gift_category", "setup_cost", "list_quiz", "compare_index", "compare_group"}
 
 
 @app.after_request
@@ -789,6 +790,10 @@ def _apply_pending_add(db, reg_id, catalog_ids):
         if not exists:
             _insert_registry_item_from_catalog(db, reg_id, c)
             added += 1
+            q = (session.get("pending_qty") or {}).get(str(c["id"]))  # set by the list quiz
+            if isinstance(q, int) and 1 < q < 100:
+                db.execute("UPDATE registry_items SET qty_wanted=? WHERE registry_id=? AND catalog_id=?",
+                           (q, reg_id, c["id"]))
     return added
 
 
@@ -1122,6 +1127,9 @@ def inject_globals():
         gift_status=gift_status,
         illustration_for=illustration_for,
         option_count=option_count,
+        preconnect_links=preconnect_links,
+        compare_name=compare_name,
+        compare_url=compare_url,
         fmt_date=lambda iso: fmt_date(iso, lang),
         canonical_url=canonical_url,
         alt_urls=alt_urls,
@@ -1410,6 +1418,7 @@ def gift_category(cat_slug):
             (reg["id"],))}
     return render_template("gift_category.html", cat=cat, cat_slug=cat_slug, groups=groups, items=rows,
                            have=have, has_reg=bool(reg), cat_links=GIFT_CATS,
+                           cmp_groups=[(s, r) for s, r in compare_groups(db).items() if compare_cat(r) == cat],
                            guide_obj=ob_guides.BY_SLUG.get(ITEM_GUIDES.get(cat, "")))
 
 
@@ -1644,6 +1653,138 @@ def catalog_item(slug):
         band_slug=band_slug, guide_obj=guide_obj, more=more, options=options, have=have, has_reg=bool(reg),
         meta_desc=_item_description(item, lang),
         offer_ok=(item["price_status"] == "verified" and bool(item["url"]) and price > 0))
+
+
+# ---------------------------------------------------------------- comparison pages
+# /compare lists every option group with at least two active items; /compare/<group> lines one group's
+# items up side by side (tier, then price). Nothing is stored: groups come from catalog_items.option_group.
+def compare_groups(db):
+    """{slug: [rows]} for every option group with >= 2 active items, rows in tier-then-price order;
+    groups ordered by the category order, then slug. One query per request (cached on g)."""
+    if not hasattr(g, "_compare_groups"):
+        rows = db.execute("SELECT * FROM catalog_items WHERE active=1 AND option_group != ''").fetchall()
+        rows.sort(key=lambda r: (_TIER_RANK.get(r["tier"], 1), r["price_nis"] or 0, r["sort"] or 0, r["id"]))
+        grouped = {}
+        for r in rows:
+            grouped.setdefault(r["option_group"], []).append(r)
+        cats = list(CATEGORIES)
+        grouped = {k: v for k, v in grouped.items() if len(v) > 1}
+        order = sorted(grouped, key=lambda k: (cats.index(grouped[k][0]["category"])
+                                               if grouped[k][0]["category"] in cats else 99, k))
+        g._compare_groups = {k: grouped[k] for k in order}
+    return g._compare_groups
+
+
+def compare_name(slug, lang=None):
+    """Display name of an option group: the cmp_name_<slug> string, else the slug title-cased."""
+    lang = lang or current_lang()
+    key = "cmp_name_" + slug
+    name = _t(key, lang)
+    return name if name != key else slug.replace("-", " ").replace("_", " ").title()
+
+
+def compare_intro(slug, lang=None):
+    lang = lang or current_lang()
+    key = "cmp_intro_" + slug
+    txt = _t(key, lang)
+    return txt if txt != key else _t("cmp_intro_generic", lang)
+
+
+def compare_cat(rows):
+    """The category a group belongs to: its most common item category."""
+    counts = {}
+    for r in rows:
+        counts[r["category"]] = counts.get(r["category"], 0) + 1
+    best = max(counts, key=lambda c: counts[c])
+    return best if best in CATEGORIES else "home"
+
+
+def compare_url(slug):
+    return url_for("compare_group", slug=slug)
+
+
+def _compare_meta(slug, rows, lang):
+    prices = [r["price_nis"] for r in rows if r["price_nis"]]
+    kw = dict(name=compare_name(slug, lang), n=len(rows))
+    if prices and min(prices) != max(prices):
+        out = tf("cmp_meta", lang, lo="{:,}".format(min(prices)), hi="{:,}".format(max(prices)), **kw)
+    else:
+        out = tf("cmp_meta_flat", lang, lo="{:,}".format(prices[0] if prices else 0), **kw)
+    return out if len(out) <= 155 else out[:154].rstrip(" ,;:") + "…"
+
+
+@app.route("/compare")
+def compare_index():
+    db = get_db()
+    lang = current_lang()
+    cards = []
+    for slug, rows in compare_groups(db).items():
+        prices = [r["price_nis"] for r in rows if r["price_nis"]]
+        cards.append({"slug": slug, "name": compare_name(slug, lang), "n": len(rows),
+                      "lo": min(prices) if prices else 0, "hi": max(prices) if prices else 0,
+                      "cheapest": min(rows, key=lambda r: (r["price_nis"] or 10 ** 9, r["id"])),
+                      "cat": compare_cat(rows)})
+    return render_template("compare_index.html", cards=cards, pic_items=[c["cheapest"] for c in cards])
+
+
+@app.route("/compare/<slug>")
+def compare_group(slug):
+    db = get_db()
+    lang = current_lang()
+    rows = compare_groups(db).get(slug)
+    if not rows:
+        abort(404)
+    cat = compare_cat(rows)
+    reg = user_registry()
+    have = set()
+    if reg:
+        have = {r["catalog_id"] for r in db.execute(
+            "SELECT catalog_id FROM registry_items WHERE registry_id=? AND catalog_id IS NOT NULL",
+            (reg["id"],))}
+    return render_template(
+        "compare_group.html", slug=slug, items=rows, name=compare_name(slug, lang), intro=compare_intro(slug, lang),
+        cat=cat, guide_obj=ob_guides.BY_SLUG.get(ITEM_GUIDES.get(cat, "")), have=have, has_reg=bool(reg),
+        meta_desc=_compare_meta(slug, rows, lang))
+
+
+# Picture hosts: product pictures are hot-linked, so a page that shows some can open the connection
+# early. Images are not CORS fetches, hence plain preconnect with no crossorigin attribute.
+PRECONNECT_MAX = 4
+_PIC_HOST_RE = re.compile(r"^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$")
+
+
+def picture_hosts(*groups, limit=PRECONNECT_MAX):
+    """https hosts of the pictures among the rows in `groups` (rows, or nested lists / (key, rows) pairs),
+    most frequent first, at most `limit`."""
+    counts = {}
+
+    def walk(x):
+        if x is None or isinstance(x, (str, bytes)):
+            return
+        if hasattr(x, "keys"):
+            try:
+                img = x["image"] if "image" in x.keys() else ""
+            except (KeyError, TypeError):
+                img = ""
+            if img and isinstance(img, str) and img.startswith("https://"):
+                host = (urlsplit(img).hostname or "").lower()
+                if host and _PIC_HOST_RE.match(host):
+                    counts[host] = counts.get(host, 0) + 1
+            return
+        try:
+            for y in x:
+                walk(y)
+        except TypeError:
+            pass
+
+    for grp in groups:
+        walk(grp)
+    return sorted(counts, key=lambda h: -counts[h])[:limit]  # sorted() is stable: ties keep first-seen order
+
+
+def preconnect_links(*groups):
+    """<link rel="preconnect"> tags for the picture hosts among the rows in `groups` (Jinja global)."""
+    return Markup("".join('<link rel="preconnect" href="https://%s">\n' % escape(h) for h in picture_hosts(*groups)))
 
 
 # Public catalog browsing controls (all server-side, URL-addressable so the
@@ -2282,7 +2423,7 @@ def signup():
                 cur = db.execute(
                     "INSERT INTO users (email, pw_hash, name) VALUES (?,?,?)",
                     (email, generate_password_hash(pw), name))
-                _fresh_session("pending_add", "pending_join", "pending_link")
+                _fresh_session("pending_add", "pending_qty", "pending_join", "pending_link")
                 session["uid"] = cur.lastrowid
                 session["sv"] = 1
                 db.execute("UPDATE users SET lang=? WHERE id=?", (current_lang(), cur.lastrowid))
@@ -2897,6 +3038,7 @@ def _save_registry(reg):
         pending = session.pop("pending_add", None) or []
         if pending:
             _apply_pending_add(db, reg_id, pending)
+        session.pop("pending_qty", None)
     track("registry_created")
     flash(_t("r_created", lang), "ok")
     _flash_date_note(event_type, event_date, "", lang)
@@ -3218,6 +3360,11 @@ def items_add():
         here = _catalog_by_slug(db, request.args.get("slug") or "")
         if here:
             return redirect(url_for("catalog_item", slug=catalog_slug(here)))
+    if request.args.get("back") == "compare":
+        # back to a comparison page; the group must exist (>= 2 active items), never used as a raw target
+        grp = request.args.get("grp") or ""
+        if grp in compare_groups(db):
+            return redirect(url_for("compare_group", slug=grp))
     if request.args.get("back") == "cat" and request.args.get("cat_slug") in GIFT_CATS:
         return redirect(url_for("gift_category", cat_slug=request.args["cat_slug"])
                         + (f"#c-{cat_id}" if cat_id else ""))
@@ -3446,15 +3593,12 @@ def setup_cost():
     checked_dates = [r["price_checked_at"] for rows in groups.values() for r in rows if r["price_checked_at"]]
     bundles = db.execute("SELECT * FROM bundles WHERE active=1 ORDER BY sort").fetchall()
     appliances_guide = any(g["slug"] == "appliances-from-abroad-or-buy-in-israel" for g in ob_guides.GUIDES)
-    cur = (session.get("cur") or getattr(g, "display_currency", None)
-           or ("USD" if "USD" in ob_money.CURRENCIES else "ILS"))
-    est_rate = ob_money.RATES.get(cur) if cur != "ILS" else None
+    est_rate, est_sym = _estimate_rate()
     return render_template(
         "setup_cost.html", groups=groups, group_order=STARTER_GROUPS_ORDER, presets=SETUP_PRESETS,
         preset=preset, checked_groups=checked_groups, group_totals=group_totals, total=total,
         n_items=n_items, last_checked=max(checked_dates) if checked_dates else "", bundles=bundles,
-        appliances_guide=appliances_guide, est_rate=est_rate,
-        est_sym=ob_money.CURRENCY_SYMBOLS.get(cur, cur + " ") if est_rate else "")
+        appliances_guide=appliances_guide, est_rate=est_rate, est_sym=est_sym)
 
 
 def _setup_ticked_ids(db, cap):
@@ -3522,18 +3666,95 @@ def setup_cost_start():
         flash(_t("setup_none_selected", lang), "err")
         return redirect(url_for("setup_cost"))
     track("setup_cost_start")
+    return _start_registry_from_ids(db, ids, lang)
+
+
+def _start_registry_from_ids(db, ids, lang, qtys=None):
+    """Shared by /setup-cost/start and /build-my-list/start: ids straight onto the couple's list
+    (no duplicates) when they have a registry, else queued in session['pending_add'] (cap 50, as
+    items_add) until they sign up and create one. `qtys` {id: n} (n > 1) is applied the same way."""
+    qtys = {str(i): q for i, q in (qtys or {}).items() if i in ids and isinstance(q, int) and 1 < q < 100}
     reg = user_registry() if current_user() else None
     if reg:
-        with ob_db.write_txn(db):
-            added = _apply_pending_add(db, reg["id"], ids)
-            if added:
-                _maybe_track_first_gifts(db, reg["id"])
+        session["pending_qty"] = qtys
+        try:
+            with ob_db.write_txn(db):
+                added = _apply_pending_add(db, reg["id"], ids)
+                if added:
+                    _maybe_track_first_gifts(db, reg["id"])
+        finally:
+            session.pop("pending_qty", None)
         flash(tf("starter_added", lang, n=added) if added else _t("setup_nothing_new", lang), "ok")
         return redirect(url_for("items_manage") + "#mine")
     pending = [i for i in (session.get("pending_add") or []) if i not in ids] + ids
     session["pending_add"] = pending[-50:]
+    if qtys:
+        session["pending_qty"] = {**(session.get("pending_qty") or {}), **qtys}
     flash(_t("pending_add_signup", lang), "ok")
     return redirect(url_for("registry_new") if current_user() else url_for("signup"))
+
+
+def _estimate_rate():
+    """(shekels per display-currency unit, its symbol) for the '≈ $X' estimate line, or (None, "")."""
+    cur = (session.get("cur") or getattr(g, "display_currency", None)
+           or ("USD" if "USD" in ob_money.CURRENCIES else "ILS"))
+    rate = ob_money.RATES.get(cur) if cur != "ILS" else None
+    return rate, (ob_money.CURRENCY_SYMBOLS.get(cur, cur + " ") if rate else "")
+
+
+# ---------------------------------------------------------------- "Build my list" quiz
+quiz_pick = ob_quiz.quiz_pick
+
+
+@app.route("/build-my-list")
+def list_quiz():
+    """Six radio questions in one GET form; with any answer in the query string the same page
+    renders the draft list below (ob_quiz decides the items). Noindex with args comes from the
+    generic 'any non-lang query arg' rule; canonical drops the query."""
+    db = get_db()
+    answers = ob_quiz.normalise(request.args)
+    submitted = any(k in request.args for k in ob_quiz.ANSWER_KEYS)
+    ctx = dict(answers=answers, questions=ob_quiz.QUESTIONS, submitted=submitted)
+    if submitted:
+        built = ob_quiz.quiz_build(db, answers)
+        rows, qty = built["rows"], built["qty"]
+        total = sum((r["price_nis"] or 0) * qty[r["id"]] for r in rows)
+        sig = "|".join(answers[k] for k in ob_quiz.ANSWER_KEYS)
+        seen = session.get("quiz_seen") or []
+        if sig not in seen:
+            track("list_quiz_done")
+            session["quiz_seen"] = (seen + [sig])[-10:]
+        cats = []
+        for r in rows:
+            if not cats or cats[-1][0] != r["category"]:
+                cats.append((r["category"], []))
+            cats[-1][1].append(r)
+        rate, sym = _estimate_rate()
+        ctx.update(rows=rows, qty=qty, total=total, n_items=len(rows), notes=built["notes"], cats=cats,
+                   est_rate=rate, est_sym=sym)
+    return render_template("list_quiz.html", **ctx)
+
+
+@app.route("/build-my-list/start", methods=["POST"])
+def list_quiz_start():
+    """"Start my registry with these": the ticked quiz items (and their quantities) onto the list."""
+    if rate_limited("quiz_start", limit=20, per=600):
+        abort(429)
+    if is_spam():
+        return redirect(url_for("list_quiz"))
+    lang = current_lang()
+    db = get_db()
+    ids = _setup_ticked_ids(db, 50)
+    if not ids:
+        flash(_t("setup_none_selected", lang), "err")
+        return redirect(url_for("list_quiz"))
+    qtys = {}
+    for i in ids:
+        raw = request.form.get(f"qty_{i}", "")
+        if raw.isascii() and raw.isdigit() and 1 <= int(raw) <= 99:
+            qtys[i] = int(raw)
+    track("list_quiz_start")
+    return _start_registry_from_ids(db, ids, lang, qtys)
 
 
 @app.route("/registry/items/<int:item_id>/update", methods=["POST"])
@@ -5169,7 +5390,8 @@ INSIGHT_ENDPOINT_NAMES = {
     "find": "Find a registry", "advertise": "Advertise", "privacy": "Privacy", "terms": "Terms",
     "contact": "Contact", "guides": "Guides index", "guide": "Guide articles",
     "gift_ideas": "Gift ideas", "catalog_item": "Item pages", "gift_category": "Category pages",
-    "setup_cost": "Setup cost calculator",
+    "setup_cost": "Setup cost calculator", "list_quiz": "Build my list quiz",
+    "compare_index": "Compare index", "compare_group": "Comparison pages",
 }
 
 
@@ -5547,9 +5769,10 @@ def robots():
 def sitemap():
     pages = [ext_url(p) for p in
              ("index", "how", "find", "catalog_page", "sample", "shana", "about", "contact", "privacy", "terms",
-              "advertise", "guides", "gift_ideas", "setup_cost")]
+              "advertise", "guides", "gift_ideas", "setup_cost", "list_quiz")]
     pages += [ext_url("gift_ideas", band=slug) for slug in IDEAS_BANDS]
     pages += [ext_url("gift_category", cat_slug=slug) for slug in GIFT_CATS]
+    pages += [ext_url("compare_index")] + [ext_url("compare_group", slug=s) for s in compare_groups(get_db())]
     xml = ['<?xml version="1.0" encoding="UTF-8"?>',
            '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in pages:

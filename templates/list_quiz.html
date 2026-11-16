@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% from "_cards.html" import gift_media with context %}
+{% block title %}{{ t('quiz_title') }}{% endblock %}
+{% block meta_desc %}{{ t('quiz_meta') }}{% endblock %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+<div class="home sheet-page starter-page setup-page quiz-page">
+  <div class="sec-inner">
+    <header class="starter-head setup-head">
+      <p class="kicker">{{ t('quiz_kicker') }}</p>
+      <h1 class="sheet-title">{{ t('quiz_h1') }}</h1>
+      <p class="page-sub">{{ t('quiz_sub') }}</p>
+    </header>
+
+    <form method="get" action="{{ url_for('list_quiz') }}" class="quiz-form" id="quiz-form">
+      {% if lang == 'he' %}<input type="hidden" name="lang" value="he">{% endif %}
+      {% for key, vals in questions %}
+      <fieldset class="quiz-q">
+        <legend><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ t('quiz_q_' ~ key) }}</legend>
+        <div class="quiz-opts">
+          {% for v in vals %}
+          <label class="quiz-opt">
+            <input type="radio" name="{{ key }}" value="{{ v }}" {% if answers[key] == v %}checked{% endif %}>
+            <span>{{ t('quiz_o_' ~ key ~ '_' ~ v) }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endfor %}
+      <p class="quiz-go"><button class="btn btn-gold btn-lg" type="submit">{{ t('quiz_show') }} <span aria-hidden="true">{{ arrow }}</span></button></p>
+    </form>
+
+    {% if submitted %}
+    {% set est = estimate_label(total) %}
+    {% set tally_tpl = t('setup_tally_none') if n_items == 0 else (t('setup_tally_one') if n_items == 1 else t('setup_tally')) %}
+    <section class="quiz-result" id="draft" aria-labelledby="quiz-draft-h">
+      <h2 class="sec-title" id="quiz-draft-h">{{ t('quiz_draft_title') }}</h2>
+      <div class="quiz-why">
+        <h3 class="sub-title">{{ t('quiz_why_title') }}</h3>
+        <ul>{% for n in notes %}<li>{{ t(n) }}</li>{% endfor %}</ul>
+      </div>
+
+      <form method="post" action="{{ url_for('list_quiz_start') }}" id="starter-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="starter-lists">
+          {% for cat, items in cats %}
+          <div class="starter-group sheet" data-group="{{ cat }}">
+            <div class="starter-group-head">
+              <h3 class="sub-title"><span class="rail-n">{{ '%02d' % loop.index }}</span>{{ cat_label(cat) }}</h3>
+              <button class="btn btn-ghost btn-sm" type="button" data-starter-all hidden
+                      data-label-all="{{ t('starter_select_all') }}" data-label-none="{{ t('starter_clear_group') }}">{{ t('starter_select_all') }}</button>
+            </div>
+            <div class="starter-grid">
+              {% for c in items %}
+              {% set href = item_url(c) %}
+              {% set q = qty[c['id']] %}
+              <div class="starter-card">
+                <div class="starter-card-top setup-row quiz-row">
+                  <input type="checkbox" name="add_{{ c['id'] }}" value="1" id="quiz-i-{{ c['id'] }}" aria-labelledby="quiz-n-{{ c['id'] }}"
+                         data-price="{{ c['price_nis'] or 0 }}" checked>
+                  {% if q > 1 %}<input type="hidden" name="qty_{{ c['id'] }}" value="{{ q }}">{% endif %}
+                  <div class="quiz-pic">{{ gift_media(c, small=True) }}</div>
+                  <span>
+                    <strong id="quiz-n-{{ c['id'] }}">{% if href %}<a href="{{ href }}">{% endif %}{% if c['brand'] %}<span class="item-brand">{{ c['brand'] }}</span> {% endif %}{{ pick(c, 'name') }}{% if href %}</a>{% endif %}{% if q > 1 %} <span class="quiz-qty bdi">×{{ q }}</span>{% endif %}</strong>
+                    <span class="gift-meta bdi">{% if c['price_nis'] %}₪{{ '{:,}'.format(c['price_nis'] * q) }}{% set _e = estimate_label(c['price_nis'] * q) %}{% if _e %} {{ _e }}{% endif %}{% endif %}{% if c['store'] %} · {{ c['store'] }}{% endif %}{% if c['price_status'] == 'estimate' %} · {{ t('price_estimate') }}{% endif %}</span>
+                  </span>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% if not rows %}<p class="empty-note">{{ t('quiz_empty') }}</p>{% endif %}
+        <div class="starter-bar">
+          <span class="starter-tally" id="starter-tally" aria-live="polite"
+                data-none="{{ t('setup_tally_none') }}" data-one="{{ t('setup_tally_one') }}" data-many="{{ t('setup_tally') }}"
+                {% if est_rate %}data-est-rate="{{ est_rate }}" data-est-sym="{{ est_sym }}"{% endif %}>{{ tally_tpl.replace('{n}', n_items | string).replace('{total}', '₪' ~ '{:,}'.format(total)).replace('{est}', (' ' ~ est) if est else '') }}</span>
+          <button class="btn btn-gold" type="submit">{{ t('quiz_start_btn') }}</button>
+          <button class="btn btn-ghost" type="submit" formaction="{{ url_for('setup_cost_request') }}">{{ t('setup_do_for_you') }} <span aria-hidden="true">{{ arrow }}</span></button>
+        </div>
+      </form>
+      {% if est %}<p class="hint setup-est-note">{{ estimate_note() }}</p>{% endif %}
+      <p class="hint">{{ t('quiz_foot') }} <a href="{{ url_for('setup_cost') }}">{{ t('quiz_to_cost') }}</a></p>
+    </section>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

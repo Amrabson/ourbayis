@@ -37,6 +37,7 @@
         </a>
         {% endfor %}
       </div>
+      <p class="quiz-alt"><a class="link-arrow" href="{{ url_for('list_quiz') }}">{{ t('quiz_link_cost') }} <span aria-hidden="true">{{ arrow }}</span></a></p>
     </header>
 
     <form method="post" action="{{ url_for('setup_cost_start') }}" id="starter-form">

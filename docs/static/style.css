@@ -2722,4 +2722,59 @@ main:focus { outline: none; }
 @media (max-width: 480px) { .add-link-sheet .join-actions { flex-direction: column; align-items: stretch; } }
 .add-anywhere-hint[hidden] { display: none; }
 
+/* compare pages: /compare and /compare/<group> (cmp_). A real table from 761px up, stacked cards below. */
+.cmp-intro { max-width: 720px; }
+.item-options-compare { margin: 0 0 12px; }
+.cmp-wrap { overflow-x: auto; margin-bottom: 18px; }
+.cmp-table { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 560px; }
+.cmp-table th, .cmp-table td { padding: 12px 12px; vertical-align: top; text-align: start; border-bottom: 1px solid var(--line); }
+.cmp-table thead th { border-bottom: 2px solid var(--gold-bright); color: var(--navy); font-weight: 700; }
+.cmp-table tbody th { width: 120px; font-size: .88rem; font-weight: 600; color: var(--ink-soft); }
+.cmp-table .cmp-corner { width: 120px; border-bottom: 2px solid var(--gold-bright); }
+.cmp-table .gift-ph { height: 130px; }
+.cmp-table .gift-sub, .cmp-table .gift-model, .cmp-table .cmp-price { margin: 0 0 4px; }
+.cmp-table td .btn { max-width: 100%; }
+.cmp-table :is(th, td) { overflow-wrap: anywhere; }
+.cmp-cards { display: none; list-style: none; margin: 0 0 18px; padding: 0; gap: 12px; }
+.cmp-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px 14px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+.cmp-card .gift-ph-sm { width: 76px; height: 76px; aspect-ratio: 1; }
+.cmp-card-text p { margin: 0 0 4px; }
+.cmp-card-add { grid-column: 1 / -1; }
+@media (max-width: 760px) {
+  .cmp-wrap { display: none; }
+  .cmp-cards { display: grid; }
+}
+.cmp-index { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.cmp-index-card { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
+.cmp-index-pic .gift-ph { height: 96px; }
+.cmp-index-name { font-size: 1.1rem; margin: 0 0 4px; }
+.cmp-index-text p { margin: 0 0 6px; }
+.cat-compare { margin-bottom: 18px; }
+
+/* ---------- "Build my list" quiz (/build-my-list) ---------- */
+.quiz-page .quiz-form { display: grid; gap: 18px; margin-top: 8px; }
+.quiz-page .quiz-q { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px 16px; margin: 0; min-width: 0; }
+.quiz-page .quiz-q legend { font-weight: 600; padding: 0 6px; }
+.quiz-page .quiz-opts { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 6px; }
+.quiz-page .quiz-opt { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: #fffdf8; cursor: pointer; }
+.quiz-page .quiz-opt input { width: 20px; height: 20px; flex: none; margin: 0; }
+.quiz-page .quiz-opt:has(input:checked) { border-color: var(--navy); box-shadow: inset 0 0 0 1px var(--navy); }
+.quiz-page .quiz-opt:has(input:focus-visible) { outline: 2px solid var(--navy); outline-offset: 2px; }
+.quiz-page .quiz-go { margin: 4px 0 0; }
+.quiz-page .quiz-result { margin-top: clamp(28px, 5vw, 56px); }
+.quiz-page .quiz-why { background: #fffdf8; border: 1px solid var(--line); border-radius: 8px; padding: 14px 18px; margin-bottom: 18px; }
+.quiz-page .quiz-why ul { margin: 6px 0 0; padding-inline-start: 1.2em; }
+.quiz-page .quiz-why li { margin-bottom: 4px; }
+.quiz-page .quiz-row { align-items: center; }
+.quiz-page .quiz-pic { flex: none; }
+.quiz-page .quiz-qty { color: var(--ink-soft); font-weight: 400; }
+.quiz-alt { margin: 12px 0 0; }
+.quiz-signup-link { margin-top: 6px; }
+.home .tools-grid:has(.tool-card:nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 860px) { .home .tools-grid:has(.tool-card:nth-child(4)) { grid-template-columns: 1fr; } }
+@media (max-width: 480px) {
+  .quiz-page .quiz-opts { grid-template-columns: 1fr; }
+  .quiz-page .quiz-q { padding-inline: 12px; }
+}
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}

@@ -9,6 +9,7 @@
 {% block og_desc %}{{ t('event_' ~ reg['event_type']) }}{% if reg['event_date'] %} · {{ fmt_date(reg['event_date']) }}{% endif %}{% if reg['city'] %} · {{ reg['city'] }}{% endif %}.
 {%- if total and not reg['closed_at'] %} {{ tf('reg_og_left', left=total - done, total=total) if total - done != 1 else tf('reg_og_left_one', total=total) }} {{ t('reg_og_cta') }}{% endif %}{% endblock %}
 {% block og_image %}{{ ext_url('static', filename='og-registry-' ~ ('he' if rtl else 'en') ~ '.png') }}{% endblock %}
+{% block head_extra %}{{ preconnect_links(items) }}{% endblock %}
 {% block content %}
 
 <section class="invite">

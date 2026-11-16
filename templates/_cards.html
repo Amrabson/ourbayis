@@ -4,11 +4,11 @@
    Rules (review 2026-09-15): name + price first; brand/model/store subordinate;
    the stock flag and price-confidence tag travel with the item everywhere. #}
 
-{% macro gift_media(item, small=False) -%}
+{% macro gift_media(item, small=False, hero=False) -%}
   {%- set _cat = item['category'] if item['category'] in categories else 'home' -%}
   {%- if item['image'] -%}
   <div class="gift-ph gift-img ph-{{ _cat }} {% if small %}gift-ph-sm{% endif %}">
-    <img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" width="{{ 54 if small else 240 }}" height="{{ 54 if small else 180 }}">
+    <img class="gift-img-img" src="{{ item['image'] }}" alt="{{ pick(item, 'name') }}" {% if hero %}fetchpriority="high"{% else %}loading="lazy"{% endif %} decoding="async" referrerpolicy="no-referrer" width="{{ 54 if small else 240 }}" height="{{ 54 if small else 180 }}">
     <svg class="ic ic-lg ill-fallback" aria-hidden="true"><use href="#ill-{{ illustration_for(item) }}"/></svg>
   </div>
   {%- else -%}

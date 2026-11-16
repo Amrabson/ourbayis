@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% from "_cards.html" import gift_media with context %}
+{% block title %}{{ tf('cmp_index_title', brand=brand) }}{% endblock %}
+{% block meta_desc %}{{ t('cmp_index_meta') }}{% endblock %}
+{% block head_extra %}{{ preconnect_links(pic_items) }}{% endblock %}
+{% block jsonld %}
+{%- set _suffix = '?lang=he' if rtl else '' -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": {{ t('nav_catalog') | tojson }},
+      "item": {{ (ext_url('catalog_page') ~ _suffix) | tojson }} },
+    { "@type": "ListItem", "position": 2, "name": {{ t('cmp_crumb') | tojson }},
+      "item": {{ (ext_url('compare_index') ~ _suffix) | tojson }} }
+  ]
+}
+</script>
+{% endblock %}
+{% block content %}
+{% set arrow = '←' if rtl else '→' %}
+<div class="home ideas-page compare-page">
+  <header class="sec-inner ideas-head">
+    <nav class="item-crumbs" aria-label="{{ t('item_crumbs') }}">
+      <ol>
+        <li><a href="{{ url_for('catalog_page') }}">{{ t('nav_catalog') }}</a></li>
+        <li aria-current="page">{{ t('cmp_crumb') }}</li>
+      </ol>
+    </nav>
+    <h1 class="ideas-title">{{ t('cmp_index_h') }}</h1>
+    <p class="page-sub">{{ t('cmp_index_sub') }}</p>
+  </header>
+  <div class="sec-inner ideas-body">
+    {% if cards %}
+    <ul class="cmp-index" aria-label="{{ t('cmp_index_aria') }}">
+      {% for c in cards %}
+      <li class="cmp-index-card">
+        <a class="cmp-index-pic" href="{{ url_for('compare_group', slug=c.slug) }}" tabindex="-1" aria-hidden="true">{{ gift_media(c.cheapest) }}</a>
+        <div class="cmp-index-text">
+          <h2 class="cmp-index-name"><a class="gift-name-link" href="{{ url_for('compare_group', slug=c.slug) }}">{{ c.name }}</a></h2>
+          <p class="hint">{{ tf('cmp_count', n=c.n) }}{% if c.hi %} · <span class="bdi">{% if c.lo != c.hi %}{{ tf('cmp_range', lo='{:,}'.format(c.lo), hi='{:,}'.format(c.hi)) }}{% else %}₪{{ '{:,}'.format(c.lo) }}{% endif %}</span>{% endif %}</p>
+          <a class="link-arrow" href="{{ url_for('compare_group', slug=c.slug) }}">{{ t('cmp_more_link') }} <span aria-hidden="true">{{ arrow }}</span></a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="hint">{{ t('cmp_index_empty') }}</p>
+    {% endif %}
+    <p class="hint catalog-affiliate">{{ t('affiliate_note') }}{% if amazon_associate %} {{ t('amazon_associate_note') }}{% endif %}</p>
+    {% set _n = estimate_note() %}{% if _n %}<p class="hint rates-note">{{ _n }}</p>{% endif %}
+  </div>
+</div>
+{% endblock %}
