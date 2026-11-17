@@ -85,3 +85,24 @@ def test_no_heads_up_once_the_gift_is_on_its_way(client, app_module):
     db.commit()
     html = guest.get(f"/g/{token}").get_data(as_text=True)
     assert "gift-rush" not in html and "gift-steps" not in html
+
+
+def test_unusable_email_is_mentioned_and_reported_status_speaks_to_the_guest(client, app_module):
+    signup(client, email="couple@example.com")
+    create_registry(client, couple="Dina & Yossi")
+    add_item(client, name="Electric kettle", price_nis="64", url="https://ksp.co.il/item/1")
+    db = _db()
+    db.execute("UPDATE registries SET visibility=\x27public\x27")
+    db.commit()
+    slug = db.execute("SELECT slug FROM registries").fetchone()["slug"]
+    item_id = db.execute("SELECT id FROM registry_items").fetchone()["id"]
+    guest = app_module.app.test_client()
+    page = guest.get(f"/r/{slug}").get_data(as_text=True)
+    r = guest.post(f"/r/{slug}/claim/{item_id}", data=dict(csrf_token=get_csrf(page), form_key=get_form_key(page),
+                   guest_name="Aunt Malka", guest_email="not-an-email", give="buy"), follow_redirects=True)
+    html = r.get_data(as_text=True)
+    assert "didn&#39;t look right" in html or "didn\x27t look right" in html
+    token = r.request.path.rsplit("/", 1)[-1]
+    guest.post(f"/g/{token}/report", data=dict(csrf_token=get_csrf(html)))
+    html = guest.get(f"/g/{token}").get_data(as_text=True)
+    assert "on its way" in html and "Guest reports sending" not in html

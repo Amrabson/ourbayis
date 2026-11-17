@@ -4,7 +4,7 @@
 {% block content %}
 <div class="wrap section items-page">
   <h1 class="section-title">{{ t('items_title') }}</h1>
-  <p class="page-sub">{{ t('items_sub') }}</p>
+  <p class="page-sub">{{ t('items_sub') }}</p><p class="hint items-back"><a class="link-arrow" href="{{ url_for('dashboard') }}">{{ t('back_to_dashboard') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a></p>
 
   <div class="notice-panel starter-panel">
     <a class="btn btn-gold" href="{{ url_for('items_starter') }}"><svg class="ic"><use href="#i-star"/></svg> {{ t('starter_btn') }}</a>

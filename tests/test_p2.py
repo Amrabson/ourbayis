@@ -406,7 +406,7 @@ def test_claim_dialog_routes_and_guest_flow_unchanged(client, app_module):
     assert "Amount to send" in html and "paypal.me" in html
     assert "gift-steps" not in html  # cash route: no order/send/tell steps
     r = g.post(f"/g/{token}/report", data=dict(csrf_token=get_csrf(html)), follow_redirects=True)
-    assert "Guest reports" in r.get_data(as_text=True)
+    assert "You told the couple it" in r.get_data(as_text=True)  # guest's own page speaks to them (2026-11-17)
 
 
 def test_dates_are_localised_but_stored_unchanged(client, app_module):

@@ -41,7 +41,7 @@
       </div>
 
       <form method="post" action="{{ url_for('list_quiz_start') }}" id="starter-form">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% for _k, _v in answers.items() %}<input type="hidden" name="a_{{ _k }}" value="{{ _v }}">{% endfor %}
         <input type="text" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="starter-lists">
           {% for cat, items in cats %}

@@ -99,6 +99,10 @@ work from anywhere (manage.py finds the database and `instance/ob.env` next to i
 # weekly, before any deploy that touches the schema, or just as a habit
 # (keeps the newest 14 copies in backups/ and deletes older ones; --keep N to change, 0 = keep all):
 /home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py backup
+
+# weekly: re-reads store pages that can be read (never ksp / payngo / homecenter), writes unchanged
+# and changed prices to the catalog; review the result at /admin/prices. Drop --apply for a report only.
+/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py check-prices --apply
 ```
 `manage.py check` is worth running after any deploy — it checks DB integrity, foreign keys, that at least one admin exists, and secret-key/cookie config sanity; exits 1 if anything's wrong (including email half set up). It also prints WARNING lines for settings that fail quietly: email off, `OB_BASE_URL` / `OB_NOTIFY_EMAIL` missing, failed emails in the outbox, stale exchange rates. Read them before going live.
 

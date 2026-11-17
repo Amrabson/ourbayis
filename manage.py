@@ -11,6 +11,8 @@ stats          -- print basic counts (no PII)
 seed-sync      -- adopt/insert catalog rows from seed_catalog.json by seed_key;
                   with --fields, explicitly overwrite those fields from the seed
                   (both default to a dry run printing a diff table; pass --apply to write)
+check-prices   -- re-read store product pages, report price changes, --apply to write them
+                  (never requests ksp/payngo/homecenter; --write-seed also edits seed_catalog.json)
 refresh-registry-links -- copy url/image/store/brand from catalog to registry_items
                   that came from the catalog, skipping any field the couple overrode
                   (dry run by default; pass --apply to write)
@@ -397,6 +399,50 @@ def cmd_refresh_registry_links(args):
     return 0
 
 
+def cmd_check_prices(args):
+    import ob_pricecheck as pc
+    delay = args.delay
+    if delay < pc.MIN_DELAY:
+        print(f"--delay raised to the minimum of {pc.MIN_DELAY:g}s.")
+        delay = pc.MIN_DELAY
+    if args.write_seed and not args.apply:
+        print("--write-seed only works together with --apply.", file=sys.stderr)
+        return 2
+    db = _open()
+    try:
+        res = pc.run(db, stores=args.store or None, older_than=args.older_than, limit=args.limit, delay=delay)
+    except Exception as e:  # internal error
+        print(f"check-prices failed: {e!r}", file=sys.stderr)
+        return 1
+    rows = res["rows"]
+    print(f"{'item':<38} {'store':<22} {'old':>6} {'new':>6} {'change':>8}  status")
+    for r in rows:
+        new = "-" if r["new"] is None else str(r["new"])
+        ch = "-" if r["pct"] is None else f"{r['pct']:+.1f}%"
+        print(f"{r['item']['name'][:37]:<38} {r['host'][:21]:<22} {r['old']:>6} {new:>6} {ch:>8}  "
+              f"{r['status']}{' - ' + r['detail'] if r['detail'] else ''}")
+    for h, n in sorted(res["skipped"].items()):
+        print(f"skipped (store blocks reading or returns wrong products): {h} - {n} item(s) not requested")
+    counts = {}
+    for r in rows:
+        counts[r["status"]] = counts.get(r["status"], 0) + 1
+    pics = sum(1 for r in rows if "picture differs" in r["detail"])
+    print("\nSummary: " + ", ".join(f"{counts.get(s, 0)} {s}" for s in pc.STATUSES if s != "skipped")
+          + f", {counts.get('skipped', 0) + sum(res['skipped'].values())} skipped"
+          + (f"; {pics} with a different picture (never replaced)" if pics else ""))
+    if args.apply:
+        ids = [r["check_id"] for r in rows if r["check_id"] and r["status"] in ("same", "changed")]
+        counts2, seed_pairs = pc.apply_rows(db, ids)
+        print(f"Applied {counts2['applied']} (not applied: {sum(counts2.values()) - counts2['applied']}).")
+        if args.write_seed:
+            seed_path = Path(args.seed_file) if args.seed_file else BASE / "seed_catalog.json"
+            done = pc.write_seed(seed_path, pc.merge_changes(seed_pairs))
+            print(f"Seed file updated for {len(done)} item(s): {seed_path}")
+    else:
+        print("Dry run: nothing changed except the price_checks log. Add --apply to write the prices.")
+    return 0
+
+
 def cmd_fetch_rates(args):
     import ob_money
     try:
@@ -464,6 +510,17 @@ def main():
     sp = sub.add_parser("fetch-rates",
                         help="pull ECB reference rates (frankfurter.app) into instance/rates.json")
     sp.set_defaults(fn=cmd_fetch_rates)
+
+    sp = sub.add_parser("check-prices",
+                        help="re-read store pages and report price changes (dry run unless --apply)")
+    sp.add_argument("--store", action="append", help="store host (repeatable); default: every readable host")
+    sp.add_argument("--older-than", type=int, default=21, help="only items checked more than N days ago (default 21)")
+    sp.add_argument("--limit", type=int, default=60, help="max items to fetch (default 60)")
+    sp.add_argument("--apply", action="store_true", help="write same/changed prices to the catalog")
+    sp.add_argument("--write-seed", action="store_true", help="with --apply: also edit seed_catalog.json")
+    sp.add_argument("--delay", type=float, default=3.0, help="seconds between requests to one host (min 2)")
+    sp.add_argument("--seed-file", default="", help=argparse.SUPPRESS)
+    sp.set_defaults(fn=cmd_check_prices)
 
     sp = sub.add_parser("refresh-registry-links")
     sp.add_argument("--apply", action="store_true",

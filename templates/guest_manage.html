@@ -84,7 +84,7 @@
         <strong>{{ tf('guest_held_h', date=fmt_date(claim['expires_at'])) if claim['expires_at'] else t('claim_status_reserved') }}</strong>
         <p>{{ t('guest_reserved_note_steps') }}</p>
       {% else %}
-      <strong>{{ t('claim_status_' ~ claim['status']) }}</strong>
+      <strong>{{ t('guest_status_reported') if claim['status'] == 'reported' else t('claim_status_' ~ claim['status']) }}</strong>
       {% endif %}
       {% if claim['status'] == 'reserved' and _steps_mode %}
       {% elif claim['status'] == 'reserved' %}

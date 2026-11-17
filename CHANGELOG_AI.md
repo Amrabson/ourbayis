@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-11-17 (price re-check tool; journey audit fixes)
+- **`manage.py check-prices`** (`ob_pricecheck.py`; `price_checks` table [m38]; `/admin/prices`): re-reads catalog
+  store pages with `ob_linkinfo` for readable stores only (`NO_FETCH_HOSTS`: KSP, Payngo, Home Center are never
+  requested), one request at a time, ≥2 s between requests to a host, a host is dropped after 2 failures or any
+  429/403/999 (`lookup()` results now carry `status` for HTTP ≥400). Statuses same / changed / no price / failed /
+  mismatch (page shows a different product: never applied). `--apply` updates price + verified date; `--write-seed`
+  edits only those fields in seed_catalog.json. Admin page applies per row or all; it never fetches. Weekly task line
+  in DEPLOY_AI.md.
+- **Journey audit** (whole couple + guest flow, EN/HE, tests/test_journey.py incl. an end-to-end walk): owner viewing
+  their own registry sees "the way guests see it" with a way back; dashboard "View as a guest" counts as the preview
+  step; items page and share kit link back to the dashboard; removing a gift confirms; the quiz keeps its answers
+  after "tick at least one".
+- Guest typed an email that isn't valid → told so (the reservation still goes through); after "I've sent it" the
+  guest's own page says "You told the couple it's on its way"; Hebrew "Unlisted" now "לא מופיע בחיפוש".
+- **23 catalog items** (183 in the seed), prices read on each store's page 2026-11-17: mostly IKEA Israel (shoe
+  cabinet, standing mirror, coat stand, blackout curtains, under-bed box, cleaning bucket, door mat, lamp, shower
+  curtain, bath mat, two drying racks, kitchen scale, oven dishes, lid organiser, cutlery tray, vacuum flask, salad
+  servers, tablecloth, rotating tray) plus Bug (oil radiator — no picture, its image 404s; two rice cookers). New
+  option groups `drying-rack`, `rice-cooker` with `cmp_*` strings. Not added for want of a drawing: smoke detector,
+  power strips, bins, toothbrush holder (would need new `ill-*` symbols).
+- Left for the owner (decision): "registry" vs "gift list" vs "list" wording in English; Hebrew "את" before item
+  names in couple emails.
+
 ## 2026-11-16 (build-my-list quiz, comparison pages, bedding)
 - **`/build-my-list`** (`list_quiz`, `list_quiz_start`; rules in `ob_quiz.py`, `quiz_pick`/`quiz_build`): six GET
   questions (start, bed, host, kitchen, quality, yomtov) → a draft list from active catalog items, one member per

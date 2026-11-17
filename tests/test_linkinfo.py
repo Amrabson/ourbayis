@@ -522,3 +522,13 @@ def test_deeply_nested_json_does_not_crash():
     nested = "[" * 5000 + "]" * 5000
     html = '<script type="application/ld+json">%s</script><title>T</title>' % nested
     assert parse_html(html, BASE)["name"] == "T"
+
+
+def test_http_status_surfaced_on_failure():
+    for code in (429, 403, 404):
+        r = lookup("https://example.com/a", resolver=res_public,
+                   opener=lambda url, host, ip, headers, deadline, c=code: (c, {}, b""))
+        assert r["error"] == "fetch_failed" and r["status"] == code and not r["ok"]
+    # a blocked host never reaches the network and carries no status
+    r = lookup("http://127.0.0.1/", resolver=res_public)
+    assert r["error"] == "blocked_host" and "status" not in r

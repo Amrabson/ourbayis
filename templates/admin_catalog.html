@@ -6,6 +6,7 @@
     <h1 class="section-title">Catalog ({{ rows | length }})</h1>
     <nav class="dash-actions">
       <a class="btn btn-primary" href="{{ url_for('admin_catalog_edit') }}"><svg class="ic"><use href="#i-plus"/></svg> New item</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_prices') }}">Price checks</a>
       <a class="btn btn-ghost" href="{{ url_for('admin_catalog_csv') }}">Export CSV</a>
       <a class="btn btn-ghost" href="{{ url_for('admin_catalog_import') }}">Import CSV</a>
       <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
@@ -18,6 +19,7 @@
     <a class="stat-card" href="{{ url_for('admin_catalog', price_status='estimate') }}"><strong>{{ queue_counts['unverified'] }}</strong><span>unverified price</span></a>
     <a class="stat-card {% if queue_counts['stale'] %}stat-warn{% endif %}" href="{{ url_for('admin_catalog', stale=1) }}"><strong>{{ queue_counts['stale'] }}</strong><span>price not re-checked in {{ recheck_days }}+ days</span></a>
   </div>
+  {% if stale %}<p class="hint">Stores that can be read are re-checked automatically: see <a href="{{ url_for('admin_prices') }}">Price checks</a> (<code>python manage.py check-prices</code>).</p>{% endif %}
 
   <form class="filter-row" method="get" action="{{ url_for('admin_catalog') }}">
     <input type="search" name="q" value="{{ q }}" placeholder="Search name or seed_key" aria-label="Search name or seed_key">

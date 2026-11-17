@@ -39,6 +39,7 @@ import ob_hebcal
 import ob_linkinfo
 import ob_mail
 import ob_mailhtml
+import ob_pricecheck
 import ob_quiz
 import ob_money
 import ob_search
@@ -916,22 +917,22 @@ _ILLUSTRATION_RULES = (
     # cash funds ("Sefarim fund", "קרן ספרים"): the money-box drawing, ahead of every keyword rule
     (("fund ", "קרן "), "boxes"),
     # checked before the broad rules below: "cookie sheets" must not hit "sheet" (bedding)
-    (("cookie sheet", "baking pan", "baking dish", "kugel pan", "loaf", "תבנית"), "bakeware"),
+    (("cookie sheet", "baking pan", "baking dish", "oven dish", "kugel pan", "loaf", "תבנית"), "bakeware"),
     # 2026-10-25 additions, checked first: the more specific names before the broad rules below
     (("cutting board", "קרש חיתוך"), "board"),
-    (("cake stand", "מעמד עוגה"), "cakestand"),
-    (("measuring", "מדידה"), "measure"),
+    (("cake stand", "rotating", "lazy susan", "מעמד עוגה", "מגש הגשה מסתובב"), "cakestand"),
+    (("measuring", "kitchen scale", "מדידה", "משקל מטבח"), "measure"),
     (("spice", "salt", "תבלינים", "מלחייה"), "spices"),
     (("rolling pin", "pastry", "מערוך"), "rolling"),
     (("garlic", "peeler", "מכבש שום", "קולפן"), "cutlery"),
-    (("hamper", "laundry basket", "סל כביסה"), "hamper"),
+    (("hamper", "laundry basket", "clothes drying", "סל כביסה", "ייבוש כביסה"), "hamper"),
     (("drying rack", "dish rack", "מתקן ייבוש"), "dishrack"),
     (("havdalah", "הבדלה"), "havdalah"),
     (("netilas", "washing cup", "mayim achronim", "נטלה", "נטילת ידיים", "מים אחרונים"), "netilas"),
     (("seder", "קערת ליל הסדר", "קערת סדר"), "seder"),
     (("ironing", "steam iron", "מגהץ"), "iron"),
-    (("hanger", "קולב"), "hanger"),
-    (("storage box", "container", "organizer", "קופסאות אחסון", "מארגנ", "tzedakah", "tallit bag", "tallis bag", "קופסת צדקה", "תיק טלית"), "boxes"),
+    (("hanger", "coat stand", "קולב", "מתלה לכובעים"), "hanger"),
+    (("storage box", "container", "organizer", "קופסאות אחסון", "מארגנ", "shoe cabinet", "ארון נעליים", "tzedakah", "tallit bag", "tallis bag", "קופסת צדקה", "תיק טלית"), "boxes"),
     (("step stool", "stool", "שרפרף"), "stool"),
     (("tool kit", "toolbox", "first aid", "ארגז כלים", "עזרה ראשונה"), "toolbox"),
     (("sandwich", "waffle", "panini", "טוסטר לחיצה", "וופל"), "press"),
@@ -941,9 +942,9 @@ _ILLUSTRATION_RULES = (
     (("bath mat", "shower", "מקלחת", "אמבטיה"), "towel"),
     (("hot plate", "platta", "פלטה"), "platta"),
     (("urn", "meicham", "pump pot", "מיחם"), "urn"),
-    (("kettle", "קומקום"), "kettle"),
+    (("kettle", "flask", "thermos", "קומקום", "תרמוס"), "kettle"),
     (("stand mixer", "hand mixer", "מיקסר"), "mixer"),
-    (("slow cooker", "crock", "cholent", "בישול איטי"), "slowcooker"),
+    (("slow cooker", "rice cooker", "crock", "cholent", "בישול איטי", "סיר אורז"), "slowcooker"),
     (("towel", "bathrobe", "מגבת", "מגבות", "חלוק"), "towel"),
     (("candlestick", "פמוט"), "candlesticks"),
     (("kiddush", "קידוש"), "kiddush"),
@@ -951,7 +952,7 @@ _ILLUSTRATION_RULES = (
     (("menorah", "chanukah", "חנוכייה"), "menorah"),
     (("mezuzah", "מזוזה"), "mezuzah"),
     (("dinnerware", "plates", "porcelain", "צלחות", "כלי אוכל"), "dinnerware"),
-    (("cutlery", "knife", "knives", "סכו", "סכין"), "cutlery"),
+    (("cutlery", "knife", "knives", "salad servers", "סכו", "סכין", "כלי הגשה לסלט"), "cutlery"),
     (("glassware", "wine", "pitcher", "carafe", "כוסות", "יין"), "glassware"),
     (("pots", "frying pan", "cast-iron", "cast iron", "dutch", "deep fryer", "סירים", "מחבת", "סיר לחם", "סיר טיגון"), "pots"),
     (("table", "chairs", "שולחן", "כיסא"), "table"),
@@ -961,12 +962,12 @@ _ILLUSTRATION_RULES = (
     (("oven", "microwave", "toaster", "air fryer", "bread maker", "תנור", "מיקרוגל", "טוסטר", "אופה לחם"), "oven"),
     (("blender", "food processor", "בלנדר", "מעבד מזון"), "blender"),
     (("coffee", "frother", "קפה"), "coffee"),
-    (("vacuum", "sponja", "broom", "שואב", "ספונג"), "cleaning"),
+    (("vacuum", "sponja", "broom", "bucket", "שואב", "ספונג", "דלי ניקוי"), "cleaning"),
     (("bookcase", "sefarim", "shas", "chumash", "siddur", "machzor", "bentcher", "ספרי", "ספרייה"), "books"),
     (("sukkah", "esrog", "סוכה", "אתרוג"), "sukkah"),
     (("lamp", "מנורה"), "lamp"),
-    (("fan", "heater", "dehumidifier", "מאוורר", "חימום", "לחות"), "fan"),
-    (("couch", "sofa", "rug", "curtain", "mirror", "ספה", "שטיח", "וילון", "מראה"), "sofa"),
+    (("fan", "heater", "radiator", "dehumidifier", "מאוורר", "חימום", "רדיאטור", "לחות"), "fan"),
+    (("couch", "sofa", "rug", "curtain", "mirror", "door mat", "ספה", "שטיח", "וילון", "מראה"), "sofa"),
 )
 
 
@@ -2148,6 +2149,8 @@ def claim_item(slug, item_id):
                  guest_message=(request.form.get("message") or "").strip()[:1000], **extra)
     if _guest_email():
         send_guest_link(db, result["claim_id"], result["token"], _guest_email(), lang)
+    elif (request.form.get("guest_email") or "").strip():
+        flash(_t("guest_email_unusable", lang), "err")  # typed, but not one valid address: say so
     track("reservation", owner_uid=reg["user_id"])
     return redirect(url_for("guest_manage", token=result["token"]))
 
@@ -2288,6 +2291,8 @@ def cash_gift(slug):
                          else _t("mail_cash_no_amount", _ol)))
     if _guest_email():
         send_guest_link(db, cur.lastrowid, token, _guest_email(), lang)
+    elif (request.form.get("guest_email") or "").strip():
+        flash(_t("guest_email_unusable", lang), "err")
     track("guest_report", owner_uid=reg["user_id"])
     return redirect(url_for("guest_manage", token=token))
 
@@ -3747,7 +3752,9 @@ def list_quiz_start():
     ids = _setup_ticked_ids(db, 50)
     if not ids:
         flash(_t("setup_none_selected", lang), "err")
-        return redirect(url_for("list_quiz"))
+        # keep their six answers, so the draft comes back instead of an empty quiz
+        kept = ob_quiz.normalise({k: request.form.get("a_" + k) for k in ob_quiz.ANSWER_KEYS})
+        return redirect(url_for("list_quiz", **kept))
     qtys = {}
     for i in ids:
         raw = request.form.get(f"qty_{i}", "")
@@ -3788,6 +3795,7 @@ def items_update(item_id):
                 db.execute("UPDATE registry_items SET archived=1 WHERE id=?", (item_id,))
             else:
                 db.execute("DELETE FROM registry_items WHERE id=?", (item_id,))
+            flash(_t("item_removed", lang), "ok")
             return redirect(url_for("items_manage", _anchor="mine"))
         try:
             qty = max(1, min(int(request.form.get("qty_wanted", 1)), 99))
@@ -5560,7 +5568,7 @@ def insights_data(db, days=30, today=None):
     d["catalog"] = dict(
         active=n(""), with_link=n(" AND url!=''"), verified=n(" AND price_status='verified'"),
         stale=n(" AND " + STALE_PRICE_SQL), zero_clicks=n(" AND COALESCE(clicks,0)=0"),
-        hosts_without_rule=len(bare))
+        hosts_without_rule=len(bare), price_check=ob_pricecheck.last_run_summary(db))
 
     # 7. mail
     counts = ob_mail.outbox_counts(db)
@@ -5575,6 +5583,55 @@ def admin_insights():
     days = insights_days(request.args.get("days"))
     return render_template("admin_insights.html", d=insights_data(get_db(), days),
                            choice=("all" if days is None else str(days)))
+
+
+@app.route("/admin/prices")
+@admin_required
+def admin_prices():
+    """Results of the last `manage.py check-prices` runs. Reads the price_checks log only -
+    a web request never fetches anything from a store."""
+    db = get_db()
+    status = request.args.get("status", "")
+    store = request.args.get("store", "")
+    rows = ob_pricecheck.latest_checks(db)
+    stores = sorted({r["host"] for r in rows})
+    shown = [r for r in rows if (not status or r["status"] == status) and (not store or r["host"] == store)]
+    hosts = ob_pricecheck.active_hosts(db)
+    return render_template(
+        "admin_prices.html", rows=shown, status=status, store=store, stores=stores,
+        statuses=ob_pricecheck.STATUSES[:-1], last=ob_pricecheck.last_run_summary(db),
+        read_hosts=sorted(h for h in hosts if h not in ob_pricecheck.NO_FETCH_HOSTS),
+        skipped_hosts=sorted(h for h in hosts if h in ob_pricecheck.NO_FETCH_HOSTS),
+        no_fetch_why=ob_pricecheck.NO_FETCH_WHY,
+        n_unchanged=sum(1 for r in rows if r["status"] in ("same", "changed") and not r["applied"]),
+        today=datetime.now(timezone.utc).date().isoformat())
+
+
+def _prices_flash(counts):
+    msg = "Applied %d." % counts["applied"]
+    skipped = counts["already"] + counts["not-applicable"] + counts["stale"]
+    if skipped:
+        msg += " Not applied: %d (already applied, not applicable, or the price moved since the check)." % skipped
+    flash(msg, "ok" if counts["applied"] else "err")
+
+
+@app.route("/admin/prices/<int:check_id>/apply", methods=["POST"])
+@admin_required
+def admin_prices_apply(check_id):
+    counts, _ = ob_pricecheck.apply_rows(get_db(), [check_id])
+    _prices_flash(counts)
+    return redirect(url_for("admin_prices"))
+
+
+@app.route("/admin/prices/apply-all", methods=["POST"])
+@admin_required
+def admin_prices_apply_all():
+    db = get_db()
+    ids = [r["id"] for r in ob_pricecheck.latest_checks(db)
+           if r["status"] in ("same", "changed") and not r["applied"]]
+    counts, _ = ob_pricecheck.apply_rows(db, ids)
+    _prices_flash(counts)
+    return redirect(url_for("admin_prices"))
 
 
 @app.route("/admin/password", methods=["POST"])

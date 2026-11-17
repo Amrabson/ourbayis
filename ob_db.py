@@ -870,6 +870,24 @@ def _m037_mail_body_html(db):
     _add_column(db, "mail_outbox", "body_html TEXT")
 
 
+def _m038_price_checks(db):
+    """Price re-check log (2026-11-17): one row per catalog item per `manage.py check-prices` run.
+    Money in minor units (agorot). `applied`=1 once the result was written to catalog_items."""
+    db.execute("""
+    CREATE TABLE IF NOT EXISTS price_checks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      run_at TEXT NOT NULL,
+      item_id INTEGER NOT NULL,
+      host TEXT DEFAULT '',
+      old_minor INTEGER,
+      new_minor INTEGER,
+      status TEXT NOT NULL,
+      applied INTEGER DEFAULT 0,
+      detail TEXT DEFAULT ''
+    )""")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_price_checks_item ON price_checks(item_id, id)")
+
+
 MIGRATIONS = [
     _m001_initial_schema,
     _m002_brand_backfill,
@@ -908,6 +926,7 @@ MIGRATIONS = [
     _m035_shana_wanted_list,
     _m036_catalog_options,
     _m037_mail_body_html,
+    _m038_price_checks,
 ]
 
 

@@ -763,7 +763,9 @@ def lookup(url, *, timeout=6.0, resolver=None, opener=None):
             break
 
         if status >= 400 or status < 200:
-            raise LinkError("fetch_failed", "status %s" % status)
+            err = LinkError("fetch_failed", "status %s" % status)
+            err.status = status          # surfaced as result["status"] so callers can back off on 429/403
+            raise err
         ctype = hdrs.get("content-type", "")
         if ctype.split(";")[0].strip().lower() not in HTML_TYPES:
             raise LinkError("not_html")
@@ -792,7 +794,8 @@ def lookup(url, *, timeout=6.0, resolver=None, opener=None):
     except LinkError as e:
         code = e.code if e.code in ("bad_url", "blocked_host", "fetch_failed",
                                     "not_html", "too_big") else "fetch_failed"
-        return _result(error=code, url=_safe_strip(cur_url), host=_display_host(cur_url))
+        extra = {"status": e.status} if getattr(e, "status", None) else {}
+        return _result(error=code, url=_safe_strip(cur_url), host=_display_host(cur_url), **extra)
     except Exception:
         return _result(error="fetch_failed", url=_safe_strip(cur_url),
                        host=_display_host(cur_url))

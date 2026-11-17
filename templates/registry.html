@@ -31,7 +31,7 @@
   </div>
 </section>
 
-<div class="wrap reg-body">
+<div class="wrap reg-body">{% if is_owner and not is_sample %}<div class="notice-panel owner-notice"><svg class="ic"><use href="#i-star"/></svg><p>{{ t('owner_view_note') }} <a href="{{ url_for('dashboard') }}">{{ t('back_to_dashboard') }} {{ '←' if rtl else '→' }}</a></p></div>{% endif %}
 
   {% if is_sample %}
   <div class="notice-panel sample-notice">

@@ -140,7 +140,8 @@
     <div class="stat-card"><strong>{{ k.zero_clicks }}</strong><span>items with zero clicks</span></div>
     <div class="stat-card"><strong>{{ k.hosts_without_rule }}</strong><span>store hosts with no affiliate rule</span></div>
   </div>
-  <p class="hint"><a href="{{ url_for('admin_catalog', stale=1) }}">Review stale prices</a> · <a href="{{ url_for('admin_affiliates') }}">Affiliate rules</a></p>
+  <p class="hint">{% if k.price_check %}Last price check: {{ k.price_check.run_at[:10] }}, {{ k.price_check.changed }} changed, {{ k.price_check.failed }} failed.{% else %}Last price check: never run.{% endif %} <a href="{{ url_for('admin_prices') }}">Price checks</a></p>
+  <p class="hint"><a href="{{ url_for('admin_catalog', stale=1) }}">Review stale prices</a> ·<a href="{{ url_for('admin_affiliates') }}">Affiliate rules</a></p>
 
   <h2 class="sub-title">7. Mail</h2>
   <div class="stat-row">

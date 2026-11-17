@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Price checks — {{ brand }}{% endblock %}
+{% block content %}
+<div class="wrap section admin">
+  <div class="admin-head">
+    <h1 class="section-title">Price checks</h1>
+    <nav class="dash-actions">
+      <a class="btn btn-ghost" href="{{ url_for('admin_catalog', stale=1) }}">Stale prices</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin_home') }}">← Admin</a>
+    </nav>
+  </div>
+
+  <div class="hint">
+    <p><strong>Stores read:</strong> {{ read_hosts | join(', ') if read_hosts else 'none' }}. Some of these sometimes block the reader; a host is dropped for the rest of a run after two failures in a row, or at once on a rate-limit reply.</p>
+    <p><strong>Never requested</strong> ({{ no_fetch_why }}): {{ skipped_hosts | join(', ') if skipped_hosts else 'none' }}.</p>
+    <p>This page only shows the results of a run; it never contacts a store. Run it from the console:
+      <code>python manage.py check-prices</code> (add <code>--apply</code> to write the prices, <code>--store www.vardinon.co.il</code> to limit it).
+      PythonAnywhere scheduled task (weekly): <code>/home/bashertbench/ourbayis/venv/bin/python /home/bashertbench/ourbayis/manage.py check-prices --apply</code></p>
+    <p>
+      {% if last %}Last run: <strong>{{ last.run_at }}</strong> — {{ last.changed }} changed, {{ last.failed }} failed.{% else %}No run recorded yet.{% endif %}
+    </p>
+  </div>
+
+  <form class="filter-row" method="get" action="{{ url_for('admin_prices') }}">
+    <select name="status" data-autosubmit aria-label="Status">
+      <option value="">All statuses</option>
+      {% for s in statuses %}<option value="{{ s }}" {% if s == status %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <select name="store" data-autosubmit aria-label="Store">
+      <option value="">All stores</option>
+      {% for s in stores %}<option value="{{ s }}" {% if s == store %}selected{% endif %}>{{ s }}</option>{% endfor %}
+    </select>
+    <button class="btn btn-ghost btn-sm" type="submit">Filter</button>
+  </form>
+
+  {% if n_unchanged %}
+  <form method="post" action="{{ url_for('admin_prices_apply_all') }}" style="margin:12px 0">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button class="btn btn-primary" type="submit">Apply all ({{ n_unchanged }} same or changed; mismatches and failures are never applied)</button>
+  </form>
+  {% endif %}
+
+  {% if not rows %}<p class="empty-note">No results to show.</p>{% else %}
+  <div class="ins-scroll"><table class="admin-table">
+    <thead><tr><th scope="col">Item</th><th scope="col">Store</th><th scope="col">Old ₪</th><th scope="col">New ₪</th><th scope="col">Change</th><th scope="col">Status</th><th scope="col">Checked</th><th scope="col"></th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+      {% set old = (r['old_minor'] or 0) // 100 %}
+      {% set new = (r['new_minor'] // 100) if r['new_minor'] is not none else none %}
+      <tr>
+        <td><a href="{{ url_for('admin_catalog_edit', item_id=r['item_id']) }}">{{ r['item_name'] }}</a>
+          · <a href="{{ url_for('catalog_item', slug=r['seed_key'] or ('item-%d' % r['item_id'])) }}">public page</a>
+          · <a href="{{ r['item_url'] }}" rel="noopener nofollow" target="_blank">store page</a>
+          {% if r['detail'] %}<br><span class="hint">{{ r['detail'] }}</span>{% endif %}</td>
+        <td>{{ r['host'] }}</td>
+        <td>{{ old }}</td>
+        <td>{{ new if new is not none else '–' }}</td>
+        <td>{% if new is not none and old %}{{ '%+.1f' | format((new - old) * 100.0 / old) }}%{% else %}–{% endif %}</td>
+        <td>{{ r['status'] }}{% if r['applied'] %} (applied){% endif %}</td>
+        <td>{{ r['run_at'][:10] }}</td>
+        <td>
+          {% if r['status'] in ('same', 'changed') and not r['applied'] %}
+          <form method="post" action="{{ url_for('admin_prices_apply', check_id=r['id']) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="btn btn-ghost btn-sm" type="submit">Apply</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% endif %}
+</div>
+{% endblock %}

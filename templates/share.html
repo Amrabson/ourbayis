@@ -22,7 +22,7 @@
     <div class="sheet share-sheet">
       <p class="kicker">{{ t('dash_share') }}</p>
       <h1 class="sheet-title">{{ t('share_title') }}</h1>
-      <p class="page-sub">{{ t('share_sub') }}</p>
+      <p class="page-sub">{{ t('share_sub') }}</p><p class="hint"><a class="link-arrow" href="{{ url_for('dashboard') }}">{{ t('back_to_dashboard') }} <span aria-hidden="true">{{ '←' if rtl else '→' }}</span></a></p>
       {% if reg['visibility'] == 'draft' %}
       <p class="share-draft">{{ t('share_draft') }} <a href="{{ url_for('registry_edit', _anchor='rf-visibility') }}">{{ t('share_draft_cta') }}</a></p>
       {% endif %}
