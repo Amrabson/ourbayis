@@ -32,7 +32,7 @@ def test_add_one_gift_thank_it_and_keep_their_card(client):
 
     page = htmllib.unescape(client.get("/dashboard/thanks").get_data(as_text=True))
     card = page.split(f'id="thanks-o{gid}"')[1].split("</article>")[0]
-    assert "The Cohen family" in card and "Outside the list" in card and "Their card" in card
+    assert "The Cohen family" in card and "Outside the registry" in card and "Their card" in card
     assert "Thank you so much for a salad bowl" in card       # their own article is kept
     assert "Dear Cohen family," in card                        # not "Dear The Cohen family"
     assert "mailto:cohen@example.com" in card

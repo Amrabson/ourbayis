@@ -1391,10 +1391,10 @@ def test_dashboard_offers_a_ready_thank_you_email(client, app_module):
 def test_registry_says_when_every_gift_is_taken(client, app_module):
     reg, items = _couple_with_catalog_items(client, app_module, ["electric-kettle"], pay=True)
     guest = app_module.app.test_client()
-    assert "list is taken" not in guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
+    assert "registry is taken" not in guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
     _claim(app_module, reg["slug"], next(iter(items.values()))["id"])
     html = guest.get(f"/r/{reg['slug']}").get_data(as_text=True)
-    assert "list is taken" in html and 'data-modal="cash-modal">You can still send' in html
+    assert "registry is taken" in html and 'data-modal="cash-modal">You can still send' in html
     dash = client.get("/dashboard").get_data(as_text=True)
     assert "nothing left to choose" in dash and 'href="/registry/items#add-more"' in dash
 
@@ -1404,7 +1404,7 @@ def test_guest_page_says_who_cancelled_and_links_back(client, app_module):
     tok = _claim(app_module, reg["slug"], next(iter(items.values()))["id"])
     guest = app_module.app.test_client()
     html = guest.get(f"/g/{tok}").get_data(as_text=True)
-    assert f'<a href="/r/{reg["slug"]}">See the rest of the list' in html
+    assert f'<a href="/r/{reg["slug"]}">See the rest of the registry' in html
     db = _db(); db.execute("UPDATE claims SET status='cancelled', cancelled_by='owner'"); db.commit()
     html = guest.get(f"/g/{tok}").get_data(as_text=True)
     assert "The couple released this reservation" in html and "Choose another gift" in html
@@ -1608,7 +1608,7 @@ def test_registry_hero_links_down_to_the_gift_list(client, app_module):
     reg, _items = _couple_with_catalog_items(client, app_module, ["stand-mixer"])
     g = app_module.app.test_client()
     html = g.get(f"/r/{reg['slug']}").get_data(as_text=True)
-    assert '<a class="reg-jump" href="#gifts">See the gift list ↓</a>' in html and 'id="gifts"' in html
+    assert '<a class="reg-jump" href="#gifts">See the registry ↓</a>' in html and 'id="gifts"' in html
     assert "לרשימת המתנות ↓" in g.get(f"/r/{reg['slug']}?lang=he").get_data(as_text=True)
 
 

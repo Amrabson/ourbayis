@@ -18,7 +18,7 @@ def test_empty_list_points_at_the_starter_pack(client):
     signup(client)
     create_registry(client)
     html = client.get("/registry/check").get_data(as_text=True)
-    assert "How your list looks to guests" in html and "/registry/items/starter" in html
+    assert "How your registry looks to guests" in html and "/registry/items/starter" in html
 
 
 def test_list_check_finds_the_gaps_and_suggestions_fill_them(client):

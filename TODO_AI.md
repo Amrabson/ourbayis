@@ -48,7 +48,8 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   preview picture (og:image), hot-linked on the couple's registry; the couple can clear it. (Catalog items still
   only get photos the owner has the right to use.)
 - [x] `refresh-registry-links` keeps a price that guests have chipped in toward (2026-11-12).
-- [ ] Hebrew of the six 2026-11-11 guides: have a native speaker read them.
+- [ ] Hebrew review by a native speaker: the 11 guides added 2026-11-11/13, the `cmp_*` comparison intros, the
+  `quiz_*` strings and the new catalog items' `name_he`/`model_he` (all machine-written).
 - [x] Co-owners — done 2026-10-30 as owner + helpers (`/registry/people`, invite links, hand-over).
   Helpers can opt in to the gift emails (2026-10-30).
 - [x] Gifts from outside the list on the thank-you page (2026-11-03), with paste-a-list.
@@ -100,7 +101,10 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
   in i18n `sample_reg_*` if you prefer different wording; keep the "Sample registry" flag.
 
 ## Owner launch checklist (do these before going live)
-- [ ] **Re-check prices monthly.** `/admin/catalog?stale=1` lists verified prices older than 30 days;
+- [ ] **Re-check prices weekly/monthly.** Non-KSP stores: `python manage.py check-prices` (dry run), then
+  `--apply` or apply from `/admin/prices` (2026-11-17; schedule weekly, DEPLOY_AI.md). **KSP (80 items) is due now
+  (last checked 2026-10-19)** and must still be done by hand as below, since KSP blocks automated reading.
+  `/admin/catalog?stale=1` lists verified prices older than 30 days;
   `manage.py check` prints the count. All 100 linked items were re-checked (67 on 2026-10-19, the 33 newest on 2026-10-20; next due ~2026-11-18) —
   KSP's own item feed (`/m_action/api/item/<id>`, `price` = regular price, `addToCart` 0 = "not available
   now", `isLastItem` = last unit) read from inside a browser tab on ksp.co.il is the fast way; go slowly

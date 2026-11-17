@@ -350,7 +350,7 @@ GUIDES = [
         "title": "How to build a registry when you're moving to Israel",
         "title_he": "איך בונים רשימת מתנות כשעוברים לגור בישראל",
         "summary": "Your guests are in three countries and your apartment is still empty. A practical way "
-                   "to choose what goes on the list, so it fits both the home and the people giving.",
+                   "to choose what goes on the registry, so it fits both the home and the people giving.",
         "summary_he": "האורחים שלכם בשלוש מדינות והדירה עדיין ריקה. דרך מעשית לבחור מה נכנס לרשימה, "
                       "כך שתתאים גם לבית וגם לאנשים שנותנים.",
         "sections": [
@@ -374,8 +374,8 @@ GUIDES = [
             {
                 "h": "Give every guest something to choose",
                 "h_he": "שלכל אורח יהיה מה לבחור",
-                "p": ["A list made only of big appliances leaves most guests with nothing in their range, "
-                      "and a list of small things leaves the people who want to give something "
+                "p": ["A registry made only of big appliances leaves most guests with nothing in their range, "
+                      "and a registry of small things leaves the people who want to give something "
                       "substantial without a way to do it. Aim for a spread:"],
                 "p_he": ["רשימה שכולה מוצרי חשמל גדולים משאירה את רוב האורחים בלי משהו בטווח שלהם, "
                          "ורשימה של דברים קטנים משאירה את מי שרוצה לתת משהו משמעותי בלי דרך לעשות "
@@ -400,7 +400,7 @@ GUIDES = [
                       "guest a familiar way to give.",
                       "Write a delivery note: your address, a phone number for the courier, or where to "
                       "send things if you have not moved in yet. Guests see it only after they reserve "
-                      "a gift, on their private page — it is never shown on the public list."],
+                      "a gift, on their private page — it is never shown on the public registry."],
                 "p_he": ["לקרובים בחו״ל בדרך כלל הכי קל להזמין מחנות ישראלית שמשלחת לכאן, או לשלוח "
                          "כסף דרך קישור התשלום שלכם ולתת לכם לקנות. אורחים בארץ אולי יעדיפו Bit או "
                          "PayBox. כשמוסיפים כל קישור שיש לכם, לכל אורח יש דרך מוכרת לתת.",
@@ -415,7 +415,7 @@ GUIDES = [
                       "the wedding — guests who plan ahead like to give early. Mark the few things you "
                       "want most so they show first.",
                       "Come back to it as gifts arrive: confirm what reached you, write your thank-yous "
-                      "while you still remember who sent what, and add a few more items if the list runs "
+                      "while you still remember who sent what, and add a few more items if the registry runs "
                       "out — the last guests to look should still find something to give."],
                 "p_he": ["שימו את הקישור על ההזמנה או שלחו אותו עם הודעת הוואטסאפ הראשונה על החתונה — "
                          "אורחים שמתכננים מראש אוהבים לתת מוקדם. סמנו את הדברים הבודדים שהכי חשובים "
@@ -1247,10 +1247,10 @@ GUIDES = [
                 "h": "A registry, so relatives do not double up",
                 "h_he": "רשימת מתנות, כדי שקרובים לא יקנו כפול",
                 "p": ["When aunts, grandparents and family friends all want to help, someone buys a "
-                      "kettle and someone else buys the same kettle. A single shared list that shows "
+                      "kettle and someone else buys the same kettle. A single shared registry that shows "
                       "what has been taken ends that. It also gives relatives who ask “what do they "
                       "need?” a link to send instead of a guess.",
-                      "Help the couple make the list useful: a spread of small and large items, the "
+                      "Help the couple make the registry useful: a spread of small and large items, the "
                       "mattress measurements before anyone buys linen, and a note on what the apartment "
                       "already has. Our guide on building a registry covers how to choose what goes on "
                       "it."],
@@ -1418,7 +1418,7 @@ GUIDES = [
                 "p": ["With the apartment known, build the registry: the first-week items at the "
                       "top, a spread of prices, and a note on what you already have. Then send the "
                       "link. See our guide on telling guests about a registry for wording.",
-                      "Guests who plan ahead like to buy early, and some items on the list need time "
+                      "Guests who plan ahead like to buy early, and some items on the registry need time "
                       "to arrive, so a link sent in week four helps both sides."],
                 "p_he": ["כשהדירה ידועה, בנו את הרשימה: פריטי השבוע הראשון למעלה, פיזור של מחירים, "
                          "והערה על מה שכבר יש לכם. ואז שלחו את הקישור. נוסח אפשרי מופיע במדריך שלנו "
@@ -1537,9 +1537,9 @@ GUIDES = [
                          "הנה שלוש דוגמאות להתאמה, אחת להודעת וואטסאפ לחברים בחו״ל, אחת לדף הוספה "
                          "להזמנה, ואחת לשיחה בעל פה בישראל."],
                 "list": ["WhatsApp, abroad: “So happy you will be with us. Several people asked what "
-                         "we need, so we made a small list at this link. Completely optional, and "
+                         "we need, so we made a small registry at this link. Completely optional, and "
                          "your being there is the real gift.”",
-                         "Invitation insert: “For those who have asked, we have set up a gift list "
+                         "Invitation insert: “For those who have asked, we have set up a gift registry "
                          "at the address below. Cash gifts are equally welcome.”",
                          "In person, in Israel: “If you want to help us set up, we put together a "
                          "list of what we still need. And if you prefer to give in the usual way, "
@@ -1694,7 +1694,7 @@ GUIDES = [
             {
                 "h": "Balance the price points",
                 "h_he": "לאזן את טווחי המחירים",
-                "p": ["Once you know the gaps, you may find the list is mostly small things. That "
+                "p": ["Once you know the gaps, you may find the registry is mostly small things. That "
                       "is fine, but remember that some guests want to give something larger. Keep "
                       "a few mid-range and bigger items so that every guest finds something that fits "
                       "their budget and closeness.",

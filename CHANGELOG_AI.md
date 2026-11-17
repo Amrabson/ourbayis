@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-17 (English wording: "registry")
+Owner decision: in English the couple's registry is always "registry" (items page "Manage your registry", "Close the
+registry", share messages "Our registry", hero "One registry for the family…"); ~75 T_EN strings, about.html and 10
+guide sentences changed. "List" stays for the quiz's "draft list", the setup-cost list, "List check" (feature name),
+the thank-you list and general shopping advice in guides. Preview step reads "See your registry as guests see it"
+everywhere (short button "View as a guest"). Hebrew unchanged (already "רשימה" throughout).
+
 ## 2026-11-17 (price re-check tool; journey audit fixes)
 - **`manage.py check-prices`** (`ob_pricecheck.py`; `price_checks` table [m38]; `/admin/prices`): re-reads catalog
   store pages with `ob_linkinfo` for readable stores only (`NO_FETCH_HOSTS`: KSP, Payngo, Home Center are never

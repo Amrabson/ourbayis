@@ -23,14 +23,14 @@ def test_share_kit_messages_link_to_their_own_language(client):
     db.commit()
     slug = db.execute("SELECT slug FROM registries").fetchone()["slug"]
     page = html.unescape(client.get("/registry/share?lang=en").get_data(as_text=True))
-    assert "Send your list" in page
+    assert "Send your registry" in page
     # English messages first, Hebrew folded below; each language links to its own page
     assert page.index("Hi everyone!") < page.index("שלום לכולם!")
     assert f"/r/{slug}\n" in page and f"/r/{slug}?lang=he\n" in page
     assert "Sarah & Dovid" in page and "שרה ודוד" in page
     # WhatsApp and email carry the same text
-    assert "wa.me/?text=Our%20gift%20list%3A%20http" in page.replace("+", "%20")
-    assert "mailto:?subject=Our%20gift%20list&body=" in page
+    assert "wa.me/?text=Our%20registry%3A%20http" in page.replace("+", "%20")
+    assert "mailto:?subject=Our%20registry&body=" in page
     # no payment link, no date: no cash line, no reminder
     assert "gift of money" not in page and "the simcha is in" not in page
     he = client.get("/registry/share?lang=he").get_data(as_text=True)

@@ -62,7 +62,7 @@ def test_share_previews_say_whose_list_and_whats_open(client):
     page = client.get("/sample?lang=en").get_data(as_text=True)
     title = re.search(r'property="og:title" content="([^"]*)"', page).group(1)
     desc = re.search(r'property="og:description" content="([^"]*)"', page).group(1)
-    assert title == "Chana &amp; Moshe: our gift list"
+    assert title == "Chana &amp; Moshe: our registry"
     assert "Wedding · " in desc and "still open" in desc
     assert "og-registry-en.png" in page
     he = client.get("/sample?lang=he").get_data(as_text=True)

@@ -51,7 +51,7 @@ def test_owner_sees_a_banner_with_a_way_back_guests_do_not(client, app_module):
 def test_view_as_guest_link_counts_as_the_preview_step(client):
     slug = _couple(client)
     dash = client.get("/dashboard?lang=en").get_data(as_text=True)
-    link = re.search(r'<a class="link-arrow" href="([^"]+)">View as a guest</a>', dash).group(1)
+    link = re.search(r'<a class="link-arrow" href="([^"]+)">See your registry as guests see it</a>', dash).group(1)
     assert link == f"/r/{slug}?preview=1"
     assert "previewed_at" not in (_db().execute("SELECT preferences_json FROM registries").fetchone()[0] or "")
     client.get(link)
@@ -113,7 +113,7 @@ def test_end_to_end_couple_and_guest(client, app_module):
     r = create_registry(client, couple="Dina & Yossi")
     assert r.status_code == 200 and "Your registry is live" in r.get_data(as_text=True)
     dash = client.get("/dashboard").get_data(as_text=True)
-    assert "Next step" in dash and "Put some gifts on the list" in dash and "Pick from the starter lists" in dash
+    assert "Next step" in dash and "Put some gifts on the registry" in dash and "Pick from the starter lists" in dash
 
     starter = client.get("/registry/items/starter")
     assert starter.status_code == 200
@@ -122,7 +122,7 @@ def test_end_to_end_couple_and_guest(client, app_module):
     assert len(picks) == 3
     r = client.post("/registry/items/starter", data=dict([("csrf_token", get_csrf(page))] + [(f"add_{p}", "1") for p in picks]),
                     follow_redirects=True)
-    assert r.status_code == 200 and "On your list (3)" in r.get_data(as_text=True)
+    assert r.status_code == 200 and "On your registry (3)" in r.get_data(as_text=True)
 
     db = _db()
     reg = db.execute("SELECT * FROM registries").fetchone()
@@ -189,7 +189,7 @@ def test_end_to_end_couple_and_guest(client, app_module):
     keep = client.get("/dashboard/keepsake")
     assert keep.status_code == 200 and "Mazel tov" in keep.get_data(as_text=True)
     r = client.post("/registry/close", data=dict(csrf_token=get_csrf(dash)), follow_redirects=True)
-    assert "The list is closed" in r.get_data(as_text=True)
+    assert "The registry is closed" in r.get_data(as_text=True)
     closed = guest.get(f"/r/{slug}").get_data(as_text=True)
-    assert "closed their gift list" in closed and "Leave them a bracha" in closed
+    assert "closed their registry" in closed and "Leave them a bracha" in closed
     assert guest.get(token_path).status_code == 200

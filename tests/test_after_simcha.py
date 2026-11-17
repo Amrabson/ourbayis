@@ -38,7 +38,7 @@ def test_after_the_date_registry_says_mazel_tov_and_dashboard_points_to_thanks(c
     dash = client.get("/dashboard?lang=en").get_data(as_text=True)
     assert "The simcha was 3 days ago" in dash
     assert "1 gift is waiting for a thank-you note." in dash
-    assert "Close the list" in dash
+    assert "Close the registry" in dash
     he = client.get("/dashboard?lang=he").get_data(as_text=True)
     assert "השמחה הייתה לפני 3 ימים" in he
     # before the date: no panel
@@ -56,17 +56,17 @@ def test_closed_list_shows_a_thank_you_refuses_new_gifts_and_keeps_brachos(clien
     _set("UPDATE registries SET paypal_url='https://paypal.me/sarahdovid', visibility='public'")
     r = _post(client, "/registry/close", **{"lang": "en"})
     assert db.execute("SELECT closed_at FROM registries").fetchone()["closed_at"]
-    assert "Your gift list is closed" in client.get("/dashboard?lang=en").get_data(as_text=True)
+    assert "Your registry is closed" in client.get("/dashboard?lang=en").get_data(as_text=True)
 
     guest = client.application.test_client()
     page = guest.get(f"/r/{slug}?lang=en").get_data(as_text=True)
-    assert "have closed their gift list" in page
+    assert "have closed their registry" in page
     assert "Towels" not in page and 'id="cash-modal"' not in page
     assert 'id="bracha"' in page
     # a stale form still can't reserve or record cash
     r = guest.post(f"/r/{slug}/claim/{item_id}", data=dict(
         csrf_token=get_csrf(page), form_key=get_form_key(page), guest_name="Dov"), follow_redirects=True)
-    assert "This gift list is closed" in r.get_data(as_text=True)
+    assert "This registry is closed" in r.get_data(as_text=True)
     assert db.execute("SELECT COUNT(*) FROM claims").fetchone()[0] == 0
     guest.post(f"/r/{slug}/cash", data=dict(csrf_token=get_csrf(page), guest_name="Dov", amount="100"))
     assert db.execute("SELECT COUNT(*) FROM claims").fetchone()[0] == 0
@@ -76,7 +76,7 @@ def test_closed_list_shows_a_thank_you_refuses_new_gifts_and_keeps_brachos(clien
     assert db.execute("SELECT COUNT(*) FROM brachos").fetchone()[0] == 1
     # out of the sitemap, tagged in /find
     assert f"/r/{slug}" not in guest.get("/sitemap.xml").get_data(as_text=True)
-    assert "Gift list closed" in guest.get("/find?q=Sarah&lang=en").get_data(as_text=True)
+    assert "Registry closed" in guest.get("/find?q=Sarah&lang=en").get_data(as_text=True)
 
     # reopen from the edit page
     r = _post(client, "/registry/reopen", page="/registry/edit", back="edit")

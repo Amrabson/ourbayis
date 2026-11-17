@@ -62,7 +62,7 @@ def test_logged_out_goes_to_login_and_the_link_survives_login(app, no_fetch):
     r = c.get("/add")  # no query: the link comes back from the session
     assert r.status_code == 302 and "url=" in r.headers["Location"]
     page = c.get(r.headers["Location"]).get_data(as_text=True)
-    assert "Add this to your list?" in page and LINK in htmllib.unescape(page)
+    assert "Add this to your registry?" in page and LINK in htmllib.unescape(page)
 
 
 def test_link_survives_signup_and_registry_creation(client, no_fetch):
@@ -134,7 +134,7 @@ def test_a_helper_can_use_it(app, fake):
     owner = _owner_with_registry(app)
     helper = _join(app, _invite(owner))
     page = helper.get(add_url()).get_data(as_text=True)
-    assert "Add this to your list?" in page
+    assert "Add this to your registry?" in page
     r = helper.post("/registry/items/lookup", data=dict(csrf_token=get_csrf(page), link=LINK), follow_redirects=True)
     assert fake == [LINK] and "Philips Air Fryer" in r.get_data(as_text=True)
 
@@ -176,7 +176,7 @@ def test_manifest(client):
 
 def test_renders_in_english_and_hebrew(couple, no_fetch):
     en = couple.get(add_url()).get_data(as_text=True)
-    assert "Add this to your list?" in en and "Yes, fill in the details" in en
+    assert "Add this to your registry?" in en and "Yes, fill in the details" in en
     he = couple.get(add_url() + "&lang=he").get_data(as_text=True)
     assert "להוסיף את זה לרשימה?" in he and "כן, למלא את הפרטים" in he
     items = couple.get("/registry/items").get_data(as_text=True)
