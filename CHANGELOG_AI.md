@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-19 (homepage room cards)
+Owner screenshot (~860–1100px, category list beside the cards): two cards per row left ~90px for the text beside
+the picture, so every line broke. `.home .room-panel` is now a size container; below 600px of panel width the room
+grid is one card per row. Wide screens keep two per row; phones were already one.
+
 ## 2026-11-17 (English wording: "registry")
 Owner decision: in English the couple's registry is always "registry" (items page "Manage your registry", "Close the
 registry", share messages "Our registry", hero "One registry for the family…"); ~75 T_EN strings, about.html and 10

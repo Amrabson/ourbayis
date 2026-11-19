@@ -2777,4 +2777,11 @@ main:focus { outline: none; }
   .quiz-page .quiz-q { padding-inline: 12px; }
 }
 
+/* Room by room: two cards per row only when the room panel is wide enough; otherwise one per row, so the
+   text beside the 112px picture isn't squeezed into a narrow strip (owner screenshot 2026-11-19, ~860px) */
+.home .room-panel { container-type: inline-size; }
+@container (max-width: 600px) {
+  .home .room-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
 .demo-banner{background:#223354;color:#f3e9cf;text-align:center;font-size:.9rem;padding:8px 16px;letter-spacing:.2px}
