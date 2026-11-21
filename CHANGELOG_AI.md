@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-21 (new drawings; items that lacked them)
+- Four line drawings in base.html's sprite, same style as the rest: `ill-detector`, `ill-powerstrip`, `ill-bin`,
+  `ill-toothbrush`, with `_ILLUSTRATION_RULES` entries at the top (the Hebrew bin keywords are "פח אשפה", "פח פדל",
+  "פח קטן", "פח עם מכסה" — never bare "פח", which also means tin as in "תבנית פח").
+- Seven items, prices read on each store page 2026-11-21: two smoke detectors at Bug (group `smoke-detector`; the
+  Hyundai HS-103 is marked `unavailable` — Bug lists it out of stock; product facts only, no safety wording), IKEA
+  KNODD bins (40 L, 16 L), EKOLN toothbrush holder, GANSJÖN bathroom set, a 4-socket power strip from Lev HaBayit
+  (levhabait.co.il; brand and Israeli standard mark not stated on the page — check before relying on it).
+
 ## 2026-11-19 (homepage room cards)
 Owner screenshot (~860–1100px, category list beside the cards): two cards per row left ~90px for the text beside
 the picture, so every line broke. `.home .room-panel` is now a size container; below 600px of panel width the room

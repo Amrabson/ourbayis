@@ -1582,6 +1582,8 @@ T_EN = {
     "cmp_intro_chef-knife": "A chef's knife is mostly a matter of blade length, the steel and how it feels in your hand. Many cooks find that a knife that is comfortable to hold gets used more than a very sharp one that is not. Check how to sharpen it, and remember that a kosher kitchen keeps separate knives for meat and milk.",
     "cmp_intro_coffee-machine": "Coffee machines differ in type (capsule, filter or bean-to-cup), the size of the water tank, how much work they take to clean and what the capsules or beans cost to keep buying. Check that the model is sold with an Israeli warranty and that its capsules are easy to buy locally.",
     "cmp_intro_fryer": "Air fryers differ mainly in basket capacity, power and how easy the basket is to clean. A larger basket suits a family, while a small one is easier to store. Check the dimensions against your counter space, and whether you want one or two compartments.",
+    "cmp_name_smoke-detector": "Smoke detectors",
+    "cmp_intro_smoke-detector": "Stand-alone smoke detectors run on a battery and fix to the ceiling with a mount, so no electrician is needed. The two here differ in the make and the price. Compare the battery type, the diameter and the warranty on each page before adding one to a registry.",
 }
 
 T_HE = {
@@ -3150,6 +3152,8 @@ T_HE = {
     "cmp_intro_chef-knife": "סכין שף היא בעיקר עניין של אורך להב, פלדה ותחושה ביד. הרבה טבחים מוצאים שסכין נוחה לאחיזה משמשת יותר מסכין חדה מאוד שאינה נוחה. בדקו איך מחדדים אותה, וזכרו שמטבח כשר מחזיק סכינים נפרדות לבשרי ולחלבי.",
     "cmp_intro_coffee-machine": "מכונות קפה נבדלות בסוג (קפסולות, פילטר או טחינת פולים), בגודל מיכל המים, בכמה עבודה דרושה לניקוי ובעלות הקפסולות או הפולים שממשיכים לקנות. בדקו שהדגם נמכר עם אחריות ישראלית ושקל לקנות את הקפסולות שלו בארץ.",
     "cmp_intro_fryer": "מטגנים בלי שמן נבדלים בעיקר בקיבולת הסל, בהספק ובקלות ניקוי הסל. סל גדול מתאים למשפחה, וקטן קל יותר לאחסון. בדקו את המידות מול מקום על השיש, ואם אתם רוצים תא אחד או שניים.",
+    "cmp_name_smoke-detector": "גלאי עשן",
+    "cmp_intro_smoke-detector": "גלאי עשן עצמאיים פועלים על סוללה ומתחברים לתקרה בעזרת תושבת, ולכן אין צורך בחשמלאי. שני הדגמים כאן נבדלים ביצרן ובמחיר. כדאי להשוות בין סוג הסוללה, הקוטר והאחריות בכל דף לפני שמוסיפים אחד לרשימה.",
 }
 
 # Catalog / item categories: slug -> (icon-id, EN label, HE label)

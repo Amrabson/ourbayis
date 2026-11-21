@@ -916,6 +916,11 @@ def gift_status(item, breakdown):
 _ILLUSTRATION_RULES = (
     # cash funds ("Sefarim fund", "קרן ספרים"): the money-box drawing, ahead of every keyword rule
     (("fund ", "קרן "), "boxes"),
+    # 2026-11-21 additions, checked early so "organizer"/"bowl"/"fan" in a longer name cannot steal them
+    (("smoke detector", "smoke alarm", "גלאי עשן"), "detector"),
+    (("power strip", "extension cord", "extension lead", "surge protector", "מפצל חשמל", "כבל מאריך", "מאריך חשמל"), "powerstrip"),
+    (("toothbrush", "מברשת שיניים", "מחזיק מברשות"), "toothbrush"),
+    (("pedal bin", "waste bin", "trash can", "rubbish bin", "kitchen bin", "bathroom bin", "swing bin", "bin with lid", "פח אשפה", "פח פדל", "פח קטן", "פח עם מכסה"), "bin"),  # not bare "פח": it also means tin (תבנית פח)
     # checked before the broad rules below: "cookie sheets" must not hit "sheet" (bedding)
     (("cookie sheet", "baking pan", "baking dish", "oven dish", "kugel pan", "loaf", "תבנית"), "bakeware"),
     # 2026-10-25 additions, checked first: the more specific names before the broad rules below
