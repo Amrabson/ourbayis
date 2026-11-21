@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-22 (in-between widths: 768-1200px)
+Visual sweep of 28 pages at 768/900/1024/1120/1200/1280 in EN and HE (earlier passes checked only 390 and 1280).
+CSS only, one dated block at the end of style.css:
+- /compare index: the 4:3 picture box grew past its 96px column and hid the first letters of each title; pinned to
+  96px, cards min 340px.
+- /dashboard gifts ledger (1024-1120): action buttons squeezed guest name/gift/message to ~50px; text column keeps
+  14rem, actions wrap.
+- /registry/items "add more" grid: cards min 350px (two columns until ~1170px).
+- Arrivals board (home, Shana Rishonah): stacks at <=980px.
+- /compare/<group>: card list replaces the table at <=900px (was 760).
+- /catalog filters: "Show" select no longer clips "Products and ideas".
+Left alone (judged fine): stamp/th false positives, arrivals-board cells at 390px, Shana ticket button wrapping at 1024.
+Products that were generic placeholders, now real items read on the store page 2026-11-22: Vardinon FIELD bedspread
+(₪199.96 sale, stored as ₪200 since prices are whole shekels), IKEA VIDJA floor lamp (₪225), IKEA NYSJÖN mirror with
+shelf (₪125; renamed from "Entryway mirror & shelf", seed_key kept). Morphy Richards radiator marked unavailable
+(Bug: 'חסר זמנית'); its picture 404s on Bug's CDN so it keeps the drawing. Not changed: the towel set (Vardinon's page
+is a single towel), Fox Home bathrobes (site returned 429), KitchenAid picture (Payngo blocks readers). Luminarc fleishig set: Hakol LaBait picture
+added (its server refuses curl but serves browsers), price ₪199 re-read.
+
 ## 2026-11-21 (new drawings; items that lacked them)
 - Four line drawings in base.html's sprite, same style as the rest: `ill-detector`, `ill-powerstrip`, `ill-bin`,
   `ill-toothbrush`, with `_ILLUSTRATION_RULES` entries at the top (the Hebrew bin keywords are "פח אשפה", "פח פדל",

@@ -2783,3 +2783,27 @@ main:focus { outline: none; }
 @container (max-width: 600px) {
   .home .room-grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* 2026-11-21 in-between widths QA (768-1200px; earlier passes only looked at 390 and 1280).
+   Each rule fixes text squeezed into a narrow column at a laptop-sized window. */
+/* /dashboard gifts ledger: the three action buttons took ~420px of a ~490px column and left the guest's
+   name, gift and message about 50px; the actions now wrap and the text keeps a readable minimum. */
+.dash-gifts .gift-row { grid-template-columns: minmax(14rem, 1fr) auto; }
+.dash-gifts .mine-actions { flex-wrap: wrap; }
+/* /registry/items "add more" list: three cards at ~984px left ~140px for the name beside thumb + Add. */
+.items-page .catalog-grid { grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); }
+/* Arrivals board (home, Shana): stack with the copy before the board column drops under ~440px. */
+@media (max-width: 980px) { .board-grid { grid-template-columns: 1fr; } }
+/* Catalog filter bar: the "Show" select clipped "Products and ideas"; wider minimums wrap the last control. */
+.catalog-controls .ctl { flex-basis: 190px; }
+.catalog-controls .ctl-search { flex-basis: 200px; }
+/* Compare table: four options leave ~120px per column at tablet width; use the card list from 900px down. */
+@media (max-width: 900px) {
+  .cmp-wrap { display: none; }
+  .cmp-cards { display: grid; }
+}
+/* /compare index: the picture is a 4:3 box with a fixed height, so it grew to ~128px and ran over the 96px
+   column, hiding the first letters of each title; pin it to the column. */
+.cmp-index-pic { display: block; min-width: 0; }
+.cmp-index-pic .gift-ph { width: 96px; height: 96px; aspect-ratio: auto; }
+.cmp-index { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }  /* was 260px: three ~290px cards at laptop width wrapped the link text */
