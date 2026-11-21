@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-22 (homepage line; rates)
+- Hero second line no longer repeats "Guests": "Then they buy from a linked store or send money straight to you."
+- Ran `manage.py fetch-rates` before the export: the static preview's ≈ $ amounts now use ECB rates of 2026-11-20
+  (was 2026-10-19). On the live site this is the daily scheduled task.
+
 ## 2026-11-22 (in-between widths: 768-1200px)
 Visual sweep of 28 pages at 768/900/1024/1120/1200/1280 in EN and HE (earlier passes checked only 390 and 1280).
 CSS only, one dated block at the end of style.css:

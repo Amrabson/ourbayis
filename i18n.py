@@ -924,7 +924,7 @@ T_EN = {
     "board_note": "An example timeline. Your dates are set in your quote.",
     "hero_lead": "One registry for the family in Yerushalayim and the aunt in Toronto.",
     "hero_body": "Write down what the apartment needs, from the meicham to 160×200 sheets. Guests anywhere pick a gift and see what's already taken.",
-    "hero_note": "Guests buy from linked stores or send money directly to you.",
+    "hero_note": "Then they buy from a linked store or send money straight to you.",
     "hero_sub": "Write down what the apartment needs, from the meicham to 160×200 sheets, and share one link. Guests anywhere buy from the linked store or send money straight to you, in English or Hebrew.",
     "cta_start": "Create your registry",
     "cta_find": "Find a couple",
