@@ -1584,6 +1584,16 @@ T_EN = {
     "cmp_intro_fryer": "Air fryers differ mainly in basket capacity, power and how easy the basket is to clean. A larger basket suits a family, while a small one is easier to store. Check the dimensions against your counter space, and whether you want one or two compartments.",
     "cmp_name_smoke-detector": "Smoke detectors",
     "cmp_intro_smoke-detector": "Stand-alone smoke detectors run on a battery and fix to the ceiling with a mount, so no electrician is needed. The two here differ in the make and the price. Compare the battery type, the diameter and the warranty on each page before adding one to a registry.",
+    "cmp_name_fridge": "Fridges",
+    "cmp_intro_fridge": "The main questions are size, where the freezer sits and whether you need a Shabbos mode. 400 to 450 litres is usually enough for a couple; if you host often, look at 500 litres or more. A freezer on the upper level is the classic layout, a freezer at the bottom puts the fridge section at eye level, and an inverter compressor runs more quietly and uses less electricity. Where a listing states a Shabbos mode it also says who approved it; where it says nothing, ask the store, and ask your rav about using it on Shabbos. Check that the warranty comes from the official importer (יבואן רשמי) rather than a parallel import, and note that delivery and installation are ordered separately.",
+    "cmp_name_washing-machine": "Washing machines",
+    "cmp_intro_washing-machine": "The main questions are drum size, spin speed and whether it is a front-loader. 7 to 8 kg suits a couple; 9 kg or more is easier once there are children or bulky bedding. A higher spin speed (1,200 to 1,400 rpm) leaves the laundry drier and shortens drying time, and an inverter or brushless motor is quieter. Front-loaders are the usual choice in Israel and tend to use less water. Look for a warranty from the official importer (יבואן רשמי) rather than a parallel import, and remember that delivery and installation are ordered separately.",
+    "cmp_name_dryer": "Clothes dryers",
+    "cmp_intro_dryer": "The main question is heat pump or condenser. A heat-pump dryer costs more to buy but uses much less electricity, so it pays back over the years if you dry laundry often; a basic condenser is cheaper up front and costs more to run. Also check the capacity in kg (match it to your washing machine) and the energy label. Look for a warranty from the official importer (יבואן רשמי) rather than a parallel import, and remember that delivery and installation are ordered separately.",
+    "cmp_name_dishwasher": "Dishwashers",
+    "cmp_intro_dishwasher": "The main questions are width and noise. A full-size 60 cm dishwasher takes 13 to 14 place settings; a 45 cm slimline fits a narrow kitchen but holds less. Noise is listed in decibels, and around 42 to 46 dB is quiet, which matters in an open-plan kitchen. Look for a warranty from the official importer (יבואן רשמי) rather than a parallel import, and remember that delivery and installation (water and drain connection) are ordered separately.",
+    "cmp_name_oven": "Built-in ovens",
+    "cmp_intro_oven": "A built-in oven needs a cavity of the right size and an installer, so check the cavity dimensions on the listing before ordering. Pyrolytic models clean themselves at high heat; mechanical ones are simpler and cheaper. If you want a Shabbos mode, choose a model whose listing states it and says who approved it, and ask your rav how to use it on Shabbos and Yom Tov. Look for a warranty from the official importer (יבואן רשמי) rather than a parallel import, and remember that delivery and installation are ordered separately.",
 }
 
 T_HE = {
@@ -3154,6 +3164,16 @@ T_HE = {
     "cmp_intro_fryer": "מטגנים בלי שמן נבדלים בעיקר בקיבולת הסל, בהספק ובקלות ניקוי הסל. סל גדול מתאים למשפחה, וקטן קל יותר לאחסון. בדקו את המידות מול מקום על השיש, ואם אתם רוצים תא אחד או שניים.",
     "cmp_name_smoke-detector": "גלאי עשן",
     "cmp_intro_smoke-detector": "גלאי עשן עצמאיים פועלים על סוללה ומתחברים לתקרה בעזרת תושבת, ולכן אין צורך בחשמלאי. שני הדגמים כאן נבדלים ביצרן ובמחיר. כדאי להשוות בין סוג הסוללה, הקוטר והאחריות בכל דף לפני שמוסיפים אחד לרשימה.",
+    "cmp_name_fridge": "מקררים",
+    "cmp_intro_fridge": "השאלות המרכזיות הן הנפח, מיקום המקפיא והאם אתם צריכים מצב שבת. 400 עד 450 ליטר בדרך כלל מספיקים לזוג; אם מארחים הרבה, כדאי להסתכל על 500 ליטר ומעלה. מקפיא עליון הוא המבנה הקלאסי, מקפיא תחתון מביא את תא הקירור לגובה העיניים, ומדחס אינוורטר שקט יותר וחוסך בחשמל. כשהמודעה מציינת מצב שבת היא גם מציינת מי אישר אותו; כשהיא לא מציינת, שאלו את החנות, ושאלו את הרב שלכם איך להשתמש בו בשבת. ודאו שהאחריות היא מיבואן רשמי ולא מיבוא מקביל, ושימו לב שמשלוח והתקנה מוזמנים בנפרד.",
+    "cmp_name_washing-machine": "מכונות כביסה",
+    "cmp_intro_washing-machine": "השאלות המרכזיות הן גודל התוף, מהירות הסחיטה והאם זו מכונה עם פתח קדמי. 7 עד 8 ק״ג מתאימים לזוג; 9 ק״ג ומעלה נוחים יותר כשיש ילדים או מצעים גדולים. מהירות סחיטה גבוהה יותר (1,200 עד 1,400 סל״ד) משאירה את הכביסה יבשה יותר ומקצרת את הייבוש, ומנוע אינוורטר או ללא פחמים שקט יותר. מכונה עם פתח קדמי היא הבחירה הרגילה בישראל ונוטה לצרוך פחות מים. חפשו אחריות מיבואן רשמי ולא מיבוא מקביל, וזכרו שמשלוח והתקנה מוזמנים בנפרד.",
+    "cmp_name_dryer": "מייבשי כביסה",
+    "cmp_intro_dryer": "השאלה המרכזית היא משאבת חום או קונדנסור. מייבש משאבת חום יקר יותר לרכישה אבל צורך הרבה פחות חשמל, ולכן הפער מחזיר את עצמו עם השנים אם מייבשים הרבה; קונדנסור בסיסי זול יותר בהתחלה ויקר יותר בהפעלה. בדקו גם את הקיבולת בק״ג (כדאי להתאים אותה למכונת הכביסה) ואת הדירוג האנרגטי. חפשו אחריות מיבואן רשמי ולא מיבוא מקביל, וזכרו שמשלוח והתקנה מוזמנים בנפרד.",
+    "cmp_name_dishwasher": "מדיחי כלים",
+    "cmp_intro_dishwasher": "השאלות המרכזיות הן הרוחב והרעש. מדיח רחב של 60 ס״מ מכיל 13 עד 14 מערכות כלים; מדיח צר של 45 ס״מ מתאים למטבח צר אבל מכיל פחות. הרעש מצוין בדציבלים, וסביב 42 עד 46 dB נחשב שקט, מה שחשוב במטבח פתוח. חפשו אחריות מיבואן רשמי ולא מיבוא מקביל, וזכרו שמשלוח והתקנה (חיבור מים וניקוז) מוזמנים בנפרד.",
+    "cmp_name_oven": "תנורים בנויים",
+    "cmp_intro_oven": "תנור בנוי דורש נישה בגודל המתאים ומתקין, ולכן בדקו את מידות הנישה במודעה לפני ההזמנה. תנורים פירוליטיים מנקים את עצמם בחום גבוה; תנורים מכניים פשוטים וזולים יותר. אם אתם רוצים מצב שבת, בחרו דגם שהמודעה מציינת אותו ואת מי שאישר אותו, ושאלו את הרב שלכם איך להשתמש בו בשבת וביום טוב. חפשו אחריות מיבואן רשמי ולא מיבוא מקביל, וזכרו שמשלוח והתקנה מוזמנים בנפרד.",
 }
 
 # Catalog / item categories: slug -> (icon-id, EN label, HE label)

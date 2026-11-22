@@ -321,6 +321,9 @@ from the homepage components wrap in `<div class="home">` (shana.html, how.html)
 members, tier then price) feeds the item page's `#options`; `option_count(item)` (cached per request) feeds the card
 line. Set both in `seed_catalog.json` when adding an alternative; the catalog `model` line is public — keep research
 caveats in `notes` (internal).
+Groups with three tiers include the big appliances since 2026-11-22 (`fridge`, `washing-machine`, `dryer`,
+`dishwasher`, `oven`). "(Shabbos mode)" appears in an item name only when the store listing states one, and its
+`notes` quote who the listing says approved it; never infer it from the brand.
 
 ## Gift ideas by budget (2026-11-07)
 `/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and

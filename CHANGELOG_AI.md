@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-22 (KSP re-check, partial)
+16 KSP kitchen items re-read on their product pages in a browser (regular price, not the Black Friday/coupon
+price): mixing bowls ₪59 -> ₪49, kettle ₪64 -> ₪63, the rest unchanged; all have add-to-cart. KSP then showed a
+Cloudflare check, so the other 59 KSP items stay on the owner's manual re-check (TODO_AI.md).
+
+## 2026-11-22 (big appliances: three options each)
+Fridge, washing machine, dryer, dishwasher and built-in oven are now option groups with basic / standard / premium
+(10 new items, 190 -> 200), so /compare/<group> and the item pages' "Other options" cover the highest-value gifts.
+KSP pages read in a browser 2026-11-22 (regular price; KSP also shows coupon/Black-Friday figures, not used); the
+premium fridge is the Samsung RT53DG7A14WW at Bug (KSP had no fridge listing that states a Shabbos mode at that size).
+Shabbos mode is in the name only where the listing states it (Electrolux ETM4302SC, Samsung RT53DG7A14WW, AEG oven),
+and notes quote the approval the listing names. The five original items got option-style names ("Fridge — 421 L
+4-door, Sharp" etc.; seed_keys unchanged; test_p2 search expectation updated). `cmp_name_*`/`cmp_intro_*` EN+HE for
+the five groups (size, Shabbos mode and asking a rav, official importer vs parallel import, installation).
+
 ## 2026-11-22 (homepage line; rates)
 - Hero second line no longer repeats "Guests": "Then they buy from a linked store or send money straight to you."
 - Ran `manage.py fetch-rates` before the export: the static preview's ≈ $ amounts now use ECB rates of 2026-11-20

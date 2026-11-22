@@ -1221,7 +1221,7 @@ def test_login_and_logout_keep_the_language(client):
     ("shabbat candlesticks", "Shabbos candlesticks"), ("plata", "Shabbos hot plate (platta)"),
     ("hotplate", "Shabbos hot plate (platta)"), ("פלטה", "Shabbos hot plate (platta)"),
     ("sheets", "Sheet sets (x2)"), ("towels", "Towel set"), ("knives", "Knife set with block"),
-    ("refrigerator", "Fridge — large family size"), ("silverware", "Cutlery sets — milchig &amp; fleishig"),
+    ("refrigerator", "Fridge — 421 L 4-door, Sharp"), ("silverware", "Cutlery sets — milchig &amp; fleishig"),
     ("becher", "Kiddush cup (silver plated)"), ("candle sticks", "Shabbos candlesticks"),
     ("crock pot", "Slow cooker (for cholent!)"), ("חנוכיה", "Menorah (Chanukah)"),
     ("KitchenAid", "Stand mixer"), ("Gold Line ATL-480", "Shabbos hot plate (platta)"),
