@@ -69,6 +69,11 @@
     {%- endif -%}
   {%- endif -%}
 {%- endmacro %}
+{% macro store_btn(o, cls='btn-sm') -%}
+  {%- if o['url'] -%}
+  <a class="btn btn-ghost {{ cls }} bdi cmp-store" href="{{ go_url(o) }}"{{ go_attrs(o) }} target="_blank" rel="nofollow sponsored noopener">{{ tf('item_view_at', store=o['store']) if o['store'] else t('view_store_page') }}</a>
+  {%- endif -%}
+{%- endmacro %}
 {% block content %}
 {% set arrow = '←' if rtl else '→' %}
 <article class="home item-page compare-page">
@@ -101,6 +106,7 @@
           <tr><th scope="row">{{ t('cmp_row_store') }}</th>{% for o in items %}<td>{{ gift_facts(o, show_model=False, show_tags=False) }}</td>{% endfor %}</tr>
           <tr><th scope="row">{{ t('cmp_row_model') }}</th>{% for o in items %}<td>{% if o['model'] %}<p class="gift-model bdi">{{ pick(o, 'model') }}</p>{% endif %}</td>{% endfor %}</tr>
           <tr><th scope="row">{{ t('cmp_row_checked') }}</th>{% for o in items %}<td>{{ status_tag(o) }}</td>{% endfor %}</tr>
+          <tr><th scope="row">{{ t('cmp_row_buy') }}</th>{% for o in items %}<td class="cmp-buy">{{ store_btn(o) }}</td>{% endfor %}</tr>
           <tr><th scope="row">{{ t('cmp_row_add') }}</th>{% for o in items %}<td class="cmp-add">{{ add_form(o, 'btn-sm') }}</td>{% endfor %}</tr>
         </tbody>
       </table>
@@ -116,7 +122,7 @@
           {{ price_line(o, 'opt-price') }}
           {{ gift_facts(o, show_tags=False) }}
         </div>
-        <div class="cmp-card-add">{{ add_form(o, 'btn-sm') }}</div>
+        <div class="cmp-card-add">{{ store_btn(o) }}{{ add_form(o, 'btn-sm') }}</div>
       </li>
       {% endfor %}
     </ul>

@@ -2739,7 +2739,7 @@ main:focus { outline: none; }
 .cmp-card { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px 14px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; }
 .cmp-card .gift-ph-sm { width: 76px; height: 76px; aspect-ratio: 1; }
 .cmp-card-text p { margin: 0 0 4px; }
-.cmp-card-add { grid-column: 1 / -1; }
+.cmp-card-add { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 @media (max-width: 760px) {
   .cmp-wrap { display: none; }
   .cmp-cards { display: grid; }

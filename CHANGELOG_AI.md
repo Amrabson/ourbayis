@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-23 (store links on comparison pages)
+/compare/<group> had no way to buy: each option now has an "At the store" row (table) and a store button beside
+"add to registry" (phone cards), built with go_url/go_attrs and rel="nofollow sponsored noopener" like the item
+page, so affiliate rules apply. `cmp_row_buy` EN/HE; `.cmp-card-add` is a wrapping flex row; test added.
+
 ## 2026-11-23 (mattresses and single beds; copy fixes)
 - Three groups, IKEA Israel pages read 2026-11-23 (Aminach/Home Center answered 429, Payngo 403 — not retried):
   `mattress` 160×200 (ÅBYGDA / VESTERÖY / VALEVÅG, ₪1,495-2,100), `mattress-single` 90×200 (ÅGOTNES / ÅFJÄLL /

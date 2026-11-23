@@ -243,3 +243,13 @@ def test_item_page_main_picture_is_high_priority_others_lazy(client):
     assert html.count('fetchpriority="high"') == 1
     assert 'loading="lazy"' in html            # option thumbnails and the rest stay lazy
     assert "fetchpriority" not in client.get("/compare/zzcmp-pillow").get_data(as_text=True)
+
+
+def test_each_option_links_to_its_store(client):
+    """2026-11-23: every option with a store link offers it in the table and in the phone cards, with the
+    sponsored rel the item page uses, so a guest can buy from the comparison."""
+    html = client.get("/compare/fridge").get_data(as_text=True)
+    links = re.findall(r'<a class="btn btn-ghost btn-sm bdi cmp-store" href="([^"]+)"[^>]*rel="nofollow sponsored noopener"', html)
+    assert len(links) == 6, links          # three options x (table row + card)
+    assert "At the store" in html
+    assert "בחנות" in client.get("/compare/fridge?lang=he").get_data(as_text=True)
