@@ -914,6 +914,13 @@ def gift_status(item, breakdown):
 # keyword -> item-specific line illustration (<symbol id="ill-*"> in base.html).
 # Only used when an item has no photo; falls back to the category drawing.
 _ILLUSTRATION_RULES = (
+    # 2026-11-23 additions, checked first so a broader rule ("shabbos", "fan", "table") cannot steal them
+    (("air conditioner", "מזגן"), "aircon"),
+    (("water bar", "בר מים", "tami4", "tami 4"), "waterbar"),
+    (("television", "טלוויזיה"), "tv"),  # not bare "tv": it is a substring of other words
+    (("bed frame", "מסגרת מיטה"), "bed"),
+    (("wardrobe", "ארון בגדים"), "wardrobe"),
+    (("shabbos timer", "shabbos clock", "שעון שבת"), "timer"),
     # cash funds ("Sefarim fund", "קרן ספרים"): the money-box drawing, ahead of every keyword rule
     (("fund ", "קרן "), "boxes"),
     # 2026-11-21 additions, checked early so "organizer"/"bowl"/"fan" in a longer name cannot steal them

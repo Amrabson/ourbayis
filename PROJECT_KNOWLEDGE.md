@@ -322,7 +322,8 @@ members, tier then price) feeds the item page's `#options`; `option_count(item)`
 line. Set both in `seed_catalog.json` when adding an alternative; the catalog `model` line is public — keep research
 caveats in `notes` (internal).
 Groups with three tiers include the big appliances since 2026-11-22 (`fridge`, `washing-machine`, `dryer`,
-`dishwasher`, `oven`). "(Shabbos mode)" appears in an item name only when the store listing states one, and its
+`dishwasher`, `oven`) and, since 2026-11-23, `air-conditioner`, `water-bar`, `television`, `bed-frame`, `wardrobe`,
+`shabbos-timer`. "(Shabbos mode)" appears in an item name only when the store listing states one, and its
 `notes` quote who the listing says approved it; never infer it from the brand.
 
 ## Gift ideas by budget (2026-11-07)

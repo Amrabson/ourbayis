@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-23 (six new product groups: the big things a new Israeli apartment lacks)
+18 items, 3 tiers each, read on the store pages 2026-11-23 (regular price; sale/coupon figures only in price_source):
+- `air-conditioner` (KSP: Tadiran Sfera 10 NG / Electra Relax 170 / Tadiran Sfera 21 NG, ₪990-2,190; BTU from the
+  listing, the HP class in notes is our rough conversion; KSP prices exclude installation, which the notes say).
+- `water-bar` (KSP: Afikim Olympic / Tokyo / Noam 1, ₪849-2,349, delivery and installation included). Tami4 is sold
+  only as monthly service plans on its own site, so there is no one-off price to list.
+- `television` (KSP: Samsung 50" Mini LED / 65" Crystal UHD / 65" OLED, ₪1,646-4,002). Names start "Television — ".
+- `bed-frame` (IKEA 160×200: VEVELSTAD / SLATTUM / MALM storage, ₪745-2,950; intro mentions two single frames).
+- `wardrobe` (IKEA KLEPPSTAD / BRIMNES / PAX-FORSAND, ₪845-2,180; must be fixed to the wall, per the listings).
+- `shabbos-timer` (Home Center SYENERGY 24 h / 48 h, ₪26 / ₪40; Moonled digital 3680 W, ₪129).
+Shabbos mode in a name only where the listing states it; notes quote the approving body the listing names
+(משמרת השבת for the Tadiran units, צומת for the Afikim Tokyo) or say none is named. Six drawings added to the sprite
+(`ill-aircon`, `ill-waterbar`, `ill-tv`, `ill-bed`, `ill-wardrobe`, `ill-timer`) with rules at the top of
+`_ILLUSTRATION_RULES` (no existing item changed drawing). `cmp_name_*`/`cmp_intro_*` EN+HE for all six.
+
 ## 2026-11-22 (KSP re-check, partial)
 16 KSP kitchen items re-read on their product pages in a browser (regular price, not the Black Friday/coupon
 price): mixing bowls ₪59 -> ₪49, kettle ₪64 -> ₪63, the rest unchanged; all have add-to-cart. KSP then showed a
