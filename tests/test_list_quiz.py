@@ -231,3 +231,32 @@ def test_copy_rules_and_parity():
     assert en and set(en) == {k for k in i18n.T_HE if k.startswith("quiz_")}
     for k, v in en.items():
         assert not banned.search(v), k
+
+
+def test_furniture_for_an_empty_flat_and_bed_frame_only_for_a_double(app_module):
+    """2026-11-23: an empty flat gets the furniture starter group; the catalog's bed frames are 160x200
+    doubles, so a couple choosing two single beds (or unsure) doesn't get one."""
+    groups = lambda rows: {r["option_group"] for r in rows}  # noqa: E731
+    empty = _pick(app_module, start="empty")
+    assert any(r["starter_group"] == "furniture" for r in empty)
+    assert "bed-frame" in groups(empty)
+    assert "bed-frame" not in groups(_pick(app_module, start="empty", bed="singles"))
+    assert "bed-frame" not in groups(_pick(app_module, start="empty", bed="unsure"))
+    assert not any(r["starter_group"] == "furniture" for r in _pick(app_module, start="furnished"))
+
+
+def test_two_single_beds_get_two_single_frames_and_mattresses(app_module):
+    """2026-11-23: "two singles" swaps the 160x200 frame and mattress for 90x200 ones, two of each;
+    "unsure" leaves beds and mattresses out; "nicer" picks the premium mattress."""
+    dbl = _build(app_module, start="empty")
+    groups = {r["option_group"] for r in dbl["rows"]}
+    assert {"bed-frame", "mattress"} <= groups and not groups & {"bed-frame-single", "mattress-single"}
+    sgl = _build(app_module, start="empty", bed="singles")
+    by_group = {r["option_group"]: r for r in sgl["rows"] if r["option_group"]}
+    assert "bed-frame" not in by_group and "mattress" not in by_group
+    for g in ("bed-frame-single", "mattress-single"):
+        assert sgl["qty"][by_group[g]["id"]] == 2, g
+    unsure = {r["option_group"] for r in _build(app_module, start="empty", bed="unsure")["rows"]}
+    assert not unsure & {"bed-frame", "mattress", "bed-frame-single", "mattress-single"}
+    nicer = [r for r in _build(app_module, start="empty", quality="nicer")["rows"] if r["option_group"] == "mattress"]
+    assert nicer and nicer[0]["tier"] == "premium"

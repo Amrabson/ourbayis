@@ -7,7 +7,7 @@ import i18n
 
 from conftest import get_csrf, signup, create_registry
 
-GROUPS = ("first_week", "kitchen", "shabbos", "bedbath", "appliances")
+GROUPS = ("first_week", "kitchen", "shabbos", "bedbath", "furniture", "appliances")
 PRESET_GROUPS = {
     "minimum": ("first_week",),
     "home": ("first_week", "kitchen", "shabbos", "bedbath"),

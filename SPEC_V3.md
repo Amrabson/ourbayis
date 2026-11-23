@@ -91,7 +91,7 @@ catalog_items:+ seed_key TEXT UNIQUE NULL, + kind TEXT DEFAULT 'product', + mode
               + variant TEXT DEFAULT '', + image_credit TEXT DEFAULT '', + price_status TEXT DEFAULT 'estimate'
               ('verified'|'estimate'|'unknown'), + price_checked_at TEXT DEFAULT '', + price_source TEXT DEFAULT '',
               + availability TEXT DEFAULT 'unknown', + notes TEXT DEFAULT '', + notes_he TEXT DEFAULT '',
-              + starter_group TEXT DEFAULT '' ('first_week'|'kitchen'|'shabbos'|'bedbath'|'appliances'),
+              + starter_group TEXT DEFAULT '' ('first_week'|'kitchen'|'shabbos'|'bedbath'|'furniture'|'appliances'),
               + clicks INTEGER DEFAULT 0, + updated_at TEXT
 shana_requests: + neighborhood, furnishing ('unknown'|'empty'|'partly'|'furnished'), budget TEXT,
               + notes_internal TEXT, next_action TEXT, next_action_date TEXT, quote_json TEXT DEFAULT '{}'

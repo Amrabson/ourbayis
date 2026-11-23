@@ -147,7 +147,7 @@ the CSRF token. Keep it the first-registered after_request hook (Flask runs hook
 - `seed_catalog.json` items carry a stable `seed_key` (slugified name), `kind` ('product' when a
   real brand is known, 'idea' for generic items), `featured` (promotional placement — homepage +
   `/registry/items/starter`'s old one-click no longer uses this), `starter_group`
-  ('first_week'|'kitchen'|'shabbos'|'bedbath'|'appliances', used by the grouped starter-pack
+  ('first_week'|'kitchen'|'shabbos'|'bedbath'|'furniture'|'appliances', used by the grouped starter-pack
   picker), and `price_status`/`price_checked_at`/`price_source` ('verified' for 100 of the 120 active items,
   each confirmed against a real Israeli store listing — see the 2026-10-19/20 CHANGELOG_AI.md entries; 'estimate' otherwise).
 - **Seed sync** (`ob_db.seed_sync()`, called automatically on every app import, and via
@@ -323,7 +323,8 @@ line. Set both in `seed_catalog.json` when adding an alternative; the catalog `m
 caveats in `notes` (internal).
 Groups with three tiers include the big appliances since 2026-11-22 (`fridge`, `washing-machine`, `dryer`,
 `dishwasher`, `oven`) and, since 2026-11-23, `air-conditioner`, `water-bar`, `television`, `bed-frame`, `wardrobe`,
-`shabbos-timer`. "(Shabbos mode)" appears in an item name only when the store listing states one, and its
+`shabbos-timer`, `mattress`, `mattress-single`, `bed-frame-single`. Quiz (ob_quiz.py): "two singles" swaps the furniture
+group's double frame/mattress for the single groups (SINGLES_SWAP) at qty 2; "unsure" drops all bed sizes. "(Shabbos mode)" appears in an item name only when the store listing states one, and its
 `notes` quote who the listing says approved it; never infer it from the brand.
 
 ## Gift ideas by budget (2026-11-07)

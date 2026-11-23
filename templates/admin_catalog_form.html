@@ -33,7 +33,7 @@
         <label>Starter group
           <select name="starter_group">
             <option value="">—</option>
-            {% for g in ('first_week','kitchen','shabbos','bedbath','appliances') %}
+            {% for g in ('first_week','kitchen','shabbos','bedbath','furniture','appliances') %}
             <option value="{{ g }}" {% if row and row['starter_group'] == g %}selected{% endif %}>{{ g }}</option>
             {% endfor %}
           </select>

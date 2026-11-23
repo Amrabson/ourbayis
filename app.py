@@ -3522,7 +3522,7 @@ def registry_check():
     return render_template("list_check.html", reg=reg, check=list_check(get_db(), reg))
 
 
-STARTER_GROUPS_ORDER = ["first_week", "kitchen", "shabbos", "bedbath", "appliances"]
+STARTER_GROUPS_ORDER = ["first_week", "kitchen", "shabbos", "bedbath", "furniture", "appliances"]
 
 
 @app.route("/registry/items/starter", methods=["GET", "POST"])

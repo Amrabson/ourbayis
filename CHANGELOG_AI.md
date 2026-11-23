@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-23 (mattresses and single beds; copy fixes)
+- Three groups, IKEA Israel pages read 2026-11-23 (Aminach/Home Center answered 429, Payngo 403 — not retried):
+  `mattress` 160×200 (ÅBYGDA / VESTERÖY / VALEVÅG, ₪1,495-2,100), `mattress-single` 90×200 (ÅGOTNES / ÅFJÄLL /
+  VESTMARKA, ₪345-845), `bed-frame-single` 90×200 (NEIDEN / VIHALS / GULLABERG, ₪295-1,150; only GULLABERG includes
+  slats — each note says). Prices are per piece. Basic double mattress joined the `furniture` starter group.
+- Quiz: "two singles" now lists two single frames and two single mattresses instead of dropping the bed; "nicer"
+  picks the premium mattress; "unsure" leaves frames and mattresses out (test added).
+- Copy: fridge and AC intros no longer claim every Shabbos-mode listing names its approver; Hebrew fixes in the TV,
+  wardrobe and homepage compare-card lines; group intros no longer describe the specific items ("the three below").
+
+## 2026-11-23 (furniture in the setup cost, quiz and homepage)
+- New starter group `furniture` (STARTER_GROUPS_ORDER, admin form, tests; "Furniture" / "ריהוט"): couch, dining
+  table, the basic bed frame and wardrobe. Basic AC and water bar joined `appliances`, the 24-hour Shabbos timer
+  joined `shabbos` (one starter item per option group). /setup-cost "everything" is now ₪22,368; "home" unchanged.
+- Quiz: an empty flat gets the furniture group; the 160×200 bed frame is dropped for "two singles" and "unsure"
+  (`bed-frame` in BED_SIZE_GROUPS) — test added.
+- Homepage: fifth tools card "Compare before you choose" -> /compare (spans the row at desktop width); the ribbon
+  gained Mazgan / Shabbos clock / Water bar (EN+HE).
+
 ## 2026-11-23 (six new product groups: the big things a new Israeli apartment lacks)
 18 items, 3 tiers each, read on the store pages 2026-11-23 (regular price; sale/coupon figures only in price_source):
 - `air-conditioner` (KSP: Tadiran Sfera 10 NG / Electra Relax 170 / Tadiran Sfera 21 NG, ₪990-2,190; BTU from the

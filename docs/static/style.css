@@ -2772,6 +2772,7 @@ main:focus { outline: none; }
 .quiz-signup-link { margin-top: 6px; }
 .home .tools-grid:has(.tool-card:nth-child(4)) { grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 860px) { .home .tools-grid:has(.tool-card:nth-child(4)) { grid-template-columns: 1fr; } }
+.home .tools-grid:has(.tool-card:nth-child(4)) .tool-card:last-child:nth-child(odd) { grid-column: 1 / -1; }  /* 5 cards: last one spans */
 @media (max-width: 480px) {
   .quiz-page .quiz-opts { grid-template-columns: 1fr; }
   .quiz-page .quiz-q { padding-inline: 12px; }

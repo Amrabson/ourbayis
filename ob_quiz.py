@@ -8,7 +8,7 @@ shorter, not break it. Rules are documented in PROJECT_KNOWLEDGE.md ("Build my l
 """
 import re
 
-STARTER_ORDER = ("first_week", "kitchen", "shabbos", "bedbath", "appliances")
+STARTER_ORDER = ("first_week", "kitchen", "shabbos", "bedbath", "furniture", "appliances")
 
 QUESTIONS = (  # (answer key, allowed values; the first is the default)
     ("start", ("empty", "partly", "furnished")),
@@ -23,15 +23,18 @@ DEFAULTS["quality"] = "mid"
 ANSWER_KEYS = tuple(k for k, _ in QUESTIONS)
 
 START_GROUPS = {
-    "empty": ("first_week", "kitchen", "shabbos", "bedbath", "appliances"),
+    "empty": ("first_week", "kitchen", "shabbos", "bedbath", "furniture", "appliances"),
     "partly": ("first_week", "kitchen", "shabbos", "bedbath", "appliances"),
     "furnished": ("first_week", "shabbos", "bedbath"),
 }
 # partly furnished: the big appliances that stay with the flat (matched on the English name)
 BIG_APPLIANCE = re.compile(r"\b(fridge|refrigerator|washing machine|dryer|dishwasher|air condition\w*)\b|^oven\b", re.I)
-QUALITY_MATTERS = {"pots-set", "chef-knife", "pillow", "duvet", "sheet-set", "towels", "kettle", "coffee-machine"}
-BED_SIZE_GROUPS = {"sheet-set", "mattress-protector", "duvet"}
-PER_BED_GROUPS = {"duvet", "mattress-protector", "sheet-set"}
+QUALITY_MATTERS = {"pots-set", "chef-knife", "pillow", "duvet", "sheet-set", "towels", "kettle", "coffee-machine",
+                   "mattress", "mattress-single"}
+BED_SIZE_GROUPS = {"sheet-set", "mattress-protector", "duvet", "bed-frame", "mattress"}
+# two single beds: the double frame / mattress in the furniture starter group become two singles
+SINGLES_SWAP = {"bed-frame": "bed-frame-single", "mattress": "mattress-single"}
+PER_BED_GROUPS = {"duvet", "mattress-protector", "sheet-set", "bed-frame-single", "mattress-single"}
 ALREADY_PAIR = re.compile(r"[x×]\s?2\b|protectors", re.I)
 
 # starter items that duplicate another starter item (bundle vs parts, two versions of one thing)
@@ -139,6 +142,10 @@ def quiz_build(db, answers):
     if a["bed"] == "unsure":
         notes_beds_unsure = bool(drop(lambda r: r["option_group"] in BED_SIZE_GROUPS
                                       or re.search(r"\bsheet", r["name"] or "", re.I)))
+    elif a["bed"] == "singles":  # swap the 160x200 frame / mattress for 90x200 singles (qty 2 below)
+        for dbl, sgl in SINGLES_SWAP.items():
+            if drop(lambda r, g=dbl: r["option_group"] == g) and members.get(sgl):
+                add(members[sgl][0])  # step 5 picks the tier
 
     # 3. hosting and Yom Tov additions (option groups below pick the tier)
     if a["host"] in ("some", "most"):

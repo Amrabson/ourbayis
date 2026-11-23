@@ -16,8 +16,8 @@ def test_section_renders_in_both_languages_with_working_links(client):
         for k in ("home_tools_title", "home_tools_cost_t", "home_tools_link_t", "home_tools_fund_t"):
             assert table[k] in html
         hrefs = _hrefs(html)
-        assert len(hrefs) == 4
-        assert hrefs[0] == "/setup-cost" and hrefs[2] == "/sample" and hrefs[3] == "/build-my-list"
+        assert len(hrefs) == 5
+        assert hrefs[0] == "/setup-cost" and hrefs[2] == "/sample" and hrefs[3] == "/build-my-list" and hrefs[4] == "/compare"
         for h in hrefs:
             r = client.get(h)
             assert r.status_code == 200 or (r.status_code == 302 and "/signup" in r.headers["Location"]), h

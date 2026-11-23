@@ -33,7 +33,7 @@ def test_fresh_install_has_featured_and_every_starter_group(app_module):
         db = app_module.get_db()
         n_featured = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND featured=1").fetchone()[0]
         assert n_featured >= 1
-        for grp in ("first_week", "kitchen", "shabbos", "bedbath", "appliances"):
+        for grp in ("first_week", "kitchen", "shabbos", "bedbath", "furniture", "appliances"):
             n = db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND starter_group=?",
                            (grp,)).fetchone()[0]
             assert n > 0, f"starter_group {grp} is empty"
@@ -405,7 +405,7 @@ def test_migrated_legacy_db_gets_starter_groups_and_verified_links_stay_opt_in(t
     import app  # noqa: F401  (runs migrate + seed_sync)
     db = sqlite3.connect(db_path)
     groups = {r[0] for r in db.execute("SELECT DISTINCT starter_group FROM catalog_items")}
-    assert {"first_week", "kitchen", "shabbos", "bedbath", "appliances"} <= groups
+    assert {"first_week", "kitchen", "shabbos", "bedbath", "furniture", "appliances"} <= groups
     # every seed item exactly once: old rows adopted, only genuinely new seed items inserted
     assert db.execute("SELECT COUNT(*) FROM catalog_items").fetchone()[0] == len(seed_items)
     # adoption never copies a store link onto a row that already existed (new rows may have one)
