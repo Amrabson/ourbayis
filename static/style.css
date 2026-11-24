@@ -2808,3 +2808,19 @@ main:focus { outline: none; }
 .cmp-index-pic { display: block; min-width: 0; }
 .cmp-index-pic .gift-ph { width: 96px; height: 96px; aspect-ratio: auto; }
 .cmp-index { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }  /* was 260px: three ~290px cards at laptop width wrapped the link text */
+
+/* 2026-11-24: /compare in sections by category with chip jump links; "Compare before you choose" box on guides */
+.cmp-jump ul { list-style: none; padding: 0; }
+.cmp-jump-n { margin-inline-start: 6px; font-size: .85em; color: var(--ink-soft); }
+.cmp-sec { scroll-margin-top: 90px; }
+.cmp-sec + .cmp-sec { margin-top: 28px; }
+.cmp-sec-h { font-family: var(--font-display); font-size: 1.5rem; margin: 0 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.guide-cmp { margin-top: clamp(40px, 6vw, 64px); padding-top: 26px; border-top: 1px solid var(--navy); }
+.guide-cmp > .hint { margin: 0 0 14px; }
+.guide-cmp-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.guide-cmp-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--card); color: var(--ink); text-decoration: none; }
+.guide-cmp-card:hover, .guide-cmp-card:focus-visible { border-color: var(--gold-bright); }
+.guide-cmp-card strong { grid-column: 1; }
+.guide-cmp-card .hint { grid-column: 1; margin: 2px 0 0; }
+.guide-cmp-go { grid-column: 2; grid-row: 1 / span 2; color: var(--gold); font-size: 1.2rem; }
+.guide-cmp + .guide-others { margin-top: 36px; }

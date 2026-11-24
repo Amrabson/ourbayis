@@ -68,6 +68,23 @@
       </section>
       {% endfor %}
 
+      {% if cmp_cards %}
+      {% set arrow = '←' if rtl else '→' %}
+      <aside class="guide-cmp" aria-labelledby="guide-cmp-h">
+        <h2 class="rform-h" id="guide-cmp-h">{{ t('guide_cmp_h') }}</h2>
+        <p class="hint">{{ t('guide_cmp_sub') }}</p>
+        <ul class="guide-cmp-list">
+          {% for c in cmp_cards %}
+          <li><a class="guide-cmp-card" href="{{ url_for('compare_group', slug=c.slug) }}">
+            <strong>{{ c.name }}</strong>
+            <span class="hint">{{ tf('cmp_count', n=c.n) }}{% if c.hi %} · <span class="bdi">{% if c.lo != c.hi %}{{ tf('cmp_range', lo='{:,}'.format(c.lo), hi='{:,}'.format(c.hi)) }}{% else %}₪{{ '{:,}'.format(c.lo) }}{% endif %}</span>{% endif %}</span>
+            <span class="guide-cmp-go" aria-hidden="true">{{ arrow }}</span>
+          </a></li>
+          {% endfor %}
+        </ul>
+      </aside>
+      {% endif %}
+
       {% if others %}
       <aside class="guide-others">
         <h2 class="rform-h">{{ t('guides_more') }}</h2>

@@ -1446,7 +1446,8 @@ def guide(slug):
     if not g:
         abort(404)
     others = [x for x in ob_guides.GUIDES if x["slug"] != slug][:3]
-    return render_template("guide.html", guide=g, others=others)
+    cmp_cards = compare_cards(get_db(), ob_guides.GUIDE_COMPARE.get(slug, ()))
+    return render_template("guide.html", guide=g, others=others, cmp_cards=cmp_cards)
 
 
 def guide_cta(g):
@@ -1726,18 +1727,38 @@ def _compare_meta(slug, rows, lang):
     return out if len(out) <= 155 else out[:154].rstrip(" ,;:") + "…"
 
 
-@app.route("/compare")
-def compare_index():
-    db = get_db()
-    lang = current_lang()
+def compare_cards(db, slugs=None, lang=None):
+    """Index cards (name, count, price range, cheapest row, category) for option groups `slugs`, in that
+    order (default: every group); unknown or single-item groups are skipped."""
+    groups = compare_groups(db)
+    lang = lang or current_lang()
     cards = []
-    for slug, rows in compare_groups(db).items():
+    for slug in (groups if slugs is None else slugs):
+        rows = groups.get(slug)
+        if not rows:
+            continue
         prices = [r["price_nis"] for r in rows if r["price_nis"]]
         cards.append({"slug": slug, "name": compare_name(slug, lang), "n": len(rows),
                       "lo": min(prices) if prices else 0, "hi": max(prices) if prices else 0,
                       "cheapest": min(rows, key=lambda r: (r["price_nis"] or 10 ** 9, r["id"])),
                       "cat": compare_cat(rows)})
-    return render_template("compare_index.html", cards=cards, pic_items=[c["cheapest"] for c in cards])
+    return cards
+
+
+@app.route("/compare")
+def compare_index():
+    """/compare: every group, in sections by category (catalog order), A-Z by name inside a section."""
+    lang = current_lang()
+    cards = compare_cards(get_db(), lang=lang)
+    order = {c: i for i, c in enumerate(CATEGORIES)}
+    cards.sort(key=lambda c: (order.get(c["cat"], len(order)), c["name"].casefold()))
+    sections = []
+    for c in cards:
+        if not sections or sections[-1]["cat"] != c["cat"]:
+            sections.append({"cat": c["cat"], "label": cat_label(c["cat"], lang), "cards": []})
+        sections[-1]["cards"].append(c)
+    return render_template("compare_index.html", cards=cards, sections=sections,
+                           pic_items=[c["cheapest"] for c in cards])
 
 
 @app.route("/compare/<slug>")

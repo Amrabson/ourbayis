@@ -253,3 +253,45 @@ def test_each_option_links_to_its_store(client):
     assert len(links) == 6, links          # three options x (table row + card)
     assert "At the store" in html
     assert "בחנות" in client.get("/compare/fridge?lang=he").get_data(as_text=True)
+
+
+def test_index_is_in_category_sections_with_jump_links(client):
+    """2026-11-24: /compare groups its cards under one heading per category (catalog order), each with a
+    chip link at the top; every group sits in the section of its category."""
+    import i18n
+    groups = _groups()
+    html = client.get("/compare").get_data(as_text=True)
+    cats = re.findall(r'<section class="cmp-sec" id="cmp-([a-z]+)"', html)
+    assert cats and cats == [c for c in i18n.CATEGORIES if c in cats]
+    for c in cats:
+        assert 'href="#cmp-%s"' % c in html
+    for i, c in enumerate(cats):
+        part = html.split('id="cmp-%s"' % c, 1)[1]
+        if i + 1 < len(cats):
+            part = part.split('id="cmp-%s"' % cats[i + 1], 1)[0]
+        for slug in re.findall(r'<h3 class="cmp-index-name"><a class="gift-name-link" href="/compare/([^"]+)"', part):
+            counts = {}
+            for r in groups[slug]:
+                counts[r["category"]] = counts.get(r["category"], 0) + 1
+            assert max(counts, key=counts.get) == c, slug
+    he = client.get("/compare?lang=he").get_data(as_text=True)
+    assert i18n.CATEGORIES[cats[0]][2] in he
+
+
+def test_guides_link_to_their_comparison_pages(client):
+    """Each guide in GUIDE_COMPARE ends with "Compare before you choose" cards for its groups; every listed
+    group exists in the catalog; a guide with no entry shows no box."""
+    import guides
+    groups = _groups()
+    for slug, wanted in guides.GUIDE_COMPARE.items():
+        assert slug in guides.BY_SLUG, slug
+        assert wanted and len(wanted) == len(set(wanted)), slug
+        html = client.get("/guides/" + slug).get_data(as_text=True)
+        assert 'class="guide-cmp"' in html, slug
+        links = re.findall(r'class="guide-cmp-card" href="/compare/([^"]+)"', html)
+        assert links == [g for g in wanted if g in groups], slug
+        assert set(wanted) <= set(groups), (slug, set(wanted) - set(groups))
+    bare = next(g["slug"] for g in guides.GUIDES if g["slug"] not in guides.GUIDE_COMPARE)
+    assert 'class="guide-cmp"' not in client.get("/guides/" + bare).get_data(as_text=True)
+    he = client.get("/guides/shabbos-kitchen-equipment-buying-guide?lang=he").get_data(as_text=True)
+    assert "משווים לפני שבוחרים" in he

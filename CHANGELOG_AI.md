@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-24 (Hebrew editor pass)
+An editor pass (agent, reviewed) over the machine-written Hebrew: T_HE cmp_/quiz_/guide_cmp keys and name_he/
+model_he/notes_he of the items checked since 2026-11-22 or in an option group. 51 fixes: wrong words (צפויה ->
+מצופה ניקל, מליבת ליבנה -> מעץ ליבנה מלא, כביס -> ניתן לכביסה), terms (מגש -> קרש חלה, חוגה, שמירת חום, קופת צדקה),
+grammar (מסגרת למיטת יחיד, מזרני יחיד, מגני מזרן, שני מדפים), and gershayim in ס״מ/ק״ג (22). English: the urn's
+model said "safety Shabbos urn" and the mayim achronim notes "Not dishwasher safe" (now "Hand wash only").
+Still wanted: a native speaker's read (TODO).
+
+## 2026-11-24 (comparison index by category; comparison links in the guides)
+- /compare: 52 cards in one flat list became six sections by category (catalog order, A-Z inside) with chip jump
+  links and counts; card titles are h3 under the section h2. New helper `compare_cards(db, slugs)`.
+- Guides: a "Compare before you choose" box (name, option count, price range -> /compare/<group>) before "More
+  guides", from `guides.GUIDE_COMPARE` (14 guides, up to six groups each; the two registry-process guides have none).
+- Copy: the Shabbos kitchen guide said "safety marks" (summary and a heading, EN+HE); now "the Israeli standard
+  mark" / "תו תקן".
+- Tests: two expectations used old item names (slow cooker search, microwave in a guest-report mail subject);
+  new tests for the index sections and the guide boxes. i18n: cmp_jump_aria, guide_cmp_h, guide_cmp_sub.
+
 ## 2026-11-24 (13 more comparison groups)
 Single items grown into three-tier groups (25 new items, store pages read 2026-11-24, regular prices; the existing
 item in each group got a specific name, its `option_group` and `tier`):

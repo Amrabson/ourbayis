@@ -689,10 +689,10 @@ GUIDES = [
         "title": "Shabbos kitchen equipment: what to look for when buying",
         "title_he": "ציוד מטבח לשבת: על מה להסתכל כשקונים",
         "summary": "Platta, urn or Shabbos kettle, Shabbos clock, slow cooker and lamp: sizes, wattage and "
-                   "safety marks worth checking, and what suits a couple compared with a household "
+                   "the Israeli standard mark worth checking, and what suits a couple compared with a household "
                    "that hosts.",
-        "summary_he": "פלטה, מיחם או קומקום שבת, שעון שבת, סיר בישול איטי ומנורה: גדלים, הספק וסימוני "
-                      "בטיחות שכדאי לבדוק, ומה מתאים לזוג לעומת בית שמארח.",
+        "summary_he": "פלטה, מיחם או קומקום שבת, שעון שבת, סיר בישול איטי ומנורה: גדלים, הספק ותו "
+                      "התקן הישראלי שכדאי לבדוק, ומה מתאים לזוג לעומת בית שמארח.",
         "sections": [
             {
                 "h": "Before you buy: what this guide covers",
@@ -776,8 +776,8 @@ GUIDES = [
                          "מתאימה לה כדי שתוכלו להחליף."],
             },
             {
-                "h": "Safety marks and cords",
-                "h_he": "סימוני בטיחות וכבלים",
+                "h": "The Israeli standard mark and cords",
+                "h_he": "תו תקן וכבלים",
                 "p": ["Many household electrical appliances have to meet an Israeli standard before "
                       "they can be sold here. When you compare, prefer an appliance sold through an "
                       "Israeli importer, check the product page or the box for the Israeli standard "
@@ -1860,6 +1860,35 @@ GUIDES = [
 ]
 
 BY_SLUG = {g["slug"]: g for g in GUIDES}
+
+# Comparison pages to show at the end of each guide (2026-11-24). Order = relevance; groups that are
+# missing or have fewer than two active options are skipped at render time.
+GUIDE_COMPARE = {
+    "first-apartment-checklist": ("fridge", "washing-machine", "microwave", "pots-set", "mattress", "couch"),
+    "kosher-kitchen-basics": ("pots-set", "dinnerware-fleishig", "dinnerware-milchig", "cutlery", "chef-knife",
+                              "microwave"),
+    "sizes-plugs-delivery": ("fridge", "washing-machine", "dryer", "television", "kettle", "mattress"),
+    "building-your-registry": ("coffee-machine", "stand-mixer", "food-processor", "vacuum", "couch", "dining-set"),
+    "appliances-from-abroad-or-buy-in-israel": ("fridge", "washing-machine", "dryer", "dishwasher", "oven",
+                                                "air-conditioner"),
+    "israeli-bed-mattress-and-linen-sizes": ("mattress", "mattress-single", "bed-frame", "sheet-set", "duvet",
+                                             "mattress-protector"),
+    "shabbos-kitchen-equipment-buying-guide": ("shabbos-urn", "shabbos-timer", "slow-cooker", "oven", "fridge",
+                                               "kettle"),
+    "wedding-gifts-israel-guests-from-abroad": ("candlesticks", "kiddush-cup", "havdalah-set", "challah-board",
+                                                "coffee-machine", "stand-mixer"),
+    "where-to-shop-for-a-home-in-israel": ("fridge", "couch", "dining-set", "wardrobe", "mattress", "television"),
+    "first-yom-tov-year-in-a-new-home": ("menorah", "kiddush-cup", "shabbos-urn", "dining-set", "slow-cooker",
+                                         "challah-cover"),
+    "helping-your-children-set-up-a-home-in-israel": ("fridge", "washing-machine", "air-conditioner", "mattress",
+                                                      "couch", "water-bar"),
+    "eight-week-timeline-engagement-to-working-apartment": ("fridge", "washing-machine", "air-conditioner",
+                                                            "bed-frame", "mattress", "wardrobe"),
+    "registry-when-you-already-have-hand-me-downs": ("pots-set", "mattress", "sheet-set", "towels", "chef-knife",
+                                                     "coffee-machine"),
+    "chanukas-habayis-and-aliyah-gifts": ("mezuzah-case", "candlesticks", "havdalah-set", "tzedakah-box",
+                                          "challah-cover", "kiddush-cup"),
+}
 
 
 def pick(guide_or_section, field, lang):

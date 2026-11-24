@@ -328,6 +328,10 @@ Groups with three tiers include the big appliances since 2026-11-22 (`fridge`, `
 `havdalah-set`, `mezuzah-case`, `challah-cover`, `tzedakah-box` (52 groups). Quiz (ob_quiz.py): "two singles" swaps the furniture
 group's double frame/mattress for the single groups (SINGLES_SWAP) at qty 2; "unsure" drops all bed sizes. "(Shabbos mode)" appears in an item name only when the store listing states one, and its
 `notes` quote who the listing says approved it; never infer it from the brand.
+Comparison pages: `/compare/<group>` (table + phone cards, each option with a store button through go_url) and
+`/compare`, which since 2026-11-24 is in one section per category (CATEGORIES order, A-Z inside, chip jump links;
+`compare_cards(db, slugs)` builds the cards). Guides end with a "Compare before you choose" box from
+`guides.GUIDE_COMPARE` (guide slug -> group slugs; missing groups are skipped, a test checks they all exist).
 
 ## Gift ideas by budget (2026-11-07)
 `/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and

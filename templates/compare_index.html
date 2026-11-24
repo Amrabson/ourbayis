@@ -33,18 +33,28 @@
   </header>
   <div class="sec-inner ideas-body">
     {% if cards %}
-    <ul class="cmp-index" aria-label="{{ t('cmp_index_aria') }}">
-      {% for c in cards %}
-      <li class="cmp-index-card">
-        <a class="cmp-index-pic" href="{{ url_for('compare_group', slug=c.slug) }}" tabindex="-1" aria-hidden="true">{{ gift_media(c.cheapest) }}</a>
-        <div class="cmp-index-text">
-          <h2 class="cmp-index-name"><a class="gift-name-link" href="{{ url_for('compare_group', slug=c.slug) }}">{{ c.name }}</a></h2>
-          <p class="hint">{{ tf('cmp_count', n=c.n) }}{% if c.hi %} · <span class="bdi">{% if c.lo != c.hi %}{{ tf('cmp_range', lo='{:,}'.format(c.lo), hi='{:,}'.format(c.hi)) }}{% else %}₪{{ '{:,}'.format(c.lo) }}{% endif %}</span>{% endif %}</p>
-          <a class="link-arrow" href="{{ url_for('compare_group', slug=c.slug) }}">{{ t('cmp_more_link') }} <span aria-hidden="true">{{ arrow }}</span></a>
-        </div>
-      </li>
-      {% endfor %}
-    </ul>
+    <nav class="cmp-jump" aria-label="{{ t('cmp_jump_aria') }}">
+      <ul class="chip-row">
+        {% for s in sections %}<li><a class="chip" href="#cmp-{{ s.cat }}">{{ s.label }} <span class="cmp-jump-n">{{ s.cards | length }}</span></a></li>{% endfor %}
+      </ul>
+    </nav>
+    {% for s in sections %}
+    <section class="cmp-sec" id="cmp-{{ s.cat }}" aria-labelledby="cmp-h-{{ s.cat }}">
+      <h2 class="cmp-sec-h" id="cmp-h-{{ s.cat }}">{{ s.label }}</h2>
+      <ul class="cmp-index">
+        {% for c in s.cards %}
+        <li class="cmp-index-card">
+          <a class="cmp-index-pic" href="{{ url_for('compare_group', slug=c.slug) }}" tabindex="-1" aria-hidden="true">{{ gift_media(c.cheapest) }}</a>
+          <div class="cmp-index-text">
+            <h3 class="cmp-index-name"><a class="gift-name-link" href="{{ url_for('compare_group', slug=c.slug) }}">{{ c.name }}</a></h3>
+            <p class="hint">{{ tf('cmp_count', n=c.n) }}{% if c.hi %} · <span class="bdi">{% if c.lo != c.hi %}{{ tf('cmp_range', lo='{:,}'.format(c.lo), hi='{:,}'.format(c.hi)) }}{% else %}₪{{ '{:,}'.format(c.lo) }}{% endif %}</span>{% endif %}</p>
+            <a class="link-arrow" href="{{ url_for('compare_group', slug=c.slug) }}">{{ t('cmp_more_link') }} <span aria-hidden="true">{{ arrow }}</span></a>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
     {% else %}
     <p class="hint">{{ t('cmp_index_empty') }}</p>
     {% endif %}
