@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-24 (13 more comparison groups)
+Single items grown into three-tier groups (25 new items, store pages read 2026-11-24, regular prices; the existing
+item in each group got a specific name, its `option_group` and `tier`):
+- Appliances: `microwave` (KSP ₪188-990), `toaster-oven` (KSP ₪229-619), `slow-cooker` (KSP/Bug ₪129-279; the
+  Hamilton Beach was marked temporarily out of stock — availability "unavailable"), `food-processor` (KSP ₪249-1,459),
+  `heater` (KSP/Bug ₪199-667; the two existing heaters plus a DeLonghi radiator). Six KSP items were read on KSP
+  category listings (14-page budget, no Cloudflare challenge), so their availability is "unknown".
+- Furniture (IKEA Israel): `couch` ₪1,083-5,495, `dining-set` ₪795-2,475, `coffee-table` ₪245-1,195, `bookcase`
+  ₪445-1,195 (load per shelf in the notes).
+- Judaica (Heichal Menachem): `havdalah-set` ₪220-370, `mezuzah-case` ₪60-150 (sold singly, priced as five; notes say
+  klafim are separate and to ask your rav about checking them), `challah-cover` ₪69-195, `tzedakah-box` ₪46-325.
+- cmp_name/cmp_intro EN+HE for all 13; microwave intro says to ask your rav about one microwave for milchig and
+  fleishig instead of describing what couples do.
+
 ## 2026-11-23 (store links on comparison pages)
 /compare/<group> had no way to buy: each option now has an "At the store" row (table) and a store button beside
 "add to registry" (phone cards), built with go_url/go_attrs and rel="nofollow sponsored noopener" like the item

@@ -102,7 +102,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 
 ## Owner launch checklist (do these before going live)
 - [ ] **Re-check prices weekly/monthly.** Non-KSP stores: `python manage.py check-prices` (dry run), then
-  `--apply` or apply from `/admin/prices` (2026-11-17; schedule weekly, DEPLOY_AI.md). **KSP: 59 items are due now
+  `--apply` or apply from `/admin/prices` (2026-11-17; schedule weekly, DEPLOY_AI.md). **2026-11-24 groups:** the Hamilton Beach slow cooker (Bug) was out of stock — swap it if it stays so; the
+  existing tzedakah box is still a USD estimate (Judaica WebStore) — a Heichal box would make it a verified
+  shekel price. **KSP: 59 items are due now
   (last checked 2026-10-19; 16 kitchen items and the 10 big-appliance options were read 2026-11-22 — KSP showed a
   Cloudflare check after ~16 page views, so the rest is by hand)** and must still be done by hand as below, since KSP blocks automated reading.
   `/admin/catalog?stale=1` lists verified prices older than 30 days;

@@ -1223,7 +1223,7 @@ def test_login_and_logout_keep_the_language(client):
     ("sheets", "Sheet sets (x2)"), ("towels", "Towel set"), ("knives", "Knife set with block"),
     ("refrigerator", "Fridge — 421 L 4-door, Sharp"), ("silverware", "Cutlery sets — milchig &amp; fleishig"),
     ("becher", "Kiddush cup (silver plated)"), ("candle sticks", "Shabbos candlesticks"),
-    ("crock pot", "Slow cooker (for cholent!)"), ("חנוכיה", "Menorah (Chanukah)"),
+    ("crock pot", "Slow cooker — 6.5 L, Gold Line ATL-066 (for cholent)"), ("חנוכיה", "Menorah (Chanukah)"),
     ("KitchenAid", "Stand mixer"), ("Gold Line ATL-480", "Shabbos hot plate (platta)"),
 ])
 def test_catalog_search_forgives_spelling_plurals_and_synonyms(client, q, expect):
@@ -1485,7 +1485,7 @@ def test_guest_report_note_reaches_the_couple(client, app_module):
     assert note == "Ordered from Payngo — arriving Thursday, order 12345"  # one line, trimmed
     assert mails[0][0] == "Aunt Miriam says your gift is on its way: Stand mixer"
     assert 'Their note: "Ordered from Payngo — arriving Thursday, order 12345"' in mails[0][1]
-    assert mails[1][0] == "Uncle Avi says your gift is on its way: Microwave" and "Their note" not in mails[1][1]
+    assert mails[1][0] == "Uncle Avi says your gift is on its way: Microwave — 23 L digital, Sharp R-703Z(K)" and "Their note" not in mails[1][1]
     assert "Your note to the couple:" in g.get(f"/g/{t1}").get_data(as_text=True)
     dash = client.get("/dashboard").get_data(as_text=True)
     assert "Their update:" in dash and "order 12345" in dash

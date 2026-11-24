@@ -323,7 +323,9 @@ line. Set both in `seed_catalog.json` when adding an alternative; the catalog `m
 caveats in `notes` (internal).
 Groups with three tiers include the big appliances since 2026-11-22 (`fridge`, `washing-machine`, `dryer`,
 `dishwasher`, `oven`) and, since 2026-11-23, `air-conditioner`, `water-bar`, `television`, `bed-frame`, `wardrobe`,
-`shabbos-timer`, `mattress`, `mattress-single`, `bed-frame-single`. Quiz (ob_quiz.py): "two singles" swaps the furniture
+`shabbos-timer`, `mattress`, `mattress-single`, `bed-frame-single` and, since 2026-11-24, `microwave`,
+`toaster-oven`, `slow-cooker`, `food-processor`, `heater`, `couch`, `dining-set`, `coffee-table`, `bookcase`,
+`havdalah-set`, `mezuzah-case`, `challah-cover`, `tzedakah-box` (52 groups). Quiz (ob_quiz.py): "two singles" swaps the furniture
 group's double frame/mattress for the single groups (SINGLES_SWAP) at qty 2; "unsure" drops all bed sizes. "(Shabbos mode)" appears in an item name only when the store listing states one, and its
 `notes` quote who the listing says approved it; never infer it from the brand.
 
