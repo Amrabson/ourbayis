@@ -917,7 +917,6 @@ _ILLUSTRATION_RULES = (
     # 2026-11-23 additions, checked first so a broader rule ("shabbos", "fan", "table") cannot steal them
     (("air conditioner", "מזגן"), "aircon"),
     (("water bar", "בר מים", "tami4", "tami 4"), "waterbar"),
-    (("television", "טלוויזיה"), "tv"),  # not bare "tv": it is a substring of other words
     (("bed frame", "מסגרת מיטה"), "bed"),
     (("wardrobe", "ארון בגדים"), "wardrobe"),
     (("shabbos timer", "shabbos clock", "שעון שבת"), "timer"),
@@ -3152,6 +3151,7 @@ STORE_NAMES = {
     "judaicagifts.co.il": "Judaica Gifts",
     "levhabait.co.il": "Lev HaBayit",
     "moonled.co.il": "Moonled",
+    "soferavi.co.il": "Avi Sofer",
 }
 _HEBREW_RE = re.compile(r"[֐-׿]")
 LOOKUP_LIMIT = 20          # pasted-link lookups per couple per LOOKUP_PER seconds
@@ -3603,10 +3603,27 @@ def items_starter():
 
 def starter_groups(db):
     """{group: [catalog rows]} for every starter group, in STARTER_GROUPS_ORDER (shared by the
-    starter picker and the /setup-cost calculator)."""
-    return {g: db.execute(
-        "SELECT * FROM catalog_items WHERE active=1 AND starter_group=? ORDER BY sort", (g,)).fetchall()
+    starter picker and the /setup-cost calculator). An out-of-stock starter item is shown as its
+    in-stock stand-in (see `in_stock_stand_in`), so a pack never adds something the store can't sell."""
+    return {g: [in_stock_stand_in(db, r) for r in db.execute(
+        "SELECT * FROM catalog_items WHERE active=1 AND starter_group=? ORDER BY sort", (g,)).fetchall()]
         for g in STARTER_GROUPS_ORDER}
+
+
+def in_stock_stand_in(db, row):
+    """`row` itself, unless it is marked unavailable and its option group has an available, linked member:
+    then the member closest in price (ties: the cheaper, then the lower id). 2026-11-25 — KSP had six
+    starter items "not available right now"; when the store restocks, the seed flips them back."""
+    if (row["availability"] or "") != "unavailable" or not row["option_group"]:
+        return row
+    alts = db.execute(
+        "SELECT * FROM catalog_items WHERE active=1 AND option_group=? AND id != ? AND url != ''"
+        " AND COALESCE(availability, '') != 'unavailable' AND COALESCE(starter_group, '') = ''",
+        (row["option_group"], row["id"])).fetchall()  # never another pack's own item (it would count twice)
+    if not alts:
+        return row
+    base = row["price_nis"] or 0
+    return min(alts, key=lambda a: (abs((a["price_nis"] or 0) - base), a["price_nis"] or 0, a["id"]))
 
 
 # ---------------------------------------------------------------- setup-cost calculator

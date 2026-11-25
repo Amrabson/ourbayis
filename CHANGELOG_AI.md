@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-11-25 (televisions out; Universe urns, kettles and plattas)
+- Owner: "take out televisions its a charadi registry". Removed the `television` group (3 Samsung items), its
+  cmp strings, the `tv` drawing rule and `#ill-tv` symbol, the TV links in two guide boxes (now air conditioners /
+  bed frames) and "wall-mounted TVs" in the where-to-shop guide (EN+HE).
+- Universe (owner's preferred brand), pages read 2026-11-25 at Bug and Avi Sofer (soferavi.co.il, added to
+  STORE_NAMES): urns NR508 40 cups ₪399 (out of stock -> unavailable) and NR-713 65 cups ₪599 (Tzomet + Mishmeret
+  HaShabbos per the page), Shabbos kettle NRI5020 ₪249 (out of stock), electric kettle NRI-3056 ₪168 (kettle group
+  standard), plattas NRI-956X4 (four linkable plates) ₪560 and NRI856 40×77 ₪449 (ungrouped). Approvals only as the
+  page states them, each with "ask your rav".
+- Fix: an out-of-stock starter's stand-in is never another pack's starter item. The 40-cup urn's stand-in had been
+  the first-week urn, listed twice on /setup-cost (duplicate ids, caught by test_a11y); it is now the Universe NR-713.
+
+## 2026-11-25 (KSP re-check; out-of-stock starter items get an in-stock stand-in)
+- 14 starter / comparison items re-read on KSP (one page load each, no challenge). Prices: dining set ₪1,449 ->
+  ₪1,490, premium 10-piece pots ₪799 -> ₪649; six unchanged (regular prices, not the Black Friday ones). Six were
+  "לא זמין כרגע" with no price: couch, microwave, cutlery set, sheet sets x2, 40-cup urn, mattress protectors ->
+  `availability` unavailable (price kept, price_source says what the page showed).
+- `in_stock_stand_in()`: the starter picker and /setup-cost show the in-stock group member closest in price instead
+  (microwave -> Premier ₪188, sheets -> percale ₪200, urn -> 60-cup ₪462, cutlery -> Salvinelli ₪675, protector ->
+  Vardinon ₪164, couch -> IKEA EKTORP ₪2,545); the quiz passes over unavailable options. Tests added; the quiz tier test
+  and the setup-cost totals now count only what can be bought.
+- Guides: the comparison boxes gained kiddush fountains, esrog boxes, netilas yadayim, knife blocks, blenders and
+  cast-iron pots.
+- Tests: two expectations followed renamed copy (expired-form sentence, knife set name).
+
 ## 2026-11-24 (16 more comparison groups)
 33 new items read 2026-11-24 (regular prices; sale figures only in price_source), 17 existing items named/tiered:
 - Bug: `blender` ₪99-459, `immersion-blender` ₪112-455, `hand-mixer` ₪65-309, `dehumidifier` ₪299-999,

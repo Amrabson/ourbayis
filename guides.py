@@ -471,13 +471,13 @@ GUIDES = [
                 "list": ["Phone, tablet and laptop chargers",
                          "Camera and e-reader chargers, power banks",
                          "Many electric toothbrush and shaver chargers",
-                         "Many small speakers, routers and game consoles with an external power brick",
+                         "Many small speakers and routers with an external power brick",
                          "A short extension strip with its own plug is often more convenient than "
                          "five separate adapters"],
                 "list_he": ["מטענים של טלפון, טאבלט ומחשב נייד",
                             "מטענים של מצלמה וקורא ספרים אלקטרוני, וסוללות גיבוי",
                             "הרבה מטענים של מברשות שיניים ומכונות גילוח",
-                            "הרבה רמקולים קטנים, ראוטרים וקונסולות משחקים עם משנאי חיצוני",
+                            "הרבה רמקולים קטנים וראוטרים עם משנאי חיצוני",
                             "מפצל חשמל קצר עם תקע ישראלי נוח הרבה יותר מחמישה מתאמים נפרדים"],
             },
             {
@@ -1031,13 +1031,13 @@ GUIDES = [
                       "carrying it upstairs when there is no elevator, and whether the crew takes away "
                       "the old unit. Floor and elevator access are common reasons for extra charges.",
                       "Installation (hatkana) is a separate service for items such as air conditioners, "
-                      "ovens, dishwashers and wall-mounted TVs. In some cases it is included or "
+                      "ovens and dishwashers. In some cases it is included or "
                       "available as an add-on, and in others you hire your own technician. Ask for it "
                       "in writing, and find out who is responsible if something is damaged."],
                 "p_he": ["פריטים גדולים מגיעים בהובלה בחלון זמן מתואם. שאלו לפני ההזמנה לאיזו קומה "
                          "המשלוח מגיע, האם המחיר כולל נשיאה במעלה המדרגות כשאין מעלית, והאם הצוות "
                          "לוקח את המכשיר הישן. קומה וגישה למעלית הן סיבות נפוצות לתוספת תשלום.",
-                         "התקנה היא שירות נפרד לפריטים כמו מזגנים, תנורים, מדיחים וטלוויזיות תלויות. "
+                         "התקנה היא שירות נפרד לפריטים כמו מזגנים, תנורים ומדיחים. "
                          "לעיתים היא כלולה או זמינה כתוספת, ולעיתים שוכרים טכנאי משלכם. בקשו אותה "
                          "בכתב, ובררו מי אחראי אם משהו ניזוק."],
             },
@@ -1865,29 +1865,29 @@ BY_SLUG = {g["slug"]: g for g in GUIDES}
 # missing or have fewer than two active options are skipped at render time.
 GUIDE_COMPARE = {
     "first-apartment-checklist": ("fridge", "washing-machine", "microwave", "pots-set", "mattress", "couch"),
-    "kosher-kitchen-basics": ("pots-set", "dinnerware-fleishig", "dinnerware-milchig", "cutlery", "chef-knife",
+    "kosher-kitchen-basics": ("pots-set", "dinnerware-fleishig", "dinnerware-milchig", "cutlery", "knife-block",
                               "microwave"),
-    "sizes-plugs-delivery": ("fridge", "washing-machine", "dryer", "television", "kettle", "mattress"),
-    "building-your-registry": ("coffee-machine", "stand-mixer", "food-processor", "vacuum", "couch", "dining-set"),
+    "sizes-plugs-delivery": ("fridge", "washing-machine", "dryer", "air-conditioner", "kettle", "mattress"),
+    "building-your-registry": ("coffee-machine", "stand-mixer", "food-processor", "blender", "vacuum", "couch"),
     "appliances-from-abroad-or-buy-in-israel": ("fridge", "washing-machine", "dryer", "dishwasher", "oven",
                                                 "air-conditioner"),
     "israeli-bed-mattress-and-linen-sizes": ("mattress", "mattress-single", "bed-frame", "sheet-set", "duvet",
                                              "mattress-protector"),
     "shabbos-kitchen-equipment-buying-guide": ("shabbos-urn", "shabbos-timer", "slow-cooker", "oven", "fridge",
                                                "kettle"),
-    "wedding-gifts-israel-guests-from-abroad": ("candlesticks", "kiddush-cup", "havdalah-set", "challah-board",
+    "wedding-gifts-israel-guests-from-abroad": ("candlesticks", "kiddush-cup", "havdalah-set", "kiddush-fountain",
                                                 "coffee-machine", "stand-mixer"),
-    "where-to-shop-for-a-home-in-israel": ("fridge", "couch", "dining-set", "wardrobe", "mattress", "television"),
-    "first-yom-tov-year-in-a-new-home": ("menorah", "kiddush-cup", "shabbos-urn", "dining-set", "slow-cooker",
-                                         "challah-cover"),
+    "where-to-shop-for-a-home-in-israel": ("fridge", "couch", "dining-set", "wardrobe", "mattress", "bed-frame"),
+    "first-yom-tov-year-in-a-new-home": ("menorah", "kiddush-cup", "kiddush-fountain", "esrog-box", "shabbos-urn",
+                                         "dining-set"),
     "helping-your-children-set-up-a-home-in-israel": ("fridge", "washing-machine", "air-conditioner", "mattress",
                                                       "couch", "water-bar"),
     "eight-week-timeline-engagement-to-working-apartment": ("fridge", "washing-machine", "air-conditioner",
                                                             "bed-frame", "mattress", "wardrobe"),
-    "registry-when-you-already-have-hand-me-downs": ("pots-set", "mattress", "sheet-set", "towels", "chef-knife",
-                                                     "coffee-machine"),
+    "registry-when-you-already-have-hand-me-downs": ("pots-set", "mattress", "sheet-set", "towels", "knife-block",
+                                                     "dutch-oven"),
     "chanukas-habayis-and-aliyah-gifts": ("mezuzah-case", "candlesticks", "havdalah-set", "tzedakah-box",
-                                          "challah-cover", "kiddush-cup"),
+                                          "netilas-yadayim", "challah-cover"),
 }
 
 

@@ -16,12 +16,12 @@ PRESET_GROUPS = {
 
 
 def _sum(app_module, groups):
+    """Expected total: the starter items as the calculator shows them (out-of-stock ones replaced by their
+    in-stock stand-in, 2026-11-25), minus the two second-version items."""
+    skip = ('pots-pans-premium-10-piece-set', 'chef-s-knife-professional')
     with app_module.app.app_context():
-        db = app_module.get_db()
-        return sum(db.execute(
-            "SELECT COALESCE(SUM(price_nis),0) FROM catalog_items WHERE active=1 AND starter_group=?"
-            " AND COALESCE(seed_key,'') NOT IN ('pots-pans-premium-10-piece-set','chef-s-knife-professional')",
-            (g,)).fetchone()[0] for g in groups)
+        shown = app_module.starter_groups(app_module.get_db())
+        return sum(r["price_nis"] or 0 for g in groups for r in shown[g] if (r["seed_key"] or "") not in skip)
 
 
 def _starter_ids(app_module, limit=None):
@@ -195,3 +195,33 @@ def test_no_banned_words_in_new_en_strings():
         if key.startswith("setup_"):
             assert not banned.search(val), key
     assert set(k for k in i18n.T_EN if k.startswith("setup_")) == set(k for k in i18n.T_HE if k.startswith("setup_"))
+
+
+def test_out_of_stock_starter_items_show_their_in_stock_stand_in(client, app_module):
+    """2026-11-25: an unavailable starter item with an option group is replaced, in the starter picker and the
+    setup-cost total, by the group's available member closest in price; without an alternative it stays."""
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        row = db.execute("SELECT * FROM catalog_items WHERE active=1 AND starter_group='appliances'"
+                         " AND option_group != '' ORDER BY id").fetchone()
+        alts = db.execute("SELECT * FROM catalog_items WHERE active=1 AND option_group=? AND id != ? AND url != ''"
+                          " AND COALESCE(availability,'') != 'unavailable' AND COALESCE(starter_group,'') = ''",
+                          (row["option_group"], row["id"])).fetchall()
+        want = min(alts, key=lambda a: (abs(a["price_nis"] - row["price_nis"]), a["price_nis"], a["id"]))
+        old = row["availability"]
+        db.execute("UPDATE catalog_items SET availability='unavailable' WHERE id=?", (row["id"],))
+        db.commit()
+        try:
+            got = {r["id"] for r in app_module.starter_groups(db)["appliances"]}
+            assert want["id"] in got and row["id"] not in got
+            html = client.get("/setup-cost?start=everything").get_data(as_text=True)
+            assert 'href="/catalog/%s"' % want["seed_key"] in html
+            # no available alternative: the item itself stays
+            db.execute("UPDATE catalog_items SET availability='unavailable' WHERE option_group=?", (row["option_group"],))
+            db.commit()
+            assert row["id"] in {r["id"] for r in app_module.starter_groups(db)["appliances"]}
+        finally:
+            db.execute("UPDATE catalog_items SET availability=? WHERE id=?", (old, row["id"]))
+            for a in alts:
+                db.execute("UPDATE catalog_items SET availability=? WHERE id=?", (a["availability"], a["id"]))
+            db.commit()

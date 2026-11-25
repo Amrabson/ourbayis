@@ -322,7 +322,7 @@ members, tier then price) feeds the item page's `#options`; `option_count(item)`
 line. Set both in `seed_catalog.json` when adding an alternative; the catalog `model` line is public — keep research
 caveats in `notes` (internal).
 Groups with three tiers include the big appliances since 2026-11-22 (`fridge`, `washing-machine`, `dryer`,
-`dishwasher`, `oven`) and, since 2026-11-23, `air-conditioner`, `water-bar`, `television`, `bed-frame`, `wardrobe`,
+`dishwasher`, `oven`) and, since 2026-11-23, `air-conditioner`, `water-bar`, `bed-frame`, `wardrobe`,
 `shabbos-timer`, `mattress`, `mattress-single`, `bed-frame-single` and, since 2026-11-24, `microwave`,
 `toaster-oven`, `slow-cooker`, `food-processor`, `heater`, `couch`, `dining-set`, `coffee-table`, `bookcase`,
 `havdalah-set`, `mezuzah-case`, `challah-cover`, `tzedakah-box`, then `blender`, `immersion-blender`, `hand-mixer`,
@@ -335,6 +335,12 @@ Comparison pages: `/compare/<group>` (table + phone cards, each option with a st
 `/compare`, which since 2026-11-24 is in one section per category (CATEGORIES order, A-Z inside, chip jump links;
 `compare_cards(db, slugs)` builds the cards). Guides end with a "Compare before you choose" box from
 `guides.GUIDE_COMPARE` (guide slug -> group slugs; missing groups are skipped, a test checks they all exist).
+Out of stock (2026-11-25): `in_stock_stand_in(db, row)` — a starter item marked `availability='unavailable'` whose
+option group has an available linked member is shown (starter picker, /setup-cost, so also the totals) as the member
+closest in price (never another starter item: it would be listed and totalled twice); the quiz's `_choose` passes over unavailable members while another can be bought. The seed keeps
+the original as the starter, so flipping `availability` back restores it.
+Audience (owner, 2026-11-25): a chareidi registry — no televisions or similar media devices in the catalog, guides or
+comparison boxes. Universe (Nurlight) is the owner's preferred brand for Shabbos urns, kettles and plattas.
 
 ## Gift ideas by budget (2026-11-07)
 `/gift-ideas[/<slug>]` → `gift_ideas()`; `IDEAS_BANDS` maps URL slugs to `CATALOG_PRICE_BANDS` keys and

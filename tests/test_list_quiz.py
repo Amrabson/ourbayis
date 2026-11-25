@@ -67,7 +67,8 @@ def test_quality_picks_the_tier(app_module):
     by_q = {q: _pick(app_module, quality=q) for q in ("simple", "mid", "nicer")}
     checked = 0
     for grp in ("pots-set", "towels", "sheet-set"):
-        mem = _members(app_module, grp)
+        # tiers among the options that can be bought (out-of-stock ones are passed over, 2026-11-25)
+        mem = [m for m in _members(app_module, grp) if m["availability"] != "unavailable"]
         if len(mem) < 2:
             continue
         got = {q: [r for r in rows if r["option_group"] == grp] for q, rows in by_q.items()}
@@ -260,3 +261,37 @@ def test_two_single_beds_get_two_single_frames_and_mattresses(app_module):
     assert not unsure & {"bed-frame", "mattress", "bed-frame-single", "mattress-single"}
     nicer = [r for r in _build(app_module, start="empty", quality="nicer")["rows"] if r["option_group"] == "mattress"]
     assert nicer and nicer[0]["tier"] == "premium"
+
+
+def test_quiz_passes_over_out_of_stock_options(app_module):
+    """2026-11-25: when the option the quiz would pick is marked unavailable, it picks another member of the
+    group that can be bought; with every member unavailable it still lists one."""
+    base = _build(app_module, start="empty")
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        counts = {g: db.execute("SELECT COUNT(*) FROM catalog_items WHERE active=1 AND option_group=?"
+                                " AND COALESCE(availability,'') != 'unavailable'", (g,)).fetchone()[0]
+                  for g in {r["option_group"] for r in base["rows"] if r["option_group"]}}
+    row = next(r for r in base["rows"] if r["option_group"] and counts[r["option_group"]] >= 2
+               and r["availability"] != "unavailable")
+    grp = row["option_group"]
+    with app_module.app.app_context():
+        db = app_module.get_db()
+        before = {r["id"]: r["availability"] for r in db.execute(
+            "SELECT id, availability FROM catalog_items WHERE option_group=?", (grp,))}
+        db.execute("UPDATE catalog_items SET availability='unavailable' WHERE id=?", (row["id"],))
+        db.commit()
+    try:
+        now = next(r for r in _build(app_module, start="empty")["rows"] if r["option_group"] == grp)
+        assert now["id"] != row["id"] and now["availability"] != "unavailable"
+        with app_module.app.app_context():
+            db = app_module.get_db()
+            db.execute("UPDATE catalog_items SET availability='unavailable' WHERE option_group=?", (grp,))
+            db.commit()
+        assert any(r["option_group"] == grp for r in _build(app_module, start="empty")["rows"])
+    finally:
+        with app_module.app.app_context():
+            db = app_module.get_db()
+            for i, a in before.items():
+                db.execute("UPDATE catalog_items SET availability=? WHERE id=?", (a, i))
+            db.commit()

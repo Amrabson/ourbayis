@@ -76,7 +76,9 @@ def _size_pref(r, bed):
 
 
 def _choose(members, quality, group, bed):
-    """ONE member of an option group for the quality answer (see module docstring)."""
+    """ONE member of an option group for the quality answer (see module docstring). Members marked
+    unavailable are passed over while another member can be bought (2026-11-25)."""
+    members = [r for r in members if (r["availability"] or "") != "unavailable"] or members
     by_price = sorted(members, key=lambda r: (_price(r), r["id"]))
     tiers = {}
     for r in members:
