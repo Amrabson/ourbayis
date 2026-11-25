@@ -103,9 +103,9 @@ parchment redesign, currency estimates with a rate note. 47 automated tests.
 ## Owner launch checklist (do these before going live)
 - [ ] **Re-check prices weekly/monthly.** Non-KSP stores: `python manage.py check-prices` (dry run), then
   `--apply` or apply from `/admin/prices` (2026-11-17; schedule weekly, DEPLOY_AI.md). **2026-11-24 groups:** `frying-pan` has two options (find a premium pan, in stock, with one stated diameter);
-  `mayim-achronim` and `kiddush-fountain` still include a USD-estimated Yair Emanuel item. **KSP: 45 items are due now
+  `mayim-achronim` and `kiddush-fountain` still include a USD-estimated Yair Emanuel item. **KSP: 31 items are due now
   (last checked 2026-10-19; 16 kitchen items and the 10 big-appliance options were read 2026-11-22, 14 starter items
-  2026-11-25 — one page load per item, ≤14 a day stays under KSP's Cloudflare check). Six starter items were "not
+  2026-11-25, 14 more 2026-11-26 — one page load per item, ≤14 a day stays under KSP's Cloudflare check). Six starter items were "not
   available right now" on 2026-11-25 (couch, microwave, cutlery set, sheet sets x2, 40-cup urn, mattress protectors):
   `availability` is `unavailable`; set it back when KSP restocks — the stand-in rule then returns them.** and must still be done by hand as below, since KSP blocks automated reading.
   `/admin/catalog?stale=1` lists verified prices older than 30 days;

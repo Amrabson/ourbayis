@@ -1886,8 +1886,8 @@ GUIDE_COMPARE = {
                                                             "bed-frame", "mattress", "wardrobe"),
     "registry-when-you-already-have-hand-me-downs": ("pots-set", "mattress", "sheet-set", "towels", "knife-block",
                                                      "dutch-oven"),
-    "chanukas-habayis-and-aliyah-gifts": ("mezuzah-case", "candlesticks", "havdalah-set", "tzedakah-box",
-                                          "netilas-yadayim", "challah-cover"),
+    "chanukas-habayis-and-aliyah-gifts": ("mezuzah-case", "candlesticks", "havdalah-set", "shtender",
+                                          "tzedakah-box", "netilas-yadayim"),
 }
 
 

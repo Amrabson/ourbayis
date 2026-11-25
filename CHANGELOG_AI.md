@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-11-26 (KSP re-check 2; towels)
+- 14 more KSP items re-read (one load each, no challenge): air fryer ₪699 -> ₪668, bookcase for sefarim ₪699 ->
+  ₪999 (regular; sale and delivery/assembly extras in price_source); seven unchanged; five "לא זמין כרגע" ->
+  unavailable (towel set, vacuum, fans x2, guest linen, shower shelf). The vacuum's starter slot shows its in-stock
+  stand-in.
+- Towels group: the KSP 8-piece premium now pointed at another product, and the Vardinon ESTER basic link was 404.
+  Premium -> Vardinon Cecile 4-piece 550 g/m² (₪600 regular), basic -> Homestyle Barcelona 4-piece (₪89); both
+  single listings, pictures viewed (product only). A two-listing Fox Home bundle was rejected: a guest must be able
+  to buy an item from one link. homestyle.co.il in STORE_NAMES.
+
+## 2026-11-26 (chareidi-home items; links for two link-less items)
+- `shtender` group, Heichal Menachem, tabletop stands ₪99 / ₪339 (Vilna Gate plaque, book drawer) / ₪375; new
+  drawing `#ill-shtender` and rule (English "shtender" only: Hebrew "סטנדר" is inside "סטנדרטי"). Mishna Berura
+  full set (Lesham, vocalized, 6 vols, ₪220; "mishna berura" joins the books rule). Shtender in the chanukas
+  habayis guide box.
+- Kitchen/dining: Pesach pots set (WMF Comfort Line, Cookshop ₪1,690), Pesach dinnerware (Arcosteel English Rose 18
+  pcs, Cookshop ₪699) — both filed by the store under Pesach; the pages say nothing on kashrus, notes say ask your
+  rav — and clear table-cover roll 135 cm × 50 m (Sano, Home Center ₪40). Milchig/fleishig sink basins were looked
+  for and not added (only a generic unmarked basin found).
+- `iron-ironing-board` now links Home Center (HOME iron + CLASSIC board, ₪220, was a ₪180 estimate);
+  `candlesticks-sterling-silver` now Hazorfim hammered 925 pair, 13.5 cm, ₪2,211 (made to order; was ₪2,500
+  estimate). hazorfim.co.il in STORE_NAMES. Every picture viewed: product only.
+
 ## 2026-11-25 (televisions out; Universe urns, kettles and plattas)
 - Owner: "take out televisions its a charadi registry". Removed the `television` group (3 Samsung items), its
   cmp strings, the `tv` drawing rule and `#ill-tv` symbol, the TV links in two guide boxes (now air conditioners /

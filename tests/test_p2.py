@@ -489,7 +489,7 @@ def test_remind_claims_is_bounded_and_idempotent(client, app_module, tmp_path):
         assert len(mail) == 1 and mail[0]["to_addr"] == "g1@example.com"
         assert "Towel set" in mail[0]["subject"] and "https://ourbayis.example/r/" in mail[0]["body"]
         assert "שלום" in mail[0]["body"]  # bilingual body
-        assert "״סט מגבות״" in mail[0]["body"]  # Hebrew half names the gift in Hebrew
+        assert "סט מגבות" in mail[0]["body"]  # Hebrew half names the gift in Hebrew
         assert not re.search(r"\d{4}-\d\d-\d\d", mail[0]["body"])  # "12 October 2026", not ISO
         assert re.search(r"\d{1,2} ב[א-ת]+ \d{4}", mail[0]["body"])
         assert db.execute("SELECT COUNT(*) FROM claims WHERE reminded_at IS NOT NULL").fetchone()[0] == 1
@@ -1220,7 +1220,7 @@ def test_login_and_logout_keep_the_language(client):
 @pytest.mark.parametrize("q,expect", [
     ("shabbat candlesticks", "Shabbos candlesticks"), ("plata", "Shabbos hot plate (platta)"),
     ("hotplate", "Shabbos hot plate (platta)"), ("פלטה", "Shabbos hot plate (platta)"),
-    ("sheets", "Sheet sets (x2)"), ("towels", "Towel set"), ("knives", "Knife set with block — 5 knives in a stand, Fresco"),
+    ("sheets", "Sheet sets (x2)"), ("towels", "Towel set — 4 pieces, Homestyle Barcelona"), ("knives", "Knife set with block — 5 knives in a stand, Fresco"),
     ("refrigerator", "Fridge — 421 L 4-door, Sharp"), ("silverware", "Cutlery sets — milchig &amp; fleishig"),
     ("becher", "Kiddush cup (silver plated)"), ("candle sticks", "Shabbos candlesticks"),
     ("crock pot", "Slow cooker — 6.5 L, Gold Line ATL-066 (for cholent)"), ("חנוכיה", "Menorah (Chanukah)"),

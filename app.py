@@ -914,6 +914,7 @@ def gift_status(item, breakdown):
 # keyword -> item-specific line illustration (<symbol id="ill-*"> in base.html).
 # Only used when an item has no photo; falls back to the category drawing.
 _ILLUSTRATION_RULES = (
+    (("shtender",), "shtender"),  # 2026-11-25; not the Hebrew: "סטנדר" is inside "סטנדרטי"
     # 2026-11-23 additions, checked first so a broader rule ("shabbos", "fan", "table") cannot steal them
     (("air conditioner", "מזגן"), "aircon"),
     (("water bar", "בר מים", "tami4", "tami 4"), "waterbar"),
@@ -974,7 +975,8 @@ _ILLUSTRATION_RULES = (
     (("blender", "food processor", "בלנדר", "מעבד מזון"), "blender"),
     (("coffee", "frother", "קפה"), "coffee"),
     (("vacuum", "sponja", "broom", "bucket", "שואב", "ספונג", "דלי ניקוי"), "cleaning"),
-    (("bookcase", "sefarim", "shas", "chumash", "siddur", "machzor", "bentcher", "ספרי", "ספרייה"), "books"),
+    (("bookcase", "sefarim", "shas", "chumash", "siddur", "machzor", "bentcher", "mishna berura", "ספרי", "ספרייה",
+      "משנה ברורה"), "books"),
     (("sukkah", "esrog", "סוכה", "אתרוג"), "sukkah"),
     (("lamp", "מנורה"), "lamp"),
     (("fan", "heater", "radiator", "dehumidifier", "מאוורר", "חימום", "רדיאטור", "לחות"), "fan"),
@@ -3152,6 +3154,8 @@ STORE_NAMES = {
     "levhabait.co.il": "Lev HaBayit",
     "moonled.co.il": "Moonled",
     "soferavi.co.il": "Avi Sofer",
+    "hazorfim.co.il": "Hazorfim",
+    "homestyle.co.il": "Homestyle",
 }
 _HEBREW_RE = re.compile(r"[֐-׿]")
 LOOKUP_LIMIT = 20          # pasted-link lookups per couple per LOOKUP_PER seconds
