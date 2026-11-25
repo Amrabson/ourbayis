@@ -325,7 +325,10 @@ Groups with three tiers include the big appliances since 2026-11-22 (`fridge`, `
 `dishwasher`, `oven`) and, since 2026-11-23, `air-conditioner`, `water-bar`, `television`, `bed-frame`, `wardrobe`,
 `shabbos-timer`, `mattress`, `mattress-single`, `bed-frame-single` and, since 2026-11-24, `microwave`,
 `toaster-oven`, `slow-cooker`, `food-processor`, `heater`, `couch`, `dining-set`, `coffee-table`, `bookcase`,
-`havdalah-set`, `mezuzah-case`, `challah-cover`, `tzedakah-box` (52 groups). Quiz (ob_quiz.py): "two singles" swaps the furniture
+`havdalah-set`, `mezuzah-case`, `challah-cover`, `tzedakah-box`, then `blender`, `immersion-blender`, `hand-mixer`,
+`dehumidifier`, `small-freezer` (shown as "Freezers"), `frying-pan` (two options), `knife-block`, `dutch-oven`,
+`water-filter-pitcher`, `standing-mirror`, `shoe-cabinet`, `area-rug`, `netilas-yadayim`, `mayim-achronim`,
+`kiddush-fountain`, `esrog-box` (68 groups). `STORE_NAMES` (paste-a-link names) covers every catalog store domain. Quiz (ob_quiz.py): "two singles" swaps the furniture
 group's double frame/mattress for the single groups (SINGLES_SWAP) at qty 2; "unsure" drops all bed sizes. "(Shabbos mode)" appears in an item name only when the store listing states one, and its
 `notes` quote who the listing says approved it; never infer it from the brand.
 Comparison pages: `/compare/<group>` (table + phone cards, each option with a store button through go_url) and

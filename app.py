@@ -3144,6 +3144,14 @@ STORE_NAMES = {
     "golfco.co.il": "Golf & Co",
     "naaman.co.il": "Naaman",
     "hakolabait.co.il": "Hakol LaBait",
+    "bug.co.il": "Bug",
+    "cookshop.co.il": "Cookshop",
+    "classica-asher.co.il": "Classica Asher",
+    "culinartica.co.il": "Culinartica",
+    "sodastream.co.il": "SodaStream Israel",
+    "judaicagifts.co.il": "Judaica Gifts",
+    "levhabait.co.il": "Lev HaBayit",
+    "moonled.co.il": "Moonled",
 }
 _HEBREW_RE = re.compile(r"[֐-׿]")
 LOOKUP_LIMIT = 20          # pasted-link lookups per couple per LOOKUP_PER seconds

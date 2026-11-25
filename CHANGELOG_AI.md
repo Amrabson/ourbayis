@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-24 (16 more comparison groups)
+33 new items read 2026-11-24 (regular prices; sale figures only in price_source), 17 existing items named/tiered:
+- Bug: `blender` ₪99-459, `immersion-blender` ₪112-455, `hand-mixer` ₪65-309, `dehumidifier` ₪299-999,
+  `small-freezer` ₪799-2,590 (named "Freezers": the premium is a full-height 260 L). Slow cooker premium: the
+  out-of-stock Hamilton Beach (added earlier today) is replaced by a Morphy Richards 461016 at ₪219.
+- IKEA and others (Cookshop, Classica Asher, Culinartica, SodaStream Israel, Hakol LaBait; Home Center answered
+  429): `knife-block` ₪89-699, `dutch-oven` ₪225-709, `water-filter-pitcher` ₪149-299, `standing-mirror` ₪295-595,
+  `shoe-cabinet` ₪295-745, `area-rug` ₪79-550, `frying-pan` ₪79-179 (two options: the Ninja premium was out of stock
+  and its page gave two diameters, so it was dropped).
+- Heichal Menachem / Judaica Gifts: `netilas-yadayim` ₪38-110, `mayim-achronim` ₪90-340, `kiddush-fountain`
+  ₪355-839, `esrog-box` ₪100-250. `tzedakah-box` standard is now a verified Heichal box (₪155); the USD-estimated
+  Yair Emanuel box left the group (still in the catalog).
+- STORE_NAMES gained bug.co.il and the five new store domains. Trimmed from notes: sale prices, stock counts,
+  delivery times, "ask your rav" on esrog-box size, a children/safety aside in the mirror intro.
+
 ## 2026-11-24 (Hebrew editor pass)
 An editor pass (agent, reviewed) over the machine-written Hebrew: T_HE cmp_/quiz_/guide_cmp keys and name_he/
 model_he/notes_he of the items checked since 2026-11-22 or in an option group. 51 fixes: wrong words (צפויה ->

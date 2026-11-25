@@ -1220,7 +1220,7 @@ def test_login_and_logout_keep_the_language(client):
 @pytest.mark.parametrize("q,expect", [
     ("shabbat candlesticks", "Shabbos candlesticks"), ("plata", "Shabbos hot plate (platta)"),
     ("hotplate", "Shabbos hot plate (platta)"), ("פלטה", "Shabbos hot plate (platta)"),
-    ("sheets", "Sheet sets (x2)"), ("towels", "Towel set"), ("knives", "Knife set with block"),
+    ("sheets", "Sheet sets (x2)"), ("towels", "Towel set"), ("knives", "Knife set with block — 5 knives in a stand, Fresco"),
     ("refrigerator", "Fridge — 421 L 4-door, Sharp"), ("silverware", "Cutlery sets — milchig &amp; fleishig"),
     ("becher", "Kiddush cup (silver plated)"), ("candle sticks", "Shabbos candlesticks"),
     ("crock pot", "Slow cooker — 6.5 L, Gold Line ATL-066 (for cholent)"), ("חנוכיה", "Menorah (Chanukah)"),

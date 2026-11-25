@@ -54,7 +54,7 @@ def test_expired_form_explains_itself(client):
                                                   message="hello"))
     html = r.get_data(as_text=True)
     assert r.status_code == 400
-    assert "That page was open too long" in html and "nothing was saved" in html
+    assert "That page was open too long" in html and "Nothing was saved" in html
     assert "Log in again" in html
 
 
